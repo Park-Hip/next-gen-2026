@@ -1,0 +1,15 @@
+# Generated output (rebuild with tools/render_pdf.py)
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Tool state
+.lavish/
+
+# OS
+Thumbs.db
+.DS_Store
