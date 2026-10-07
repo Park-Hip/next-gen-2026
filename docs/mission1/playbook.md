@@ -495,4 +495,12 @@ None of them may appear in the Mission 1 document as a promise.
 | Multi-topic documents (e.g. Nội quy lao động covering leave and OT) | MVP documents have exactly one topic; a list of topics is a later data change | M4 |
 | AI check that may add (never remove) a conflict warning when topics look wrong | Only needed if owners often mis-tag topics | M4 |
 | Showing a future version as "sắp thay đổi" | The brief asks for the version in force; early disclosure raises its own access question | M8 |
-
+| Notice to owners of overriding series when the parent series publishes a new version | Production safeguard for M11; needs a publishing workflow the MVP does not have | M11 |
+| "Mandatory, cannot be overridden" flag on parent rules | Production answer to a parent change that companies must follow; adds a rule type | M11 |
+| Alert before an `effective_to` passes with no successor | Only matters once owners set end dates; the MVP data has none | M10 |
+| "Hỏi cho" selector: the user picks the target unit for questions about another unit's rules | Stated as a known limitation in v1 (HR cannot ask about another unit); no AI guesses the target | M13 |
+| `covers`: a question key per Điều, so precedence and conflicts work per question and a company can change one clause | Needs a label on every chunk and fails on unstructured documents; `complements` covers the common case | M14 |
+| Owner screen for publish-time triage (new version / overrides / complements / duplicate) | The MVP runs the same check as a script on the simulated data | M15 |
+| Periodic review: owners re-confirm documents and their relations on a schedule | Real practice (NAVEX, Guru); needs owners and time, not code | M15 |
+| Similarity scan that flags near-duplicate documents for the owner | Real practice (Guru); the MVP has too few documents to need it | M15 |
+| Embedding experiment: similarity scores of the near-identical leave documents for Minh's question | A new dependency and 1-2 hours; the document describes the failure qualitatively | V3, A1 |

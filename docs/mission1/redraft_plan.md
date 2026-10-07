@@ -58,15 +58,18 @@ Check: run Minh, Lan and Hà through the spec by hand; if any answer contradicts
 These are what make "giải pháp có chạy thật không?" believable without code.
 Hiep defines the traps; Claude can format tables on request.
 
-1. 6-8 simulated leave documents with metadata, covering: a superseded version, a future version, a draft, a restricted document, a group/company pair, and a minimum-setting rule.
-2. Personas with an as-of date (Lan, Minh, Hà, An), including one edge case (transfer or two units, per M5).
-3. **Worked trace of Minh's question, done by hand:** the candidate documents, what each step removes and why, the final answer card.
+Simplified on 07/10 (decision A1): only what the PDF and the answers use.
+
+1. Simulated documents with metadata (done).
+2. Personas with an as-of date: Minh, Lan, Hà (done).
+3. **Worked trace of Minh's question:** drafted by Claude, checked row by row by Hiep.
 4. Naive-vs-correct contrast: what plain RAG would retrieve and say, next to the correct answer.
-5. Three output cards: answer, refusal, conflict.
-6. Decision V3: run the optional embedding experiment (near-identical documents scored by a real embedding model), yes or no.
+5. One outcome table: answer (Minh), conflict (Hà, T7), refusal.
+
+Dropped: full traces for the other personas (their expected results become rows of the Phase 4 test matrix) and the embedding experiment V3 (Deferred ideas).
 
 Output: `artifacts.md`.
-The hand trace is the most important PITCH preparation in the whole plan.
+The trace is the most important PITCH preparation in the whole plan.
 
 ### Phase 3 - Argue the 3 decisions (1.5 h)
 
