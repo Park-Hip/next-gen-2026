@@ -8,6 +8,7 @@ Attach these files to a new chat with a different AI (or a fresh session with no
 2. `docs/competition/rules.md` - the competition rules and scoring.
 3. `build/mission1_draft.pdf` - the draft as the judges will see it (render it first with `tools/render_pdf.py`).
 4. `docs/mission1/answers.md` - the 3 mandatory answers (submitted separately).
+5. `evidence_log.md` - the evidence log (also submitted).
 
 Do not attach `playbook.md`, `criteria.md` or anything in `thinking/`.
 They contain our own diagnosis, and the point is to get an independent view that is not anchored on it.
@@ -29,8 +30,11 @@ Your job is to help the candidate improve, which means being honest and specific
 - The challenge is "Bài test B - Tri thức nội bộ Appota": an AI product that gives each employee the right knowledge for their unit, their access rights, and the version in force.
 - Mission 1 is analysis only, with no product built yet.
   Mission 2 will be building v1, and Mission 3 will be adapting it when reality changes.
-- The deliverable is one PDF/DOCX of at most 5 pages, covering the 5 sections in the brief.
-- The 3 mandatory questions are answered in a separate submission field, not inside the PDF.
+- Three parts are submitted, and no code is required:
+  a PDF/DOCX or Notion link of at most 5 pages covering the 5 sections;
+  the 3 mandatory "Forced Decision" answers, in a separate field;
+  and an evidence log of AI tools, prompts, and decisions.
+- Mission 1 scoring: 40% Khung vấn đề ("bạn có hiểu đúng vấn đề không?"), 35% Thực thi ("giải pháp có chạy thật không?"), 25% Chất lượng quyết định ("lý do chọn A thay vì B có thuyết phục không?").
 - All company data must be simulated; the draft uses fictional units GameCo, PayCo and AdsCo.
 - The candidate must defend every line in a later PITCH round, so content they cannot explain is a liability, not an asset.
 - The candidate's own concern: the draft dumps a lot of information but does not deep dive into anything and lacks good reasoning.
@@ -41,6 +45,7 @@ Your job is to help the candidate improve, which means being honest and specific
 - `rules.md`: the rules and scoring.
 - `mission1_draft.pdf`: the draft document, in Vietnamese.
 - `answers.md`: the draft answers to the 3 mandatory questions, in Vietnamese.
+- `evidence_log.md`: the evidence log, in Vietnamese.
 
 ### Work in this order
 
@@ -48,7 +53,8 @@ Your job is to help the candidate improve, which means being honest and specific
 Read only the brief and the rules first, and answer:
 
 1. What is actually being judged in Mission 1?
-   Map the scoring (40% problem framing, 35% execution, 25% decision quality) to what a 5-page analysis document can and cannot demonstrate.
+   Map the three scoring criteria to what this submission can and cannot demonstrate.
+   In particular, explain how a candidate can score on "giải pháp có chạy thật không?" when no code is required.
 2. Which phrases in the brief and rules signal what the judges value most?
    Quote them and say what each implies for the document.
 3. For each of the 5 sections, what does an excellent answer look like, and what are the most common mistakes candidates make?
@@ -79,6 +85,10 @@ Write Part A before reading the draft, so your standard is not shaped by what th
 **Part C - The 3 mandatory answers.**
 For each answer: does it open with the decision, give the reason, and stay focused?
 Quote the weakest sentence and explain how to fix it, without rewriting the full answer.
+
+**Part C2 - The evidence log.**
+Does it make clear which decisions are the candidate's own and which came from AI, and how each AI output was verified?
+List what a judge would find missing or unconvincing.
 
 **Part D - PITCH preparation.**
 List the 8 hardest questions a judge would ask about this draft, ordered from most to least likely.

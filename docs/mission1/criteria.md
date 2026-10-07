@@ -4,8 +4,16 @@ Sources: `docs/competition/mission1_brief.md` and `docs/competition/rules.md`, r
 
 ## Submission facts
 
-- The 5-page PDF/DOCX covers the 5 sections only.
-- The 3 mandatory questions go in a separate submission section, not in the PDF.
+Three parts are submitted (brief, "Nộp gì cho mission 1"), and no code is required:
+
+1. A PDF/DOCX or a Notion link, at most 5 pages, covering the 5 sections only.
+2. The 3 mandatory "Forced Decision" answers, in a separate submission section, not in the PDF.
+3. The evidence log: AI tools, prompts, and decisions.
+
+Notes:
+
+- The evidence log is a deliverable that judges read, not just a compliance file.
+  It must show the candidate's own decisions, not only what the AI produced.
 - The 3 answers are "khuyến nghị 60-150 từ" (recommended, not a hard limit), and must be "ngắn gọn, rõ quyết định và lý do".
 - Tables, diagrams and illustrations are allowed.
 - Deadline: 2 days from opening, no extensions, the system locks automatically.
@@ -19,15 +27,23 @@ Sources: `docs/competition/mission1_brief.md` and `docs/competition/rules.md`, r
 | "Trước khi xây sản phẩm, hãy chứng minh rằng bạn hiểu đúng vấn đề cần giải quyết." | Brief | Mission 1 is mainly about the problem, not the architecture. |
 | "Hiểu đúng vấn đề, biết ưu tiên và thiết kế hướng giải quyết." | Brief | Three skills: understand, prioritise, design. |
 | "Làm chủ > Hoàn hảo ... Vòng PITCH sẽ lộ ra." | Rules | Every line must be something the candidate can defend aloud. |
-| "40% Khung vấn đề, 35% Thực thi, 25% Chất lượng quyết định (lựa chọn bắt buộc). Không có tiêu chí ẩn." | Rules | See the mapping below. |
+| "40% Khung vấn đề (Problem Framing) - bạn có hiểu đúng vấn đề không?, 35% Thực thi (giải pháp có chạy thật không?), 25% Chất lượng quyết định (lý do chọn A thay vì B có thuyết phục không?)." | Brief, Mission 1 scoring | See the mapping below. |
+| "Không có tiêu chí ẩn." | Rules | Optimise for these three criteria and nothing else. |
 
 ## How the scoring maps to Mission 1
 
-| Criterion | Weight | Where it shows in the PDF | What "good" looks like |
-|---|---|---|---|
-| Khung vấn đề | 40% | Section 1, and the "why" in every other section | A non-obvious diagnosis, shown with a concrete failure, not asserted |
-| Thực thi | 35% | Mostly Missions 2-3; in Mission 1, Section 5 | A plan that is realistic in 3 days and clearly testable |
-| Chất lượng quyết định | 25% | Sections 3-4, and the MVP cuts in Section 5 | Real choices between real options, with costs accepted and a condition that would change the decision |
+| Criterion | Weight | Judge's question | Where it shows | What "good" looks like |
+|---|---|---|---|---|
+| Khung vấn đề | 40% | "Bạn có hiểu đúng vấn đề không?" | Section 1, answer 1, and the "why" in every other section | A non-obvious diagnosis, shown with a concrete failure, not asserted |
+| Thực thi | 35% | "Giải pháp có chạy thật không?" | Sections 2 and 5, answer 2 | No code is required, so this means credibility: a flow concrete enough to trace by hand, data and rules specific enough to build, a 3-day plan that a student can really finish, and tests that would prove it works |
+| Chất lượng quyết định | 25% | "Lý do chọn A thay vì B có thuyết phục không?" | Sections 3-4, answers 2-3, and the evidence log | Every key decision names both A and B, why A wins, what A costs, and what would make B win |
+
+How to earn "Thực thi" without code:
+
+- Trace one real question through the flow, showing which simulated document drops out at each step and why.
+- Show a small sample of the simulated data (one document's metadata, one persona) so the design is clearly buildable.
+- Make the 3-day plan specific enough to start on day 1 without further design.
+- Promise nothing that cannot be built in Mission 2.
 
 ## What a "deep" point looks like
 

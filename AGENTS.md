@@ -24,7 +24,7 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 
 ## Competition rules that affect agents
 
-- Scoring: 40% problem framing, 35% execution (does it run?), 25% decision quality.
+- Mission 1 scoring (from the brief): 40% Khung vấn đề - "bạn có hiểu đúng vấn đề không?", 35% Thực thi - "giải pháp có chạy thật không?", 25% Chất lượng quyết định - "lý do chọn A thay vì B có thuyết phục không?".
 - Every AI tool and prompt that shaped the final result must be declared in the evidence log, with how the output was verified. Undeclared AI use costs 30% of the score.
 - The candidate must be able to explain or rebuild any part during the PITCH round. Explain your reasoning; never hand over output the candidate cannot defend.
 - Unverified hallucinations fail the criterion. Flag every factual claim that needs checking.
@@ -33,9 +33,13 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 
 ## Mission 1 deliverable
 
-- One PDF/DOCX, at most 5 pages, written in Vietnamese (English technical terms are fine).
-- Covers 5 sections: problem and users, solution and flow, AI/data/people, decisions and risks, validation and MVP.
-- Answers 3 mandatory questions, each 60-150 words, opening with the decision.
+Three parts are submitted (brief, "Nộp gì cho mission 1"), and no code is required:
+
+1. One PDF/DOCX or a Notion link, at most 5 pages, written in Vietnamese (English technical terms are fine).
+   It covers 5 sections: problem and users, solution and flow, AI/data/people, decisions and risks, validation and MVP.
+2. The 3 mandatory "Forced Decision" answers, submitted separately from the PDF, each about 60-150 words, opening with the decision.
+3. The evidence log (`evidence_log.md`): AI tools, prompts, and decisions.
+   It is a judged deliverable, so keep it accurate, readable and in Vietnamese.
 
 ## Core thesis
 

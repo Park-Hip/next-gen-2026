@@ -468,6 +468,7 @@ Change readiness for Mission 3:
 - [ ] Failure scenarios with mitigations
 - [ ] Metrics with numeric targets, leak rate = 0 as a gate
 - [ ] Each of the 3 answers is 60-150 words and opens with the decision
+- [ ] The evidence log is complete: every AI tool, prompt, and the decision the candidate made from it
 - [ ] At most 5 pages; the PDF renders correctly, including diacritics
 - [ ] Simulated data is labeled as simulated, and no research is invented
 - [ ] Name, "Bài test B" and contact details on page 1
@@ -475,4 +476,5 @@ Change readiness for Mission 3:
 ## 11. Optional message to HR
 
 Only if something is unclear, send one short message asking for: the exact deadline time and submission channel, whether external links (repository, demo) are allowed, and whether an appendix counts toward the 5 pages.
+Update 07/10/2026: the brief now says what to submit (PDF or Notion link + 3 Forced Decision answers + evidence log, no code), so only the deadline time and channel remain open.
 Asking precise questions is itself a signal they screen for ("biết đặt câu hỏi").

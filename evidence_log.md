@@ -1,6 +1,6 @@
 # Nhật ký Bằng chứng - Bài test B: Tri thức nội bộ Appota
 
-Ghi lại mọi công cụ AI và prompt đã định hình kết quả, cùng cách tôi xác minh đầu ra, theo `ai_policies.md`.
+Ghi lại mọi công cụ AI, prompt đã định hình kết quả, quyết định của tôi và cách tôi xác minh đầu ra, theo `ai_policies.md` và mục "Nộp gì cho mission 1" của đề bài.
 Trạng thái xác minh: ✅ đã xác minh, ⏳ cần làm trước khi nộp.
 Mục 1-7 dùng tên file trước khi thư mục được sắp xếp lại vào `docs/` (xem `AGENTS.md`), ví dụ `mission1_document_draft.md` → `docs/mission1/document.md`.
 
@@ -83,6 +83,16 @@ Mục 1-7 dùng tên file trước khi thư mục được sắp xếp lại và
 - **Xác minh:**
   - ⏳ Chạy prompt trên AI khác; ghi lại công cụ, model, kết quả và góp ý nào được chấp nhận, vì sao.
 
+### 8. Cập nhật theo tiêu chí chấm và yêu cầu nộp bài mới trong đề
+
+- **Công cụ:** Claude Code (Claude Opus 5.5).
+- **Prompt (tóm tắt):** "Tôi đã thêm 'Tiêu chí chấm điểm' và 'Nộp gì cho mission 1' vào đề, hãy sửa các chỗ liên quan."
+- **Đầu ra:** cập nhật `AGENTS.md`, `docs/mission1/criteria.md`, `docs/mission1/review_prompt.md`, `docs/mission1/playbook.md`; thêm trường "Quyết định của tôi" vào mẫu nhật ký này.
+- **Quyết định của tôi:** áp dụng tiêu chí mới cho Mission 1; nhật ký bằng chứng được nộp kèm nên phải ghi rõ quyết định của tôi ở từng mục.
+- **Xác minh:**
+  - ✅ Đối chiếu nội dung cập nhật với nguyên văn đề trong `docs/competition/mission1_brief.md`.
+  - ⏳ Bổ sung "Quyết định của tôi" cho các mục 1-7 bằng lời của mình.
+
 ## Mẫu cho các mục tiếp theo
 
 ```
@@ -91,5 +101,6 @@ Mục 1-7 dùng tên file trước khi thư mục được sắp xếp lại và
 - **Công cụ:** <tên công cụ và mô hình>
 - **Prompt (tóm tắt):** "<nội dung yêu cầu>"
 - **Đầu ra:** <file hoặc phần nào trong bài nộp>
+- **Quyết định của tôi:** <tôi giữ, sửa hay bỏ gì từ đầu ra, và vì sao>
 - **Xác minh:** <đã kiểm tra thế nào, đã tự sửa gì>
 ```
