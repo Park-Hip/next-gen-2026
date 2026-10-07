@@ -4,7 +4,7 @@
 
 Appota NextGen AI Talent 2026, Bài test B - "Tri thức nội bộ Appota".
 Goal: an AI assistant that gives each employee the right knowledge for their unit, their access rights, and the version in force today.
-Current stage: Mission 1 (analysis document only, no product yet).
+Current stage: Mission 1 redraft (analysis document only, no product yet), following `docs/mission1/redraft_plan.md`.
 Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 
 ## Files
@@ -12,12 +12,19 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/competition/mission1_brief.md` - official brief. Source of truth. Do not edit.
 - `docs/competition/rules.md` - competition rules. Do not edit.
 - `docs/competition/ai_policies.md` - AI usage policy. Do not edit. Binding, overrides anything here.
-- `docs/mission1/playbook.md` - working notes and strategy for Mission 1-3.
-- `docs/mission1/document.md` - the 5-page submission draft. Render it with `python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf`.
-- `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field.
+- `docs/mission1/playbook.md` - working notes and strategy for Mission 1-3, and the "Deferred ideas" list.
+- `docs/mission1/redraft_plan.md` - the redraft plan (Phases 0-7). Start here to know where the work stands.
+- `docs/mission1/redraft/decisions.md` - decision register. Current source of truth for the design; nothing enters the document unless it traces to a row here.
+- `docs/mission1/redraft/artifacts.md` - simulated data model, personas, documents and Minh's worked trace.
+- `docs/mission1/redraft/checks/adopted_rules.py` - the adopted core model run on the simulated data, plus the publish-time check. Run with `python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py`. `current_rules.py` and `proposed_rules.py` are history from the production review.
+- `docs/mission1/redraft/open_issues.md` - gaps found while building the artifacts, with their status.
+- `docs/mission1/redraft/production_review.md` - review of the core model against real practice (Claude draft, findings P1-P9, verified sources).
+- `docs/mission1/redraft/phase2_prompt.md` - session prompt for Phase 2.
+- `docs/mission1/document.md` - the 5-page submission draft. Outdated: written before the redraft and contradicts M0 and M1c; it is rewritten in Phase 5. Render it with `python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf`.
+- `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field. Outdated; rewritten in Phase 6.
 - `docs/mission1/criteria.md` - what Mission 1 is judged on, and the rewrite principles.
 - `docs/mission1/review_prompt.md` - prompt for an independent AI review.
-- `docs/mission1/review_output.md` - output of running that prompt (same model as the drafter, so not independent).
+- `docs/mission1/review_output.md` - output of running that prompt on the first draft (same model as the drafter, so not independent). History.
 - `docs/mission1/thinking/` - thinking-phase workbook and the candidate's decisions (Round 1-3).
 - `docs/mission1/submitted/` - the exact files submitted, kept as a record.
 - `evidence_log.md` - AI usage log for all missions. Add an entry whenever AI shapes the result.
