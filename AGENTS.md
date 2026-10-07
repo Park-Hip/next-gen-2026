@@ -17,6 +17,7 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field.
 - `docs/mission1/criteria.md` - what Mission 1 is judged on, and the rewrite principles.
 - `docs/mission1/review_prompt.md` - prompt for an independent AI review.
+- `docs/mission1/review_output.md` - output of running that prompt (same model as the drafter, so not independent).
 - `docs/mission1/thinking/` - thinking-phase workbook and the candidate's decisions (Round 1-3).
 - `docs/mission1/submitted/` - the exact files submitted, kept as a record.
 - `evidence_log.md` - AI usage log for all missions. Add an entry whenever AI shapes the result.
@@ -53,3 +54,23 @@ Keep access, validity and applicability separate in every design and every piece
 - Promise only what can be built in Mission 2.
 - Do not use the em dash. Use a plain "-".
 - Put each sentence on its own line in Markdown.
+
+## Scope discipline (MVP first)
+
+AI suggestions that sound impressive but do not fit the MVP are a real risk to shipping time.
+Treat every suggestion as out of scope until it proves it serves the current mission.
+
+- Before proposing or accepting a feature, architecture or tool, ask: does it directly serve the Mission 1 deliverable or the Mission 2 MVP?
+  If not, do not add it.
+- Prefer the simplest design that works end to end.
+  Do not add abstractions, layers, services, frameworks or config systems "for later".
+- Do not build for scale, extensibility or edge cases that the brief does not require.
+  Note them as future work in one line instead.
+- When a suggestion is impressive but out of scope, do not implement it.
+  Name it, say in one sentence why it is deferred, and park it under "Deferred ideas" in `docs/mission1/playbook.md`.
+- Flag complexity honestly.
+  If a suggestion adds a new dependency, a new moving part, or more than about half a day of work, say so and ask before proceeding.
+- Never let a deferred idea leak into the document as a promise.
+  Only promise what can be built in Mission 2.
+- When unsure whether something is in scope, ask the candidate.
+  Do not decide silently.

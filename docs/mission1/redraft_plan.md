@@ -1,0 +1,131 @@
+# Mission 1 redraft plan
+
+## Principles
+
+- **Decide before writing.** Every decision is settled and recorded before any section that depends on it is written.
+- **Hiep decides and writes.** Claude proposes options, critiques, and checks logic; it does not make decisions or write final text unless asked, and anything it drafts is labelled.
+- **Artifacts before prose.** The worked trace, sample data and test matrix are built first; the sections then describe them.
+- **Write the opener last.** Page 1 summarises the document, so it is written once the rest is stable.
+- **Evidence log:** kept as a raw AI-written artifact for now; polished in Phase 7.
+
+## Control mechanism
+
+1. **Decision register:** `docs/mission1/redraft/decisions.md`.
+   One row per decision: ID, question, options, chosen, reason, what would change it, origin.
+   Origin is one of: "Hiep", "AI proposal, accepted", "AI proposal, modified", "AI proposal, rejected".
+   Nothing enters the document unless it traces to a row here.
+2. **Artifacts:** `docs/mission1/redraft/artifacts.md` (sample data, trace, test matrix).
+3. **Sections:** written into `docs/mission1/document.md`, one section at a time.
+4. **One commit per phase**, so the history shows how the thinking developed.
+
+## Phases
+
+### Phase 0 - Lock the frame (30 min)
+
+Decide what stays fixed, so later phases do not reopen it.
+
+| ID | Question | Current position |
+|---|---|---|
+| F1 | The one problem | "Nhân sự không biết chắc quy định nào đang áp dụng cho chính mình" |
+| F2 | Primary user; is the document owner a second user? | Employee at a member company; owner listed only as gatekeeper |
+| F3 | Scope of the worked example | HR policies + AI-tool policy; reviewer suggests going deep on annual leave only |
+| F4 | The 3 decisions argued in full in Section 4 | Reviewer suggests: precedence and conflicts, decline vs caveat, launch model |
+| F5 | Page budget | Reviewer suggests 1.25 / 1.25 / 0.75 / 1.0 / 0.75 |
+
+Output: rows F1-F5 in the decision register.
+
+### Phase 1 - Fix the core model (1.5-2 h)
+
+The reviewer found that the precedence rule fails on the draft's own examples.
+Everything in Section 2, Section 3 and Answer 3 depends on this phase.
+
+| ID | Question |
+|---|---|
+| M1 | Which relations between documents exist (replaces, overrides, adds to, sets a minimum), and which ones v1 supports |
+| M2 | Who computes entitlements such as 12 + 1 days: a rules function or the LLM |
+| M3 | Are validity and company-level applicability filtered before search or after |
+| M4 | Where the topic of a document comes from: assigned at publish time, or judged by AI |
+| M5 | What happens for a person who belongs to two units or companies |
+| M6 | Is "in force" judged on today's date, or on the date the question is about |
+| M7 | Are "not allowed" and "not found" refusals worded identically |
+| M8 | Are future versions shown before they take effect, and who decides |
+
+Output: rows M1-M8, plus a one-page resolution spec (relation types and evaluation order as a small table).
+Check: run Minh, Lan and Hà through the spec by hand; if any answer contradicts the persona table, fix the spec, not the table.
+
+### Phase 2 - Build the "Thực thi" artifacts (2 h)
+
+These are what make "giải pháp có chạy thật không?" believable without code.
+Hiep defines the traps; Claude can format tables on request.
+
+1. 6-8 simulated leave documents with metadata, covering: a superseded version, a future version, a draft, a restricted document, a group/company pair, and a minimum-setting rule.
+2. Personas with an as-of date (Lan, Minh, Hà, An), including one edge case (transfer or two units, per M5).
+3. **Worked trace of Minh's question, done by hand:** the candidate documents, what each step removes and why, the final answer card.
+4. Naive-vs-correct contrast: what plain RAG would retrieve and say, next to the correct answer.
+5. Three output cards: answer, refusal, conflict.
+6. Decision V3: run the optional embedding experiment (near-identical documents scored by a real embedding model), yes or no.
+
+Output: `artifacts.md`.
+The hand trace is the most important PITCH preparation in the whole plan.
+
+### Phase 3 - Argue the 3 decisions (1.5 h)
+
+For each decision from F4, fill this template in your own words (Vietnamese bullets are fine):
+
+| Field | Content |
+|---|---|
+| A | What we choose |
+| B | The strongest real alternative, not a strawman |
+| What B does better | Honest strengths of B |
+| Criterion | Why A wins, tied to the problem framing |
+| Cost of A | What we give up |
+| B wins when | The evidence that would flip the decision |
+| Test | How Mission 2 checks it |
+
+Claude critiques each argument as a judge would.
+Decisions that do not make the cut become one line in an assumptions list.
+
+### Phase 4 - Validation and MVP (1 h)
+
+| ID | Question |
+|---|---|
+| V1 | Metrics split by stage (deterministic: must be 100% on the test set; probabilistic: interpretation, retrieval, faithfulness), each threshold with a reason |
+| V2 | The riskiest assumption, as one sentence that can be proven false |
+| V4 | The 3-day plan and the "not doing" list, with why each cut does not affect testing V2 |
+| V5 | Whether to commit to a naive-RAG baseline in Mission 2 |
+
+Output: an 8-10 row test matrix excerpt (persona, question, as-of date, expected behaviour, must cite, must not cite) in `artifacts.md`.
+
+### Phase 5 - Write the sections (3-4 h)
+
+Order: 2 → 3 → 4 → 5 → 1 → page-1 opener.
+For each section:
+
+1. Hiep writes it, from the decision register and artifacts.
+2. Claude reviews it as a strict judge: logic, gaps, claims without evidence, anything not traceable to the register.
+3. Hiep revises.
+
+### Phase 6 - Align the 3 answers (45 min)
+
+Rewrite the answers so they match the new model.
+Known changes: Answer 3 (relation types instead of "most specific wins unless mandatory"), Answer 2 (as-of date, remove "Lark/Slack"), Answer 1 (the cost asymmetry, why this problem beats leakage).
+
+### Phase 7 - Assemble and verify (2 h)
+
+1. Render, fit to 5 pages, check every page.
+2. Run `review_prompt.md` on a different model family (GPT or Gemini) for a truly independent review.
+3. Hiep verifies the legal citations on an official source (vbpl.vn), or removes them.
+4. Polish the evidence log: origin table, verbatim key prompts, honest verification statuses, ownership statement consistent with the PDF.
+5. Copy the submitted files to `docs/mission1/submitted/` and tag the commit.
+
+## Suggested schedule
+
+Assuming the deadline is Friday 09/10 morning (to be confirmed with HR).
+
+| When | Phases |
+|---|---|
+| Wed evening | 0, 1 |
+| Thu morning | 2, 3 |
+| Thu afternoon | 4, 5 |
+| Thu evening | 6, 7 |
+| Fri morning | Buffer, submit early |

@@ -478,3 +478,21 @@ Change readiness for Mission 3:
 Only if something is unclear, send one short message asking for: the exact deadline time and submission channel, whether external links (repository, demo) are allowed, and whether an appendix counts toward the 5 pages.
 Update 07/10/2026: the brief now says what to submit (PDF or Notion link + 3 Forced Decision answers + evidence log, no code), so only the deadline time and channel remain open.
 Asking precise questions is itself a signal they screen for ("biết đặt câu hỏi").
+
+## Deferred ideas
+
+Ideas that are out of scope for the Mission 2 MVP.
+None of them may appear in the Mission 1 document as a promise.
+
+| Idea | Why deferred | Source decision |
+|---|---|---|
+| Employment type and seniority as applicability dimensions | Not in the brief; adds fields, personas and a calculation without a new kind of trap; can be added later as a data field | M0 |
+| Legal rules and legal minimums (Bộ luật Lao động) | Adds a relation type and facts that must be verified, without a new trap | M1c |
+| Clause-level relations (override one clause, inherit the rest) | Only needed for partial overrides, which the MVP data avoids by requiring complete policies | M1a |
+| Questions about another unit's rules | Requires AI to detect the target unit, which puts AI into a correctness decision | M3a |
+| A person in two units (kiêm nhiệm) | Not in the brief; needs a rule for choosing between companies | M5 |
+| Questions about past or future dates | Users get today's rule; the date is only a test input | M6 |
+| Multi-topic documents (e.g. Nội quy lao động covering leave and OT) | MVP documents have exactly one topic; a list of topics is a later data change | M4 |
+| AI check that may add (never remove) a conflict warning when topics look wrong | Only needed if owners often mis-tag topics | M4 |
+| Showing a future version as "sắp thay đổi" | The brief asks for the version in force; early disclosure raises its own access question | M8 |
+
