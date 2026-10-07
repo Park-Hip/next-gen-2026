@@ -32,9 +32,9 @@ In real companies, two documents can share a broad topic without contradicting e
 - It affects the whole system, because rule 5 and the topic field (M4) both depend on how coarse topics are.
 - The failure is on the safe side: a warning instead of a wrong answer.
 - It can still produce noisy warnings, which makes owners ignore them (the risk named in M1b).
-- None of the four cases is in the current simulated data.
+- Case 2 is now in the simulated data as trap T11 (`LEAVE-PROC-GAMECO-v1` next to `LEAVE-GAMECO-v2`). Cases 3 and 4 are not.
 
-### Options discussed (none chosen)
+### Options first discussed (history; M14 chose `complements` with one topic per document, M17 made it a list)
 
 | Option | Idea | Cost |
 |---|---|---|
@@ -65,7 +65,7 @@ Open risk: an ambiguous question could land on the wrong topic, and a conflict c
 
 ## Issue 3 - `status` (draft or published) is not from the brief
 
-Status: accepted by Hiep as "our assumption, not from the brief".
+Status: accepted by Hiep as "our assumption, not from the brief" (recorded as A4 in `decisions.md`).
 Source: first appears in `playbook.md`.
 The brief only says "tài liệu nào đang có hiệu lực" and mentions "nhiều phiên bản".
 To check in real practice: whether real publishing workflows use a status separate from effective dates.

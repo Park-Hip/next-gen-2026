@@ -43,7 +43,8 @@ def to_html(md_text: str) -> str:
         else:
             out.append(line)
     # Hard line breaks match the one-sentence-per-line source style.
-    body = markdown.markdown("\n".join(out), extensions=["tables", "fenced_code", "nl2br", "md_in_html"])
+    # tab_length=2 so 2-space indented sub-items (the style used across docs/) render as nested lists.
+    body = markdown.markdown("\n".join(out), extensions=["tables", "fenced_code", "nl2br", "md_in_html"], tab_length=2)
     return f"""<!doctype html><html lang="vi"><head><meta charset="utf-8"><style>{CSS}</style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({{startOnLoad: true, theme: "neutral",

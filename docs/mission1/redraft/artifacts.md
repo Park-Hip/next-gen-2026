@@ -49,7 +49,7 @@ As-of date for every artifact: 07/10/2026.
 
 ## Simulated documents (giả lập)
 
-Claude draft, not yet approved by Hiep.
+Approved by Hiep in Step 3, then changed by decisions M9-M18 (series, `overrides` between series, `complements`, trap T11).
 All content is simulated.
 Topics: `nghi_phep`, `lam_them_gio`, `cong_tac_phi`, `luong`.
 Order of the checks (M12, M18).
@@ -140,14 +140,14 @@ Kết quả phê duyệt được gửi về email công ty của nhân sự.
 Điều 1. Nhân sự GameCo đi công tác trong nước được hỗ trợ ăn uống 300.000 đồng mỗi ngày.
 Điều 2. Vé đi lại và khách sạn được thanh toán theo hóa đơn, tối đa theo hạn mức do trưởng phòng duyệt.
 
-## Minh's trace (Claude draft, pending Hiep's review) (giả lập)
+## Minh's trace (Hiep) (giả lập)
 
 Persona: Minh, `Tập đoàn / GameCo / Studio`, roles `[employee]`.
 As-of date: 07/10/2026.
 Question: "Phép năm của tôi là bao nhiêu ngày?"
-This section was drafted by Claude at Hiep's request, so it replaces the "done by Hiep" step in the phase 2 prompt.
+Claude wrote the first draft at Hiep's request, instead of Hiep tracing it from the empty template in the phase 2 prompt.
+Hiep checked every row and approved it.
 Rebuilt after decisions M9-M12 (series, no pre-typed end dates, `overrides` between series) and M14 (`complements`, trap T11), then after M18 (rulebook first, then retrieval; no topic picked from the question).
-Rename the heading to "Minh's trace (Hiep)" once Hiep has checked every row.
 
 ### Step A - Current version of each series (M9)
 
@@ -229,3 +229,84 @@ If the LLM cited a document outside the rulebook, that citation would be dropped
 6. If GameCo repealed its policy, the procedure would be left next to `LEAVE-GROUP-v1` with no declared relation, which is a conflict.
    That is correct: the procedure was confirmed against GameCo's policy, not the Group's.
    The publish-time check (M15) lists this pair as soon as the repeal is entered, before it takes effect.
+
+## Naive vs correct, Minh's question (Claude draft) (giả lập, minh họa, chưa đo)
+
+Question: "Phép năm của tôi là bao nhiêu ngày?"
+Persona: Minh, `Tập đoàn / GameCo / Studio`. As-of date: 07/10/2026.
+No similarity score was measured.
+The left column describes the failure qualitatively.
+What a real retriever returns first is expected, not measured.
+
+| | Naive: search, then answer | Core model (M9-M18) |
+|---|---|---|
+| What goes into search | All 10 documents, ranked by similarity to the question | Minh's rulebook: 4 documents (`LEAVE-GAMECO-v2`, `LEAVE-PROC-GAMECO-v1`, `OT-GAMECO-v1`, `TRAVEL-GAMECO-v1`) |
+| Leave documents that compete | `LEAVE-GROUP-v1` (12), `LEAVE-GAMECO-v1` (13), `LEAVE-GAMECO-v2` (14), `LEAVE-GAMECO-v3` (15), `LEAVE-GAMECO-v4-DRAFT` (16), `LEAVE-PAYCO-v1` (13) | `LEAVE-GAMECO-v2` only (the procedure states no number of days) |
+| Why they compete | Seven documents use almost the same words about annual leave, so similarity cannot tell them apart; it sees no `status`, date, unit or relation | The other leave documents were removed by exact metadata before search |
+| Likely answer | One of 12, 13, 15 or 16 days, or a blend such as "12 đến 16 ngày tùy quy chế", said with confidence | "14 ngày", citing `LEAVE-GAMECO-v2`, from 01/01/2026, owner HR GameCo |
+| If the top result is wrong | Nothing notices; the LLM writes a fluent answer from it | A citation outside the rulebook is dropped; with no valid citation Minh gets the refusal |
+
+How each trap breaks the naive chatbot:
+
+| Trap | What goes wrong without the filter | What stops it in the core model |
+|---|---|---|
+| T1 | `LEAVE-GAMECO-v1` (13 days) is still published and matches the question | Step A: v2 has the later `effective_from` in the same series |
+| T2 | `LEAVE-GAMECO-v3` (15 days) is the newest file, so it looks like the answer | Step A: `effective_from` 01/01/2027 is after 07/10/2026 |
+| T3 | The draft (16 days) reads like a policy | Step A: `status: draft` |
+| T5 | `LEAVE-GROUP-v1` (12 days) is a broader policy that says the same kind of thing | Step C: GameCo v2 `overrides` the Group series |
+| T6 | `LEAVE-PAYCO-v1` (13 days) is readable by Minh but covers another company | Step B: `applies_to` |
+
+T4 (the salary band) is not triggered by this question, because it does not match leave wording.
+It is exposed by a salary question, in the outcome table below.
+
+## Outcome table and cards (Claude draft, Hiep edits the wording) (giả lập)
+
+Three outcomes, one card each.
+Every card starts with "Bạn đang hỏi với tư cách", so the asker sees which rulebook was used.
+As-of date: 07/10/2026.
+
+| Outcome | Persona and question | Trap | Rule | Cited |
+|---|---|---|---|---|
+| Answer | Minh: "Phép năm của tôi là bao nhiêu ngày?" | T1, T2, T3, T5, T6, T11 | 7 | `LEAVE-GAMECO-v2` |
+| Conflict | Hà: "Phép năm của tôi là bao nhiêu ngày?" | T7 | 4, 7 | `LEAVE-GROUP-v1` and `LEAVE-PAYCO-v1` |
+| Refusal | Minh: "Khung bậc lương của GameCo thế nào?" | T4 | 6 | none |
+
+The refusal card is the same text for "not allowed" (T4) and "not found" (T9).
+It only changes the unit in the first line.
+
+### Card 1 - Answer (Minh)
+
+> **Bạn đang hỏi với tư cách:** nhân sự GameCo, Studio
+>
+> **Phép năm của bạn là 14 ngày mỗi năm.**
+>
+> Nguồn: `LEAVE-GAMECO-v2` - Quy chế nghỉ phép GameCo (bản 2), có hiệu lực từ 01/01/2026.
+> Cần hỏi thêm: HR GameCo.
+
+### Card 2 - Conflict (Hà)
+
+> **Bạn đang hỏi với tư cách:** nhân sự PayCo, Kế toán
+>
+> **Có hai quy định về phép năm cùng áp dụng cho bạn và chúng khác nhau. Hệ thống không tự chọn một quy định.**
+>
+> - `LEAVE-GROUP-v1` - Quy chế nghỉ phép Tập đoàn, từ 01/01/2024: 12 ngày mỗi năm.
+> - `LEAVE-PAYCO-v1` - Quy chế nghỉ phép PayCo, từ 01/01/2025: 13 ngày mỗi năm.
+>
+> Vui lòng hỏi HR PayCo để biết quy định nào áp dụng. Chủ sở hữu hai văn bản (HR Tập đoàn, HR PayCo) đã được báo để xác nhận mối quan hệ giữa hai văn bản.
+
+### Card 3 - Refusal (Minh)
+
+> **Bạn đang hỏi với tư cách:** nhân sự GameCo, Studio
+>
+> **Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.**
+>
+> Vui lòng liên hệ HR GameCo.
+
+Notes for Hiep when editing the wording:
+
+1. The refusal says "không tìm thấy quy định phù hợp" and never "bạn không có quyền", so it does not reveal that a restricted document exists (M7).
+2. The conflict card names two owners, because the two documents have different owners.
+   The system routes the asker to HR of their own unit (M7), and notifies both owners.
+   "Đã được báo" is a promise for Mission 2: the MVP must either send that notice or the sentence must go.
+3. The answer card cites only `LEAVE-GAMECO-v2`.
+   The procedure is cited only when the answer adds how to apply.
