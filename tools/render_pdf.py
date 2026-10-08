@@ -25,7 +25,7 @@ p { margin: 4pt 0; }
 h1, h2, h3, p:has(+ ul), p:has(+ ol), p:has(+ table) { break-after: avoid; }
 /* Row-label tables (empty top-left header cell): keep the label column on one line. */
 table:has(thead th:first-child:empty) td:first-child { white-space: nowrap; }
-ul { margin: 3pt 0; padding-left: 16pt; }
+ul, ol { margin: 3pt 0; padding-left: 16pt; }
 blockquote { margin: 6pt 0; padding: 4pt 8pt; border-left: 3px solid #555; background: #f3f3f3; }
 table { border-collapse: collapse; width: 100%; margin: 5pt 0; font-size: 9.5pt; page-break-inside: auto; }
 tr { page-break-inside: avoid; }
