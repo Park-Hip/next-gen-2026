@@ -29,7 +29,7 @@ Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ k
 
 | Công cụ | Mô hình | Dùng để | Mục |
 |---|---|---|---|
-| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-23, 25 |
+| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-25 |
 | Pi | Claude Sonnet 5.5, qua gói đăng ký Claude | Chạy prompt Phase 2; ghi quyết định M16-M17; 2 phiên phụ | 14, 18 |
 | Pi, qua subagent | Agnes 2.5 Flash (Agnes AI), mức suy luận tối đa | Tìm nguồn web và lượt kiểm tra trích dẫn thứ hai; thử thu thập đề từ portal (không dùng) | 15, 17 |
 | Tiện ích của Pi | - | Tìm kiếm web; Lavish (chuyển Markdown thành trang HTML) | 1, 2, 9, 20 |
@@ -479,6 +479,26 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude chạy `adopted_rules.py`: 10/10 dòng đạt; khi bỏ `overrides` khỏi `LEAVE-GAMECO-v2` hoặc ban hành bản nháp v4, 3/10 dòng trượt (chạy một lần trong phiên, không lưu vào script).
   - **[AI]** Cận trên 9,5% cho "0 lỗi trên 30 ca" là công thức 1 - 0,05^(1/30), Claude tính bằng Python; tôi chưa tự kiểm.
   - **[Chưa]** Tôi duyệt hoặc sửa V1, V2, V4-V7, và kiểm từng dòng của bảng test với dữ liệu giả lập.
+
+### 24. Phase 5 - Bản nháp tài liệu 5 trang
+
+- **Thời gian:** 08:00-08:30, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
+- **Prompt (nguyên văn):**
+  - "start phase 5 in C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md"
+  - "remember to not to use our internal notations for this project"
+  - Ý chính: bắt đầu Phase 5 (viết 5 phần của tài liệu); không dùng ký hiệu nội bộ của dự án trong bài.
+- **Đầu ra:**
+  - `docs/mission1/document.md`: Claude viết lại toàn bộ 5 phần và đoạn mở đầu theo thứ tự của kế hoạch, từ `decisions.md`, `artifacts.md` và `phase3_decisions.md`; không còn mã quyết định, mã bẫy hay mã văn bản, văn bản được gọi bằng tên, quan hệ được gọi bằng tiếng Việt kèm tên trường tiếng Anh một lần.
+  - Bản đầu dài 8 trang; Claude cắt còn 5 trang bằng cách bỏ sơ đồ luồng (hiển thị quá nhỏ, không đọc được), bỏ bảng persona, đưa ba thẻ kết quả vào một bảng, rút gọn các phần 3-5.
+  - `decisions.md`: dòng A11 (giao viết nháp) và ghi chú những gì bị cắt, những dòng còn chờ duyệt mà bản nháp phụ thuộc.
+  - `phase3_decisions.md`: sửa một khẳng định quá mức ở phần S (xem Xác minh).
+- **Quyết định của tôi:** giao viết nháp (A11, cần tôi xác nhận); nội dung chưa sửa.
+- **Xác minh:**
+  - **[AI]** Claude render PDF bằng `tools/render_pdf.py` (5 trang), xem ảnh từng trang, và tìm bằng `grep` để chắc không còn dấu gạch dài và ký hiệu nội bộ.
+  - **[AI]** Mọi con số và kết quả trong bài (14, 15, 12 ngày; thẻ mâu thuẫn của Hà; các câu từ chối; 10/10 dòng phần luật; cận trên 9,5%) lấy từ `artifacts.md` và kết quả chạy `adopted_rules.py` trong phiên này.
+  - **[AI]** Khi đọc lại, Claude phát hiện và sửa hai khẳng định quá mức: câu từ chối cho câu hỏi làm thêm giờ của Hà vẫn phụ thuộc LLM, không do luật bảo đảm; và việc LLM trích văn bản không liên quan không phải "con đường duy nhất" tới câu trả lời sai, vì còn lỗi diễn đạt sai nội dung.
+  - **[Chưa]** Tôi sửa từng phần bằng lời của mình; duyệt V1, V2, V4, V5, V7, A8 mà bản nháp đang dựa vào.
 
 ### 25. Phase 4 - Duyệt bộ test, chỉ số và kế hoạch 3 ngày
 

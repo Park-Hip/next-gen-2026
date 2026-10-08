@@ -95,6 +95,7 @@ Rows: M3b, M18; Minh's trace (Steps D-E); the naive-vs-correct table.
 
 - Trong B, lỗi của AI (phân loại sai) quyết định LLM được thấy văn bản nào; trong A, lỗi của AI (retriever bỏ sót) chỉ làm câu trả lời yếu đi hoặc thành "không tìm thấy", vì mọi văn bản trong bộ luật đều đã hợp lệ.
 - Thẻ mâu thuẫn chạy theo văn bản được trích dẫn, không theo chủ đề đoán từ câu hỏi: Hà hỏi về làm thêm giờ nhận câu từ chối, không nhận thẻ mâu thuẫn giả về nghỉ phép (đã chạy trong `adopted_rules.py`); trong B, chỉ cần câu đó bị xếp vào `nghi_phep` là ra thẻ mâu thuẫn giả.
+  - Sửa trong Phase 5: kết quả từ chối này vẫn phụ thuộc LLM không trích văn bản nghỉ phép (dòng 8 của bảng test, cột "Cấm (LLM)"); luật không bảo đảm nó. So sánh đúng: trong A, thẻ mâu thuẫn giả cần một lỗi trích dẫn mà bộ test bắt được; trong B, chỉ cần một lỗi phân loại.
 - Câu hỏi chạm hai chủ đề, ví dụ "Ngày nghỉ bù sau làm thêm giờ có tính vào phép năm không?", vẫn được tìm trong cả `OT-GAMECO-v1` lẫn `LEAVE-GAMECO-v2`; B chỉ đưa văn bản của một chủ đề (ví dụ minh hoạ, chưa đo).
 - Danh sách chủ đề chỉ còn một việc là đánh dấu cặp mâu thuẫn; không phải mở rộng danh sách cho mỗi kiểu câu hỏi mới.
 

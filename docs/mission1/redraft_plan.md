@@ -115,6 +115,10 @@ For each section:
 2. Claude reviews it as a strict judge: logic, gaps, claims without evidence, anything not traceable to the register.
 3. Hiep revises.
 
+Drafted on 08/10 by Claude (A11, to be confirmed by Hiep): all five sections and the opener in `document.md`, 5 pages when rendered, with no internal IDs in the text.
+The draft depends on the Phase 4 rows (accepted 08/10) and on A8, still pending Hiep; the notes under A11 in `decisions.md` list what was cut for length and one corrected claim.
+Next: Hiep revises section by section in the order above, then Claude reviews each section as a strict judge.
+
 ### Phase 6 - Align the 3 answers (45 min)
 
 Rewrite the answers so they match the new model.

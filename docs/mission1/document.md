@@ -1,174 +1,179 @@
-# Trợ lý tri thức nội bộ: đúng người, đúng quyền, đúng hiệu lực
+# Trợ lý tri thức nội bộ: đúng người, đúng quyền, đúng phiên bản
 
 **Bài test B - Tri thức nội bộ Appota - Mission 1**
 **Ứng viên:** [Họ tên]
 
-> Một câu hỏi, bốn phép kiểm tra: **liên quan, được phép, đang hiệu lực, áp dụng cho tôi**.
-> Tìm kiếm thông thường chỉ giải quyết phép kiểm tra đầu tiên.
-> Toàn bộ đơn vị, nhân sự và văn bản trong tài liệu này là **giả lập**.
+> Một văn bản liên quan chưa chắc đã được phép xem, đang có hiệu lực, hay áp dụng cho người hỏi.
+> Thiết kế này giao ba phép kiểm tra đó cho luật trên metadata; AI chỉ tìm đoạn văn bản và viết câu trả lời có trích nguồn; khi luật không biết văn bản nào đúng, hệ thống nói rõ thay vì đoán.
+> Mọi đơn vị, nhân sự, văn bản và con số trong tài liệu là **giả lập**.
 
 ## 1. Vấn đề & người dùng
 
-**Nhân sự không thiếu tài liệu.**
-**Họ thiếu một câu trả lời đáng tin, đúng với chính họ, tại thời điểm hiện tại.**
+**Vấn đề quan trọng nhất: nhân sự không biết chắc quy định nào đang áp dụng cho chính mình.**
+Họ không thiếu tài liệu; họ thiếu một câu trả lời đúng với đơn vị của mình, trong phạm vi mình được xem, theo phiên bản có hiệu lực hôm nay.
 
-Câu hỏi "Quy định nghỉ phép của tôi như thế nào?" thực chất chứa bốn câu hỏi: văn bản nào **liên quan** (tìm kiếm), người này **được phép** xem văn bản nào (bảo mật), bản nào **đang hiệu lực** hôm nay (thời gian), và văn bản nào **áp dụng** cho đơn vị, loại hợp đồng, thâm niên của họ (phạm vi).
+**Ví dụ xuyên suốt.** Minh làm ở phòng Studio của GameCo, một công ty thành viên.
+Ngày 07/10/2026, Minh hỏi: "Phép năm của tôi là bao nhiêu ngày?"
+Kho tài liệu có sáu văn bản nêu số ngày phép năm, câu chữ gần như giống nhau, nhưng chỉ một văn bản đúng với Minh:
 
-**Vì sao khó: văn bản nguy hiểm nhất là văn bản giống nhất.**
-Quy chế Tập đoàn, quy chế công ty và bản năm ngoái dùng câu chữ gần như giống hệt nhau, nên tìm kiếm ngữ nghĩa xếp chúng ngang nhau.
-Chatbot RAG thông thường sẽ gộp chúng thành một câu trả lời tự tin nhưng sai.
-Một mô hình lớn hơn cũng không sửa được, vì thông tin còn thiếu nằm ngoài câu chữ: ai đang hỏi, văn bản thuộc đơn vị nào, còn hiệu lực không, áp dụng cho ai.
-Chỉ metadata phân biệt được các văn bản này.
+| Văn bản | Ngày | Có đúng với Minh hôm nay không? |
+|---|---|---|
+| Quy chế nghỉ phép Tập đoàn | 12 | Không: quy chế GameCo được khai báo là dùng thay nó |
+| Quy chế GameCo, bản 1 | 13 | Không: đã bị bản 2 thay thế |
+| **Quy chế GameCo, bản 2** | **14** | **Có: đã ban hành, hiệu lực từ 01/01/2026** |
+| Quy chế GameCo, bản 3 | 15 | Chưa: hiệu lực từ 01/01/2027 |
+| Dự thảo quy chế GameCo, bản 4 | 16 | Không: dự thảo, chưa ban hành |
+| Quy chế nghỉ phép PayCo | 13 | Không: Minh đọc được, nhưng nó chỉ áp dụng cho PayCo |
 
-Hai phân biệt tôi giữ xuyên suốt tài liệu:
+Một chatbot "tìm rồi trả lời" xếp sáu văn bản gần ngang nhau, vì độ tương đồng câu chữ không thấy trạng thái, ngày hiệu lực, đơn vị áp dụng hay quan hệ giữa văn bản.
+Nó có thể trả lời 12, 13, 15 hay 16 ngày, hoặc "12 đến 16 ngày tùy quy chế", với giọng tự tin như nhau (minh họa, chưa đo).
+Mô hình lớn hơn cũng không sửa được: thông tin còn thiếu nằm ở việc ai đang hỏi và ở metadata, không nằm trong câu chữ.
+**Văn bản nguy hiểm nhất là văn bản giống văn bản đúng nhất.**
 
-- **Được xem ≠ được áp dụng.** HR Tập đoàn được đọc quy chế của GameCo, nhưng quy chế đó không điều chỉnh phép năm của họ.
-- **Mới nhất ≠ đang hiệu lực.** Một dự thảo vừa tải lên là file mới nhất nhưng chưa có hiệu lực.
+Ba phân biệt giữ xuyên suốt tài liệu:
 
-**Ví dụ xuyên suốt (giả lập).**
-Tập đoàn có các công ty GameCo, PayCo, AdsCo.
-Mức sàn pháp lý: 12 ngày phép năm, cộng 1 ngày cho mỗi 5 năm làm việc (Bộ luật Lao động 2019, Điều 113-114).
+- **Liên quan ≠ được phép xem:** Minh hỏi về khung bậc lương GameCo, nhưng chỉ HR GameCo được xem văn bản đó.
+- **Được xem ≠ áp dụng cho mình:** Lan (Nhân sự Tập đoàn) đọc được quy chế GameCo, nhưng phép năm của Lan theo quy chế Tập đoàn: 12 ngày.
+- **Mới nhất ≠ đang hiệu lực:** bản 3 và dự thảo bản 4 mới hơn bản 2, nhưng hôm nay chưa có hiệu lực.
 
-| Persona | Đơn vị, tình trạng | Câu trả lời đúng cho "Phép năm của tôi?" | Điều được kiểm tra |
-|---|---|---|---|
-| Lan | HR Tập đoàn, chính thức, 6 năm | 13 ngày: 12 theo quy chế Tập đoàn + 1 ngày thâm niên | Quy chế chung, thâm niên |
-| Minh | GameCo, phòng Studio, chính thức, 2 năm | 14 ngày theo Quy chế GameCo v2 (hiệu lực 01/01/2026); v3 hiệu lực 01/01/2027 là "sắp thay đổi" | Phạm vi cụ thể nhất, phiên bản |
-| Hà | PayCo, thử việc | Theo quy định thử việc của PayCo | Loại hợp đồng |
-| An | AdsCo, thực tập sinh | Theo quy chế chương trình thực tập, không phải quy chế nhân viên | Văn bản khác hẳn |
-| Minh | GameCo | Hỏi "Khung lương GameCo?": không có thông tin trong quyền của bạn, liên hệ HR; không nêu tên văn bản mật | Quyền truy cập, không lộ sự tồn tại |
+**Vì sao chọn vấn đề này, không phải chống rò rỉ.** Rò rỉ phải bằng 0 trong mọi thiết kế, nên đó là điều kiện để phát hành, không phải vấn đề để chọn.
+Áp dụng nhầm quy định là lỗi hằng ngày và vô hình: câu trả lời sai trông y như câu đúng, và người hỏi hành động theo nó, ví dụ lên kế hoạch nghỉ 15 ngày theo một bản chưa có hiệu lực.
+Hai loại lỗi có giá khác nhau: câu trả lời sai mà người dùng tin thì đắt; câu "chưa chắc, hãy hỏi HR" chỉ đưa họ về tình trạng hiện nay.
+Thiết kế chấp nhận lỗi thứ hai để tránh lỗi thứ nhất.
 
-**Người dùng chính:** nhân sự công ty thành viên, vào lúc cần ra một quyết định do quy định điều chỉnh.
-**Bên kiểm soát:** HR (chủ sở hữu nội dung), IT/bảo mật và pháp chế (một lần lộ dữ liệu lương là sự cố dữ liệu cá nhân theo Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15).
-Sản phẩm chỉ sống được nếu HR tin câu trả lời và bảo mật đồng ý cho chạy.
-**Kết quả họ cần:** biết chắc quy định nào đang áp dụng cho mình để hành động ngay, không phải chờ HR, không dùng nhầm bản cũ, và không bao giờ thấy thông tin ngoài quyền.
-**Giả định:** SSO/HRIS là nguồn sự thật về đơn vị, chức danh, loại hợp đồng và ngày vào làm.
+**Người dùng chính** là nhân sự các công ty thành viên, vào lúc cần ra một quyết định do quy định điều chỉnh (xin nghỉ, làm thêm giờ, đi công tác).
+Kết quả họ cần: quyết định đúng ngay lần đầu, không phải chờ HR.
+**Người dùng thứ hai** là chủ sở hữu văn bản (HR từng đơn vị): đăng văn bản một lần, bớt trả lời câu hỏi lặp lại, không bao giờ bị quy trách nhiệm vì lộ thông tin.
+Không có họ, metadata không được cập nhật và hệ thống sai dần.
+
+**Phạm vi:** quy định nhân sự, đi sâu vào phép năm vì chủ đề này đã chứa mọi cái bẫy trên; câu trả lời phụ thuộc đúng ba yếu tố đề bài nêu: đơn vị, quyền truy cập, phiên bản có hiệu lực.
 
 ## 2. Giải pháp & luồng hoạt động
 
-**Giải pháp:** trợ lý tri thức hiểu người hỏi: lọc quyền trước, xác định văn bản đang hiệu lực và áp dụng đúng người, rồi mới để AI diễn giải kèm trích dẫn.
-**Nguyên tắc:** luật xác định quyết định mọi thứ liên quan đến đúng sai; AI chỉ xử lý ngôn ngữ.
+**Ý chính: dựng bộ quy định của người hỏi trước, rồi mới tìm và trả lời bên trong bộ đó.**
+Bộ quy định của một người là các văn bản họ được xem, đang có hiệu lực và áp dụng cho họ, sau khi xét văn bản nào dùng thay văn bản nào; mọi bước dựng bộ này là luật tất định trên metadata.
 
-```mermaid
-flowchart LR
-  Q["Câu hỏi + danh tính<br/>(AI hiểu ý)"] --> P["1. Lọc quyền<br/>trước khi tìm"]
-  P --> R["2. Tìm kiếm<br/>trong phần được phép"]
-  R --> V["3. Lọc hiệu lực"]
-  V --> A["4. Xác định<br/>áp dụng"]
-  A --> C{"Còn hòa?"}
-  C -- Không --> G["AI diễn giải<br/>+ trích dẫn"]
-  C -- Có --> X["Trích nguyên văn cả hai<br/>+ chuyển chủ sở hữu"]
-  R -- Không có văn bản --> N["Từ chối<br/>+ chỉ người cần hỏi"]
-```
+**Dữ liệu.** Hồ sơ người hỏi gồm đường đơn vị (Tập đoàn → GameCo → Studio) và vai trò.
+Metadata của quy chế GameCo bản 2: **chuỗi phiên bản** (series) "Nghỉ phép GameCo"; **trạng thái** đã ban hành, **hiệu lực** từ 01/01/2026, không đặt sẵn ngày hết hạn; **quyền xem** mọi nhân sự; **áp dụng cho** GameCo và mọi đơn vị bên dưới; **dùng thay** (overrides) chuỗi "Nghỉ phép Tập đoàn"; **chủ đề** nghỉ phép, trong một danh sách cố định; **chủ sở hữu** HR GameCo.
+Quan hệ thứ ba là **bổ sung** (complements): hướng dẫn đăng ký nghỉ phép bổ sung cho chuỗi "Nghỉ phép GameCo", cùng chủ đề mà không mâu thuẫn.
 
-Bước 1, 3, 4 là luật xác định, không dùng AI.
-"Còn hòa" nghĩa là vẫn còn từ hai văn bản cùng chủ đề, cùng phạm vi, cùng hiệu lực sau khi áp dụng thứ tự ưu tiên dưới đây.
+**Luồng 7 bước, lần vết với câu hỏi của Minh** trên 10 văn bản giả lập: bước 1-4 là luật và không đọc câu hỏi, bước 5-6 là AI, bước 7 là luật.
 
-**Thứ tự ưu tiên khi nhiều văn bản cùng chủ đề:**
-(1) quy định cấp trên được đánh dấu bắt buộc, ví dụ mức sàn pháp lý;
-(2) phạm vi cụ thể nhất (Nhóm > Phòng ban > Công ty > Tập đoàn);
-(3) loại văn bản (quy chế > quy trình > hướng dẫn > FAQ > thông báo);
-(4) nếu vẫn hòa: mâu thuẫn thật, chuyển chủ sở hữu.
-Quyết định của chủ sở hữu ("bổ sung cho nhau" hoặc "A thay thế B") được lưu thành dữ liệu, nên cùng một cảnh báo không lặp lại.
+| Bước và luật | Với Minh, 07/10/2026 |
+|---|---|
+| 1. Mỗi chuỗi giữ bản đã ban hành có ngày hiệu lực muộn nhất, không sau hôm nay | Loại GameCo bản 1, bản 3, dự thảo bản 4 |
+| 2. Giữ văn bản người hỏi được xem và áp dụng cho đơn vị của họ | Loại khung bậc lương (không có quyền), quy chế PayCo (không áp dụng) |
+| 3. "Dùng thay", chỉ xét giữa các văn bản còn lại sau bước 2 | Loại quy chế Tập đoàn |
+| 4. Đánh dấu cặp cùng chủ đề không có quan hệ khai báo là mâu thuẫn | Không có cặp nào; bộ quy định còn 4 văn bản: quy chế GameCo bản 2, hướng dẫn đăng ký nghỉ, làm thêm giờ, công tác phí |
+| 5-6. AI tìm đoạn trong bộ quy định, trả lời có trích nguồn hoặc nói không tìm thấy | "14 ngày", trích Điều 2 quy chế GameCo bản 2 |
+| 7. Trích văn bản thuộc cặp mâu thuẫn: thẻ mâu thuẫn; không còn trích dẫn hợp lệ: từ chối; còn lại: trả lời | Thẻ trả lời |
 
-**Thẻ trả lời (Minh hỏi phép năm):**
+Bước 1 chạy trước bộ lọc vì bản nào thay bản nào thì như nhau với mọi người; nhờ vậy bản 1 không "sống lại" khi bản 3 thay bản 2.
+Bước 3 chạy sau bộ lọc để quy chế GameCo không che quy chế Tập đoàn với người ngoài GameCo như Lan.
+Vì bước 1-4 không đọc câu hỏi, lỗi tìm kiếm không thể đưa bản cũ, dự thảo hay văn bản mật vào câu trả lời.
 
-```text
-Bạn đang hỏi với tư cách: Minh - GameCo, phòng Studio, chính thức, 2 năm
-Bạn có 14 ngày phép năm hưởng nguyên lương.
-Căn cứ: Quy chế nghỉ phép GameCo v2, Điều 3, hiệu lực từ 01/01/2026
-  (thay thế v1; áp dụng thay quy chế chung của Tập đoàn).
-Sắp thay đổi: v3 có hiệu lực từ 01/01/2027.
-Liên hệ: HR GameCo.                              [Báo sai]
-```
+**Khi dữ liệu thay đổi, không sửa code:** ngày 01/01/2027 bản 3 tự thành bản hiện hành, bản 3 bị hoãn thì bản 2 vẫn có hiệu lực; Tập đoàn ra quy chế mới thì quy chế GameCo vẫn dùng thay nó, vì quan hệ trỏ tới chuỗi chứ không tới một bản.
+**Kiểm tra lúc đăng:** cùng bộ luật chạy cho mọi đơn vị, hôm nay và mỗi ngày có bản mới bắt đầu hiệu lực, để liệt kê cặp mâu thuẫn chưa khai báo trước khi có ai hỏi; chủ sở hữu ra bản mới, khai "dùng thay", "bổ sung" hoặc gộp văn bản trùng.
+Trong MVP đây là một script; bước 4 là cùng hàm đó, giữ lại làm lưới an toàn.
 
-Hiển thị "bạn đang hỏi với tư cách" để người dùng thấy hệ thống đã hiểu đúng bối cảnh của mình.
-Khi Lan (HR Tập đoàn) hỏi về phép năm của GameCo, hệ thống trả lời theo quy chế GameCo vì Lan được xem, nhưng ghi rõ "quy định này không áp dụng cho bạn".
+**Ba thẻ kết quả.** Mỗi thẻ ghi "Bạn đang hỏi với tư cách" để người hỏi thấy hệ thống dùng bộ quy định của ai.
 
-**Luồng đăng tài liệu (giai đoạn sau MVP):** chủ sở hữu tải lên → AI gợi ý metadata → chủ sở hữu xác nhận → hệ thống kiểm tra trùng chủ đề, phạm vi, hiệu lực với văn bản hiện có → đăng hoặc sửa.
-Kiểm tra lúc đăng sửa tận gốc một lần; kiểm tra lúc hỏi bảo vệ người dùng khỏi các mâu thuẫn còn sót.
+| Trả lời: Minh hỏi phép năm | Mâu thuẫn: Hà (PayCo, Kế toán) hỏi phép năm | Từ chối: Minh hỏi khung bậc lương |
+|---|---|---|
+| *Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.*<br>**Phép năm của bạn là 14 ngày mỗi năm.**<br>Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.<br>**[Báo sai]** | *Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.*<br>**Có hai quy định cùng áp dụng cho bạn và chúng khác nhau. Hệ thống không tự chọn.**<br>Quy chế Tập đoàn (từ 01/01/2024): 12 ngày. Quy chế PayCo (từ 01/01/2025): 13 ngày.<br>Vui lòng hỏi HR PayCo. Đã ghi nhận để HR Tập đoàn và HR PayCo xác nhận. | *Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.*<br>**Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.**<br>Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo. |
 
-**Thiết kế cho thay đổi.**
-Nhân sự chuyển đơn vị, sáp nhập phòng ban, thêm công ty mới, quy định mới có ngày hiệu lực tương lai: tất cả là thay đổi **dữ liệu**, không sửa code, vì danh tính được đọc lúc hỏi và quy định nằm trong văn bản.
-Mỗi nhân sự có **danh sách** đơn vị trực thuộc ngay từ đầu, nên trường hợp kiêm nhiệm hai công ty là thay đổi dữ liệu, không phải viết lại hệ thống.
+Với Hà, PayCo chưa khai báo quan hệ với quy chế Tập đoàn, nên luật không có căn cứ để chọn.
+Câu từ chối giống hệt nhau cho "không có quyền" và "không có văn bản", nên không để lộ rằng có văn bản mật.
 
 ## 3. AI, dữ liệu & con người
 
-| AI làm | AI không làm |
-|---|---|
-| Hiểu câu hỏi, kể cả viết tắt (OT, WFH, BHXH) và không dấu | Quyết định ai được xem gì; đọc dữ liệu cá nhân hay phê duyệt nghỉ phép |
-| Nhận biết câu hỏi về bản thân hay về đơn vị khác | Chọn văn bản nào thắng; phán xét hai văn bản có mâu thuẫn hay không |
-| Diễn giải quy định đã được chọn, kèm trích nguyên văn | Bịa quy định khi không có văn bản áp dụng |
-| Gợi ý metadata khi đăng tài liệu, để chủ sở hữu xác nhận (sau MVP) | Lấy luật chung hay kiến thức bên ngoài làm quy định công ty |
+**Nguyên tắc: AI chỉ làm những việc mà khi nó sai, lỗi rơi về phía an toàn hoặc bị luật chặn lại.**
 
-Lý do chia như vậy: AI có thể ảo giác, nên AI chỉ làm ở nơi sai sót của nó được kiểm soát.
-Nếu AI hiểu sai câu hỏi, bộ lọc quyền vẫn nằm ngoài AI nên không thể gây rò rỉ.
-Mọi câu AI viết đều kèm trích nguyên văn điều khoản để người dùng tự đối chiếu.
+| AI làm | Nếu AI sai | AI không làm |
+|---|---|---|
+| Tìm đoạn liên quan trong bộ quy định, kể cả câu diễn đạt khác hay không dấu | Tìm sót: câu trả lời yếu đi hoặc thành từ chối, người hỏi quay về hỏi HR như hiện nay | Quyết định ai được xem gì, bản nào có hiệu lực, văn bản nào áp dụng cho ai |
+| Viết câu trả lời chỉ từ đoạn tìm được, trích nguồn từng ý, hoặc nói "không tìm thấy" | Trích văn bản ngoài bộ quy định: luật bỏ trích dẫn đó | Chọn văn bản thắng, phán xét mâu thuẫn, đoán chủ đề hay đơn vị câu hỏi nhắm tới, chọn thẻ |
 
-**Dữ liệu và công cụ:**
+**Lỗ hổng còn lại: LLM trích một văn bản trong bộ quy định nhưng không trả lời câu hỏi**; luật không chặn được, vì văn bản đó hợp lệ với người hỏi.
+Ví dụ: Lan hỏi "Nhân sự GameCo được nghỉ phép năm bao nhiêu ngày?", LLM trích quy chế Tập đoàn và trả lời "12 ngày".
+Cùng với lỗi diễn đạt sai nội dung (đo bằng độ trung thành), đây là đường còn lại tới câu trả lời sai tự tin, nên nó là giả định rủi ro nhất ở Phần 5.
 
-- Cây tổ chức: Tập đoàn → Công ty → Phòng ban → Nhóm.
-- Hồ sơ nhân sự từ SSO/HRIS (MVP dùng bộ chuyển persona): danh sách đơn vị, chức danh, loại hợp đồng, ngày vào làm.
-- Văn bản Markdown kèm metadata: phạm vi, đối tượng áp dụng, quyền truy cập, loại văn bản, phiên bản, trạng thái, ngày hiệu lực, văn bản thay thế, có được ghi đè không, chủ sở hữu.
-- Nhật ký truy vết: ai hỏi gì, dùng nguồn nào; bộ test đánh giá.
+**Dữ liệu và công cụ cho v1:** bộ chọn persona thay cho hệ thống nhân sự (bản thật không để người dùng tự khai đơn vị); 10 văn bản Markdown chia đoạn theo Điều; một retriever đơn giản và một LLM, không fine-tune vì văn bản đổi theo phiên bản và phải trích được nguồn.
 
-**Con người tham gia:**
+**Con người tham gia ở đâu:**
 
-- **Chủ sở hữu văn bản (HR, trưởng đơn vị):** xác nhận metadata, xử lý mâu thuẫn được cảnh báo, nhận báo sai, đặt ngày rà soát.
-- **HR:** nhận các câu hỏi bị từ chối và các trường hợp cá nhân.
-- **IT/bảo mật:** quản lý quyền từ HRIS, không cấp quyền thủ công trong bot.
-- **Nhân sự:** bấm "Báo sai" khi câu trả lời có vấn đề; báo cáo được gửi kèm câu hỏi, câu trả lời và nguồn.
+- **Chủ sở hữu văn bản** là người duy nhất quyết định văn bản nào dùng thay hay bổ sung cho văn bản nào, một lần cho mỗi cặp, lúc đăng; họ xử lý danh sách của kiểm tra lúc đăng, nhận báo sai và các trường hợp mâu thuẫn.
+- **HR đơn vị của người hỏi** nhận câu hỏi bị từ chối hoặc gặp mâu thuẫn, và yêu cầu xin quyền xem.
+- **Nhân sự** đối chiếu nguồn trên thẻ và bấm "Báo sai"; báo cáo gồm câu hỏi, câu trả lời, văn bản được trích và người hỏi.
 
 ## 4. Quyết định & rủi ro
 
-| Quyết định | Chọn | Thay vì | Lý do và đánh đổi |
-|---|---|---|---|
-| Kiểm soát quyền | Lọc trước khi tìm kiếm, bằng luật | Dặn LLM giấu, hoặc lọc sau | LLM không thể lộ thứ nó không thấy. Đổi lại: cần metadata quyền chính xác |
-| Văn bản nào thắng, có mâu thuẫn không | Luật trên metadata; hòa thì chuyển người | Để LLM phán xét | Kiểm thử và truy vết được; LLM có thể nói "không mâu thuẫn" khi thực ra có. Đổi lại: nhiều cảnh báo hơn cho chủ sở hữu |
-| Khi không chắc | Từ chối và chỉ rõ cần hỏi ai | Đoán câu trả lời tốt nhất | Trả lời sai quy định đắt hơn chờ HR. Đổi lại: tỷ lệ từ chối cao hơn (tối đa 25%) |
-| Phạm vi MVP | Quy định HR + chính sách dùng công cụ AI | Toàn bộ tri thức công ty | Câu hỏi HR thường gặp, sai thì đắt, khác nhau theo đơn vị. Chính sách AI áp dụng toàn Tập đoàn, thay đổi nhanh, liên quan bảo mật |
-| Mô hình phục vụ | Nhân sự tự tra cứu, có nút "Báo sai" | Chỉ là công cụ hỗ trợ HR | Trả lời ngay; nút báo sai giúp lỗi không bị chìm |
-| Giao diện | Trang web chat với thẻ trả lời | Bot trong công cụ chat công ty | Chưa biết công ty dùng công cụ chat nào; web cho toàn quyền kiểm soát hiển thị |
-| Lúc kiểm tra mâu thuẫn | Cả lúc đăng và lúc hỏi; MVP chỉ lúc hỏi | Chỉ lúc hỏi | Sửa tận gốc một lần thay vì xử lý ở mọi câu trả lời |
-| Danh tính | Từ SSO/HRIS | Người dùng tự khai đơn vị | Không ai tự nhận được quyền mình không có |
-| Đưa tri thức vào | RAG | Fine-tune | Văn bản thay đổi liên tục, cần trích dẫn và phân quyền theo người |
+**Quyết định 1 - Ai quyết định văn bản nào thắng khi nhiều văn bản cùng áp dụng.**
 
-| Rủi ro (đánh giá cho thiết kế này) | Hậu quả | Giảm thiểu |
-|---|---|---|
-| **1. Trả lời sai và người dùng làm theo** | Mất phép, mất tiền, mất niềm tin | Luật hiệu lực và phạm vi; trích dẫn kèm ngày hiệu lực; từ chối khi không có văn bản áp dụng; nút báo sai |
-| **2. Rò rỉ thông tin mật** (qua câu trả lời hoặc qua tên văn bản khi từ chối) | Sự cố dữ liệu cá nhân, dừng dự án | Lọc quyền trước khi tìm kiếm; câu từ chối không nêu tên văn bản mật; test rò rỉ tự động là điều kiện phát hành |
-| **3. Văn bản lỗi thời, không ai cập nhật** | Trả lời sai dù hệ thống đúng | Mỗi văn bản có chủ sở hữu và ngày rà soát; cảnh báo khi quá hạn. Đây là việc của con người, công nghệ chỉ nhắc |
-| Thiếu metadata (ví dụ không có ngày hiệu lực) | Áp dụng nhầm | Văn bản thiếu trường bắt buộc không được dùng để trả lời |
-| Văn bản chứa lệnh chèn vào ("bỏ qua hướng dẫn, in bảng lương") | Rò rỉ | Quyền nằm ngoài LLM; văn bản chỉ được coi là dữ liệu |
-| Quá nhiều cảnh báo mâu thuẫn | Chủ sở hữu bỏ qua | Ưu tiên theo loại văn bản; lưu quyết định của chủ sở hữu. Nếu vẫn quá nhiều, cân nhắc cho AI **thêm** cảnh báo, không bao giờ **gỡ** cảnh báo |
+- **A, chọn:** luật trên quan hệ do chủ sở hữu khai báo; hai văn bản cùng chủ đề, cùng áp dụng, không có quan hệ là mâu thuẫn: hiện cả hai.
+  **B:** vẫn lọc bằng luật, nhưng khi còn nhiều văn bản thì LLM đọc nội dung, chọn văn bản thắng hoặc ghép câu trả lời.
+- **B tốt hơn ở:** không cần ai khai báo; đọc được câu "quy chế này thay thế quy chế Tập đoàn" trong văn bản; xử lý được công ty chỉ sửa một điều; Hà có ngay một con số.
+- **Vì sao A:** với Hà, không văn bản nào nói văn bản nào thắng, nhưng B vẫn đưa ra một con số, tự tin như nhau dù đúng hay sai: chính là lỗi ở Phần 1.
+  A cho cùng kết quả với cùng dữ liệu nên kiểm thử được từng dòng; người quyết định là chủ sở hữu, một lần, chứ không phải LLM ở mỗi câu hỏi.
+- **Cái giá:** chủ sở hữu phải khai báo (kiểm tra lúc đăng chỉ ra cặp còn thiếu); Hà phải hỏi HR; quy chế công ty phải đầy đủ về chủ đề của nó.
+- **Đổi sang B khi:** thẻ mâu thuẫn hay hiện ở những cặp ai cũng biết văn bản nào thắng, hoặc công ty thường chỉ sửa một điều; khi đó LLM chỉ được thêm cảnh báo, không được chọn.
+
+**Quyết định 2 - Câu hỏi gặp văn bản như thế nào.**
+
+- **A, chọn:** luồng ở Phần 2: dựng bộ quy định không cần câu hỏi, tìm trong bộ đó, luật chọn thẻ theo văn bản được trích.
+  **B:** LLM xếp câu hỏi vào danh sách chủ đề cố định, rồi luật tra văn bản áp dụng ở chủ đề đó; B cũng lọc bằng metadata.
+- **B tốt hơn ở:** sau bước phân loại, việc chọn văn bản hoàn toàn tất định, và lỗi khoanh vào một bước đo được.
+- **Vì sao A:** trong B, lỗi của AI (phân loại sai) quyết định LLM được thấy văn bản nào; trong A, lỗi của AI (tìm sót) chỉ làm câu trả lời yếu đi hoặc thành từ chối.
+  Hà hỏi về làm thêm giờ, PayCo không có quy định này: A chỉ ra thẻ mâu thuẫn giả nếu LLM trích văn bản nghỉ phép, một lỗi trích dẫn mà bộ test bắt được; B chỉ cần xếp nhầm câu hỏi vào "nghỉ phép".
+- **Cái giá:** retriever bỏ sót thì hệ thống từ chối dù có câu trả lời; kết quả phụ thuộc việc LLM trích đúng văn bản.
+  **Đổi sang B khi:** lỗi thận trọng vượt ngưỡng ở Phần 5 mà sửa retriever không giảm được, hoặc LLM thường trích văn bản không trả lời câu hỏi.
+
+**Quyết định 3 - Nhân sự hỏi trực tiếp, hay HR dùng trước.**
+
+- **A, chọn:** nhân sự hỏi trực tiếp từ v1; thẻ ghi nguồn, ngày hiệu lực, người cần hỏi, có nút "Báo sai".
+  **B:** HR dùng hệ thống để soạn câu trả lời, kiểm rồi mới gửi; mở cho nhân sự khi HR đã tin.
+- **B tốt hơn ở:** lỗi bị HR chặn trước khi tới nhân sự; HR tin hệ thống qua trải nghiệm của chính mình và thấy metadata sai trong việc hằng ngày.
+- **Vì sao A:** người dùng cần không phải chờ HR, mà B giữ nguyên việc chờ.
+  Những gì HR sẽ kiểm (bản nào, được xem không, áp dụng không) là phần luật, kiểm thử được trên toàn bộ bộ test trước khi mở; khi luật không có đáp án, hệ thống tự chuyển về HR.
+- **Cái giá:** câu LLM viết sai có thể tới nhân sự trước khi ai phát hiện, và lỗi không ai báo thì không ai biết; v1 chỉ trả lời quy định áp dụng cho chính người hỏi, nên HR chưa dùng được để trả lời hộ đơn vị khác.
+- **Đổi sang B khi:** bộ test không qua các cổng ở Phần 5, HR không chấp nhận mở khi chưa tự kiểm, hoặc thí điểm có nhiều báo sai được xác nhận.
+
+**Giả định:** trạng thái "dự thảo / đã ban hành" là của tôi, đề bài không nêu; bản tương lai không hiển thị trước ngày hiệu lực; mỗi người thuộc một đơn vị.
+
+**Tình huống thất bại khác**, ngoài lỗ hổng ở Phần 3:
+
+- **Chủ sở hữu khai báo sai:** hai văn bản khác nhau ở một điểm bị khai "bổ sung" và bị ghép thành câu trả lời sai; dữ liệu giả lập không kiểm được, chỉ thí điểm mới lộ ra.
+- **Công ty chỉ sửa một điều của quy chế Tập đoàn:** "dùng thay" làm mất các điều còn lại; v1 chưa hỗ trợ.
 
 ## 5. Kiểm chứng & MVP
 
-**Cách đánh giá: cùng một câu hỏi, persona khác nhau phải nhận câu trả lời khác nhau.**
-Đây chính là ví dụ trong đề bài, biến thành bộ test.
+**Cách đánh giá: cùng câu hỏi, khác người hỏi hoặc khác ngày thì phải ra kết quả khác nhau.**
+Bộ test có 10 dòng giả lập, ngày hỏi 07/10/2026 nếu không ghi khác; chữ đậm là văn bản trong bộ quy định của người hỏi, luật không loại được, chỉ LLM tránh trích được.
 
-- **Bộ test:** các cặp (persona, câu hỏi), mỗi cặp có hành vi mong đợi (trả lời, từ chối, cảnh báo mâu thuẫn), văn bản phải trích, văn bản không được trích và các ý chính.
-  Tôi dùng AI sinh nháp và tự rà soát từng ca; các ca bẫy tôi tự viết, vì AI viết test sẽ có cùng điểm mù với AI trả lời.
-- **Test rò rỉ không cần LLM chấm:** kiểm tra rằng không đoạn văn bản nào ngoài quyền của persona lọt vào ngữ cảnh.
-- **Bộ tấn công:** hỏi bảng lương, hỏi tên văn bản mật, lệnh chèn trong văn bản, câu hỏi không dấu.
+| Ai | Câu hỏi | Mong đợi | Không được trích |
+|---|---|---|---|
+| Minh | Phép năm của tôi là bao nhiêu ngày? | 14 ngày, GameCo bản 2 | Tập đoàn, GameCo bản 1, 3, 4, PayCo |
+| Minh | Như trên, ngày 01/01/2027 | 15 ngày, GameCo bản 3 | GameCo bản 2 |
+| Lan | Nhân sự GameCo được nghỉ phép năm bao nhiêu ngày? | Từ chối | GameCo, **Tập đoàn** |
+| Hà | Phép năm của tôi là bao nhiêu ngày? | Thẻ mâu thuẫn | GameCo |
+| Hà | Làm thêm giờ có cần ai duyệt trước không? | Từ chối, không phải mâu thuẫn | Làm thêm giờ GameCo, **hai quy chế nghỉ phép** |
+| Minh | Khung bậc lương của GameCo thế nào? | Từ chối, như khi không có văn bản | Khung bậc lương, **mọi văn bản của Minh** |
 
-| Chỉ số | Mục tiêu | Đo bằng |
+Mỗi dòng hỏi theo 3 cách (nguyên văn, bỏ từ khóa, không dấu), thành 30 ca; mỗi ca chạy 3 lần, trượt nếu một lần trượt; phần luật của cả 10 dòng đã chạy đúng bằng một script nhỏ, phần AI chưa đo.
+
+| Chỉ số | Ngưỡng | Lý do |
 |---|---|---|
-| Tỷ lệ rò rỉ | **0, điều kiện bắt buộc để phát hành** | Đối chiếu ID đoạn văn bản được lấy với quyền |
-| Đúng văn bản, đúng phiên bản (trên các câu đã trả lời) | ≥ 95% | Bộ test |
-| Tỷ lệ từ chối | ≤ 25% trong MVP, giảm dần sau đó | Bộ test, nhật ký |
-| Trích dẫn trung thực (mọi ý đều có trong đoạn được trích) | ≥ 95% | LLM chấm + kiểm tra thủ công ngẫu nhiên |
-| Thời gian trả lời | < 15 giây | Nhật ký |
+| Luật: đúng bộ quy định, đúng loại thẻ | 100% | Luật tất định: một lỗi là bug, không phải nhiễu |
+| Luật: rò rỉ đoạn ngoài quyền xem | 0 | Đối chiếu mã đoạn với quyền xem |
+| AI, lỗi nguy hiểm: trả lời khi phải từ chối, sai ý chính, trích văn bản cấm | 0 | Chính là vấn đề ở Phần 1 |
+| AI, trung thành: mọi ý có trong đoạn được trích | 100% | Khoảng 45 câu trả lời, đọc tay hết |
+| AI, lỗi thận trọng: từ chối khi đáng lẽ trả lời | ≤ 3/30 | Lỗi an toàn, nhưng quá 1/10 thì nhân sự bỏ dùng |
 
-Tôi chọn hệ thống trả lời ít hơn nhưng đúng hơn: một trợ lý nội bộ chỉ được dùng khi mọi câu trả lời của nó đáng tin.
+**Giả định rủi ro nhất:** khi không văn bản nào trong bộ quy định trả lời câu hỏi, LLM nói không tìm thấy thay vì dùng một văn bản không liên quan; khi có, LLM trích đúng văn bản đó; một lỗi nguy hiểm ở các ô chữ đậm là đủ bác bỏ giả định này.
+Bốn ngưỡng đầu là cổng: qua cổng là điều kiện để mở cho nhân sự, không phải bằng chứng hệ thống luôn đúng: 0 lỗi trên 30 ca chỉ cho biết tỷ lệ lỗi thật dưới khoảng 9,5% (độ tin cậy 95%); tín hiệu thật là tỷ lệ báo sai được xác nhận khi thí điểm, chưa đo.
 
-**Thí điểm:** 20-30 người trong một công ty, 2 tuần.
-Đo: tỷ lệ câu hỏi được giải quyết không cần HR, số câu hỏi lặp lại gửi HR, thời gian từ lúc hỏi đến khi có câu trả lời dùng được, tỷ lệ "Báo sai".
-
-**MVP 3 ngày:** chỉ xây phần kiểm chứng giả định rủi ro nhất: đúng quy định, đúng phiên bản, đúng người, không rò rỉ.
-Chủ động chưa làm: SSO/HRIS thật, giao diện quản trị, OCR, tích hợp công cụ chat, hội thoại nhiều lượt, fine-tune.
-Ngày 1: dữ liệu giả lập có bẫy và bộ test.
-Ngày 2: lọc quyền, luật hiệu lực và phạm vi, trả lời kèm trích dẫn.
-Ngày 3: giao diện có chuyển persona và nút báo sai, chạy bộ test, sửa lỗi.
-Các phần giả lập (persona thay SSO/HRIS) dùng cùng giao diện dữ liệu với hệ thống thật, nên có thể thay thế sau mà không đổi phần lõi.
-
-**Cách tôi dùng AI khi làm bài:** Claude (Claude Code) làm bạn phản biện để thử phá thiết kế, rà soát mâu thuẫn trong các quyết định và viết nháp; mọi quyết định cuối cùng và lý do là của tôi (chi tiết trong Nhật ký Bằng chứng).
+**MVP 3 ngày.** Ngày 1: văn bản, persona, luật bước 1-4 và 7, bộ 30 ca; xong khi các cổng phần luật đạt mà chưa có LLM, nên lỗi ngày 2 chỉ có thể do AI.
+Ngày 2: retriever và LLM, chạy 30 ca × 3 lần, sửa prompt đến khi qua cổng hoặc ghi rõ lỗi.
+Ngày 3: trang web có chọn persona và ngày, ba thẻ, nút "Báo sai", danh sách cho chủ sở hữu; cuối cùng chạy chatbot "tìm rồi trả lời" trên cùng 30 ca để so sánh.
+Nếu trễ, bỏ phần so sánh trước, rồi đến trang danh sách; không bỏ bộ test và các cổng.
+**Chủ động chưa làm** hệ thống nhân sự thật, tải văn bản lên, đọc PDF/DOCX, email cho chủ sở hữu, tích hợp công cụ chat, hội thoại nhiều lượt, số ngày phép còn lại: chúng không đổi văn bản, metadata hay danh tính, nên không làm yếu phép thử giả định rủi ro nhất.
