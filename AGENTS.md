@@ -32,7 +32,8 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/mission1/redraft/review_answers_output.md` - verbatim output of that prompt from ChatGPT and Gemini; the edits it led to are A13 in `decisions.md`.
 - `docs/mission1/review_output.md` - output of running that prompt on the first draft (same model as the drafter, so not independent). History.
 - `docs/mission1/thinking/` - thinking-phase workbook and the candidate's decisions (Round 1-3).
-- `docs/mission1/submitted/` - the exact files submitted, kept as a record.
+- `docs/mission1/submitted/` - the exact files submitted on 08/10, kept as a record, with a README on where each came from. Do not edit.
+- `docs/mission2/mission1_promises.md` - every commitment in the submitted Mission 1 text, as the Mission 2 acceptance checklist.
 - `evidence_log.md` - AI usage log for all missions. Add an entry whenever AI shapes the result.
 - `build/` - generated output, not committed.
 

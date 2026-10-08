@@ -398,63 +398,71 @@ Confirm the exact time and submission channel with HR.
 | Fri morning   | Buffer only. Do not plan work here                                                                                                                  |
 
 
-## 9. Prepare Missions 2 and 3 now (lightweight)
+## 9. Prepare Missions 2 and 3 (rewritten 08/10 after submitting Mission 1)
 
-Stack: use what you already know well. A sensible default:
+The first version of this section (07/10) predated the redraft and contradicted the submitted design: it had `employment_types`, an `overridable` flag, future versions shown as "sắp thay đổi", and precedence by "most specific scope, then document type".
+All of these were dropped or deferred (M0, M8, M11, M1b).
+This section now only summarises; the sources are:
 
-- Python with FastAPI, or a single Streamlit app if speed matters more than polish.
-- Postgres with pgvector (access filters become plain SQL WHERE clauses, easy to audit and test), or SQLite or LanceDB for zero setup. With 50 documents the vector store barely matters; spend the time on the resolver and the evaluation.
-- Hybrid retrieval (keyword plus embeddings) with an embedding model that handles Vietnamese well.
-- Chunk by Điều and Khoản so citations point to exact clauses.
-- Any LLM; a free tier is enough for this scale.
+- What v1 must do: `docs/mission2/mission1_promises.md`, every commitment in the submitted document and answers.
+- The design: `docs/mission1/redraft/current_design.md`.
+- Metadata, personas, the 10 documents, the test matrix, metrics and the 3-day plan: `docs/mission1/redraft/artifacts.md`.
+- The rules, already running on the simulated data: `docs/mission1/redraft/checks/adopted_rules.py`.
 
-Document format: Markdown with YAML front matter.
+Stack: decide when the Mission 2 brief arrives, and use what is fastest to ship.
+A sensible default is Python with a single small web app, documents as Markdown files with YAML front matter, a hybrid retriever (keyword plus embedding) that handles Vietnamese, and an off-the-shelf LLM.
+With 10 documents the vector store does not matter; spend the time on the rules and the test set.
+
+Document metadata, as submitted and as `adopted_rules.py` reads it (field list in `artifacts.md`, "Document metadata"):
 
 ```yaml
-id: POL-LEAVE-GAMECO-v2
-title: Quy chế nghỉ phép GameCo
-doc_type: quy_che          # quy_che > quy_trinh > huong_dan > faq > thong_bao
-topic: nghi_phep
-scope: gameco              # node in the org tree
+id: LEAVE-GAMECO-v2
+title: Quy chế nghỉ phép GameCo (bản 2)
+doc_type: quy_che
+owner: HR GameCo
+series: LEAVE-GAMECO          # versions of one policy; the later effective_from supersedes
+topic: nghi_phep              # one per document; only used to find conflict pairs
+access: all_staff             # all_staff | unit:<unit> | roles:<role>,<role>
 applies_to:
-  employment_types: [chinh_thuc]
-access:
-  visibility: scope        # group_public | scope | roles
-  roles: []
-version: 2
-status: active             # draft | active | superseded | archived
+  unit: GameCo                # covers the unit and the units below it
+status: published             # published | draft
 effective_from: 2026-01-01
-effective_to: null
-supersedes: POL-LEAVE-GAMECO-v1
-overridable: true          # false = lower levels may not override
-owner: hr.gameco@example.com
+effective_to: null            # only when the document really ends
+overrides: LEAVE-GROUP        # "dùng thay": one series this one is used instead of, for the units it applies to
+complements: []               # "bổ sung": series this one adds to without contradicting
 ```
 
-Precedence rules, applied in order:
+The 7 steps, as submitted (Phần 2):
 
-1. Access: drop everything the asker may not see. It never enters the context.
-2. Validity: drop drafts, archived, superseded and expired documents. Keep future versions aside as "sắp thay đổi".
-3. Applicability: drop documents whose scope is not on the asker's org path, or whose applies-to excludes the asker, unless they explicitly asked about another unit they are allowed to see.
-4. Precedence within a topic: non-overridable parent, then most specific scope, then higher document-type authority, then later effective date.
-5. If two or more contradictory candidates remain, it is a true conflict and the system does not decide.
+1. Each series keeps its current version: published, latest `effective_from` not after the as-of date.
+2. Keep documents the asker may see and that apply to the asker's unit.
+3. Drop a document when another kept document declares `overrides` over its series.
+4. Mark conflict pairs: same topic, both kept, no `overrides` or `complements` between them.
+5. Hybrid retrieval, only over chunks of the documents kept after step 3.
+6. The LLM answers only from the retrieved chunks and cites each statement, or says "không tìm thấy".
+7. Rules pick the card from the citations: a cited document in a conflict pair gives the conflict card; no citation, or a citation outside the retrieved chunks, refuses the whole answer; otherwise the answer card.
 
-Evaluation case format:
+There is no default "lower unit wins": precedence exists only where an owner declared it.
+Steps 1-4 never read the question and use no AI.
+
+Test case format (the 10 rows of the matrix in `artifacts.md`, each asked in 3 phrasings):
 
 ```yaml
-- id: leave-minh
-  persona: minh_gameco_studio
-  question: "Quy định nghỉ phép của tôi như thế nào?"
-  expected_behavior: answer          # answer | abstain | flag_conflict
-  must_cite: [POL-LEAVE-GAMECO-v2]
-  must_not_cite: [POL-LEAVE-GROUP-v1, POL-LEAVE-GAMECO-v1]
-  forbidden_in_context: [SAL-BAND-GAMECO]
-  key_facts: ["14 ngày", "01/01/2026"]
+- id: leave-minh-today
+  persona: minh
+  as_of: 2026-10-07
+  question: "Phép năm của tôi là bao nhiêu ngày?"
+  expected: answer                    # answer | conflict | refusal
+  key_facts: ["14 ngày"]
+  must_cite: [LEAVE-GAMECO-v2]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-PAYCO-v1]
+  forbidden_for_llm: []               # valid for the asker but does not answer the question
 ```
 
 Change readiness for Mission 3:
 
-- Everything that varies (org tree, access rules, precedence rules, documents) lives in data or config.
-- The evaluation set doubles as a regression suite. When reality changes: add test cases first, change data or config, rerun, and show the before and after numbers.
+- Org tree, personas, documents and their relations live in data files, so most changes are data changes.
+- The test set is the regression suite: when reality changes, add the test cases first, change the data, rerun, and show before and after.
 
 ## 10. Final checklist before submitting
 
