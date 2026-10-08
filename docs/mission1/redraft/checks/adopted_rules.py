@@ -74,12 +74,13 @@ def rulebook(docs, persona, asof):
     return kept, gaps
 
 def answer(docs, persona, asof, cited):
-    """Step 7 (M18): rules decide the outcome from the documents the model cites.
-    Citations outside the rulebook are dropped; nothing valid cited is the refusal (M7);
-    a cited document in a conflict pair shows both documents of the pair."""
+    """Step 7 (M18, RV5): rules decide the outcome from the documents the model cites.
+    No citation, or any citation outside what was retrieved, refuses the whole answer (M7):
+    the model only sees retrieved chunks, so such a citation means it invented a source.
+    Here the rulebook stands in for the retrieved set, since there is no retriever yet.
+    A cited document in a conflict pair shows both documents of the pair."""
     kept, gaps = rulebook(docs, persona, asof)
-    cited = [i for i in cited if i in {d["id"] for d in kept}]
-    if not cited: return "REFUSAL"
+    if not cited or any(i not in {d["id"] for d in kept} for i in cited): return "REFUSAL"
     hit = [(a, b) for a, b in gaps if a["id"] in cited or b["id"] in cited]
     if hit: return "CONFLICT " + "; ".join(f"{a['id']} vs {b['id']}" for a, b in hit)
     return "ANSWER citing " + " + ".join(cited)
@@ -171,6 +172,7 @@ if __name__ == "__main__":
     run("Hà, model cites only the Group policy", DOCS, "ha", "07/10/2026", cited=["LEAVE-GROUP-v1"])
     run("Hà asks about overtime, nothing relevant", DOCS, "ha", "07/10/2026", subject="lam_them_gio")
     run("Minh, model cites a removed version", DOCS, "minh", "07/10/2026", cited=["LEAVE-GAMECO-v1"])
+    run("Minh, one valid and one invented citation", DOCS, "minh", "07/10/2026", cited=["LEAVE-GAMECO-v2", "LEAVE-GAMECO-v1"])
 
     print("\n== Changes that broke the old rules ==")
     run("v3 takes effect as planned", DOCS, "minh", "01/01/2027")

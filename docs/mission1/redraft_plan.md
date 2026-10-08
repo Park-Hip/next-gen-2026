@@ -123,6 +123,20 @@ Next: Hiep revises section by section in the order above, then Claude reviews ea
 
 Rewrite the answers so they match the new model.
 Known changes: Answer 3 (relation types instead of "most specific wins unless mandatory"), Answer 2 (as-of date, remove "Lark/Slack"), Answer 1 (the cost asymmetry, why this problem beats leakage).
+After Hiep's review on 08/10, Answer 1 no longer compares with leakage (that stays in Section 1 of the PDF), and Answer 2 does not mention the as-of date.
+
+Requirement from the brief, quoted: "Trả lời ngắn gọn, rõ quyết định và lý do. Khuyến nghị 60–150 từ."
+So each answer:
+
+- opens with the decision;
+- states the reason, not only what is done;
+- is 60-150 words, counted by whitespace (each Vietnamese syllable is one word), answer text only;
+- gives the reason only for the choice made, not for rejecting other options;
+- is short: one idea per sentence, no detailed lists;
+- uses plain words a reader who has not seen the PDF understands, with no internal terms or IDs.
+
+Drafted on 08/10 by Claude (A12), accepted by Hiep on 08/10: `answers.md`, 147 / 148 / 145 words; revised the same day after Hiep's review (shorter, plain words, no internal terms), now 114 / 134 / 130 words.
+Done; the answers are final unless Phase 7 changes the document they summarise.
 
 ### Phase 7 - Assemble and verify (2 h)
 

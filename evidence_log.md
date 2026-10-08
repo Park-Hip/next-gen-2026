@@ -29,9 +29,10 @@ Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ k
 
 | Công cụ | Mô hình | Dùng để | Mục |
 |---|---|---|---|
-| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-25 |
+| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-28 |
 | Pi | Claude Sonnet 5.5, qua gói đăng ký Claude | Chạy prompt Phase 2; ghi quyết định M16-M17; 2 phiên phụ | 14, 18 |
 | Pi, qua subagent | Agnes 2.5 Flash (Agnes AI), mức suy luận tối đa | Tìm nguồn web và lượt kiểm tra trích dẫn thứ hai; thử thu thập đề từ portal (không dùng) | 15, 17 |
+| Claude Code (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Chạy prompt review "người đọc mới" | 29 |
 | Tiện ích của Pi | - | Tìm kiếm web; Lavish (chuyển Markdown thành trang HTML) | 1, 2, 9, 20 |
 | Wispr Flow | AI nhận dạng giọng nói | Nhập prompt bằng giọng nói; không tạo nội dung bài nộp | Nhiều phiên |
 | Orca CLI | Không | Quản lý dự án và phiên làm việc; không tạo nội dung | - |
@@ -132,7 +133,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 ### 5. Bản nháp 3 câu hỏi bắt buộc
 
 - **Thời gian:** từ 14:14.
-- **Trạng thái:** sẽ được viết lại ở Phase 6 cho khớp với mô hình mới.
+- **Trạng thái:** đã được thay bằng bản viết lại ở Phase 6 (mục 33).
 - **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** "Now I think that we can start drafting the draft right now." (14:14)
   Ý chính: bắt đầu viết nháp; AI viết nháp tiếng Việt cho 3 câu hỏi bắt buộc dựa trên các quyết định của tôi.
@@ -512,6 +513,136 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Claude chạy lại `adopted_rules.py` trước khi tóm tắt: 10/10 dòng phần luật đạt.
   - **[Tôi]** Đọc bản tóm tắt và các phản biện, duyệt từng mục.
+
+### 26. Phase 5 - Review bằng Lavish và bản nháp thứ hai
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú trực tiếp lên tài liệu, không sinh nội dung.
+- **Prompt (nguyên văn):**
+  - "Yes commit. I want to check this. Should I do the AI judge on the current PDF file first or will I review it and after that send it to the judge? I have some ideas in my mind now."
+  - "I want to inspect each element and write down my notes there. Should I use the lavish skill?"
+  - "Yes do that setup."
+  - "I wonder whether we should keep or remove 6-row test excerpt. And also is Markdown a good choice for the submission? I think that your cut-down list is good.  you do the draft for me I will revise it."
+- **Đầu ra:**
+  - Claude tách phần việc chưa commit thành 3 commit theo phase (3, 4, 5).
+  - Claude viết `tools/render_review.py` để mở tài liệu trong Lavish với cùng font, độ rộng và vị trí ngắt trang như PDF.
+  - Tôi ghi 10 ghi chú; Claude chép nguyên văn vào `docs/mission1/redraft/review_notes.md`.
+  - Claude viết lại toàn bộ `document.md` theo các ghi chú: văn xuôi thay cho gạch đầu dòng, thuật ngữ RAG, sơ đồ luồng 7 bước, phần 4 viết theo "chọn X thay vì Y", phần 5 trả lời "phần nào làm trước"; bỏ `nl2br` trong `tools/render_pdf.py` để các câu chảy thành đoạn văn.
+- **Quyết định của tôi:** review trước rồi mới chạy AI judge; giữ bảng test rút gọn; nộp PDF dựng từ Markdown; đồng ý danh sách cắt; giao Claude viết bản nháp thứ hai, tôi sửa sau.
+- **Xác minh:**
+  - **[Tôi]** Review bản nháp đầu, ghi 10 ghi chú (`review_notes.md`).
+  - **[AI]** Claude render lại (5 trang), xem ảnh từng trang, kiểm tra không còn dấu gạch dài và ký hiệu nội bộ; các con số không đổi so với bản đầu.
+  - **[Chưa]** Tôi sửa bản nháp thứ hai bằng lời của mình.
+
+### 27. Phase 5 - Prompt review "người đọc mới"
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
+- **Prompt (nguyên văn):** "I want you to craft the review prompts for a reviewer AI agent. I want it to act as a new reader who reads this. I want it to find out: - what is controversial - what are the conflicts - what is very hard to understand - what can be changed so it's more readable and more understandable It should check whether this document matches the competition's brief and requirements also. Besides that you need to tell me to add more things to the prompts so it checks the things besides what I recommend."
+- **Đầu ra:** `docs/mission1/review_prompt_reader.md`: prompt 6 phần (đọc lần đầu, khó hiểu, gây tranh cãi và mâu thuẫn, đối chiếu đề bài, cách sửa cho dễ đọc, tóm tắt) và 5 module tùy chọn do Claude đề xuất thêm (nguồn của con số, quyết định có phải lựa chọn thật, khả năng xây dựng, câu hỏi khi pitch, trình bày trang).
+- **Bổ sung sau (theo yêu cầu của tôi):** thêm mục "Needs more explanation" vào phần 2 của prompt: tìm chỗ nêu kết luận mà thiếu lý do, thiếu ví dụ hoặc nhảy bước.
+- **Quyết định của tôi:** 4 yêu cầu chính và việc đối chiếu đề bài là của tôi; các module tùy chọn là đề xuất của AI, tôi chọn module nào khi chạy.
+- **Xác minh:**
+  - **[Chưa]** Chạy prompt trên một mô hình khác họ (GPT hoặc Gemini), lưu kết quả và ghi lại ở đây.
+
+### 28. Phase 5 - Ghi chú review đợt 2 và chỉnh sửa
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
+- **Prompt (nguyên văn):** 6 ghi chú của tôi trên Lavish (chép nguyên văn trong `docs/mission1/redraft/review_notes.md`, đợt 2), rồi "Write them down." và "Apply the recommendations."
+- **Đầu ra:** Claude trả lời 4 câu hỏi trong ghi chú bằng đề xuất, rồi sửa `document.md`: bỏ câu "Đây là dự đoán..."; gọi người hỏi theo vị trí thay vì tên; đổi "bộ quy định" thành "phạm vi tìm kiếm"; nói rõ chiều của quan hệ "dùng thay" và việc hệ thống không tự cho đơn vị cấp dưới thắng; tách dòng chủ đề và chủ sở hữu.
+- **Quyết định của tôi:** 6 ghi chú là của tôi; tôi chấp nhận cả 6 đề xuất của Claude.
+- **Xác minh:**
+  - **[AI]** Claude render lại (5 trang), xem ảnh trang 2 và 5, kiểm tra không còn tên riêng, "bộ quy định" hay dấu gạch dài.
+  - **[Chưa]** Tôi đọc lại toàn bộ bản đã sửa.
+
+### 29. Phase 5 - Chạy prompt review "người đọc mới" (cùng họ mô hình)
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):** "C:/Users/Hiep/orca/projects/next-gen/docs/mission1/review_prompt_reader.md do this"
+  Ý chính: chạy prompt review trong `review_prompt_reader.md` trên bản PDF hiện tại.
+- **Đầu ra:** `docs/mission1/redraft/review_reader_output.md`: đủ 6 phần và cả 5 module tùy chọn A-E.
+  5 vấn đề lớn nhất: luật phạm vi từ chối câu hỏi về đơn vị khác dù người hỏi được xem văn bản; quyết định 3 dựa vào nút "Báo sai" trong khi Phần 1 nói câu trả lời sai trông giống câu đúng; cơ chế phát hiện cặp mâu thuẫn chưa được nói rõ; quyết định 1 chưa phản biện phương án "đơn vị cấp dưới thắng"; Phần 5 chưa đo kết quả người dùng nêu ở Phần 1.
+- **Giới hạn:** cùng họ mô hình với bản nháp; phiên đã nạp `AGENTS.md` nên không đọc "lạnh" hoàn toàn; đề bài và quy định được đọc cùng lúc với tài liệu, trước khi viết Phần 1-3, trái với hướng dẫn trong prompt.
+- **Quyết định của tôi:** xem mục 30.
+- **Xác minh:**
+  - **[AI]** Claude render PDF (5 trang), xem ảnh từng trang, trích nguyên văn từ `document.md`, kiểm tra không có dấu gạch dài trong file kết quả.
+  - **[Tôi]** Đọc bản tóm tắt kết quả và chọn mục cần sửa (mục 30).
+  - **[Chưa]** Chạy lại prompt trên một mô hình khác họ (GPT hoặc Gemini) để có review độc lập (mục 27).
+
+### 30. Phase 5 - Quyết định và chỉnh sửa sau review "người đọc mới"
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):**
+  - "tell me the findings of C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft/review_reader_output.md"
+  - "are there any conflicts or decisions that need me now"
+  - "approve the recommendations. my name is Phạm Bách Hiệp. do not show the scripts. I think the diacritics parts should be remove now and the retriever may include hybrid search"
+- **Đầu ra:**
+  - Claude tóm tắt kết quả review, rồi đối chiếu từng phát hiện với `decisions.md`: phần đã có quyết định chỉ cần sửa câu chữ; 6 điểm cần tôi quyết, mỗi điểm kèm đề xuất.
+  - Ghi các quyết định RV1-RV7 vào `decisions.md`.
+  - Sửa `document.md`: nói rõ phiên bản đầu chỉ trả lời quy định áp dụng cho người hỏi; nêu luật tìm cặp mâu thuẫn; quyết định 1 phản biện "đơn vị cấp dưới thắng"; quyết định 3 so với phương án HR dùng trước vài tuần; thẻ mâu thuẫn trích nguyên văn; bước 7 từ chối cả câu trả lời khi có trích dẫn bịa; thí điểm sau Mission 2 đo kết quả người dùng; retriever hybrid search; bỏ phần "không dấu"; điền tên ứng viên; các chỗ sửa câu chữ khác liệt kê trong `decisions.md`.
+  - Sửa `adopted_rules.py` theo RV5 và `artifacts.md` theo RV4, RV5, RV7.
+  - `tools/render_pdf.py`: giữ tiêu đề và câu dẫn cùng trang với danh sách hoặc bảng theo sau.
+- **Quyết định của tôi:** chấp nhận các đề xuất của Claude; không công bố script cho giám khảo; bỏ phần "không dấu" và dùng hybrid search cho retriever (thay cho đề xuất tìm theo từ khóa sau khi bỏ dấu của Claude).
+  Hai chi tiết do Claude tự chọn khi áp dụng: cách hỏi thứ ba "văn nói" thay cho "không dấu", và quy mô thí điểm "một công ty, 4 tuần".
+- **Xác minh:**
+  - **[AI]** Chạy lại `adopted_rules.py`: 10/10 dòng phần luật đạt; so với bản trước, đầu ra chỉ thêm một ca mới (một trích dẫn hợp lệ kèm một trích dẫn bịa thì từ chối).
+  - **[AI]** Render PDF đúng 5 trang, xem ảnh từng trang; câu trích trên thẻ mâu thuẫn khớp nguyên văn Điều 1 của hai văn bản giả lập trong `artifacts.md`; không còn dấu gạch dài.
+  - **[Chưa]** Tôi đọc lại toàn bộ bản đã sửa, nhất là ba quyết định ở Phần 4, bằng lời của mình.
+  - **[Chưa]** Chạy lại prompt review trên một mô hình khác họ (GPT hoặc Gemini).
+
+### 31. Phase 5 - Ghi chú review đợt 3 và chỉnh sửa
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú lên tài liệu.
+- **Prompt (nguyên văn):**
+  - "open it in lavish"
+  - 18 ghi chú của tôi trên Lavish (chép nguyên văn trong `docs/mission1/redraft/review_notes.md`, đợt 3).
+  - "3. remove item 4 and remove anything that mention comparing with naive-RAG. 6. check the other number so we not too confident also ensure the Chỉ số column is easy to understand what we measure. and for the remaininig options choose your recommendations"
+- **Đầu ra:**
+  - Claude chép ghi chú, trả lời các câu hỏi (thẻ mâu thuẫn khi chủ sở hữu quên khai báo "bổ sung", Markdown hay DOCX/PDF, ngưỡng 100% có quá tự tin không, Phần 4 dạng bảng) kèm đề xuất.
+  - Ghi các quyết định RV8-RV14 vào `decisions.md`; đưa thí điểm, so sánh với naive RAG và DOCX/PDF vào "Deferred ideas" trong `playbook.md`.
+  - Sửa `document.md`: Phần 4 thành một bảng (mỗi cột một quyết định, A và B cạnh nhau); Phần 5 mô tả năm tình huống test thay cho bảng test, bỏ thí điểm và so sánh naive RAG, viết lại bảng chỉ số bằng lời dễ hiểu và mục tiêu ít tự tin hơn; thẻ mâu thuẫn dùng câu trung tính; rút gọn các đoạn dài ở Phần 2 và 3.
+  - Sửa `artifacts.md` cho khớp (thẻ mâu thuẫn, ngưỡng 10%, bỏ so sánh naive RAG khỏi kế hoạch 3 ngày); `tools/render_pdf.py` giữ cột nhãn của bảng Phần 4 trên một dòng.
+- **Quyết định của tôi:** 18 ghi chú là của tôi; tôi tự quyết việc bỏ so sánh với naive RAG (RV10) và yêu cầu kiểm lại các con số (RV13); phần còn lại tôi chọn theo đề xuất của Claude.
+  Bỏ thí điểm (RV9) đảo lại RV3 mà tôi đã duyệt trước đó cùng ngày, vì tài liệu chỉ nêu những gì MVP làm.
+- **Xác minh:**
+  - **[AI]** Render PDF đúng 5 trang, xem ảnh từng trang; kiểm tra không còn "retrieval", "generation", "kế toán PayCo", "thí điểm", "30 ca", "9,5%" và dấu gạch dài.
+  - **[Chưa]** Tôi đọc lại bảng Phần 4 và Phần 5 bằng lời của mình.
+
+### 32. Phase 5 - Chỉnh sửa đợt 4 trong chat
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):** "consider remove this sentence Dữ liệu đổi, code không đổi: đến 01/01/2027, bản 3 tự trở thành bản hiện hành, remove the fine-tune part we don't need it. in quyeet dinh 2, is there any other alternative option B ? remove this Giả định: trạng thái "dự thảo / đã ban hành" do tôi thêm, đề bài không nêu; mỗi người thuộc một đơn vị; bản tương lai chưa hiển thị vì có thể chưa công bố. also explain why choosing Chỉ theo dõi for context recall which is the current document is limited so measuring brings little meanings. why include this phase Giả định rủi ro nhất: ... and why we only do step 1-4 and 7 but not the full pipeline"
+- **Đầu ra:** Claude bỏ ba chỗ tôi yêu cầu, ghi lý do cho dòng context recall, viết lại thứ tự làm để rõ bước 5-6 được thêm ở mục 2; trả lời trong chat về các phương án B khác cho quyết định 2 và vì sao giữ "Giả định rủi ro nhất". Ghi lại trong `decisions.md` (batch 4).
+- **Quyết định của tôi:** các chỗ bỏ là của tôi; phương án B của quyết định 2 chờ tôi chọn.
+- **Xác minh:**
+  - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 5.
+  - **[Chưa]** Tôi chọn có đổi phương án B của quyết định 2 hay không.
+
+### 33. Phase 6 - Viết lại 3 câu hỏi bắt buộc
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):** "start phase 6 of C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md. note that trả lời ngắn gọn, rõ quyết định và lý do khuyến nghị 60-150 từ is a requirements of the answers. Check it this exist first, if not write it down to our document"
+- **Đầu ra:**
+  - Claude kiểm tra: yêu cầu đã có trong đề bài, `criteria.md`, `AGENTS.md` và danh sách kiểm tra trong `playbook.md`, nhưng chưa có ở Phase 6 của `redraft_plan.md` và trong `answers.md`; Claude ghi thêm vào hai file này và trích nguyên văn yêu cầu vào `AGENTS.md`.
+  - Viết lại `answers.md` theo mô hình hiện tại: Câu 1 thêm lý do chọn vấn đề này thay vì rò rỉ và bỏ "loại hợp đồng"; Câu 2 theo kế hoạch 3 ngày và danh sách chưa làm đã duyệt, bỏ "Lark/Slack"; Câu 3 thay "đơn vị cụ thể nhất thắng" bằng phiên bản đang hiệu lực, bộ lọc quyền và phạm vi áp dụng, quan hệ "dùng thay" và "bổ sung" do chủ sở hữu khai báo, cặp chưa khai báo là mâu thuẫn.
+  - Ghi quyết định A12 vào `decisions.md`, kèm danh sách phần đã cắt cho vừa số từ.
+- **Quyết định của tôi:** không duyệt bản đầu; tôi review và yêu cầu viết lại (xem bên dưới), rồi duyệt bản thứ hai, giữ nguyên câu chữ.
+- **Xác minh:**
+  - **[AI]** Đếm số từ bằng script Python (tách theo khoảng trắng, chỉ phần trả lời): Câu 1 = 147, Câu 2 = 148, Câu 3 = 145, nằm trong khoảng 60-150.
+  - **[AI]** Đối chiếu từng câu với `decisions.md` và `document.md`; kiểm tra không có mã nội bộ hay dấu gạch dài.
+  - **[Tôi]** Đọc bản đầu và review: Câu 1 dài vì so sánh với rò rỉ, lý do Câu 2 chưa rõ, Câu 3 dùng thuật ngữ nội bộ.
+- **Review của tôi (prompt nguyên văn):** "in q1, the requirements include short and brief answer but you include the reason the the other problem so it may not statisfy that. the reason for q2 is not clear, this part make the answer long  (bản cũ, bản sắp hiệu lực, dự thảo, văn bản mật, cặp mâu thuẫn).in q3 make sure the reader can understand our ideas, do not use our internal terminology for this . my review is applied for all questions so please check again"
+- **Đầu ra sau review:** Claude viết lại cả 3 câu: Câu 1 bỏ phần so sánh với rò rỉ; Câu 2 bỏ danh sách bẫy, nói rõ lý do của từng phần và lý do chưa làm, bỏ fine-tune khỏi danh sách vì lý do không khớp; Câu 3 bỏ thuật ngữ nội bộ ("dùng thay", "bổ sung", "chuỗi phiên bản", "metadata"), diễn đạt bằng lời thường.
+  Ghi thêm các quy tắc này vào đầu `answers.md` và Phase 6 của `redraft_plan.md`.
+- **Xác minh sau review:**
+  - **[AI]** Đếm lại bằng script: Câu 1 = 114, Câu 2 = 134, Câu 3 = 130 từ; kiểm tra không còn thuật ngữ nội bộ và dấu gạch dài.
+  - **[Duyệt]** Tôi duyệt cả 3 câu của bản thứ hai ngày 08/10 (prompt: "approve the answers").
 
 ## Mẫu cho các mục tiếp theo
 

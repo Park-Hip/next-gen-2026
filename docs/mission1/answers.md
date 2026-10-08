@@ -1,29 +1,40 @@
-# Mission 1 - 3 câu hỏi bắt buộc (bản nháp)
+# Mission 1 - 3 câu hỏi bắt buộc
 
-Bản nháp do Claude viết từ các quyết định trong `thinking/thinking_phase_answers.md`.
-Hãy đọc, viết lại bằng giọng của mình, và ghi vào Nhật ký Bằng chứng trước khi nộp.
+Bản Phase 6 do Claude viết (A12), sửa theo review của Hiệp, Hiệp duyệt ngày 08/10.
+Nộp ở ô riêng, không nằm trong PDF.
+
+**Yêu cầu của đề (nguyên văn):** "Trả lời ngắn gọn, rõ quyết định và lý do. Khuyến nghị 60–150 từ."
+Cách áp dụng:
+
+- Câu đầu tiên là quyết định.
+- Lý do ngắn và rõ, chỉ cho lựa chọn của mình; không giải thích vì sao bỏ các phương án khác.
+- Ngắn gọn: một ý mỗi câu, không liệt kê chi tiết; càng gọn càng tốt, không quá 150 từ.
+  Đếm theo khoảng trắng (mỗi âm tiết tiếng Việt là một từ), chỉ đếm phần trả lời, không đếm tiêu đề.
+- Người đọc có thể chưa đọc PDF: dùng lời thường, không dùng thuật ngữ nội bộ ("phạm vi tìm kiếm", "dùng thay", "bổ sung", "chuỗi phiên bản", "thẻ", "Báo sai") hay mã nội bộ.
 
 ## Câu 1 - Vấn đề quan trọng nhất
 
-Tôi chọn vấn đề: nhân sự không biết chắc quy định nào đang áp dụng cho chính mình.
-Người dùng là nhân sự các công ty thành viên, vào lúc cần ra một quyết định do quy định điều chỉnh: xin nghỉ, đăng ký OT, thanh toán công tác phí.
-Họ tìm được tài liệu, nhưng bản của Tập đoàn, của công ty và bản cũ gần giống nhau, nên dễ dùng nhầm hoặc phải chờ HR.
-Kết quả họ cần: một câu trả lời đúng với đơn vị, loại hợp đồng và thời điểm hiện tại, kèm nguồn, phiên bản và ngày hiệu lực để tự hành động ngay.
-Ràng buộc không thương lượng: không bao giờ lộ thông tin ngoài quyền truy cập.
+Tôi chọn: nhân sự không biết chắc quy định nào đang áp dụng cho chính mình.
+Người dùng là nhân sự các công ty thành viên khi cần làm một việc theo quy định, như xin nghỉ phép.
+Kết quả họ cần là câu trả lời đúng với đơn vị của họ, từ văn bản họ được xem, theo bản đang có hiệu lực, kèm nguồn để tự kiểm tra mà không chờ HR.
+Lý do: quy định của Tập đoàn, của công ty, bản cũ và bản nháp gần giống nhau.
+Câu trả lời theo nhầm văn bản trông giống hệt câu đúng, nên người hỏi làm theo mà không biết mình sai.
 
 ## Câu 2 - Ba ngày đầu: làm gì, chưa làm gì
 
-Tôi chỉ xây phần kiểm chứng giả định rủi ro nhất: đúng quy định, đúng phiên bản, đúng người, không rò rỉ.
-Gồm: dữ liệu giả lập có bẫy (bản cũ, dự thảo, quy định chồng chéo, tài liệu mật); lọc quyền trước khi tìm kiếm; luật xác định hiệu lực và phạm vi; trả lời kèm trích dẫn, từ chối khi không chắc; chuyển persona thay đăng nhập; nút báo sai; bộ test persona × câu hỏi có kiểm tra rò rỉ tự động.
-Chủ động chưa làm: SSO/HRIS thật, giao diện quản trị, OCR, tích hợp Lark/Slack, tra cứu dữ liệu cá nhân, hội thoại nhiều lượt, fine-tune.
-Lý do: đó là bài toán tích hợp và mở rộng; nếu phần lõi sai, mọi thứ khác vô nghĩa.
+Tôi làm trước phần quyết định câu trả lời đúng hay sai, vì đó là rủi ro lớn nhất.
+Ngày 1: dữ liệu giả lập, luật chọn văn bản cho người hỏi và bộ câu hỏi kiểm thử.
+Luật phải đúng mọi ca trước khi thêm AI, để lỗi sau đó chắc chắn do AI.
+Ngày 2: AI tìm và trả lời kèm nguồn; kiểm tra AI nói "không tìm thấy" khi không có văn bản phù hợp.
+Ngày 3: giao diện web để chọn người hỏi và xem kết quả.
+Chủ động chưa làm: đăng nhập thật, kết nối hệ thống nhân sự, tích hợp công cụ chat, đọc file DOCX/PDF.
+Lý do: chúng chỉ đổi nơi lấy dữ liệu hoặc nơi hiển thị, không đổi việc câu trả lời đúng hay sai.
 
 ## Câu 3 - Hai tài liệu liên quan nhưng khác nhau
 
-Thứ tự ưu tiên do luật trên metadata quyết định, không để LLM tự chọn.
-Cả hai tài liệu đã qua bộ lọc quyền.
-Khác phiên bản: dùng bản đang hiệu lực hôm nay, báo trước nếu có bản sắp hiệu lực.
-Khác phạm vi: quy định của đơn vị cụ thể nhất được áp dụng, trừ khi quy định cấp trên được đánh dấu bắt buộc, ví dụ mức tối thiểu theo luật.
-Cùng phạm vi, cùng chủ đề, cùng hiệu lực: coi là mâu thuẫn, không để AI phán xét vì AI có thể ảo giác.
-Hệ thống không chọn, không trộn: trích nguyên văn hai điều khoản, cảnh báo và chuyển chủ sở hữu tài liệu quyết định.
-Quyết định đó được lưu lại để lần sau trả lời đúng.
+Luật cố định chọn văn bản trước khi AI trả lời; AI không bao giờ tự quyết văn bản nào đúng.
+Khác phiên bản: chỉ giữ bản đã ban hành và đang có hiệu lực hôm nay.
+Khác đơn vị: chỉ giữ văn bản người hỏi được xem và áp dụng cho đơn vị của họ.
+Nếu vẫn còn cả hai, hệ thống làm theo điều HR đã ghi khi đăng văn bản: văn bản này thay văn bản kia, hay hai văn bản dùng cùng nhau.
+Nếu HR chưa ghi, hệ thống không chọn mà trích nguyên văn cả hai và chuyển người hỏi tới HR.
+Lý do: khi chưa ai xác nhận, chọn một văn bản là đoán, và đoán sai thì người hỏi vẫn tin là đúng.

@@ -22,9 +22,11 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/mission1/redraft/phase2_prompt.md` - session prompt for Phase 2.
 - `docs/mission1/redraft/phase3_decisions.md` - A-vs-B arguments for the 3 decisions in Section 4 (P, S, L; F4r); Claude draft, Hiep revises (A10).
 - `docs/mission1/document.md` - the 5-page submission draft, rewritten in Phase 5 (Claude draft, Hiep revises; A11). It uses no internal IDs (M18, T7, `LEAVE-GAMECO-v2`, P/S/L): documents are named by title and relations in Vietnamese. Render it with `python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf` and keep it at 5 pages.
-- `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field. Outdated; rewritten in Phase 6.
+- `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field. Rewritten in Phase 6 (Claude draft, revised after Hiep's review and accepted by him; A12), with the brief's length and form requirement at the top.
 - `docs/mission1/criteria.md` - what Mission 1 is judged on, and the rewrite principles.
-- `docs/mission1/review_prompt.md` - prompt for an independent AI review.
+- `docs/mission1/review_prompt.md` - prompt for the pre-redraft AI review. History.
+- `docs/mission1/review_prompt_reader.md` - prompt for a new-reader AI review of the Phase 5 document: hard to understand, controversial, conflicts, readability, match with the brief; optional modules at the end.
+- `docs/mission1/redraft/review_reader_output.md` - output of running that prompt with all optional modules (Claude Opus 5.5, same model family as the drafter, so not independent).
 - `docs/mission1/review_output.md` - output of running that prompt on the first draft (same model as the drafter, so not independent). History.
 - `docs/mission1/thinking/` - thinking-phase workbook and the candidate's decisions (Round 1-3).
 - `docs/mission1/submitted/` - the exact files submitted, kept as a record.
@@ -46,7 +48,8 @@ Three parts are submitted (brief, "Nộp gì cho mission 1"), and no code is req
 
 1. One PDF/DOCX or a Notion link, at most 5 pages, written in Vietnamese (English technical terms are fine).
    It covers 5 sections: problem and users, solution and flow, AI/data/people, decisions and risks, validation and MVP.
-2. The 3 mandatory "Forced Decision" answers, submitted separately from the PDF, each about 60-150 words, opening with the decision.
+2. The 3 mandatory "Forced Decision" answers, submitted separately from the PDF.
+   The brief requires "Trả lời ngắn gọn, rõ quyết định và lý do. Khuyến nghị 60–150 từ.": each answer opens with the decision, gives the reason, and is 60-150 words counted by whitespace.
 3. The evidence log (`evidence_log.md`): AI tools, prompts, and decisions.
    It is a judged deliverable, so keep it accurate, readable and in Vietnamese.
 
