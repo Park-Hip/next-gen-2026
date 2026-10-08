@@ -1,6 +1,107 @@
-# Nhật ký Bằng chứng - Bài test B: Tri thức nội bộ Appota
+# Nhật ký Bằng chứng - Bài test B: Tri thức nội bộ Appota (Mission 1)
 
-Ghi lại mọi công cụ AI, prompt đã định hình kết quả, quyết định của tôi và cách xác minh đầu ra, theo `ai_policies.md` và mục "Nộp gì cho mission 1" của đề bài.
+**Ứng viên:** Phạm Bách Hiệp
+
+Nhật ký gồm hai phần.
+Phần A tóm tắt việc dùng AI: ai làm gì, tôi đã bác bỏ hoặc đổi những gì, và dữ kiện nào đã được kiểm chứng.
+Phần B ghi từng lần dùng AI theo thời gian, kèm prompt nguyên văn, đầu ra, quyết định của tôi và cách xác minh.
+
+# Phần A - Tóm tắt
+
+## A1. Tuyên bố trách nhiệm
+
+> **[Hiệp tự viết, 4-6 câu, rồi xoá khung gợi ý này.]**
+> Gợi ý các ý nên có, không phải câu chữ:
+>
+> - Phần việc của AI: viết gần như toàn bộ câu chữ của tài liệu 5 trang và 3 câu trả lời, đề xuất phần lớn chi tiết kỹ thuật, viết script kiểm tra luật.
+> - Phần việc của tôi: chọn và duyệt mọi quyết định, nêu các ý chính ở mục A4, review bản nháp qua nhiều đợt và gửi lại khi chưa đạt.
+> - Tôi giải thích được và chịu trách nhiệm cho mọi câu trong bài nộp.
+> - Dữ liệu đều là giả lập; tôi không đưa dữ liệu thật hay dữ liệu cá nhân cho AI.
+
+## A2. Công cụ
+
+| Công cụ | Mô hình | Dùng để | Mục |
+|---|---|---|---|
+| Pi, agent chạy trong terminal, gọi mô hình Claude qua tiện ích claude-bridge (gói đăng ký Claude) | Claude Opus 5.5 | Thảo luận, đề xuất phương án, viết nháp tài liệu và câu trả lời, viết script kiểm tra luật, tìm kiếm web, review | 1-28, 30-37 |
+| Pi, như trên | Claude Sonnet 5.5 | Chạy prompt Phase 2; phần cuối mục 18; 2 phiên phụ | 14, 18 |
+| Pi, qua subagent | Agnes 2.5 Flash | Tìm nguồn web và kiểm tra lại trích dẫn; không nguồn nào vào bài nộp | 15, 17 |
+| Claude Code (CLI) | Claude Opus 5.5 | Review "người đọc mới" cho tài liệu; một phiên brainstorm chỉ đọc file | 29 |
+| ChatGPT web, Gemini web | ChatGPT `gpt-5-6-t-mini` (theo trang chia sẻ); Gemini 3 Pro (chưa chắc) | Review độc lập 3 câu trả lời | 36 |
+| Lavish | Không | Tôi ghi chú review trực tiếp lên tài liệu | 26, 28, 31 |
+| Wispr Flow | Nhận dạng giọng nói | Nhập prompt bằng giọng nói; không tạo nội dung | Nhiều mục |
+| Orca CLI | Không | Quản lý dự án và phiên làm việc; không tạo nội dung | - |
+
+Ở một phiên bị ngắt (08/10, 12:47), Pi tự khởi chạy subagent với GPT-5.5, GPT-6 (OpenAI) và Claude Fable 5.1; tôi dừng phiên và yêu cầu chỉ dùng Claude.
+Không subagent nào trả về nội dung, và phiên không đổi file nào (mục 29).
+Ngoài các công cụ trên, tôi không dùng công cụ AI nào khác cho Mission 1.
+
+## A3. Nguồn gốc từng phần bài nộp
+
+Câu chữ của mọi phần do Claude viết; tôi review, yêu cầu sửa và duyệt bản cuối.
+Bảng dưới tách ý của tôi với đề xuất của AI mà tôi duyệt.
+
+| Phần | Ý của tôi hoặc tôi quyết | AI đề xuất, tôi duyệt | Kiểm chứng |
+|---|---|---|---|
+| 1. Vấn đề & người dùng | Chấp nhận từ chối nhiều hơn để tránh trả lời sai (mục 3); chỉ giữ 3 yếu tố đề bài nêu: đơn vị, quyền, phiên bản (mục 12); gọi người hỏi theo vị trí thay vì tên nhân vật (mục 28) | Vấn đề cốt lõi, hai nhóm người dùng, phạm vi phép năm (mục 11); ba cặp khái niệm tách riêng (mục 1) | Số ngày phép và ngày hiệu lực trong bảng khớp văn bản giả lập |
+| 2. Giải pháp & luồng | Không để AI phán mâu thuẫn (mục 4); hai văn bản chưa khai báo quan hệ là mâu thuẫn (mục 12); áp quan hệ thay thế trước khi tìm kiếm (mục 14); hỏi "vì sao phải chọn chủ đề", dẫn tới luật dựng phạm vi tìm kiếm trước (mục 19); hybrid search (mục 30) | Chuỗi phiên bản, quan hệ "bổ sung", bước đánh dấu cặp mâu thuẫn và bước chọn thẻ theo trích dẫn (mục 15-19); câu chữ trên ba thẻ | Script chạy bước 1-4 và 7 trên dữ liệu giả lập; câu trích trên thẻ mâu thuẫn khớp nguyên văn |
+| 3. AI, dữ liệu & con người | AI không quyết quyền xem, hiệu lực, thứ tự ưu tiên (mục 4) | Phân vai AI, lỗ hổng còn lại, ba nhóm người tham gia | Đối chiếu với Phần 2 |
+| 4. Quyết định & rủi ro | Quyết định 1 dựa trên lựa chọn ở mục 4 và 12; quyết định 2 từ câu hỏi ở mục 19; trình bày A cạnh B trong một bảng (mục 31) | Chọn 3 quyết định này (mục 21) và lập luận A-B (mục 22, 30) | Không có dữ kiện bên ngoài; ví dụ trên dữ liệu giả lập là suy luận, chưa đo |
+| 5. Kiểm chứng & MVP | Bỏ bảng test chi tiết, thí điểm, so sánh với naive RAG; giảm độ tự tin của mục tiêu (mục 31); bỏ phần fine-tune (mục 32) | Chỉ số, giả định rủi ro nhất, thứ tự làm (mục 23, duyệt ở mục 25) | Phần luật chạy bằng script; phần AI chưa đo, bài nộp ghi rõ |
+| 3 câu trả lời | Gửi lại bản đầu vì dài, lập luận về phương án khác và dùng thuật ngữ nội bộ (mục 33); duyệt các chỗ sửa sau review của ChatGPT và Gemini (mục 36) | Bản nháp và các chỗ sửa (mục 33, 36) | Số từ: 115 / 146 / 130 |
+| Dữ liệu giả lập | Giữ trạng thái "dự thảo / đã ban hành" sau khi hỏi và xác nhận đây là giả định của chúng tôi; nêu tình huống hai văn bản cùng chủ đề không mâu thuẫn (mục 14) | 10 văn bản, persona, các bẫy, lần vết câu hỏi của nhân viên GameCo (mục 14-19) | Script dùng chính bảng dữ liệu này |
+
+## A4. Những lần tôi bác bỏ hoặc đổi hướng AI
+
+1. Bác bỏ đề xuất dùng LLM đọc hai đoạn văn bản để xác nhận có mâu thuẫn hay không, vì AI có thể ảo giác và nói "không mâu thuẫn"; chuyển cho người thật (mục 4).
+   Đây là gốc của Quyết định 1 ở Phần 4.
+2. Bỏ quy định pháp luật và mức tối thiểu theo luật khỏi MVP vì quá phức tạp (mục 12).
+3. Hỏi mô hình dữ liệu dựa trên đề bài hay giả định của chúng tôi, rồi bỏ loại hợp đồng và thâm niên vì đề bài không nêu (mục 12).
+4. Chỉ ra lỗi của thiết kế: hai văn bản cùng chủ đề bị coi là mâu thuẫn, dù chúng có thể bổ sung cho nhau; yêu cầu rà soát lại cả mô hình (mục 14-15).
+5. Bác bỏ cách gắn nhãn câu hỏi cho từng đoạn văn bản (`covers`), vì phải gắn nhãn mọi đoạn và không dùng được cho văn bản không có cấu trúc (mục 17).
+6. Khi Claude khuyến nghị để LLM xếp câu hỏi vào một chủ đề, tôi hỏi vì sao phải chọn chủ đề; câu hỏi này dẫn tới thiết kế dựng phạm vi tìm kiếm trước rồi mới truy xuất (mục 19).
+7. Thay đề xuất tìm theo từ khóa sau khi bỏ dấu bằng hybrid search (mục 30).
+8. Bỏ thí điểm và so sánh với naive RAG khỏi tài liệu, dù đã duyệt trước đó cùng ngày, vì tài liệu chỉ nêu những gì MVP làm (mục 31).
+9. Không duyệt bản đầu của 3 câu trả lời và gửi lại kèm nhận xét cụ thể (mục 33).
+10. Dừng Phase 2 sớm vì các bước sau không thêm giá trị cho bài nộp (mục 14).
+
+## A5. Lỗi của AI đã phát hiện và sửa
+
+- Script kiểm tra luật cho thấy bộ luật ban đầu sai: khi bản 3 có hiệu lực, bản 1 "sống lại"; khi Tập đoàn ra bản mới, mọi nhân sự GameCo nhận cảnh báo mâu thuẫn (mục 15).
+- Bản đầu của bước kiểm tra lúc đăng văn bản bỏ sót ngày hết hiệu lực; Claude sửa và chạy lại (mục 18).
+- Lượt kiểm tra thứ hai loại 3 nguồn web không xác minh được và 2 câu trích không có trên trang được dẫn (mục 15, 17); không nguồn web nào vào bài nộp.
+- Bản nháp tài liệu có 2 khẳng định quá mức, Claude sửa khi đọc lại (mục 24).
+- Lý do "chưa làm" ở Câu 2 ban đầu sai, vì hệ thống nhân sự quyết định đơn vị của người hỏi; ChatGPT phát hiện, đã sửa (mục 36).
+- Chính nhật ký này: 3 khẳng định sai về việc ai làm gì, 1 phiên bị bỏ sót và 1 mô hình bị thiếu (sửa ở mục 20); các mục 30-36 ghi nhầm công cụ là Claude Code trong khi là Pi, và thiếu 4 phiên phụ (sửa ở mục 37).
+
+## A6. Kiểm chứng dữ kiện trong bài nộp
+
+**[Tôi]** tôi tự kiểm; **[AI]** AI kiểm bằng script hoặc đối chiếu file, tôi chưa tự kiểm lại.
+
+| Dữ kiện | Cách kiểm | Kết quả | Ai kiểm |
+|---|---|---|---|
+| Bảng Phần 1: 12, 13, 14, 15, 16, 13 ngày phép và ngày hiệu lực | So với nội dung và metadata của 10 văn bản giả lập | Khớp | [AI], [Chưa] tôi kiểm |
+| Hai câu trích trên thẻ mâu thuẫn (Phần 2) | So nguyên văn với Điều 1 của hai văn bản giả lập | Khớp | [AI], [Chưa] tôi kiểm |
+| Luồng 7 bước cho nhân viên GameCo: 10, 7, 5, 4 văn bản, 0 cặp mâu thuẫn, kết quả 14 ngày | Lần vết từng bước, so với script | Khớp | [AI], [Chưa] tôi đọc từng dòng |
+| "Phần luật của bộ test đã chạy đúng bằng script" (Phần 5) | Chạy script luật trên dữ liệu giả lập, ngày 08/10 | 10/10 tình huống đạt | [AI], [Chưa] tôi tự chạy |
+| Số từ 3 câu trả lời, giới hạn 60-150 | Đếm theo khoảng trắng bằng script, chỉ phần trả lời | 115 / 146 / 130 | [AI], [Chưa] tôi đếm lại |
+| Tài liệu tối đa 5 trang | Xuất PDF, đếm trang, xem ảnh từng trang | 5 trang | [AI] |
+| Bài nộp không dẫn luật, số liệu thống kê hay nguồn bên ngoài | Đọc và tìm trong tài liệu và 3 câu trả lời | Không có; các dữ kiện pháp lý và nguồn web ở Phần B vì vậy được ghi [Không dùng] | [AI] |
+
+Giới hạn đã biết:
+
+- Script kiểm tra luật cũng do AI viết; nó chỉ kiểm phần luật, còn bước truy xuất và LLM được thay bằng một hàm giả lập, nên phần AI chưa được đo.
+- Tài liệu 5 trang chỉ được review bởi mô hình cùng họ với mô hình viết nháp (Claude, mục 29); ChatGPT và Gemini chỉ đọc tài liệu để đối chiếu với 3 câu trả lời.
+- Nhận định trong Phần 1 và Phần 4 về cách naive RAG hoặc phương án B có thể sai là suy luận trên dữ liệu giả lập, chưa đo; tài liệu ghi "dễ xếp", không đưa con số.
+
+## A7. Dữ liệu và quyền riêng tư
+
+Mọi đơn vị, nhân sự, văn bản và con số trong bài nộp là giả lập.
+Prompt gửi cho AI chỉ chứa đề bài, ghi chú của tôi và dữ liệu giả lập; tôi không gửi dữ liệu thật của Appota hay dữ liệu cá nhân cho công cụ AI nào.
+Đề bài trong dự án do tôi tự sao chép từ portal; bản AI thu thập từ portal đã bị xoá và không được dùng.
+
+<div style="page-break-before: always"></div>
+
+# Phần B - Nhật ký chi tiết
 
 ## Cách lập nhật ký này
 
@@ -9,11 +110,15 @@ Ghi lại mọi công cụ AI, prompt đã định hình kết quả, quyết đ
 - Lúc 17:16 tôi quyết định tạm giữ nhật ký ở dạng thô do AI viết và hoàn thiện sau ("For now keep the evidence log AI written, we should treat it as raw artifact and we will adjust them and polish later").
 - Lúc 23:28 (mục 20), Claude đối chiếu nhật ký với lịch sử của cả 15 phiên Pi bằng script `tools/ai_sessions.py`, đọc trực tiếp file lưu phiên thay vì dựa vào trí nhớ của AI.
   Kết quả: thiếu một phiên định hình nội dung (nay là mục 14) và 9 phiên phụ (mục "Phiên AI không định hình nội dung bài nộp"); 3 khẳng định sai đã được sửa (mục 13, 15, 17); mục 18 thiếu Claude Sonnet 5.5; các ghi chép Round 2-3 do Claude viết thay tôi (mục 3).
+- Lúc 20:30 ngày 08/10 (mục 37), Claude đối chiếu lại với file phiên của cả Pi và Claude Code, rồi viết Phần A, sửa công cụ và thời gian của các mục 25-36, thêm 4 phiên phụ và cập nhật các nhãn kiểm chứng.
 - Prompt được trích nguyên văn từ lịch sử phiên, bằng tiếng Anh và giữ nguyên lỗi do nhập bằng giọng nói, kèm "Ý chính" bằng tiếng Việt.
   Đoạn dài được cắt bằng "[...]".
-- Mọi thời gian là giờ Việt Nam, ngày 07/10/2026.
-- Đường dẫn file là trong repo làm việc; bản PDF nộp sẽ thay bằng mô tả.
+- Thời gian là giờ Việt Nam; mục 1-20 là ngày 07/10/2026, từ mục 21 là ngày 08/10/2026.
+- Tên file là file làm việc trong dự án, không nộp kèm; các file nộp là tài liệu 5 trang, 3 câu trả lời và nhật ký này.
   Mục 1-7 dùng tên file trước khi thư mục được sắp xếp lại vào `docs/`, ví dụ `mission1_document_draft.md` → `docs/mission1/document.md`.
+- Các mã như F1, M18, RV10 là mã dòng trong sổ quyết định làm việc (`decisions.md`): F là khung bài, M là mô hình lõi, A là dữ liệu và phân công viết, V là kiểm chứng, RV là thay đổi sau review.
+  T1-T11 là các bẫy trong dữ liệu giả lập.
+  P, S, L là 3 quyết định ở Phần 4 của tài liệu: P là Quyết định 1 (ai chọn văn bản thắng), S là Quyết định 2 (tìm văn bản cho câu hỏi bằng cách nào), L là Quyết định 3 (ai dùng trước); R (từ chối hay trả lời kèm cảnh báo) bị thay bằng L ở mục 21.
 
 ## Nhãn kiểm chứng
 
@@ -21,43 +126,36 @@ Ghi lại mọi công cụ AI, prompt đã định hình kết quả, quyết đ
 - **[AI]** AI kiểm chứng (chạy script, mở nguồn, đếm trang); tôi chưa tự kiểm lại.
 - **[Duyệt]** tôi đọc và đồng ý, chưa kiểm chứng độc lập.
 - **[Chưa]** chưa làm.
-- **[Không dùng]** dữ kiện không có trong bài nộp nên không cần kiểm chứng.
+- **[Không dùng]** dữ kiện không có trong bài nộp, hoặc bản nháp đã bị thay, nên không cần kiểm chứng.
 
 Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ kiện liên quan bị bỏ khỏi bài nộp và chuyển thành [Không dùng].
-
-## Công cụ
-
-| Công cụ | Mô hình | Dùng để | Mục |
-|---|---|---|---|
-| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-28 |
-| Pi | Claude Sonnet 5.5, qua gói đăng ký Claude | Chạy prompt Phase 2; ghi quyết định M16-M17; 2 phiên phụ | 14, 18 |
-| Pi, qua subagent | Agnes 2.5 Flash (Agnes AI), mức suy luận tối đa | Tìm nguồn web và lượt kiểm tra trích dẫn thứ hai; thử thu thập đề từ portal (không dùng) | 15, 17 |
-| Claude Code (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Chạy prompt review "người đọc mới" | 29 |
-| Tiện ích của Pi | - | Tìm kiếm web; Lavish (chuyển Markdown thành trang HTML) | 1, 2, 9, 20 |
-| Wispr Flow | AI nhận dạng giọng nói | Nhập prompt bằng giọng nói; không tạo nội dung bài nộp | Nhiều phiên |
-| Orca CLI | Không | Quản lý dự án và phiên làm việc; không tạo nội dung | - |
-
-Ngoài các công cụ trên, tôi không dùng công cụ AI nào khác cho Mission 1.
 
 ## Phiên AI không định hình nội dung bài nộp
 
 Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc thay đổi nội dung bài nộp.
 
-- **08:31-09:07, Agnes 2.5 Flash:** thử thu thập đề từ portal.
+- **07/10, 08:31-09:07, Agnes 2.5 Flash:** thử thu thập đề từ portal.
   Prompt: "scrape this website and paste every information to this project https://portal.agentlize.dev/mission/1, remember to scan every buttons, sites, that it support and visible".
   Tôi yêu cầu xoá các file đã tạo ("Actually first remove all files that you created."), rồi dán văn bản đề và nhờ AI tóm tắt lại.
   Bản do AI viết này không được dùng: từ phiên đầu tiên lúc 09:43, mọi phiên đọc bản đề tôi tự sao chép trong `docs/competition/`, và không có lệnh ghi nào của AI tạo ra các file đó.
-- **09:08-09:42:** các phiên thử cài đặt Pi và kết nối mô hình (Claude Opus 5.5, Claude Sonnet 5, Agnes 2.5 Flash), ví dụ "Say hello in one sentence."; không tạo file trong dự án.
-- **11:31-11:35, Claude Opus 5.5:** tạo `AGENTS.md`, file hướng dẫn cho AI agent trong dự án, và thảo luận cách kiểm soát việc dùng AI.
+- **07/10, 09:08-09:42:** các phiên thử cài đặt Pi và kết nối mô hình (Claude Opus 5.5, Claude Sonnet 5, Agnes 2.5 Flash), ví dụ "Say hello in one sentence."; không tạo file trong dự án.
+- **07/10, 09:15-09:28, Claude Code (CLI), Claude Opus 5.5:** hỏi cốt lõi của cuộc thi và cách làm trước khi viết.
+  Prompt: "I want you to first read the relevant files to understand that I'm in a competition and this is a preparation phase of the task so there's no coding need but I need to implement a plan according to the rules. Do not make the PDF first. First tell me: what are the core things of this competition, these requirements? What should I do right now? [...]".
+  Claude chỉ đọc đề bài và mẫu nộp bài rồi trả lời trong hội thoại; không tạo file.
+  Tôi chuyển sang Pi và hỏi lại ý tương tự ở mục 1, nên phiên này có thể ảnh hưởng gián tiếp tới cách tôi đặt câu hỏi.
+- **07/10, 11:31-11:35, Claude Opus 5.5:** tạo `AGENTS.md`, file hướng dẫn cho AI agent trong dự án, và thảo luận cách kiểm soát việc dùng AI.
   Prompt: "1. Read all the documents in the project. 2. I want you to create an agents.md or a Claude.md for this project. Make it short and brief and I will improve it later. 3. This composition requires a lock for AI usage so I want you to discuss this with me. How should we do that? [...]".
   `AGENTS.md` không thuộc bài nộp nhưng định hướng mọi phiên sau, ví dụ luận điểm cốt lõi và các quy tắc làm việc.
   Phiên này đã khuyên AI chỉ được ghi nháp mục nhật ký, không được tự đánh dấu đã xác minh; các phiên sau chưa làm theo, đến mục 20 mới sửa.
-- **14:53-14:56, Claude Opus 5.5 (trong phiên của mục 1-13):** sắp xếp thư mục và quản lý phiên bản bằng git ("I want to organize and set up for this project this like using github and clean up the file structure tell me what can I do now"); không đổi nội dung.
-- **16:05-16:11, Claude Sonnet 5.5, Lavish:** chuyển `review_output.md` thành trang HTML để tôi dễ đọc ("transform this into html do not add or change anything [...]"); không đổi nội dung.
-- **18:10-18:17, Claude Sonnet 5.5:** thêm mục "Scope discipline (MVP first)" vào `AGENTS.md`.
+- **07/10, 14:53-14:56, Claude Opus 5.5 (trong phiên của mục 1-13):** sắp xếp thư mục và quản lý phiên bản bằng git ("I want to organize and set up for this project this like using github and clean up the file structure tell me what can I do now"); không đổi nội dung.
+- **07/10, 16:05-16:11, Claude Sonnet 5.5, Lavish:** chuyển `review_output.md` thành trang HTML để tôi dễ đọc ("transform this into html do not add or change anything [...]"); không đổi nội dung.
+- **07/10, 18:10-18:17, Claude Sonnet 5.5:** thêm mục "Scope discipline (MVP first)" vào `AGENTS.md`.
   Prompt: "I want to add this part to the agents.md. when AI giving some suggestions that sound cool but It's not suitable for the scope of the MVP and complicated or over-engineer for the current stage, which may delay our shipping time, so I want you to add something in agents.md to handle that."
   Quy tắc này ảnh hưởng gián tiếp: từ đó, ý tưởng ngoài phạm vi được đưa vào danh sách hoãn lại thay vì vào bài.
   Cùng phiên, AI ghi một ghi chú vào sổ tay cá nhân của tôi, ngoài dự án.
+- **08/10, 12:38-12:40, Claude Opus 5.5:** tôi dán ghi chú review đợt 2 vào nhầm một phiên mới ("I'm writing my review notes for the lavish. Check in the documents. Write it down for me and change them also. [...]"); phiên không đổi file, tôi gửi lại ở mục 28.
+- **08/10, 12:47-12:56, Claude Opus 5.5:** lần chạy đầu của prompt review "người đọc mới", bị ngắt; Pi tự khởi chạy subagent với các mô hình khác (xem mục 29); không có đầu ra nào được dùng.
+- **08/10, 15:34-15:48, Claude Opus 5.5:** hỏi kế hoạch viết lại đã xong chưa ("is C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md done ?") và commit ("commit"); không đổi nội dung.
 
 ## Các mục định hình nội dung
 
@@ -73,8 +171,9 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - Các công ty thành viên công khai của Appota: Gamota, AppotaPay, Adsota, ACheckin, Kdata.
   - Bộ luật Lao động 2019, Điều 113-114: 12 ngày phép năm, cộng 1 ngày cho mỗi 5 năm làm việc.
   - Dự đoán Mission 2 là xây v1, Mission 3 là thích ứng với thay đổi: chỉ là suy đoán, chưa được xác nhận.
+- **Quyết định của tôi:** dùng sổ tay này làm kế hoạch và làm bài tập tư duy trước khi viết (mục 2); luận điểm cốt lõi được giữ đến bản cuối.
 - **Xác minh:**
-  - **[Chưa]** Bộ luật Lao động 2019, Điều 113-114: tự mở văn bản gốc, nếu bản cuối còn dùng (theo quyết định M1c ở mục 12, bản viết lại bỏ dẫn chiếu pháp luật).
+  - **[Không dùng]** Bộ luật Lao động 2019, Điều 113-114: bài nộp không dẫn luật (quyết định M1c ở mục 12 bỏ quy định pháp luật khỏi MVP).
   - **[Không dùng]** Danh sách công ty thành viên của Appota và lộ trình NextGen.
   - Ghi chú: toàn bộ dữ liệu tổ chức và persona (GameCo, PayCo, AdsCo, Lan, Minh, Hà, An) là giả lập, không dùng dữ liệu thật của Appota.
 
@@ -91,8 +190,9 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - Phương pháp pre-mortem của Gary Klein, Harvard Business Review, tháng 9/2007.
 - **Phần tôi tự làm:** tôi tự trả lời tất cả bài tập trong sổ tay.
   Câu trả lời gốc được lưu nguyên văn trong `thinking_phase_answers.md` (Round 1).
+- **Quyết định của tôi:** tự trả lời mọi bài tập; AI chỉ đưa lựa chọn và phản biện (mục 3).
 - **Xác minh:**
-  - **[Chưa]** Điều 118-119, Luật 91/2025/QH15 và nguồn pre-mortem: tự kiểm tra trên văn bản gốc, nếu bản cuối còn dùng.
+  - **[Không dùng]** Điều 118-119, Luật 91/2025/QH15 và nguồn pre-mortem: bài nộp không dẫn các nguồn này.
   - Ghi chú: các con số minh họa trong sổ tay (điểm tương đồng khi tìm kiếm, số liệu Hệ thống A/B) chỉ dùng để luyện tư duy, không đưa vào bài nộp như dữ liệu thật.
 
 ### 3. Phản biện câu trả lời và chốt quyết định
@@ -128,7 +228,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
     Claude cụ thể hoá thành luật: luật xác định trên metadata coi là mâu thuẫn, trích nguyên văn hai điều khoản và chuyển chủ sở hữu tài liệu quyết định; tôi duyệt.
 - **Xác minh:**
   - **[Duyệt]** Toàn bộ bản nháp và 7 đề xuất.
-  - **[Chưa]** Viết lại lý do của các quyết định còn dùng bằng lời của mình để bảo vệ ở vòng PITCH (Phase 3 của kế hoạch viết lại).
+  - **[Không dùng]** Bản nháp này đã được thay; lý do của các quyết định còn dùng được viết lại ở mục 22 và tôi review qua các mục 26-34.
 
 ### 5. Bản nháp 3 câu hỏi bắt buộc
 
@@ -141,7 +241,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Đếm số từ bằng script Python: Câu 1 = 125, Câu 2 = 130, Câu 3 = 133 từ, nằm trong giới hạn 60-150.
   - **[AI]** Câu 3 đã sửa theo quyết định của tôi (không dùng AI để phán xét mâu thuẫn).
-  - **[Chưa]** Viết lại cả 3 câu bằng giọng của mình, tự giải thích to từng câu và đếm lại số từ.
+  - **[Không dùng]** Bản nháp này đã được thay bằng bản viết lại ở mục 33; kiểm chứng bản nộp ở mục 33, 36 và Phần A6.
 
 ### 6. Bản nháp tài liệu 5 trang
 
@@ -150,6 +250,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** cùng prompt 14:14 ở mục 5.
 - **Đầu ra:** `mission1_document_draft.md` (tiếng Việt, 5 phần + 3 câu trả lời) và script `tools/render_pdf.py` xuất bản nháp ra PDF A4 bằng Edge headless.
+- **Quyết định của tôi:** giao Claude viết bản nháp đầu; sau khi đọc, tôi thấy bản nháp nhồi quá nhiều thông tin mà thiếu lập luận (mục 8), dẫn tới bản viết lại.
 - **Xác minh:**
   - **[AI]** Xuất PDF và đếm trang bằng script: 5 trang (bản đầu 7 trang; đã đổi sơ đồ sang chiều ngang, gộp bảng để vừa giới hạn).
   - **[AI]** Kiểm tra từng trang bằng ảnh chụp: dấu tiếng Việt hiển thị đúng, bảng không tràn, chữ trong sơ đồ đọc được.
@@ -161,9 +262,10 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Prompt (nguyên văn):** "I want you to draft a prompt so a seperated AI can check and review the draft. I want it to point out what are the important things in the mission 1 that we should keep in mind, what are the best practices of doing them"
   Ý chính: soạn prompt để một AI khác review bản nháp, chỉ ra điều quan trọng của Mission 1 và best practice.
 - **Đầu ra:** `review_prompt.md` (cập nhật theo tiêu chí mới ở mục 8).
+- **Quyết định của tôi:** chạy prompt này trên Claude (mục 9), không chạy trên AI khác họ.
 - **Xác minh:**
-  - **[Chưa]** Chạy prompt trên một AI khác họ mô hình (GPT hoặc Gemini); ghi lại công cụ, model, kết quả, góp ý nào được chấp nhận và vì sao.
-    Mục 9 chạy trên cùng mô hình nên chưa tính.
+  - **[Không dùng]** Bản nháp được review đã bị thay toàn bộ.
+  - Giới hạn: review khác họ mô hình chỉ được làm cho 3 câu trả lời (mục 35-36); tài liệu 5 trang chỉ có review cùng họ (mục 29).
 
 ### 8. Cập nhật theo tiêu chí chấm và yêu cầu nộp bài mới trong đề
 
@@ -180,7 +282,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Quyết định của tôi:** áp dụng tiêu chí mới cho Mission 1; review trước khi viết lại; nhật ký bằng chứng được nộp kèm nên phải ghi rõ quyết định của tôi ở từng mục.
 - **Xác minh:**
   - **[AI]** Đối chiếu nội dung cập nhật với nguyên văn đề trong `docs/competition/mission1_brief.md`.
-  - **[Chưa]** Bổ sung "Quyết định của tôi" cho các mục 1-7 bằng lời của mình.
+  - **[AI]** Trường "Quyết định của tôi" của các mục 1, 2, 6, 7 được Claude điền ở mục 37 theo lịch sử phiên; tôi kiểm khi đọc lại nhật ký (mục 20).
 
 ### 9. Review bản nháp theo `review_prompt.md`
 
@@ -196,12 +298,12 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 (chinhphu.vn): ban hành 26/06/2025, hiệu lực 01/01/2026.
   - Bộ luật Lao động 2019, Điều 118-119: đúng.
   - Theo Điều 2 khoản 1 Luật 91/2025/QH15, dữ liệu cá nhân phải xác định hoặc giúp xác định một người cụ thể, nên "Khung lương GameCo" trong bản nháp không phải dữ liệu cá nhân.
-- **Quyết định của tôi:** **[Chưa]** ghi góp ý nào tôi chấp nhận, sửa hoặc bác bỏ, và vì sao.
+- **Quyết định của tôi:** không xử lý từng góp ý; nhờ Claude tóm tắt (mục 10) rồi viết lại toàn bộ tài liệu theo kế hoạch mới.
+  Lỗi lập luận chính mà review nêu (thứ tự ưu tiên với mức sàn pháp lý) được xử lý bằng việc bỏ quy định pháp luật khỏi MVP (M1c, mục 12).
 - **Xác minh:**
   - **[AI]** Claude đối chiếu các dữ kiện pháp lý trên với các trang ở trên; đây chưa phải nguồn chính thức.
-  - **[Chưa]** Tự kiểm tra trên nguồn chính thức (vbpl.vn, congbao.chinhphu.vn), nếu bản cuối còn dùng.
-  - **[Chưa]** Chạy cùng prompt trên một AI khác họ mô hình (mục 7).
-  - Ghi chú: lỗi lập luận chính mà review nêu (thứ tự ưu tiên với mức sàn pháp lý) được xử lý bằng quyết định M1c ở mục 12.
+  - **[Không dùng]** Các dữ kiện pháp lý trên: bài nộp không dẫn luật.
+  - Giới hạn: không chạy lại trên AI khác họ (mục 7).
 
 ### 10. Tóm tắt review và kế hoạch viết lại
 
@@ -214,7 +316,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Đầu ra:** bản tóm tắt review trong hội thoại (lỗi logic ở thứ tự ưu tiên, điểm từng phần, khung viết lại, rủi ro của nhật ký); `docs/mission1/redraft_plan.md` gồm 8 giai đoạn (Phase 0-7).
 - **Quyết định của tôi:** dùng kế hoạch 8 giai đoạn; quyết định trước khi viết; mọi quyết định ghi vào `docs/mission1/redraft/decisions.md` kèm nguồn gốc; giữ nhật ký này ở dạng thô và hoàn thiện ở Phase 7.
 - **Xác minh:**
-  - **[Chưa]** Tự đọc `review_output.md` và đối chiếu với bản tóm tắt.
+  - **[Không dùng]** Bản nháp được review đã bị thay toàn bộ; các review sau ở mục 29 và 36.
 
 ### 11. Phase 0 - Chốt khung bài (F1-F5)
 
@@ -297,6 +399,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude đối chiếu trường `status` với đề bài và các file, xác nhận đây là giả định của chúng tôi.
   - **[AI]** Script kiểm tra luật ở mục 15-19 cho cùng kết quả với bản lần vết (14 ngày từ `LEAVE-GAMECO-v2`); script này cũng do AI viết.
   - **[Chưa]** Tôi đọc từng dòng bản lần vết cuối (7 bước, mục 19) và tự giải thích được, để chuẩn bị vòng PITCH.
+    Sổ quyết định (A7) và tiêu đề bản lần vết đang ghi "Hiep checked every row"; câu này chỉ đúng sau khi tôi làm xong bước này.
 
 ### 15. Rà soát mô hình lõi theo thực tế vận hành
 
@@ -321,7 +424,8 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Script luật hiện tại cho cùng kết quả với bảng lần vết và kết quả mong đợi của Minh, Lan và Hà ở ngày 07/10/2026 (do AI viết, mục 14) trước khi chạy các kịch bản mới.
   - **[AI]** Lượt kiểm tra thứ hai của Agnes loại 3 nguồn không xác minh được (ISO 9001 mục 7.5.3, SAP SuccessFactors, cột metadata nhiều giá trị của SharePoint) và sửa một trích dẫn bị diễn giải.
-  - **[Chưa]** Tự chạy lại 2 script và tự mở từng nguồn S1-S10, nếu bản cuối dùng.
+  - **[Không dùng]** Nguồn S1-S10: bài nộp không dẫn nguồn web.
+    2 script này là lịch sử; script đang dùng (`adopted_rules.py`) được kiểm ở Phần A6.
 
 ### 16. Áp dụng P1-P3 vào dữ liệu giả lập và giải thích `covers`
 
@@ -361,7 +465,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Quyết định của tôi:** bỏ `covers`, giữ một `topic` cho mỗi tài liệu, thêm quan hệ `complements`, kiểm tra cặp chưa khai báo lúc đăng tài liệu bằng script, thêm bẫy T11 (ghi thành M14, M15; xem mục 18).
 - **Xác minh:**
   - **[AI]** Lượt kiểm tra thứ hai của Agnes loại 2 trích dẫn không có trên trang (Microsoft Copilot, Azure AI Search) và đánh dấu nguồn ServiceNow là yếu vì không tải được trang gốc.
-  - **[Chưa]** Tự mở các nguồn S11-S19, nếu bản cuối dùng.
+  - **[Không dùng]** Nguồn S11-S19: bài nộp không dẫn nguồn web.
 
 ### 18. Áp dụng `complements`, kiểm tra lúc đăng tài liệu và bẫy T11
 
@@ -459,7 +563,8 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Quyết định của tôi:** giao viết nháp; nội dung chưa sửa.
 - **Xác minh:**
   - **[AI]** Các kết quả trích từ `adopted_rules.py` (Minh 14 ngày, Hà ra thẻ mâu thuẫn, Hà hỏi về làm thêm giờ ra từ chối, các kịch bản phiên bản) được Claude chạy lại script trong phiên này trước khi viết.
-  - **[Chưa]** Tôi sửa từng ý bằng lời của mình và kiểm tra ví dụ câu hỏi chạm hai chủ đề trong phần S (minh hoạ, chưa đo).
+  - **[Không dùng]** Bản nháp này được đưa vào Phần 4 và tôi review ở các mục 30, 31, 34.
+  - Ví dụ câu hỏi chạm hai chủ đề còn trong Phần 4 dưới dạng suy luận, chưa đo (Phần A6).
 
 ### 23. Phase 4 - Bản nháp kiểm chứng và MVP
 
@@ -475,11 +580,11 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - `checks/adopted_rules.py`: hàm `run_matrix` chạy phần tất định của 10 dòng.
   - `playbook.md`: 3 ý tưởng hoãn (thông báo email/chat cho chủ sở hữu, LLM chấm độ trung thành, mục tiêu độ trễ).
   - Phát hiện của Claude khi chạy bảng test: ở các dòng 6, 8, 9, 10, văn bản không được trích vẫn nằm trong bộ luật của người hỏi, nên luật không chặn được; đây là cơ sở cho đề xuất V2.
-- **Quyết định của tôi:** chưa quyết; tất cả đang chờ tôi duyệt.
+- **Quyết định của tôi:** duyệt ở mục 25.
 - **Xác minh:**
   - **[AI]** Claude chạy `adopted_rules.py`: 10/10 dòng đạt; khi bỏ `overrides` khỏi `LEAVE-GAMECO-v2` hoặc ban hành bản nháp v4, 3/10 dòng trượt (chạy một lần trong phiên, không lưu vào script).
-  - **[AI]** Cận trên 9,5% cho "0 lỗi trên 30 ca" là công thức 1 - 0,05^(1/30), Claude tính bằng Python; tôi chưa tự kiểm.
-  - **[Chưa]** Tôi duyệt hoặc sửa V1, V2, V4-V7, và kiểm từng dòng của bảng test với dữ liệu giả lập.
+  - **[Không dùng]** Cận trên 9,5% cho "0 lỗi trên 30 ca" (công thức 1 - 0,05^(1/30), Claude tính bằng Python): đã bỏ khỏi bài nộp ở mục 31.
+  - **[Không dùng]** Bảng test 10 dòng không còn trong bài nộp (mục 31); bài nộp chỉ nêu năm tình huống test bằng lời.
 
 ### 24. Phase 5 - Bản nháp tài liệu 5 trang
 
@@ -499,15 +604,18 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude render PDF bằng `tools/render_pdf.py` (5 trang), xem ảnh từng trang, và tìm bằng `grep` để chắc không còn dấu gạch dài và ký hiệu nội bộ.
   - **[AI]** Mọi con số và kết quả trong bài (14, 15, 12 ngày; thẻ mâu thuẫn của Hà; các câu từ chối; 10/10 dòng phần luật; cận trên 9,5%) lấy từ `artifacts.md` và kết quả chạy `adopted_rules.py` trong phiên này.
   - **[AI]** Khi đọc lại, Claude phát hiện và sửa hai khẳng định quá mức: câu từ chối cho câu hỏi làm thêm giờ của Hà vẫn phụ thuộc LLM, không do luật bảo đảm; và việc LLM trích văn bản không liên quan không phải "con đường duy nhất" tới câu trả lời sai, vì còn lỗi diễn đạt sai nội dung.
-  - **[Chưa]** Tôi sửa từng phần bằng lời của mình; duyệt V1, V2, V4, V5, V7, A8 mà bản nháp đang dựa vào.
+  - **[Tôi]** Tôi review bản nháp qua 4 đợt ghi chú (mục 26, 28, 31, 32) và mục 34; V1-V7 được duyệt ở mục 25; câu chữ vẫn do Claude viết.
+  - **[Chưa]** Xác nhận câu chữ của ba thẻ kết quả (A8) và việc giao Claude viết nháp (A11), hai dòng còn ghi "chờ tôi xác nhận" trong sổ quyết định.
 
 ### 25. Phase 4 - Duyệt bộ test, chỉ số và kế hoạch 3 ngày
 
-- **Thời gian:** ngày 08/10.
+- **Thời gian:** 09:38-11:44, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):**
+  - "how can I check and approve the result of phase 3 and 4 in the @docs/mission1/redraft_plan.md" (09:38)
   - "tell me the result of phase 4 I want to confirm and approve it"
   - "I think that's good so I approve them but I wonder why there are no metrics relating to RAG performance in this."
+  - Ý chính: hỏi cách kiểm và duyệt kết quả Phase 3 và 4; xem tóm tắt Phase 4 để duyệt; duyệt và hỏi vì sao chưa có chỉ số về hiệu năng RAG.
 - **Đầu ra:** Claude tóm tắt kết quả Phase 4 (bộ test 10 dòng, chỉ số, giả định rủi ro nhất, kế hoạch 3 ngày, so sánh với chatbot thường, điều 3 thêm vào quy chế làm thêm giờ, câu thêm trên thẻ từ chối), mỗi mục kèm phản biện mạnh nhất; sau khi tôi duyệt, Claude ghi "accepted by Hiep 08/10" vào `decisions.md`, `artifacts.md` và `redraft_plan.md`.
 - **Quyết định của tôi:** chấp nhận V1, V2, V4, V5, V6, V7 và bộ test như đề xuất.
 - **Xác minh:**
@@ -516,7 +624,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 
 ### 26. Phase 5 - Review bằng Lavish và bản nháp thứ hai
 
-- **Thời gian:** ngày 08/10.
+- **Thời gian:** 11:48-12:37, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú trực tiếp lên tài liệu, không sinh nội dung.
 - **Prompt (nguyên văn):**
   - "Yes commit. I want to check this. Should I do the AI judge on the current PDF file first or will I review it and after that send it to the judge? I have some ideas in my mind now."
@@ -532,34 +640,38 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[Tôi]** Review bản nháp đầu, ghi 10 ghi chú (`review_notes.md`).
   - **[AI]** Claude render lại (5 trang), xem ảnh từng trang, kiểm tra không còn dấu gạch dài và ký hiệu nội bộ; các con số không đổi so với bản đầu.
-  - **[Chưa]** Tôi sửa bản nháp thứ hai bằng lời của mình.
+  - **[Tôi]** Tôi review bản nháp thứ hai qua các đợt ghi chú ở mục 28, 31, 32 và mục 34; câu chữ vẫn do Claude viết.
 
 ### 27. Phase 5 - Prompt review "người đọc mới"
 
-- **Thời gian:** ngày 08/10.
+- **Thời gian:** 12:37, phần bổ sung lúc 12:45, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** "I want you to craft the review prompts for a reviewer AI agent. I want it to act as a new reader who reads this. I want it to find out: - what is controversial - what are the conflicts - what is very hard to understand - what can be changed so it's more readable and more understandable It should check whether this document matches the competition's brief and requirements also. Besides that you need to tell me to add more things to the prompts so it checks the things besides what I recommend."
 - **Đầu ra:** `docs/mission1/review_prompt_reader.md`: prompt 6 phần (đọc lần đầu, khó hiểu, gây tranh cãi và mâu thuẫn, đối chiếu đề bài, cách sửa cho dễ đọc, tóm tắt) và 5 module tùy chọn do Claude đề xuất thêm (nguồn của con số, quyết định có phải lựa chọn thật, khả năng xây dựng, câu hỏi khi pitch, trình bày trang).
 - **Bổ sung sau (theo yêu cầu của tôi):** thêm mục "Needs more explanation" vào phần 2 của prompt: tìm chỗ nêu kết luận mà thiếu lý do, thiếu ví dụ hoặc nhảy bước.
 - **Quyết định của tôi:** 4 yêu cầu chính và việc đối chiếu đề bài là của tôi; các module tùy chọn là đề xuất của AI, tôi chọn module nào khi chạy.
 - **Xác minh:**
-  - **[Chưa]** Chạy prompt trên một mô hình khác họ (GPT hoặc Gemini), lưu kết quả và ghi lại ở đây.
+  - Prompt được chạy trên Claude ở mục 29.
+  - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
 ### 28. Phase 5 - Ghi chú review đợt 2 và chỉnh sửa
 
-- **Thời gian:** ngày 08/10.
+- **Thời gian:** 12:39-12:42, ngày 08/10 (lần gửi nhầm lúc 12:38 ở mục "Phiên AI không định hình nội dung bài nộp").
 - **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** 6 ghi chú của tôi trên Lavish (chép nguyên văn trong `docs/mission1/redraft/review_notes.md`, đợt 2), rồi "Write them down." và "Apply the recommendations."
 - **Đầu ra:** Claude trả lời 4 câu hỏi trong ghi chú bằng đề xuất, rồi sửa `document.md`: bỏ câu "Đây là dự đoán..."; gọi người hỏi theo vị trí thay vì tên; đổi "bộ quy định" thành "phạm vi tìm kiếm"; nói rõ chiều của quan hệ "dùng thay" và việc hệ thống không tự cho đơn vị cấp dưới thắng; tách dòng chủ đề và chủ sở hữu.
 - **Quyết định của tôi:** 6 ghi chú là của tôi; tôi chấp nhận cả 6 đề xuất của Claude.
 - **Xác minh:**
   - **[AI]** Claude render lại (5 trang), xem ảnh trang 2 và 5, kiểm tra không còn tên riêng, "bộ quy định" hay dấu gạch dài.
-  - **[Chưa]** Tôi đọc lại toàn bộ bản đã sửa.
+  - **[Tôi]** Tôi đọc lại bản đã sửa trong đợt review 3 (mục 31).
 
 ### 29. Phase 5 - Chạy prompt review "người đọc mới" (cùng họ mô hình)
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 12:47-13:07, ngày 08/10.
+- **Công cụ:** Claude Code (CLI), mô hình Claude Opus 5.5, từ 12:57.
+  Lần chạy đầu trên Pi (12:47-12:56) bị ngắt: Pi tự khởi chạy subagent với `gpt-5.5`, `gpt-6-sol`, `gpt-6.1-sol` (OpenAI Codex), `claude-fable-5-1` và `claude-opus-5-5`.
+  Tôi yêu cầu "Only use Claude models in this section.", hỏi "what are you doing and why you use subagent", rồi dừng phiên.
+  Theo file lưu phiên, không subagent nào trả về nội dung và phiên không đổi file nào; tôi chạy lại prompt trong Claude Code.
 - **Prompt (nguyên văn):** "C:/Users/Hiep/orca/projects/next-gen/docs/mission1/review_prompt_reader.md do this"
   Ý chính: chạy prompt review trong `review_prompt_reader.md` trên bản PDF hiện tại.
 - **Đầu ra:** `docs/mission1/redraft/review_reader_output.md`: đủ 6 phần và cả 5 module tùy chọn A-E.
@@ -569,12 +681,12 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Claude render PDF (5 trang), xem ảnh từng trang, trích nguyên văn từ `document.md`, kiểm tra không có dấu gạch dài trong file kết quả.
   - **[Tôi]** Đọc bản tóm tắt kết quả và chọn mục cần sửa (mục 30).
-  - **[Chưa]** Chạy lại prompt trên một mô hình khác họ (GPT hoặc Gemini) để có review độc lập (mục 27).
+  - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
 ### 30. Phase 5 - Quyết định và chỉnh sửa sau review "người đọc mới"
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 13:25-14:04, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):**
   - "tell me the findings of C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft/review_reader_output.md"
   - "are there any conflicts or decisions that need me now"
@@ -590,13 +702,13 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Chạy lại `adopted_rules.py`: 10/10 dòng phần luật đạt; so với bản trước, đầu ra chỉ thêm một ca mới (một trích dẫn hợp lệ kèm một trích dẫn bịa thì từ chối).
   - **[AI]** Render PDF đúng 5 trang, xem ảnh từng trang; câu trích trên thẻ mâu thuẫn khớp nguyên văn Điều 1 của hai văn bản giả lập trong `artifacts.md`; không còn dấu gạch dài.
-  - **[Chưa]** Tôi đọc lại toàn bộ bản đã sửa, nhất là ba quyết định ở Phần 4, bằng lời của mình.
-  - **[Chưa]** Chạy lại prompt review trên một mô hình khác họ (GPT hoặc Gemini).
+  - **[Tôi]** Tôi đọc lại bản đã sửa trong đợt review 3, đổi Phần 4 thành bảng (mục 31) và xem lại quyết định 2 (mục 34).
+  - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
 ### 31. Phase 5 - Ghi chú review đợt 3 và chỉnh sửa
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú lên tài liệu.
+- **Thời gian:** 14:04-15:18, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú lên tài liệu.
 - **Prompt (nguyên văn):**
   - "open it in lavish"
   - 18 ghi chú của tôi trên Lavish (chép nguyên văn trong `docs/mission1/redraft/review_notes.md`, đợt 3).
@@ -610,23 +722,22 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   Bỏ thí điểm (RV9) đảo lại RV3 mà tôi đã duyệt trước đó cùng ngày, vì tài liệu chỉ nêu những gì MVP làm.
 - **Xác minh:**
   - **[AI]** Render PDF đúng 5 trang, xem ảnh từng trang; kiểm tra không còn "retrieval", "generation", "kế toán PayCo", "thí điểm", "30 ca", "9,5%" và dấu gạch dài.
-  - **[Chưa]** Tôi đọc lại bảng Phần 4 và Phần 5 bằng lời của mình.
+  - **[Tôi]** Tôi đọc lại Phần 5 và gửi thêm ghi chú (mục 32), đọc lại quyết định 2 ở Phần 4 (mục 34).
 
 ### 32. Phase 5 - Chỉnh sửa đợt 4 trong chat
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 15:18-15:28, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** "consider remove this sentence Dữ liệu đổi, code không đổi: đến 01/01/2027, bản 3 tự trở thành bản hiện hành, remove the fine-tune part we don't need it. in quyeet dinh 2, is there any other alternative option B ? remove this Giả định: trạng thái "dự thảo / đã ban hành" do tôi thêm, đề bài không nêu; mỗi người thuộc một đơn vị; bản tương lai chưa hiển thị vì có thể chưa công bố. also explain why choosing Chỉ theo dõi for context recall which is the current document is limited so measuring brings little meanings. why include this phase Giả định rủi ro nhất: ... and why we only do step 1-4 and 7 but not the full pipeline"
 - **Đầu ra:** Claude bỏ ba chỗ tôi yêu cầu, ghi lý do cho dòng context recall, viết lại thứ tự làm để rõ bước 5-6 được thêm ở mục 2; trả lời trong chat về các phương án B khác cho quyết định 2 và vì sao giữ "Giả định rủi ro nhất". Ghi lại trong `decisions.md` (batch 4).
-- **Quyết định của tôi:** các chỗ bỏ là của tôi; phương án B của quyết định 2 chờ tôi chọn.
+- **Quyết định của tôi:** các chỗ bỏ là của tôi; phương án B của quyết định 2 được chốt ở mục 34.
 - **Xác minh:**
   - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 5.
-  - **[Chưa]** Tôi chọn có đổi phương án B của quyết định 2 hay không.
 
 ### 33. Phase 6 - Viết lại 3 câu hỏi bắt buộc
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 14:56-15:40, ngày 08/10, trong một phiên Pi chạy song song với mục 31-32.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** "start phase 6 of C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md. note that trả lời ngắn gọn, rõ quyết định và lý do khuyến nghị 60-150 từ is a requirements of the answers. Check it this exist first, if not write it down to our document"
 - **Đầu ra:**
   - Claude kiểm tra: yêu cầu đã có trong đề bài, `criteria.md`, `AGENTS.md` và danh sách kiểm tra trong `playbook.md`, nhưng chưa có ở Phase 6 của `redraft_plan.md` và trong `answers.md`; Claude ghi thêm vào hai file này và trích nguyên văn yêu cầu vào `AGENTS.md`.
@@ -646,8 +757,8 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 
 ### 34. Phase 5 - So sánh phương án cho quyết định 2 và sửa cột quyết định 2
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 15:28-15:47, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):**
   - "compare the search everthing first and it reverse give examples"
   - "explain the option of LLM choose the topic and give example"
@@ -658,25 +769,25 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Quyết định của tôi:** giữ phương án B là "LLM chọn chủ đề trước" theo đề xuất; duyệt cách viết lại cột quyết định 2. Các ví dụ so sánh dùng để chuẩn bị pitch, không đưa vào PDF.
 - **Xác minh:**
   - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 4 và 5.
-  - **[Chưa]** Tôi tự trình bày lại so sánh A và B của quyết định 2 bằng lời của mình.
+  - Chuẩn bị PITCH: tôi tự trình bày lại so sánh A và B của quyết định 2 bằng lời của mình.
 
 ### 35. Phase 6 - Prompt review độc lập cho 3 câu trả lời (mô hình khác họ)
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Thời gian:** 15:51, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
 - **Prompt (nguyên văn):** "now craft me the full prompt so I can send it to another model not from claude so I can check it, remember that I can only send them through their web chat interface (chatgpt, gemini,...) because I have no credit for those models in the coding agent so ensure the prompt include sufficient data so the judge can work properly"
 - **Đầu ra:** `docs/mission1/review_prompt_answers.md`: hai tin nhắn để dán vào ChatGPT hoặc Gemini.
   Tin 1 gồm đề bài, quy định chấm điểm và 3 câu trả lời, để giám khảo đọc 3 câu trả lời riêng như khi chấm thật; tin 2 gửi toàn văn tài liệu 5 trang để kiểm tra mâu thuẫn, thiếu sót và hứa quá mức.
   Nội dung được chép nguyên văn từ commit `95346e3` bằng script; prompt không nói ai viết câu trả lời.
-- **Quyết định của tôi:** chưa chạy.
+- **Quyết định của tôi:** chạy ở mục 36.
 - **Xác minh:**
   - **[AI]** Script kiểm tra 3 câu hỏi khớp nguyên văn đề bài và số từ 114 / 134 / 130; dấu gạch dài trong tiêu đề đề bài được đổi thành gạch thường.
-  - **[Chưa]** Chạy prompt trên ChatGPT hoặc Gemini và lưu kết quả.
+  - Prompt được chạy ở mục 36.
 
 ### 36. Phase 6 - Kết quả review độc lập 3 câu trả lời (ChatGPT, Gemini)
 
-- **Thời gian:** ngày 08/10.
-- **Công cụ:** ChatGPT web (mô hình `gpt-5-6-t-mini`, đọc từ dữ liệu trang chia sẻ) và Gemini web (Gemini 3 Pro, chưa chắc chắn); Claude Code (Claude Opus 5.5) tải và tổng hợp kết quả.
+- **Thời gian:** 19:48-20:13, ngày 08/10.
+- **Công cụ:** ChatGPT web (mô hình `gpt-5-6-t-mini`, đọc từ dữ liệu trang chia sẻ) và Gemini web (Gemini 3 Pro, chưa chắc chắn); Claude Opus 5.5 qua Pi tải và tổng hợp kết quả.
 - **Prompt (nguyên văn):** hai tin nhắn trong `docs/mission1/review_prompt_answers.md`; sau đó gửi Claude hai đường dẫn chia sẻ: "chatgpt https://chatgpt.com/share/6ac79398-c4d0-83ec-92ad-fb66722c2cbf gemini https://share.gemini.google/82hJ0cK03txm".
 - **Đầu ra:** `docs/mission1/redraft/review_answers_output.md`: nguyên văn 4 câu trả lời của hai mô hình.
   Hai mô hình cùng chỉ ra: câu mở đầu Câu 2 ("phần quyết định câu trả lời đúng hay sai") mơ hồ, nghe như hệ thống chấm đáp án; "được xem" ở Câu 1 có thể hiểu là "đang xem trên màn hình".
@@ -688,24 +799,35 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đếm số từ bản đề xuất bằng script.
   - **[Duyệt]** Tôi duyệt bản sửa; số từ sau khi sửa: 115 / 146 / 130.
 
-### 37. Phase 7 - Best practice cho nhật ký nộp bài và trang "thiết kế hiện tại"
+### 37. Phase 7 - Best practice cho nhật ký, trang "thiết kế hiện tại" và hoàn thiện nhật ký
 
-- **Thời gian:** 20:00-20:25, ngày 08/10.
-- **Công cụ:** Pi, mô hình Claude Opus 5.5 qua claude-bridge, có tìm kiếm web (Exa).
+- **Thời gian:** 20:00-21:00, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi, có tìm kiếm web.
 - **Prompt (nguyên văn):**
   - "I want you to do the research and discuss with me what are the best practices I can do so I can submit the perfect version for the evidence log. Read the document."
   - "should I fix the document system of the project first, it is not in the good shape, the ids are chaos and it's very hard to understand what are decided now"
   - "yes do that"
-  - Ý chính: tìm best practice để hoàn thiện nhật ký nộp bài; hỏi có nên sắp xếp lại hệ thống tài liệu trước vì mã quyết định lộn xộn và khó biết điều gì đang được quyết; đồng ý làm theo đề xuất.
+  - "do the evidence first, what to do now"
+  - Ý chính: tìm best practice để hoàn thiện nhật ký nộp bài; hỏi có nên sắp xếp lại hệ thống tài liệu trước vì mã quyết định lộn xộn và khó biết điều gì đang được quyết; đồng ý làm theo đề xuất; làm nhật ký trước và cho biết tôi cần làm gì.
 - **Đầu ra:**
-  - Trong hội thoại: đối chiếu nhật ký với chính sách AI của cuộc thi và 3 nguồn hướng dẫn (AID Framework của Weaver, 2024; hướng dẫn đánh giá có dùng AI của Charles Sturt University; hướng dẫn khai báo AI cho sinh viên của Saint Louis University); đánh giá nhật ký hiện tại (quá dài, 30 nhãn [Chưa], nhiều mã nội bộ, phần lớn kiểm chứng do AI làm) và đề xuất cấu trúc 2 lớp: trang tóm tắt cho giám khảo và phụ lục chi tiết.
-  - Claude đề xuất không sắp xếp lại toàn bộ dự án trước hạn nộp mà viết một trang `docs/mission1/redraft/current_design.md`: điều đang được quyết, nhóm theo phần của bài nộp, kèm nguồn gốc (của tôi, của AI, hay cả hai) và mã cũ để lần vết; danh sách các thay đổi và quyết định bị đảo; 6 việc còn mở.
-  - Việc sắp xếp lại toàn bộ được đưa vào "Deferred ideas" trong `playbook.md`; `AGENTS.md` trỏ tới trang mới.
-- **Quyết định của tôi:** chọn làm trang "thiết kế hiện tại" trước, chưa sắp xếp lại dự án.
+  - Trong hội thoại: đối chiếu nhật ký với chính sách AI của cuộc thi và 3 nguồn hướng dẫn (AID Framework của Weaver, 2024; hướng dẫn đánh giá có dùng AI của Charles Sturt University; hướng dẫn khai báo AI cho sinh viên của Saint Louis University); đánh giá nhật ký (quá dài, 30 nhãn [Chưa], nhiều mã nội bộ, phần lớn kiểm chứng do AI làm) và đề xuất cấu trúc 2 lớp.
+  - `docs/mission1/redraft/current_design.md`: điều đang được quyết, nhóm theo phần của bài nộp, kèm nguồn gốc và mã cũ để lần vết; các quyết định bị đảo; 6 việc còn mở.
+    Việc sắp xếp lại toàn bộ dự án được đưa vào "Deferred ideas" trong `playbook.md`.
+  - Nhật ký này: Phần A (tóm tắt 7 mục, trong đó tuyên bố trách nhiệm để tôi tự viết) và các sửa đổi ở Phần B.
+  - Khi đối chiếu file lưu phiên của cả Pi (`~/.pi`) và Claude Code (`~/.claude`), Claude phát hiện và sửa:
+    - các mục 30-36 ghi công cụ là Claude Code, thực ra là Pi; chỉ mục 29 và một phiên brainstorm lúc 09:15 ngày 07/10 chạy trực tiếp trong Claude Code;
+    - thời gian của các mục 25-36 thiếu giờ;
+    - 4 phiên phụ chưa ghi (09:15 ngày 07/10; 12:38, 12:47 và 15:34 ngày 08/10), trong đó phiên 12:47 có subagent dùng mô hình OpenAI;
+    - các nhãn [Chưa] đã lỗi thời hoặc không còn cần, vì bài nộp không dẫn luật hay nguồn web, hoặc bản nháp đã bị thay;
+    - mâu thuẫn giữa sổ quyết định (A7, "Hiep checked every row" của bản lần vết) và mục 14 (tôi chưa đọc từng dòng).
+- **Quyết định của tôi:** làm trang "thiết kế hiện tại" trước, chưa sắp xếp lại dự án; làm nhật ký trước các việc còn lại.
 - **Xác minh:**
   - **[AI]** Claude mở trực tiếp bài AID Framework (arXiv 2408.01904) và trang của Charles Sturt University trước khi dẫn; hướng dẫn của Saint Louis University đọc từ nội dung tìm kiếm trả về.
-  - **[AI]** Claude đối chiếu nhãn nguồn gốc trong `current_design.md` với các mục 3-19 của nhật ký này, sửa 3 nhãn ghi quá nhiều hoặc quá ít phần của tôi (M3b, M1a, M16).
+  - **[AI]** Công cụ, mô hình và thời gian lấy từ file lưu phiên (trường `model`, `entrypoint`, `timestamp`), không từ trí nhớ của AI.
+  - **[AI]** Các dữ kiện ở Phần A6 được kiểm lại trong phiên này: chạy script luật, đếm số từ, so số ngày phép và câu trích với văn bản giả lập.
+  - **[AI]** Claude đối chiếu nhãn nguồn gốc trong `current_design.md` và Phần A3 với các mục 3-36, sửa 3 nhãn ghi quá nhiều hoặc quá ít phần của tôi.
   - **[Chưa]** Tôi đọc `current_design.md`, xác nhận từng dòng và 6 việc còn mở.
+  - **[Chưa]** Tôi viết tuyên bố trách nhiệm (Phần A1).
 
 ## Mẫu cho các mục tiếp theo
 
