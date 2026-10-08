@@ -688,6 +688,25 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đếm số từ bản đề xuất bằng script.
   - **[Duyệt]** Tôi duyệt bản sửa; số từ sau khi sửa: 115 / 146 / 130.
 
+### 37. Phase 7 - Best practice cho nhật ký nộp bài và trang "thiết kế hiện tại"
+
+- **Thời gian:** 20:00-20:25, ngày 08/10.
+- **Công cụ:** Pi, mô hình Claude Opus 5.5 qua claude-bridge, có tìm kiếm web (Exa).
+- **Prompt (nguyên văn):**
+  - "I want you to do the research and discuss with me what are the best practices I can do so I can submit the perfect version for the evidence log. Read the document."
+  - "should I fix the document system of the project first, it is not in the good shape, the ids are chaos and it's very hard to understand what are decided now"
+  - "yes do that"
+  - Ý chính: tìm best practice để hoàn thiện nhật ký nộp bài; hỏi có nên sắp xếp lại hệ thống tài liệu trước vì mã quyết định lộn xộn và khó biết điều gì đang được quyết; đồng ý làm theo đề xuất.
+- **Đầu ra:**
+  - Trong hội thoại: đối chiếu nhật ký với chính sách AI của cuộc thi và 3 nguồn hướng dẫn (AID Framework của Weaver, 2024; hướng dẫn đánh giá có dùng AI của Charles Sturt University; hướng dẫn khai báo AI cho sinh viên của Saint Louis University); đánh giá nhật ký hiện tại (quá dài, 30 nhãn [Chưa], nhiều mã nội bộ, phần lớn kiểm chứng do AI làm) và đề xuất cấu trúc 2 lớp: trang tóm tắt cho giám khảo và phụ lục chi tiết.
+  - Claude đề xuất không sắp xếp lại toàn bộ dự án trước hạn nộp mà viết một trang `docs/mission1/redraft/current_design.md`: điều đang được quyết, nhóm theo phần của bài nộp, kèm nguồn gốc (của tôi, của AI, hay cả hai) và mã cũ để lần vết; danh sách các thay đổi và quyết định bị đảo; 6 việc còn mở.
+  - Việc sắp xếp lại toàn bộ được đưa vào "Deferred ideas" trong `playbook.md`; `AGENTS.md` trỏ tới trang mới.
+- **Quyết định của tôi:** chọn làm trang "thiết kế hiện tại" trước, chưa sắp xếp lại dự án.
+- **Xác minh:**
+  - **[AI]** Claude mở trực tiếp bài AID Framework (arXiv 2408.01904) và trang của Charles Sturt University trước khi dẫn; hướng dẫn của Saint Louis University đọc từ nội dung tìm kiếm trả về.
+  - **[AI]** Claude đối chiếu nhãn nguồn gốc trong `current_design.md` với các mục 3-19 của nhật ký này, sửa 3 nhãn ghi quá nhiều hoặc quá ít phần của tôi (M3b, M1a, M16).
+  - **[Chưa]** Tôi đọc `current_design.md`, xác nhận từng dòng và 6 việc còn mở.
+
 ## Mẫu cho các mục tiếp theo
 
 Chạy `python tools/ai_sessions.py` để thấy mọi phiên và kiểm tra phiên nào chưa có mục.
