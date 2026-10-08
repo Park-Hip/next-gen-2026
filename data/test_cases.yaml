@@ -1,0 +1,100 @@
+# Test matrix (giả lập), the 10 rows of artifacts.md "Phase 4 - Test matrix".
+# expected: answer | conflict | refusal
+# must_cite: what a correct answer cites; for the conflict row, the card shows both documents of the pair.
+# forbidden_by_rules: outside the asker's scope, so rules guarantee they are never cited.
+# forbidden_for_llm: inside the scope but they do not answer the question, so only the LLM can avoid citing them.
+# phrasings: Mission 2 asks every row as written, as a paraphrase without the key word, and in "văn nói";
+#   only row 1 has its phrasings written yet.
+- n: 1
+  persona: minh
+  as_of: 2026-10-07
+  question: Phép năm của tôi là bao nhiêu ngày?
+  phrasings:
+    paraphrase: Năm nay tôi được nghỉ mấy ngày?
+    van_noi: Em được off mấy ngày phép một năm?
+  expected: answer
+  key_facts: [14 ngày]
+  must_cite: [LEAVE-GAMECO-v2]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-PAYCO-v1]
+  forbidden_for_llm: []
+- n: 2
+  persona: minh
+  as_of: 2027-01-01
+  question: Phép năm của tôi là bao nhiêu ngày?
+  expected: answer
+  key_facts: [15 ngày]
+  must_cite: [LEAVE-GAMECO-v3]
+  forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-GAMECO-v1, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  forbidden_for_llm: []
+- n: 3
+  persona: minh
+  as_of: 2026-10-07
+  question: Tôi xin nghỉ phép ở đâu, ai duyệt?
+  expected: answer
+  key_facts: [hệ thống HR, trưởng nhóm]
+  must_cite: [LEAVE-PROC-GAMECO-v1]
+  may_cite: [LEAVE-GAMECO-v2]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1]
+  forbidden_for_llm: []
+- n: 4
+  persona: minh
+  as_of: 2026-10-07
+  question: Ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không?
+  expected: answer
+  key_facts: [không trừ]
+  must_cite: [OT-GAMECO-v1]
+  may_cite: [LEAVE-GAMECO-v2]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1]
+  forbidden_for_llm: []
+- n: 5
+  persona: lan
+  as_of: 2026-10-07
+  question: Phép năm của tôi là bao nhiêu ngày?
+  expected: answer
+  key_facts: [12 ngày]
+  must_cite: [LEAVE-GROUP-v1]
+  forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PAYCO-v1]
+  forbidden_for_llm: []
+- n: 6
+  persona: lan
+  as_of: 2026-10-07
+  question: Nhân sự GameCo được nghỉ phép năm bao nhiêu ngày?
+  expected: refusal
+  must_cite: []
+  forbidden_by_rules: [LEAVE-GAMECO-v2]
+  forbidden_for_llm: [LEAVE-GROUP-v1]
+- n: 7
+  persona: ha
+  as_of: 2026-10-07
+  question: Phép năm của tôi là bao nhiêu ngày?
+  expected: conflict
+  conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_cite: [LEAVE-PAYCO-v1]
+  forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
+  forbidden_for_llm: []
+- n: 8
+  persona: ha
+  as_of: 2026-10-07
+  question: Làm thêm giờ có cần ai duyệt trước không?
+  expected: refusal
+  must_cite: []
+  forbidden_by_rules: [OT-GAMECO-v1]
+  forbidden_for_llm: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+- n: 9
+  persona: ha
+  as_of: 2026-10-07
+  question: Đi công tác được hỗ trợ ăn uống bao nhiêu một ngày?
+  expected: refusal
+  must_cite: []
+  forbidden_by_rules: [TRAVEL-GAMECO-v1]
+  forbidden_for_llm: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+- n: 10
+  persona: minh
+  as_of: 2026-10-07
+  question: Khung bậc lương của GameCo thế nào?
+  expected: refusal
+  # Same refusal text as row 9 apart from the unit; no salary figure and no document title.
+  must_not_contain: [triệu, Khung bậc lương GameCo, bậc 3]
+  must_cite: []
+  forbidden_by_rules: [SAL-BAND-GAMECO]
+  forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1, OT-GAMECO-v1, TRAVEL-GAMECO-v1]

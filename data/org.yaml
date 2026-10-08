@@ -1,0 +1,17 @@
+# Org tree (giả lập). A document's applies_to covers its unit and every unit below it.
+# hr: who the cards send the asker to; a department uses the HR of the nearest unit above that has one.
+- name: Tập đoàn
+  parent: null
+  hr: HR Tập đoàn
+- name: Nhân sự Tập đoàn
+  parent: Tập đoàn
+- name: GameCo
+  parent: Tập đoàn
+  hr: HR GameCo
+- name: Studio
+  parent: GameCo
+- name: PayCo
+  parent: Tập đoàn
+  hr: HR PayCo
+- name: Kế toán
+  parent: PayCo
