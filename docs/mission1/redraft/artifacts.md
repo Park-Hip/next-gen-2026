@@ -375,7 +375,7 @@ That gives 30 cases; each case is run 3 times because LLM output varies, and a c
 | Retriever | Must-cite chunk among the chunks given to the LLM | Diagnostic, no threshold | It explains over-cautious errors; correctness is judged on the outcome, not on ranking |
 
 Honest limit: 0 failures in 30 cases only shows, with 95% confidence, that the true failure rate is below about 9.5% (computed in `run_matrix`).
-Passing the gates is the precondition for letting employees ask directly, not proof that the answers are always right; the live signal is the "Báo sai" rate in a pilot.
+Passing the gates is the precondition for letting employees ask directly, not proof that the answers are always right; after opening, the live signal is confirmed "Báo sai" reports (the pilot was removed by RV9).
 Latency gets no target in v1: it is logged, and no decision depends on it.
 
 ### 3-day plan (V4)

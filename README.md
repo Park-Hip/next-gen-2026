@@ -7,8 +7,8 @@ All company data in this repository is simulated ("giả lập"); no real Appota
 
 | Mission | Goal | Status |
 |---|---|---|
-| 1 | Understand the problem (5-page analysis) | Redraft, Phase 2 of 7 (see `docs/mission1/redraft_plan.md`) |
-| 2 | Build v1 | Not started |
+| 1 | Understand the problem (5-page analysis) | Submitted 08/10/2026 (`docs/mission1/submitted/`) |
+| 2 | Build v1 | Preparing: data files in `data/`, acceptance checklist in `docs/mission2/mission1_promises.md` |
 | 3 | Adapt to change | Not started |
 
 ## Layout
@@ -16,8 +16,11 @@ All company data in this repository is simulated ("giả lập"); no real Appota
 ```
 docs/competition/   Official brief, rules and AI policy (do not edit)
 docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking phase, redraft plan
-  redraft/          Decision register, simulated data and traces, open issues, production review
+  submitted/        The exact files submitted (do not edit)
+  redraft/          Current design, frozen decision register, simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
+docs/mission2/      Mission 2 preparation: what Mission 1 promised
+data/               Simulated documents, org tree, personas and test cases as files
 evidence_log.md     AI usage log for all missions
 tools/              Helper scripts
 build/              Generated output (not committed)
@@ -41,4 +44,13 @@ No dependencies beyond Python 3.
 
 ```bash
 python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py
+```
+
+## Check the data files
+
+Checks that `data/` matches the simulated data in `docs/mission1/redraft/artifacts.md` and `adopted_rules.py`, then reruns the test matrix on the files.
+Requires PyYAML (`pip install pyyaml`).
+
+```bash
+python -I -X utf8 tools/check_data.py
 ```

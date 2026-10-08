@@ -1,13 +1,15 @@
 # Current design - what is decided now
 
-Snapshot of 08/10/2026, 20:20, after commit `5fe9edb` (answers after A13, `document.md` after review batch 5).
+The single source for the design in force.
+Snapshot of 08/10/2026, 20:20, after commit `5fe9edb`; Mission 1 was submitted at about 21:30 the same day with no design change since.
 Claude draft from `decisions.md`, `document.md` and `answers.md`; Hiep checks it against his own understanding.
 
 How to read this page:
 
 - It lists only what is in force now, grouped by where it shows in the submission.
-- The submitted text (`document.md`, `answers.md`) wins over this page; if they disagree, fix this page.
-- `decisions.md` stays the detailed audit trail; old IDs appear here only in the "Trace" column.
+- The submitted text (`docs/mission1/submitted/`) is what judges hold; Mission 2 is checked against it through `docs/mission2/mission1_promises.md`.
+- `decisions.md` is frozen as the Mission 1 audit trail; old IDs appear here only in the "Trace" column.
+- From Mission 2 on, a decision change is made here: edit the row, add a line to "Changes since submission" with the date, the reason and who decided, and add an evidence log entry if AI shaped it.
 - Origin uses four plain values: **Hiep** (his idea or his call), **Hiep + AI** (Hiep raised the problem or set the direction, AI shaped the solution), **AI, accepted** (AI proposed, Hiep approved), **AI, not reviewed** (still needs Hiep).
 
 ## ID prefixes in `decisions.md`
@@ -118,13 +120,19 @@ Each line is a change of mind; most are Hiep's calls and belong in the evidence 
 | Overtime clause added for test row 4: kept in the data, unused in the PDF | The cross-topic example was cut for length | V6 | AI, accepted |
 | First draft of the 3 answers: rejected | Too long, argued against other options, used internal terms | A12 | Hiep |
 
-## 7. Still open before submission
+## 7. Still open
 
-Found while building this page; each needs Hiep's confirmation or a one-line fix.
+Found while building this page on 08/10.
 
-1. **A8, card wording:** the register still says "AI proposal, not yet reviewed by Hiep", but the cards in the PDF were reworded under RV4, RV8 and V7, which he accepted. Confirm the three cards as they are in Section 2.
-2. **A11, who drafted the PDF:** still "to be confirmed by Hiep", although he has reviewed four batches since. Confirm the delegation in one line.
-3. **Stale lines in `decisions.md`:** the Phase 4 header says "none is decided yet" (all rows were accepted on 08/10); the Phase 5 notes still list V5 (baseline on day 3), which RV10 removed.
-4. **Stale line in `artifacts.md`:** the metrics section still names "the 'Báo sai' rate in a pilot" as the live signal, after RV9 removed the pilot.
-5. **Answer 2 vs Section 5:** Answer 2's day 3 does not mention "Báo sai" or the owners' list, which Section 5's build order includes. This was intentional (A12: plain words, no internal terms), so a judge may see a small difference; keep or align.
-6. **Hiep's own walk-through:** read sections 1-6 of this page and confirm he can explain each row aloud; mark any row he cannot.
+1. **A8, card wording:** the register still says "AI proposal, not yet reviewed by Hiep", but the cards in the PDF were reworded under RV4, RV8 and V7, which he accepted. Hiep to confirm the three cards as they are in Section 2.
+2. **A11, who drafted the PDF:** still "to be confirmed by Hiep", although he has reviewed four batches since. Hiep to confirm the delegation in one line.
+3. **Hiep's own walk-through (PITCH prep):** read sections 1-6 of this page and confirm he can explain each row aloud; mark any row he cannot.
+
+Closed after submission:
+
+- Stale lines in `decisions.md` (Phase 4 header, V5 in the Phase 5 notes) and `artifacts.md` (pilot as the live signal): fixed 08/10.
+- Answer 2 vs Section 5 (day 3 without "Báo sai" and the owners' list): kept as submitted; building the Section 5 version satisfies both, see "Tensions" in `docs/mission2/mission1_promises.md`.
+
+## Changes since submission
+
+None yet.

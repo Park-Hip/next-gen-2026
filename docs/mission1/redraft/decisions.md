@@ -1,5 +1,9 @@
 # Decision register - Mission 1 redraft
 
+**Frozen on 08/10/2026, when Mission 1 was submitted.**
+It stays the audit trail behind the submitted text and the evidence log; do not add rows.
+The design in force, and every change from Mission 2 on, is in `current_design.md`.
+
 Every statement in the redrafted document must trace to a row here.
 Origin values: "Hiep", "AI proposal, accepted", "AI proposal, modified", "AI proposal, rejected".
 
@@ -92,7 +96,7 @@ Each one keeps its full row above.
 
 ## Phase 4 - Validation and MVP
 
-Claude drafted these rows in one session; none is decided yet.
+Claude drafted these rows in one session; Hiep accepted them on 08/10, and RV10 later removed V5.
 The tables they refer to are in `artifacts.md`, section "Phase 4"; the deterministic part of the test matrix is run by `checks/adopted_rules.py`.
 
 | ID | Question | Options considered | Chosen | Reason | Would change if | Origin |
@@ -112,7 +116,7 @@ The tables they refer to are in `artifacts.md`, section "Phase 4"; the determini
 
 Notes on the Phase 5 draft (`document.md`, 5 pages when rendered):
 
-- It depends on these rows (all accepted by Hiep 08/10 except A8): V1 (metrics), V2 (riskiest assumption), V4 (the conflict card says "đã ghi nhận để ... xác nhận", the owners' list, the 3-day plan), V5 (baseline on day 3), V7 (the extra line on the refusal card) and A8 (card wording). If any of them changes, the matching lines change.
+- It depends on these rows (all accepted by Hiep 08/10 except A8): V1 (metrics), V2 (riskiest assumption), V4 (the conflict card says "đã ghi nhận để ... xác nhận", the owners' list, the 3-day plan), V5 (baseline on day 3, removed later by RV10), V7 (the extra line on the refusal card) and A8 (card wording). If any of them changes, the matching lines change.
 - V6 is not used: the cross-topic example was cut from Section 4 for length, so the document no longer needs `OT-GAMECO-v1` Điều 3.
 - Cut for length, still in the register: the persona table in Section 1 (Lan and Hà appear in the text and cards), the flow diagram (it rendered too small to read; the 7-step trace table carries the flow), the "Test" field of each decision in Section 4 (the tests are in Section 5), M3b and the refusal rule as assumptions (the flow states them), and the two-unit and AdsCo lines.
 - Section 4 names the three decisions in plain words: who decides which document wins (P), how the question meets the documents (S), employees ask directly or HR first (L).
