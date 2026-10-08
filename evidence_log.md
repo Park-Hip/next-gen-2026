@@ -29,7 +29,7 @@ Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ k
 
 | Công cụ | Mô hình | Dùng để | Mục |
 |---|---|---|---|
-| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-20 |
+| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-22 |
 | Pi | Claude Sonnet 5.5, qua gói đăng ký Claude | Chạy prompt Phase 2; ghi quyết định M16-M17; 2 phiên phụ | 14, 18 |
 | Pi, qua subagent | Agnes 2.5 Flash (Agnes AI), mức suy luận tối đa | Tìm nguồn web và lượt kiểm tra trích dẫn thứ hai; thử thu thập đề từ portal (không dùng) | 15, 17 |
 | Tiện ích của Pi | - | Tìm kiếm web; Lavish (chuyển Markdown thành trang HTML) | 1, 2, 9, 20 |
@@ -429,6 +429,36 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Script đọc trực tiếp file lưu phiên của Pi; mô hình của từng phiên lấy từ trường `model` trong file, không từ trí nhớ của AI.
   - **[AI]** Claude mở trực tiếp trang của 3 khung tham khảo (trang hướng dẫn AID Framework của University of Waterloo, blog IBM Research, tóm tắt trên arXiv) trước khi dẫn.
   - **[Chưa]** Tôi đọc lại toàn bộ nhật ký đã sửa và xác nhận phần đề bài trong `docs/competition/` do tôi tự sao chép từ portal.
+
+### 21. Phase 3 - Chọn lại 3 quyết định cho phần 4
+
+- **Thời gian:** 00:00-00:15, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
+- **Prompt (nguyên văn):**
+  - "start phase 3 of C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md. I want you to read the updated document first and decide whether should we still choose these 3 decisions"
+  - "approve"
+  - Ý chính: bắt đầu Phase 3; đọc lại các quyết định đã cập nhật và đánh giá 3 quyết định tạm chọn ở F4 (P, R, S) có còn đúng không.
+- **Đầu ra:**
+  - Trong hội thoại: Claude đề xuất giữ P, định nghĩa lại S thành quyết định M18, bỏ R (sau M18 không còn trạng thái "không chắc"; nửa về mâu thuẫn chính là M1b nằm trong P, nửa về từ chối không có phương án B mạnh), thay bằng L (nhân sự hỏi trực tiếp hay HR dùng trước).
+  - `decisions.md`: F4r (3 quyết định mới), B1 (nút "Báo sai"), danh sách giả định mỗi dòng một câu.
+  - `artifacts.md`: thêm nút "[Báo sai]" vào thẻ trả lời; `redraft_plan.md`: ghi kết quả Phase 3.
+  - 1 commit riêng cho phần còn lại của Phase 2 (A1-A9, thẻ kết quả, đối chiếu nhật ký) trước khi sửa.
+- **Quyết định của tôi:** chấp nhận toàn bộ đề xuất.
+- **Xác minh:**
+  - **[Duyệt]** Tôi đọc lập luận và đồng ý; không có dữ kiện bên ngoài cần kiểm chứng.
+  - Giới hạn đã ghi trong F4r: Mission 2 chỉ kiểm tra được điều kiện tiên quyết của L, tín hiệu thật (tỷ lệ "Báo sai") cần thí điểm.
+
+### 22. Phase 3 - Bản nháp lập luận A-vs-B cho P, S, L
+
+- **Thời gian:** sau mục 21, cùng phiên, ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
+- **Prompt (nguyên văn):** "you need to do this for me and I will revise it"
+  Ý chính: nhờ Claude viết nháp 3 bảng lập luận của Phase 3 thay vì tôi tự điền mẫu trống; tôi sẽ sửa lại.
+- **Đầu ra:** `docs/mission1/redraft/phase3_decisions.md`, bản nháp tiếng Việt cho P, S, L theo 7 trường (A, B, B làm tốt hơn, tiêu chí, cái giá, B thắng khi, kiểm thử), mỗi quyết định kèm "Điểm giám khảo sẽ hỏi"; dòng A10 trong `decisions.md` ghi việc giao cho AI viết nháp.
+- **Quyết định của tôi:** giao viết nháp; nội dung chưa sửa.
+- **Xác minh:**
+  - **[AI]** Các kết quả trích từ `adopted_rules.py` (Minh 14 ngày, Hà ra thẻ mâu thuẫn, Hà hỏi về làm thêm giờ ra từ chối, các kịch bản phiên bản) được Claude chạy lại script trong phiên này trước khi viết.
+  - **[Chưa]** Tôi sửa từng ý bằng lời của mình và kiểm tra ví dụ câu hỏi chạm hai chủ đề trong phần S (minh hoạ, chưa đo).
 
 ## Mẫu cho các mục tiếp theo
 

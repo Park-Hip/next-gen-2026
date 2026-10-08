@@ -282,6 +282,8 @@ It only changes the unit in the first line.
 >
 > Nguồn: `LEAVE-GAMECO-v2` - Quy chế nghỉ phép GameCo (bản 2), có hiệu lực từ 01/01/2026.
 > Cần hỏi thêm: HR GameCo.
+>
+> [Báo sai]
 
 ### Card 2 - Conflict (Hà)
 
@@ -310,3 +312,5 @@ Notes for Hiep when editing the wording:
    "Đã được báo" is a promise for Mission 2: the MVP must either send that notice or the sentence must go.
 3. The answer card cites only `LEAVE-GAMECO-v2`.
    The procedure is cited only when the answer adds how to apply.
+4. "[Báo sai]" is the report button (B1).
+   It sends the question, the answer, the cited documents and the persona to the owner of each cited document.

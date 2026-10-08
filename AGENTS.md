@@ -20,6 +20,7 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/mission1/redraft/open_issues.md` - gaps found while building the artifacts, with their status.
 - `docs/mission1/redraft/production_review.md` - review of the core model against real practice (Claude draft, findings P1-P9, verified sources).
 - `docs/mission1/redraft/phase2_prompt.md` - session prompt for Phase 2.
+- `docs/mission1/redraft/phase3_decisions.md` - A-vs-B arguments for the 3 decisions in Section 4 (P, S, L; F4r); Claude draft, Hiep revises (A10).
 - `docs/mission1/document.md` - the 5-page submission draft. Outdated: written before the redraft and contradicts M0 and M1c; it is rewritten in Phase 5. Render it with `python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf`.
 - `docs/mission1/answers.md` - the 3 mandatory answers, submitted in a separate field. Outdated; rewritten in Phase 6.
 - `docs/mission1/criteria.md` - what Mission 1 is judged on, and the rewrite principles.

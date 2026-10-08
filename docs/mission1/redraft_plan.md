@@ -88,6 +88,10 @@ For each decision from F4, fill this template in your own words (Vietnamese bull
 Claude critiques each argument as a judge would.
 Decisions that do not make the cut become one line in an assumptions list.
 
+Decided on 08/10 (F4r, B1): the three decisions are P (precedence and conflicts), S redefined as M18 (rulebook first, then retrieval) and L (employees ask directly vs HR first).
+R becomes one line in the assumptions list in `decisions.md`.
+The "Báo sai" button (B1) is on the answer card.
+
 ### Phase 4 - Validation and MVP (1 h)
 
 | ID | Question |
