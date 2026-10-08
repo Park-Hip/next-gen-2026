@@ -136,6 +136,7 @@ So each answer:
 - uses plain words a reader who has not seen the PDF understands, with no internal terms or IDs.
 
 Drafted on 08/10 by Claude (A12), accepted by Hiep on 08/10: `answers.md`, 147 / 148 / 145 words; revised the same day after Hiep's review (shorter, plain words, no internal terms), now 114 / 134 / 130 words.
+Independent review by ChatGPT and Gemini (`redraft/review_answers_output.md`) led to small edits in Answers 1 and 2 (A13), accepted by Hiep on 08/10; now 115 / 146 / 130 words.
 Done; the answers are final unless Phase 7 changes the document they summarise.
 
 ### Phase 7 - Assemble and verify (2 h)

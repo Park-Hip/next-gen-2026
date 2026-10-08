@@ -644,6 +644,50 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đếm lại bằng script: Câu 1 = 114, Câu 2 = 134, Câu 3 = 130 từ; kiểm tra không còn thuật ngữ nội bộ và dấu gạch dài.
   - **[Duyệt]** Tôi duyệt cả 3 câu của bản thứ hai ngày 08/10 (prompt: "approve the answers").
 
+### 34. Phase 5 - So sánh phương án cho quyết định 2 và sửa cột quyết định 2
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):**
+  - "compare the search everthing first and it reverse give examples"
+  - "explain the option of LLM choose the topic and give example"
+  - "explain the comparision of option A and B in this decision"
+  - "is the explanation in the decision table of this case clear, should we improve it"
+  - "approve"
+- **Đầu ra:** Claude giải thích trong chat, kèm ví dụ trên dữ liệu giả lập (thứ hạng tìm kiếm chỉ là minh họa, chưa đo): tìm trên toàn bộ rồi lọc so với lọc trước rồi tìm; phương án LLM chọn chủ đề; so sánh A và B của quyết định 2. Sau đó Claude chỉ ra 4 chỗ chưa rõ trong cột quyết định 2 và đề xuất câu thay thế; sau khi tôi duyệt, Claude sửa `document.md` và ghi vào `decisions.md` (batch 5).
+- **Quyết định của tôi:** giữ phương án B là "LLM chọn chủ đề trước" theo đề xuất; duyệt cách viết lại cột quyết định 2. Các ví dụ so sánh dùng để chuẩn bị pitch, không đưa vào PDF.
+- **Xác minh:**
+  - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 4 và 5.
+  - **[Chưa]** Tôi tự trình bày lại so sánh A và B của quyết định 2 bằng lời của mình.
+
+### 35. Phase 6 - Prompt review độc lập cho 3 câu trả lời (mô hình khác họ)
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Code, mô hình Claude Opus 5.5.
+- **Prompt (nguyên văn):** "now craft me the full prompt so I can send it to another model not from claude so I can check it, remember that I can only send them through their web chat interface (chatgpt, gemini,...) because I have no credit for those models in the coding agent so ensure the prompt include sufficient data so the judge can work properly"
+- **Đầu ra:** `docs/mission1/review_prompt_answers.md`: hai tin nhắn để dán vào ChatGPT hoặc Gemini.
+  Tin 1 gồm đề bài, quy định chấm điểm và 3 câu trả lời, để giám khảo đọc 3 câu trả lời riêng như khi chấm thật; tin 2 gửi toàn văn tài liệu 5 trang để kiểm tra mâu thuẫn, thiếu sót và hứa quá mức.
+  Nội dung được chép nguyên văn từ commit `95346e3` bằng script; prompt không nói ai viết câu trả lời.
+- **Quyết định của tôi:** chưa chạy.
+- **Xác minh:**
+  - **[AI]** Script kiểm tra 3 câu hỏi khớp nguyên văn đề bài và số từ 114 / 134 / 130; dấu gạch dài trong tiêu đề đề bài được đổi thành gạch thường.
+  - **[Chưa]** Chạy prompt trên ChatGPT hoặc Gemini và lưu kết quả.
+
+### 36. Phase 6 - Kết quả review độc lập 3 câu trả lời (ChatGPT, Gemini)
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** ChatGPT web (mô hình `gpt-5-6-t-mini`, đọc từ dữ liệu trang chia sẻ) và Gemini web (Gemini 3 Pro, chưa chắc chắn); Claude Code (Claude Opus 5.5) tải và tổng hợp kết quả.
+- **Prompt (nguyên văn):** hai tin nhắn trong `docs/mission1/review_prompt_answers.md`; sau đó gửi Claude hai đường dẫn chia sẻ: "chatgpt https://chatgpt.com/share/6ac79398-c4d0-83ec-92ad-fb66722c2cbf gemini https://share.gemini.google/82hJ0cK03txm".
+- **Đầu ra:** `docs/mission1/redraft/review_answers_output.md`: nguyên văn 4 câu trả lời của hai mô hình.
+  Hai mô hình cùng chỉ ra: câu mở đầu Câu 2 ("phần quyết định câu trả lời đúng hay sai") mơ hồ, nghe như hệ thống chấm đáp án; "được xem" ở Câu 1 có thể hiểu là "đang xem trên màn hình".
+  ChatGPT thêm: lý do chưa làm ở Câu 2 sai, vì hệ thống nhân sự quyết định đơn vị của người hỏi, nên có ảnh hưởng tới câu trả lời đúng; "mọi ca" và "chắc chắn do AI" nói quá.
+  Cả hai giữ nguyên Câu 3 sau khi đọc tài liệu.
+- **Quyết định của tôi:** duyệt đề xuất của Claude (prompt: "approve"): sửa Câu 1 ("có quyền xem") và Câu 2 (câu mở đầu, "mọi ca kiểm thử", lý do chưa làm), giữ Câu 3, sửa câu tương ứng ở Phần 5 của tài liệu; ghi quyết định A13.
+- **Xác minh:**
+  - **[AI]** Claude đối chiếu từng phát hiện với `answers.md` và `document.md`, loại các đề xuất trái với quyết định đã có (dùng "thẻ mâu thuẫn" và "phạm vi tìm kiếm" trong câu trả lời; cho hỏi bản cũ hoặc bản nháp).
+  - **[AI]** Đếm số từ bản đề xuất bằng script.
+  - **[Duyệt]** Tôi duyệt bản sửa; số từ sau khi sửa: 115 / 146 / 130.
+
 ## Mẫu cho các mục tiếp theo
 
 Chạy `python tools/ai_sessions.py` để thấy mọi phiên và kiểm tra phiên nào chưa có mục.

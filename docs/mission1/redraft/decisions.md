@@ -191,3 +191,17 @@ Notes on the Phase 6 draft (`answers.md`), second version after Hiep's review on
 - Answer 2: the list of traps was removed; each day says what is built and why in plain words; the reason for the cuts is now "they only change where data comes from or where it is shown, not whether the answer is right". Fine-tuning left the list because that reason does not fit it (the PDF already says the LLM is not fine-tuned). Not mentioned: the as-of date, the "Báo sai" button, the owners' list.
 - Answer 3: no "dùng thay", "bổ sung", "chuỗi phiên bản" or "metadata"; the declared relation is "điều HR đã ghi khi đăng văn bản: văn bản này thay văn bản kia, hay hai văn bản dùng cùng nhau". Cut: the list of removed versions, notifying the owner, and the publish-time check.
 - The first version (147 / 148 / 145 words) was replaced because it was long, argued against other options and used the PDF's terms.
+
+Batch 5 (08/10, Hiep approved Claude's rewrite), wording only in the Decision 2 column of the Section 4 table (RV12), content unchanged from M18 and F4r:
+
+- Header "câu hỏi gặp văn bản thế nào" became "tìm văn bản cho câu hỏi bằng cách nào".
+- "Chọn (A)" now says A needs no topic guess, so the contrast with B is visible.
+- "B mạnh ở" names B's real strength: with the right topic the rules return the whole document, so retrieval cannot miss.
+- "Vì sao chọn A" spells out the PayCo overtime case (PayCo has no overtime policy; a wrong "nghỉ phép" topic gives a leave conflict card) and adds questions that span two topics.
+- "Cái giá" says the asker is refused and must ask HR.
+
+| ID | Question | Options considered | Chosen | Reason | Would change if | Origin |
+|---|---|---|---|---|---|---|
+| A13 | What to change after the independent review of the answers (`review_answers_output.md`, ChatGPT and Gemini) | a) keep the answers; b) fix the points both reviewers or the document support, reject the rest | b. Answer 1: "được xem" became "có quyền xem". Answer 2: the first sentence names the rules that pick the documents; "mọi ca" became "mọi ca kiểm thử" and "chắc chắn do AI" became "lỗi còn lại nằm ở AI"; the reason for the cuts now says the simulated data gives the rules the same information (unit, access, document text), replacing "only changes where data comes from", which was wrong because the HR system supplies the unit. Answer 3 unchanged. Section 5 of `document.md` gets the same wording on "mọi ca". Rejected: "thẻ mâu thuẫn" or "phạm vi tìm kiếm" in the answers (A12, no internal terms), questions about old versions or drafts (M6, M8), dropping the day plan | Both reviewers found the Answer 2 opening and "được xem" unclear; ChatGPT's point on the HR system matches the document ("bản thật lấy đơn vị từ hệ thống nhân sự") | A stronger rerun of the review finds a new problem | Findings: ChatGPT and Gemini; triage and wording: AI proposal, accepted by Hiep 08/10 |
+
+Answers after A13: 115 / 146 / 130 words.

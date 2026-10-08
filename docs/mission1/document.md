@@ -194,6 +194,6 @@ Chỉ một câu trả lời sai nguy hiểm trên bộ test là đủ bác bỏ
 
 **Nếu chỉ có thời gian ngắn, làm theo thứ tự này:**
 
-1. **Phần luật và bộ test:** bước 1-4 và 7 không cần LLM nên làm và kiểm trước; phải đúng mọi ca trước khi thêm LLM, để lỗi sau đó chỉ có thể là lỗi của AI.
+1. **Phần luật và bộ test:** bước 1-4 và 7 không cần LLM nên làm và kiểm trước; phải đúng mọi ca trong bộ test trước khi thêm LLM, để lỗi còn lại nằm ở AI.
 2. **Thêm truy xuất và sinh câu trả lời (bước 5-6):** đủ cả luồng 7 bước, chạy bộ test nhiều lần để kiểm giả định rủi ro nhất.
 3. **Giao diện tối thiểu:** chọn người hỏi và ngày, ba loại thẻ, nút "Báo sai", danh sách mâu thuẫn và báo sai cho chủ sở hữu.
