@@ -16,7 +16,7 @@ Missions 2 (build v1) and 3 (adapt to change) are expected to follow.
 - `docs/mission1/redraft_plan.md` - the redraft plan (Phases 0-7). Start here to know where the work stands.
 - `docs/mission1/redraft/decisions.md` - decision register. Current source of truth for the design; nothing enters the document unless it traces to a row here.
 - `docs/mission1/redraft/artifacts.md` - simulated data model, personas, documents and Minh's worked trace.
-- `docs/mission1/redraft/checks/adopted_rules.py` - the adopted core model run on the simulated data, plus the publish-time check. Run with `python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py`. `current_rules.py` and `proposed_rules.py` are history from the production review.
+- `docs/mission1/redraft/checks/adopted_rules.py` - the adopted core model run on the simulated data, plus the publish-time check and the deterministic part of the Phase 4 test matrix. Run with `python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py`. `current_rules.py` and `proposed_rules.py` are history from the production review.
 - `docs/mission1/redraft/open_issues.md` - gaps found while building the artifacts, with their status.
 - `docs/mission1/redraft/production_review.md` - review of the core model against real practice (Claude draft, findings P1-P9, verified sources).
 - `docs/mission1/redraft/phase2_prompt.md` - session prompt for Phase 2.

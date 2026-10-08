@@ -29,7 +29,7 @@ Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ k
 
 | Công cụ | Mô hình | Dùng để | Mục |
 |---|---|---|---|
-| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-22 |
+| Pi (coding agent chạy trong terminal) | Claude Opus 5.5, qua gói đăng ký Claude | Lập kế hoạch, thảo luận, viết nháp, review, viết script kiểm tra luật, tìm kiếm web | 1-13, 15-23, 25 |
 | Pi | Claude Sonnet 5.5, qua gói đăng ký Claude | Chạy prompt Phase 2; ghi quyết định M16-M17; 2 phiên phụ | 14, 18 |
 | Pi, qua subagent | Agnes 2.5 Flash (Agnes AI), mức suy luận tối đa | Tìm nguồn web và lượt kiểm tra trích dẫn thứ hai; thử thu thập đề từ portal (không dùng) | 15, 17 |
 | Tiện ích của Pi | - | Tìm kiếm web; Lavish (chuyển Markdown thành trang HTML) | 1, 2, 9, 20 |
@@ -459,6 +459,39 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Các kết quả trích từ `adopted_rules.py` (Minh 14 ngày, Hà ra thẻ mâu thuẫn, Hà hỏi về làm thêm giờ ra từ chối, các kịch bản phiên bản) được Claude chạy lại script trong phiên này trước khi viết.
   - **[Chưa]** Tôi sửa từng ý bằng lời của mình và kiểm tra ví dụ câu hỏi chạm hai chủ đề trong phần S (minh hoạ, chưa đo).
+
+### 23. Phase 4 - Bản nháp kiểm chứng và MVP
+
+- **Thời gian:** 00:11-00:20 và 07:48-07:55, ngày 08/10 (phiên bị ngắt giữa chừng, tiếp tục bằng "continue").
+- **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
+- **Prompt (nguyên văn):**
+  - "implement Phase 4 - Validation and MVP (1 h) in C:/Users/Hiep/orca/projects/next-gen/docs/mission1/redraft_plan.md"
+  - "continue"
+  - Ý chính: thực hiện Phase 4 của kế hoạch viết lại: chỉ số, giả định rủi ro nhất, kế hoạch 3 ngày, baseline và bảng test.
+- **Đầu ra:**
+  - `decisions.md`: các dòng V1, V2, V4-V7, đều ghi "AI proposal, pending Hiep".
+  - `artifacts.md`: bảng test 10 dòng (persona, câu hỏi, ngày, hành vi mong đợi, văn bản phải trích, văn bản cấm trích chia hai cột "luật" và "LLM"), bảng chỉ số, kế hoạch 3 ngày, danh sách chưa làm; thêm Điều 3 vào `OT-GAMECO-v1` (V6) và ghi chú dòng mới cho thẻ từ chối (V7).
+  - `checks/adopted_rules.py`: hàm `run_matrix` chạy phần tất định của 10 dòng.
+  - `playbook.md`: 3 ý tưởng hoãn (thông báo email/chat cho chủ sở hữu, LLM chấm độ trung thành, mục tiêu độ trễ).
+  - Phát hiện của Claude khi chạy bảng test: ở các dòng 6, 8, 9, 10, văn bản không được trích vẫn nằm trong bộ luật của người hỏi, nên luật không chặn được; đây là cơ sở cho đề xuất V2.
+- **Quyết định của tôi:** chưa quyết; tất cả đang chờ tôi duyệt.
+- **Xác minh:**
+  - **[AI]** Claude chạy `adopted_rules.py`: 10/10 dòng đạt; khi bỏ `overrides` khỏi `LEAVE-GAMECO-v2` hoặc ban hành bản nháp v4, 3/10 dòng trượt (chạy một lần trong phiên, không lưu vào script).
+  - **[AI]** Cận trên 9,5% cho "0 lỗi trên 30 ca" là công thức 1 - 0,05^(1/30), Claude tính bằng Python; tôi chưa tự kiểm.
+  - **[Chưa]** Tôi duyệt hoặc sửa V1, V2, V4-V7, và kiểm từng dòng của bảng test với dữ liệu giả lập.
+
+### 25. Phase 4 - Duyệt bộ test, chỉ số và kế hoạch 3 ngày
+
+- **Thời gian:** ngày 08/10.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
+- **Prompt (nguyên văn):**
+  - "tell me the result of phase 4 I want to confirm and approve it"
+  - "I think that's good so I approve them but I wonder why there are no metrics relating to RAG performance in this."
+- **Đầu ra:** Claude tóm tắt kết quả Phase 4 (bộ test 10 dòng, chỉ số, giả định rủi ro nhất, kế hoạch 3 ngày, so sánh với chatbot thường, điều 3 thêm vào quy chế làm thêm giờ, câu thêm trên thẻ từ chối), mỗi mục kèm phản biện mạnh nhất; sau khi tôi duyệt, Claude ghi "accepted by Hiep 08/10" vào `decisions.md`, `artifacts.md` và `redraft_plan.md`.
+- **Quyết định của tôi:** chấp nhận V1, V2, V4, V5, V6, V7 và bộ test như đề xuất.
+- **Xác minh:**
+  - **[AI]** Claude chạy lại `adopted_rules.py` trước khi tóm tắt: 10/10 dòng phần luật đạt.
+  - **[Tôi]** Đọc bản tóm tắt và các phản biện, duyệt từng mục.
 
 ## Mẫu cho các mục tiếp theo
 

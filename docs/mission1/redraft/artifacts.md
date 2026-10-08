@@ -134,6 +134,9 @@ Kết quả phê duyệt được gửi về email công ty của nhân sự.
 
 Điều 1. Làm thêm giờ phải được trưởng nhóm phê duyệt trước khi thực hiện.
 Điều 2. Giờ làm thêm được nghỉ bù trong vòng 30 ngày kể từ ngày làm thêm.
+Điều 3. Ngày nghỉ bù không trừ vào số ngày phép năm.
+
+Điều 3 was added in Phase 4 (V6, Claude proposal, accepted by Hiep 08/10) so that test row 4 has an answer in the data.
 
 **`TRAVEL-GAMECO-v1`**
 
@@ -310,7 +313,94 @@ Notes for Hiep when editing the wording:
 2. The conflict card names two owners, because the two documents have different owners.
    The system routes the asker to HR of their own unit (M7), and notifies both owners.
    "Đã được báo" is a promise for Mission 2: the MVP must either send that notice or the sentence must go.
+   Decided in V4 (accepted by Hiep 08/10): the conflict card writes one record per owner to the owners' list, and the sentence becomes "đã được ghi nhận để chủ sở hữu hai văn bản (HR Tập đoàn, HR PayCo) xác nhận".
 3. The answer card cites only `LEAVE-GAMECO-v2`.
    The procedure is cited only when the answer adds how to apply.
 4. "[Báo sai]" is the report button (B1).
    It sends the question, the answer, the cited documents and the persona to the owner of each cited document.
+   How the report reaches the owner in the MVP is decided in V4 (accepted by Hiep 08/10): a record in one owners' list, a page filtered by owner, with no email or chat notice.
+5. Decided in V7 (accepted by Hiep 08/10): the refusal card gets one more line, the same for every refusal, "Hệ thống chỉ trả lời các quy định áp dụng cho bạn.", so a question about another unit's rule (M3a) gets its explanation without anything detecting the unit.
+
+## Phase 4 - Test matrix, metrics and 3-day plan (Claude draft, accepted by Hiep 08/10) (giả lập)
+
+Decisions V1, V2, V4, V5, V6 and V7 in `decisions.md`.
+Nothing here was measured: the LLM columns are what Mission 2 must check.
+The deterministic part of every row is run by `checks/adopted_rules.py` (`run_matrix`), and all 10 rows pass.
+
+### Test matrix (excerpt, 10 rows)
+
+"Cấm (luật)" are documents outside the asker's rulebook: rules guarantee they cannot be cited.
+"Cấm (LLM)" are documents inside the rulebook that do not answer the question: only the LLM can avoid citing them (V2).
+
+| # | Persona | Question | As-of | Expected behaviour | Must cite | Must not cite: luật | Must not cite: LLM | Trap |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Minh | Phép năm của tôi là bao nhiêu ngày? | 07/10/2026 | Answer: 14 ngày | `LEAVE-GAMECO-v2` | `LEAVE-GROUP-v1`, `LEAVE-GAMECO-v1`, `-v3`, `-v4-DRAFT`, `LEAVE-PAYCO-v1` | - | T1, T2, T3, T5, T6 |
+| 2 | Minh | Phép năm của tôi là bao nhiêu ngày? | 01/01/2027 | Answer: 15 ngày | `LEAVE-GAMECO-v3` | `LEAVE-GAMECO-v2`, `-v1`, `-v4-DRAFT`, `LEAVE-GROUP-v1`, `LEAVE-PAYCO-v1` | - | T2 (version switch, M6, M9) |
+| 3 | Minh | Tôi xin nghỉ phép ở đâu, ai duyệt? | 07/10/2026 | Answer: tạo đơn trên hệ thống HR, trưởng nhóm duyệt; no conflict | `LEAVE-PROC-GAMECO-v1` (`LEAVE-GAMECO-v2` allowed) | `LEAVE-GROUP-v1`, `LEAVE-GAMECO-v1` | - | T11 |
+| 4 | Minh | Ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không? | 07/10/2026 | Answer: không trừ; no conflict across topics | `OT-GAMECO-v1` (`LEAVE-GAMECO-v2` allowed) | `LEAVE-GROUP-v1`, `LEAVE-GAMECO-v1` | - | T8 (needs V6) |
+| 5 | Lan | Phép năm của tôi là bao nhiêu ngày? | 07/10/2026 | Answer: 12 ngày | `LEAVE-GROUP-v1` | `LEAVE-GAMECO-v2`, `LEAVE-PAYCO-v1` | - | T6 (readable, not applicable) |
+| 6 | Lan | Nhân sự GameCo được nghỉ phép năm bao nhiêu ngày? | 07/10/2026 | Refusal (another unit's rule, M3a, V7) | - | `LEAVE-GAMECO-v2` | `LEAVE-GROUP-v1` | M3a |
+| 7 | Hà | Phép năm của tôi là bao nhiêu ngày? | 07/10/2026 | Conflict card with both documents, no number chosen | `LEAVE-GROUP-v1` or `LEAVE-PAYCO-v1` (the card shows both) | `LEAVE-GAMECO-v2`, `LEAVE-PROC-GAMECO-v1` | - | T7 |
+| 8 | Hà | Làm thêm giờ có cần ai duyệt trước không? | 07/10/2026 | Refusal; not a leave conflict card | - | `OT-GAMECO-v1` | `LEAVE-GROUP-v1`, `LEAVE-PAYCO-v1` | T6, T8 |
+| 9 | Hà | Đi công tác được hỗ trợ ăn uống bao nhiêu một ngày? | 07/10/2026 | Refusal | - | `TRAVEL-GAMECO-v1` | `LEAVE-GROUP-v1`, `LEAVE-PAYCO-v1` | T9 |
+| 10 | Minh | Khung bậc lương của GameCo thế nào? | 07/10/2026 | Refusal, same text as row 9 apart from the unit; the reply contains no salary figure and no document title | - | `SAL-BAND-GAMECO` | `LEAVE-GAMECO-v2`, `LEAVE-PROC-GAMECO-v1`, `OT-GAMECO-v1`, `TRAVEL-GAMECO-v1` | T4, M7 |
+
+What the script shows about the last column, if the LLM cites the "Cấm (LLM)" documents:
+
+- Row 6: Lan gets an answer card "12 ngày" for a question about GameCo.
+- Rows 8 and 9: Hà gets a false leave conflict card for a question about overtime or travel.
+- Row 10: Minh gets an answer card built from his leave, overtime and travel documents.
+
+Rules cannot stop these, because every one of those documents is valid for the asker.
+They are the remaining path to a confident wrong answer, which is why V2 is about them.
+
+Mutation check (run once by hand in this session, not kept in the script): removing `overrides` from `LEAVE-GAMECO-v2`, or publishing the draft v4 with an `effective_from` in the past, makes 3 of the 10 rows fail.
+So the matrix catches a broken rule or a broken document, not only the happy path.
+
+In Mission 2 every row is asked in 3 phrasings: as written, without the key word (for example "Năm nay tôi được nghỉ mấy ngày?"), and without diacritics.
+That gives 30 cases; each case is run 3 times because LLM output varies, and a case fails if any run fails.
+
+### Metrics (V1)
+
+| Stage | Metric | Threshold on the 30 cases | Reason |
+|---|---|---|---|
+| Rules (steps 1-4, 7) | Rulebook correct: must-cite documents in it, "Cấm (luật)" documents not in it; outcome correct given the citations | 100%, release gate | Same input, same output: one failure is a bug, not noise, and it is a confident wrong answer or a leak |
+| Rules | Leak: no chunk outside the asker's access reaches the retriever's output or the LLM's input | 0, release gate | Checked on chunk ids against `access`, no LLM judge; one leak is the failure HR stops the product for (Round 2) |
+| Rules | Refusal text identical for "not allowed" and "not found" (rows 9 and 10) | 100%, release gate | A different text reveals that a restricted document exists (M7) |
+| LLM (steps 5-6) | Unsafe error: an answer card where the expected outcome is a refusal or a conflict, a wrong key fact, or a "Cấm (LLM)" citation | 0, release gate for L | This is the problem in F1; with employees asking directly (L) nobody stands between this error and the employee |
+| LLM | Faithfulness: every statement in an answer is in the chunk it cites | 100%, read by hand, release gate for L | The answer rows give about 45 answers to read, so a person can check all of them; an LLM judge would add a second model to trust |
+| LLM | Over-cautious error: a refusal or a conflict card where an answer was expected, or a false conflict card on a refusal row | At most 3 of 30 cases | Safe-side error: the employee asks HR, which is today's situation; more than 1 in 10 means employees go back to HR and the assistant stops being used |
+| Retriever | Must-cite chunk among the chunks given to the LLM | Diagnostic, no threshold | It explains over-cautious errors; correctness is judged on the outcome, not on ranking |
+
+Honest limit: 0 failures in 30 cases only shows, with 95% confidence, that the true failure rate is below about 9.5% (computed in `run_matrix`).
+Passing the gates is the precondition for letting employees ask directly, not proof that the answers are always right; the live signal is the "Báo sai" rate in a pilot.
+Latency gets no target in v1: it is logged, and no decision depends on it.
+
+### 3-day plan (V4)
+
+| Day | Build | Done when |
+|---|---|---|
+| 1 | The 10 documents as Markdown files with the metadata above, chunked by Điều (by paragraph for the procedure); 3 personas; steps 1-4 and 7 ported from `adopted_rules.py`; the 30 cases as a data file; the deterministic checks and the leak check | Every rules-stage gate passes, with no LLM in the loop yet |
+| 2 | Step 5: one simple retriever over the chunks of the asker's rulebook only; step 6: the LLM answers from those chunks and cites each statement, or says nothing relevant was found; the 30 cases run 3 times | Unsafe errors, faithfulness and over-cautious errors measured, prompt fixed until the gates pass or the failure is written down |
+| 3 | One web page: persona switcher, as-of date as a test input (M6), the three cards, "Báo sai" and conflict records in one owners' list page; naive baseline run (V5); final run of the matrix | The demo shows rows 1, 7 and 10 end to end, and the results table is written from the final run |
+
+Cut order if a day slips: the naive baseline first, then the owners' list page (records kept in a file), never the test matrix or the gates.
+
+### Not doing in the 3 days (V4)
+
+Each cut holds the documents, metadata and identity fixed, so a failure on the matrix can only come from the LLM and retriever, which is what V2 tests.
+
+| Not doing | Why it does not affect testing V2 |
+|---|---|
+| Real SSO or HRIS | The persona switcher gives the same two fields (`units`, `roles`); V2 is about reading documents, not where identity comes from |
+| Document upload, owner screen, AI-suggested metadata | Metadata is written by hand, so a wrong answer cannot be blamed on wrong metadata |
+| Publish-time check screen | Stays a script (M15); the query-time check is the same resolver (M16) |
+| Email or chat notices to owners | Reports land in the owners' list; the delivery channel does not change whether an answer is right |
+| Integration with the company chat tool | The web page asks the same pipeline |
+| Multi-turn memory | Each case is one question; memory kept across a persona switch could leak one persona's documents into another's answer |
+| Personal data such as remaining leave balance | Needs the HR system and a privacy review; V2 is about policy text |
+| PDF, DOCX or OCR ingestion | Documents are Markdown; parsing does not change which documents are valid |
+| Search tuning (hybrid search, reranking) | The rulebook holds at most 4 documents per persona; retrieval is diagnostic |
+| Showing future versions (M8), other units' rules (M3a), two units per person (M5), employment type (M0) | Decided out earlier; none of them is needed by a row of the matrix |
+| LLM judge for faithfulness | About 45 answers can be read by hand |
+

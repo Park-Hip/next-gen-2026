@@ -4,6 +4,7 @@
 - answer(): step 7, the post-check on the documents the model cites.
 - lint(): the publish-time check (M15). It runs the same resolver for every unit in the org tree,
   on today and on every future effective date, and lists same-topic pairs with no declared relation.
+- run_matrix(): the deterministic columns of the Phase 4 test matrix (artifacts.md, V1).
 Run: python -I -X utf8 adopted_rules.py
 """
 from datetime import date, timedelta
@@ -106,6 +107,54 @@ def run(label, docs, persona, asof, subject="nghi_phep", cited=None):
     if cited is None: cited = model_cites(docs, persona, D(asof), subject)
     print(f"{label:<45} {persona:<5} {asof} -> {answer(docs, persona, D(asof), cited)}")
 
+# Phase 4 test matrix (artifacts.md). Only the parts rules decide are checked here; the LLM parts need Mission 2.
+# cite: what a correct model cites. out_rules: must not be cited and is outside the rulebook, so rules guarantee it.
+# out_llm: must not be cited but is inside the rulebook, so only the LLM can avoid it.
+TEST_MATRIX = [
+  dict(n=1, persona="minh", asof="07/10/2026", expect="ANSWER", cite=["LEAVE-GAMECO-v2"],
+       out_rules=["LEAVE-GROUP-v1", "LEAVE-GAMECO-v1", "LEAVE-GAMECO-v3", "LEAVE-GAMECO-v4-DRAFT", "LEAVE-PAYCO-v1"], out_llm=[]),
+  dict(n=2, persona="minh", asof="01/01/2027", expect="ANSWER", cite=["LEAVE-GAMECO-v3"],
+       out_rules=["LEAVE-GAMECO-v2", "LEAVE-GAMECO-v1", "LEAVE-GAMECO-v4-DRAFT", "LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"], out_llm=[]),
+  dict(n=3, persona="minh", asof="07/10/2026", expect="ANSWER", cite=["LEAVE-PROC-GAMECO-v1", "LEAVE-GAMECO-v2"],
+       out_rules=["LEAVE-GROUP-v1", "LEAVE-GAMECO-v1"], out_llm=[]),
+  dict(n=4, persona="minh", asof="07/10/2026", expect="ANSWER", cite=["OT-GAMECO-v1"],
+       out_rules=["LEAVE-GROUP-v1", "LEAVE-GAMECO-v1"], out_llm=[]),
+  dict(n=5, persona="lan", asof="07/10/2026", expect="ANSWER", cite=["LEAVE-GROUP-v1"],
+       out_rules=["LEAVE-GAMECO-v2", "LEAVE-PAYCO-v1"], out_llm=[]),
+  dict(n=6, persona="lan", asof="07/10/2026", expect="REFUSAL", cite=[],
+       out_rules=["LEAVE-GAMECO-v2"], out_llm=["LEAVE-GROUP-v1"]),
+  dict(n=7, persona="ha", asof="07/10/2026", expect="CONFLICT", cite=["LEAVE-PAYCO-v1"],
+       out_rules=["LEAVE-GAMECO-v2", "LEAVE-PROC-GAMECO-v1"], out_llm=[]),
+  dict(n=8, persona="ha", asof="07/10/2026", expect="REFUSAL", cite=[],
+       out_rules=["OT-GAMECO-v1"], out_llm=["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]),
+  dict(n=9, persona="ha", asof="07/10/2026", expect="REFUSAL", cite=[],
+       out_rules=["TRAVEL-GAMECO-v1"], out_llm=["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]),
+  dict(n=10, persona="minh", asof="07/10/2026", expect="REFUSAL", cite=[],
+       out_rules=["SAL-BAND-GAMECO"], out_llm=["LEAVE-GAMECO-v2", "LEAVE-PROC-GAMECO-v1", "OT-GAMECO-v1", "TRAVEL-GAMECO-v1"]),
+]
+
+def run_matrix(docs):
+    """Per row: must-cite documents are in the rulebook, out_rules documents are not, out_llm documents are,
+    and step 7 gives the expected outcome when the model cites correctly. Also shows what step 7 does
+    if the model cites the out_llm documents: that error is the LLM's to avoid (V2), rules cannot stop it."""
+    print("\n== Phase 4 test matrix, deterministic part ==")
+    passed = 0
+    for r in TEST_MATRIX:
+        asof = D(r["asof"])
+        ids = {d["id"] for d in rulebook(docs, r["persona"], asof)[0]}
+        got = answer(docs, r["persona"], asof, r["cite"])
+        errors = [f"{i} not in rulebook" for i in r["cite"] + r["out_llm"] if i not in ids]
+        errors += [f"{i} in rulebook" for i in r["out_rules"] if i in ids]
+        if not got.startswith(r["expect"]): errors.append(f"expected {r['expect']}, got {got}")
+        passed += not errors
+        print(f"  {r['n']:>2} {r['persona']:<5} {r['asof']}  {'PASS' if not errors else 'FAIL'}  {got}")
+        for e in errors: print(f"       {e}")
+        if r["out_llm"]: print(f"       if the LLM cites {' + '.join(r['out_llm'])}: {answer(docs, r['persona'], asof, r['out_llm'])}")
+    print(f"  {passed}/{len(TEST_MATRIX)} rows pass")
+    # Zero failures in n cases only bounds the true failure rate: 95% upper bound = 1 - 0.05^(1/n).
+    n = 3 * len(TEST_MATRIX)  # Mission 2 asks every row in 3 phrasings
+    print(f"  0 failures in {n} cases: true rate may still be up to {1 - 0.05 ** (1 / n):.1%}")
+
 def show_lint(label, docs):
     print(f"\n== Publish-time check: {label} ==")
     rows = lint(docs, D("07/10/2026"))
@@ -143,3 +192,5 @@ if __name__ == "__main__":
 
     d = copy.deepcopy(DOCS); next(x for x in d if x["id"] == "LEAVE-GAMECO-v3")["to"] = "30/06/2027"
     show_lint("GameCo announces it repeals v3 after 30/06/2027", d)
+
+    run_matrix(DOCS)

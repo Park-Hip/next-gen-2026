@@ -504,3 +504,6 @@ None of them may appear in the Mission 1 document as a promise.
 | Periodic review: owners re-confirm documents and their relations on a schedule | Real practice (NAVEX, Guru); needs owners and time, not code | M15 |
 | Similarity scan that flags near-duplicate documents for the owner | Real practice (Guru); the MVP has too few documents to need it | M15 |
 | Embedding experiment: similarity scores of the near-identical leave documents for Minh's question | A new dependency and 1-2 hours; the document describes the failure qualitatively | V3, A1 |
+| Email or chat notices to owners for "Báo sai" reports and conflicts | Needs an integration; the MVP keeps the records in one owners' list | V4 |
+| LLM judge for faithfulness | About 45 answers on the 30-case set can be read by hand; a judge adds a second model to trust | V1 |
+| Latency target | No decision depends on it in v1; it is only logged | V1 |

@@ -103,6 +103,9 @@ The "Báo sai" button (B1) is on the answer card.
 
 Output: an 8-10 row test matrix excerpt (persona, question, as-of date, expected behaviour, must cite, must not cite) in `artifacts.md`.
 
+Drafted on 08/10 by Claude, accepted by Hiep on 08/10: rows V1, V2, V4-V7 in `decisions.md`; the 10-row test matrix, metrics, 3-day plan and "not doing" list in `artifacts.md`; the deterministic part of the matrix runs in `checks/adopted_rules.py` (10/10 pass).
+Two gaps were found and proposed as V6 (one clause added to `OT-GAMECO-v1`) and V7 (one line on the refusal card for M3a).
+
 ### Phase 5 - Write the sections (3-4 h)
 
 Order: 2 → 3 → 4 → 5 → 1 → page-1 opener.
