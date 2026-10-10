@@ -831,7 +831,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 
 ## Mẫu cho các mục tiếp theo
 
-Chạy `python tools/ai_sessions.py` để thấy mọi phiên và kiểm tra phiên nào chưa có mục.
+Chạy `python tools/ai_sessions.py` để thấy mọi phiên của cả Pi và Claude Code và kiểm tra phiên nào chưa có mục; thêm `--since dd/mm` để chỉ xem từ một ngày.
 Chạy `python tools/ai_sessions.py --prompts HH:MM` để lấy nguyên văn prompt của phiên bắt đầu lúc HH:MM.
 
 ```
@@ -845,3 +845,44 @@ Chạy `python tools/ai_sessions.py --prompts HH:MM` để lấy nguyên văn pr
 - **Quyết định của tôi:** <tôi giữ, sửa hay bỏ gì từ đầu ra, và vì sao>
 - **Xác minh:** <[Tôi] / [AI] / [Duyệt] / [Chưa] / [Không dùng], kèm cách kiểm tra>
 ```
+
+<div style="page-break-before: always"></div>
+
+# Mission 2
+
+Ghi như Phần B của Mission 1, với ba thay đổi rút ra từ Mission 1:
+
+- Công cụ, mô hình và thời gian lấy từ `tools/ai_sessions.py` ngay khi ghi mục, không ghi theo trí nhớ của AI; script đọc cả Pi và Claude Code.
+- Mỗi mục ghi "Quyết định của tôi" ngay khi ghi; nhãn [AI] chỉ đổi thành [Tôi] khi tôi tự kiểm.
+- Trước khi nộp, viết phần tóm tắt ở đầu phần này theo cấu trúc Phần A: công cụ, nguồn gốc từng phần, những lần tôi bác bỏ AI, lỗi của AI, kiểm chứng.
+
+Mục được đánh số M2.1, M2.2, ... để không trùng với Mission 1.
+
+### M2.1. Sau khi nộp Mission 1: lưu bài nộp và chuẩn bị Mission 2
+
+- **Thời gian:** 21:33-21:50 ngày 08/10, tiếp tục lúc 13:36 ngày 10/10; cùng phiên với mục 37.
+- **Công cụ:** Claude Opus 5.5 qua Pi.
+- **Prompt (nguyên văn):**
+  - "i just submitted. what to do in prior to mision 2" (21:33)
+  - "do 1 2 5 6" (21:37)
+  - "now 7 8  9" (21:42)
+  - "." (13:36 ngày 10/10, để tiếp tục)
+  - Ý chính: hỏi cần làm gì trước Mission 2; chọn làm các bước 1, 2, 5, 6 rồi 7, 8, 9 trong danh sách 9 bước Claude đề xuất.
+- **Đầu ra:**
+  - `docs/mission1/submitted/`: bản sao các file đã nộp, kèm README ghi nguồn của từng file.
+  - `tools/render_pdf.py`: sửa khoảng cách của danh sách đánh số (đã dùng khi xuất PDF nộp nhưng chưa commit).
+  - `docs/mission1/playbook.md`, mục 9: viết lại phác thảo kỹ thuật cho khớp thiết kế đã nộp; bản cũ (07/10) còn các trường và thứ tự ưu tiên đã bị bỏ.
+  - `docs/mission2/mission1_promises.md`: 37 cam kết trích từ tài liệu và 3 câu trả lời đã nộp, mỗi cam kết kèm cách v1 chứng minh; dùng làm tiêu chí nghiệm thu Mission 2.
+  - `data/`: 10 văn bản giả lập dạng Markdown kèm metadata, cây tổ chức, 3 persona và 10 dòng bộ test, chép từ `artifacts.md` và `adopted_rules.py`; `tools/check_data.py` kiểm các file khớp nguồn và chạy lại bộ test.
+  - Sắp xếp tài liệu: `current_design.md` thành nguồn duy nhất cho thiết kế hiện hành, có mục "Changes since submission"; sổ quyết định được đóng băng; `AGENTS.md` và `README.md` tách file hiện hành với lịch sử Mission 1; sửa 3 dòng lỗi thời trong `decisions.md` và `artifacts.md`.
+  - `tools/ai_sessions.py`: đọc thêm phiên Claude Code chạy trực tiếp (bỏ qua bản sao do claude-bridge ghi), lấy được prompt dán vào Claude Code, thêm `--since`.
+- **Quyết định của tôi:** chọn 7 trong 9 bước; hai bước còn lại là việc tôi tự làm (tự kiểm các dữ kiện còn [Chưa], đọc `current_design.md` để chuẩn bị PITCH).
+  Không bắt đầu viết code cho v1 trước khi có đề Mission 2.
+- **Xác minh:**
+  - **[AI]** So chữ của PDF đã lưu với bản xuất lại từ file nguồn: tài liệu trùng khớp; nhật ký chỉ khác chỗ xuống dòng.
+  - **[AI]** `check_data.py` so từng trường metadata, persona, cây tổ chức, bộ test và nguyên văn từng văn bản với nguồn; bộ test 10/10 đạt trên các file.
+    Thử sửa 14 thành 15 ngày và bỏ `overrides` trong một văn bản: script báo cả hai lỗi.
+  - **[AI]** Ví dụ YAML trong `playbook.md` được đối chiếu với giá trị `adopted_rules.py` đọc; đã sửa 2 chỗ lệch (`overrides` là một chuỗi, không phải danh sách; dạng giá trị của `access`).
+  - **[AI]** `ai_sessions.py` tìm đúng 2 phiên Claude Code chạy trực tiếp mà nhật ký đã ghi (09:15 ngày 07/10, mục 29) và bỏ qua 33 file là bản sao của phiên Pi.
+  - **[Chưa]** Tôi xác nhận 3 ô trong `docs/mission1/submitted/README.md` (đúng file đã tải lên portal).
+  - **[Chưa]** Tôi đọc `mission1_promises.md` đối chiếu với PDF đã nộp.
