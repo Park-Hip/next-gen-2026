@@ -520,4 +520,4 @@ None of them may appear in the Mission 1 document as a promise.
 | DOCX or PDF source documents instead of Markdown | DOCX is about 2-3 hours, PDF needs OCR for scans; neither tests the riskiest assumption | RV14 |
 | Reorganise the project docs: one ID scheme, superseded rows archived, history files merged | Most of a day and breaks the links between the evidence log, the register and the commits; judges do not see the repo. Do it before Mission 2, which needs a clean spec; `current_design.md` covers the need for now | - |
 | No-AI rebuild drill for the core rules, logged in the evidence log | Hiep chose to keep the Mission 2 log simple; documentation for each part can come later | `docs/mission2/evidence_log_research.md`, section 7 |
-| Exported AI session transcripts as an appendix to the evidence log | Focus first on what the judge reads; reconsider when the project is finished | `docs/mission2/evidence_log_research.md`, section 7 |
+| Exported AI session transcripts as an appendix to the evidence log | Focus first on what the judge reads; reconsider when the project is finished (GitHub issue #2) | `docs/mission2/evidence_log_research.md`, section 7 |

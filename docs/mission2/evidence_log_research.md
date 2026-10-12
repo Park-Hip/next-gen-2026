@@ -147,9 +147,8 @@ That is the biggest chance to improve on Mission 1.
 2. Rebuild drill for the core rules: not now; documentation for each part can come later.
    Parked under "Deferred ideas" in `docs/mission1/playbook.md`.
 3. Exported transcripts in the submission: not now; focus on what the judge sees first, and reconsider when the project is finished.
-   Parked under "Deferred ideas" in `docs/mission1/playbook.md`.
-4. `tools/ai_sessions.py` does not list subagent models or web-search providers: tracked as GitHub issue #1.
-   Until it is done, check subagent models and search providers by hand at the end of each session.
+   Parked under "Deferred ideas" in `docs/mission1/playbook.md` and tracked as GitHub issue #2.
+4. Extending `tools/ai_sessions.py` to list subagent models and web-search providers: dropped.
 
 ## Sources
 

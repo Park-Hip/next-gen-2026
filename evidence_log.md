@@ -896,13 +896,13 @@ Mục được đánh số M2.1, M2.2, ... để không trùng với Mission 1.
   - `tools/ai_sessions.py` chỉ thấy Claude Opus 5.5 trong phiên này; Agnes và các nhà cung cấp tìm kiếm được ghi tay.
 - **Prompt (nguyên văn):** "I'm going to start mission 2 for this competition. The evidence log of the AI usage is an important part of the competition and the criteria that the competitions use to judge the candidates. It wants you to do research and do a deep dive into what the best practices are that can maximize the score. I want you to research what the max-score evidence log looks like. What are the things the competitors' organizer looks for when they have this evidence log as one part of the test? You can do a web search with Agnes models if you want. Use max reasoning level so you can search what the best practices are that people are doing with AI usage in the decoding task and what the competitions expect."
   Ý chính: nghiên cứu nhật ký bằng chứng đạt điểm tối đa trông như thế nào và ban tổ chức tìm gì trong nhật ký; có thể dùng Agnes để tìm web.
-  Ngày 12/10, tôi trả lời 4 việc chờ quyết (nguyên văn, chọn lọc): "Question 1: approve.", "For question 2 I don't think I need it for now.", "we can consider adding the transcripts later when we finish the project. For now I want to keep focus on what the judge sees first.", "Open an issue on GitHub about this."
+  Ngày 12/10, tôi trả lời 4 việc chờ quyết (nguyên văn, chọn lọc): "Question 1: approve.", "For question 2 I don't think I need it for now.", "we can consider adding the transcripts later when we finish the project. For now I want to keep focus on what the judge sees first.", "Open an issue on GitHub about this.", rồi sửa lại: "no close issue one, the issue is about writing the ai evidence, for the subagent listing, remove that idea"
 - **Đầu ra:** `docs/mission2/evidence_log_research.md`: những gì quy định cuộc thi nói, cách nhật ký có thể được dùng khi chấm (suy luận), điểm chung của các nguồn bên ngoài, các khẳng định của subagent bị loại, đánh giá nhật ký Mission 1, thiết kế đề xuất cho nhật ký Mission 2, 4 việc chờ tôi quyết.
 - **Quyết định của tôi (12/10):**
   - Chấp nhận giới hạn độ dài: phần tóm tắt tối đa 2 trang, các mục ngắn gọn.
   - Chưa làm bài tập tự xây lại luật lõi không dùng AI; tài liệu cho từng phần có thể làm sau.
-  - Chưa nộp kèm lịch sử phiên (transcript); ưu tiên phần giám khảo đọc trước, xem lại khi xong dự án.
-  - Mở issue GitHub #1 để `tools/ai_sessions.py` liệt kê mô hình của subagent và nhà cung cấp tìm kiếm; trước khi xong, kiểm tra bằng tay cuối mỗi phiên.
+  - Chưa nộp kèm lịch sử phiên (transcript); ưu tiên phần giám khảo đọc trước, xem lại khi xong dự án (issue GitHub #2).
+  - Bỏ ý tưởng mở rộng `tools/ai_sessions.py` để liệt kê mô hình của subagent và nhà cung cấp tìm kiếm; issue #1 do Claude mở nhầm đề tài nên đã đóng.
 - **Xác minh:**
   - **[AI]** Claude mở trực tiếp và trích nguyên văn mọi nguồn trong bảng ở mục 3 của báo cáo, trừ Monash và TEQSA (chỉ có nội dung tìm kiếm trả về, ghi [snippet only]).
   - **[AI]** Khi đối chiếu, Claude loại 4 khẳng định của subagent Agnes: thang điểm 10 điểm của Stanford CS230 (không có trên trang), các mức chấm của TEQSA (không tìm thấy, bản tóm tắt nói gần như ngược lại), cách diễn đạt của Monash, quy định về commit của ETHGlobal (không thấy trong trang đã mở).
