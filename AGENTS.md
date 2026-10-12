@@ -80,6 +80,8 @@ Keep access, validity and applicability separate in every design and every piece
 - Promise only what can be built in Mission 2.
 - Do not use the em dash. Use a plain "-".
 - Put each sentence on its own line in Markdown.
+- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of `evidence_log.md`, in Vietnamese: date and time, tool and model, task, Hiep's decision (kept, changed or rejected), and how the result was checked.
+  Take tool, model and time from `tools/ai_sessions.py`; if Hiep's decision is unknown, write "[chờ Hiệp]" instead of guessing.
 
 ## Scope discipline (MVP first)
 

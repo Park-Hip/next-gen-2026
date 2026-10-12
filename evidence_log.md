@@ -908,3 +908,10 @@ Mục được đánh số M2.1, M2.2, ... để không trùng với Mission 1.
   - **[AI]** Claude mở trực tiếp và trích nguyên văn mọi nguồn trong bảng ở mục 3 của báo cáo, trừ Monash và TEQSA (chỉ có nội dung tìm kiếm trả về, ghi [snippet only]).
   - **[AI]** Khi đối chiếu, Claude loại 4 khẳng định của subagent Agnes: thang điểm 10 điểm của Stanford CS230 (không có trên trang), các mức chấm của TEQSA (không tìm thấy, bản tóm tắt nói gần như ngược lại), cách diễn đạt của Monash, quy định về commit của ETHGlobal (không thấy trong trang đã mở).
   - **[AI]** Số liệu về nhật ký Mission 1 (16.850 từ, 45 nhãn [AI] so với 11 nhãn [Tôi], 15 dấu [Chưa]) đếm bằng `wc` và `grep` trên `docs/mission1/submitted/evidence_log.md`; số trang (28) lấy từ `docs/mission1/submitted/README.md`.
+
+## Ghi chú nhanh Mission 2
+
+Mỗi phiên thay đổi dự án một dòng: thời gian, công cụ và mô hình, việc đã làm, quyết định của tôi, cách kiểm tra.
+Mission 2 không yêu cầu nộp nhật ký; các dòng này giữ lại quyết định và cách kiểm tra để viết nhật ký đầy đủ khi cần.
+
+- 12/10, Claude Opus 5.5 (Pi): thêm quy tắc ghi chú một dòng mỗi phiên vào `AGENTS.md` và tạo mục này. Tôi chọn cách để agent tự ghi (phương án 2); kiểm bằng cách đọc lại quy tắc.
