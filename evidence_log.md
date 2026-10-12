@@ -902,6 +902,7 @@ Mục được đánh số M2.1, M2.2, ... để không trùng với Mission 1.
   - Chấp nhận giới hạn độ dài: phần tóm tắt tối đa 2 trang, các mục ngắn gọn.
   - Chưa làm bài tập tự xây lại luật lõi không dùng AI; tài liệu cho từng phần có thể làm sau.
   - Chưa nộp kèm lịch sử phiên (transcript); ưu tiên phần giám khảo đọc trước, xem lại khi xong dự án (issue GitHub #2).
+  - Mission 2 không yêu cầu nộp nhật ký bằng chứng, nên hoãn phần nộp nhật ký cho Mission 2 (prompt: "mission two does not require the AI evidence submission so we will postpone that part").
   - Bỏ ý tưởng mở rộng `tools/ai_sessions.py` để liệt kê mô hình của subagent và nhà cung cấp tìm kiếm; issue #1 do Claude mở nhầm đề tài nên đã đóng.
 - **Xác minh:**
   - **[AI]** Claude mở trực tiếp và trích nguyên văn mọi nguồn trong bảng ở mục 3 của báo cáo, trừ Monash và TEQSA (chỉ có nội dung tìm kiếm trả về, ghi [snippet only]).

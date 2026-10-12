@@ -2,6 +2,7 @@
 
 Written 10/10/2026 for the Mission 2 evidence log.
 Hiep decided the open points on 12/10/2026 (section 7); section 6 is the plan in force.
+On 12/10/2026 Hiep said Mission 2 does not require an evidence log submission, so this plan is postponed until a mission requires one.
 
 How this was produced:
 Claude Opus 5.5 via Pi read the competition files and the submitted Mission 1 log.
