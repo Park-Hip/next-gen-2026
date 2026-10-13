@@ -20,7 +20,7 @@ What remains is the LLM citing a valid in-scope document that does not answer th
 |---|---|---|
 | D1 | How `data/` gets its issue and PR | Move commit `e3ec479` off `master`; land it through #3 with Hiep's check |
 | D2 | LLM and embeddings | Gemini free tier, newest Flash allowed, `gemini-embedding-001`; working default until #6 |
-| D3 | Hosting | Render free web service, auto-deploy from `master`; working default until #7 |
+| D3 | Hosting | Render free web service, auto-deploy from `main`; working default until #7 |
 | D4 | A Studio-level document (third org level) | Yes, with an ADR (#10) |
 | D5 | New test rows | N1-N6 (#10) |
 | D6 | Who writes the "văn nói" phrasings and the lessons | Hiep; Claude checks the format |
@@ -62,7 +62,7 @@ Cut order if a day slips: first #15 (records stay in a file, as Mission 1 V4 pla
 - The demo URL works from a clean browser; the README warns that the first load can take about a minute.
 - The README answers the 3 questions and links the test report: at least 5 cases, with at least one good, one hard and one failing.
 - Every major choice has a research write-up and an ADR with Hiep's reasons.
-- Every PR is merged with "Hiệp's check" ticked, and CI is green on `master`.
+- Every PR is merged with "Hiệp's check" ticked, and CI is green on `main`.
 - Every known failure has an open issue labelled `limitation`, and the README and video mention it.
 - The video is at most 5 minutes; the repository is public, and its history has no key patterns (`AIza`, `sk-`, `.env`).
 
