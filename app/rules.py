@@ -115,6 +115,31 @@ def refusal_text(card: Card) -> str:
     return REFUSAL_TEXT.format(hr=card.hr)
 
 
+def conflict_quotes(card: Card, retrieved: tuple[Chunk, ...]) -> tuple[tuple[tuple[Chunk, ...], tuple[Chunk, ...]], ...]:
+    """The chunks each of the two documents quotes on the conflict card (ADR 0005, decision 1).
+
+    For each document in a pair: quote its cited chunks; if it cites none, its highest-ranked
+    retrieved chunk; if none was retrieved, all its chunks. Reads no meaning from any text.
+    Returns one entry per conflict pair, each entry a (left, right) tuple of quoted chunks.
+    """
+    if card.kind != "conflict":
+        return ()
+    return tuple(
+        (_quotes_for(a, card.cited, retrieved), _quotes_for(b, card.cited, retrieved))
+        for a, b in card.conflicts
+    )
+
+
+def _quotes_for(document: Document, cited: tuple[Chunk, ...], retrieved: tuple[Chunk, ...]) -> tuple[Chunk, ...]:
+    cited_chunks = tuple(c for c in cited if c.document_id == document.id)
+    if cited_chunks:
+        return cited_chunks
+    retrieved_chunks = tuple(c for c in retrieved if c.document_id == document.id)
+    if retrieved_chunks:
+        return (retrieved_chunks[0],)
+    return tuple(document_chunks(document))
+
+
 if __name__ == "__main__":
     import sys
 

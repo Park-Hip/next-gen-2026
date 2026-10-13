@@ -1,0 +1,9 @@
+# Tunable values. Read only through app/config.py; see AGENTS.md "Config". Secrets never go here.
+retrieval:
+  top_k: 5                 # chunks passed on to step 6 (ADR 0002); the stub uses it now, #12 later
+stub:                      # keyword stand-in for steps 5-6; removed with app/stub.py in #13
+  min_shared_tokens: 2
+  stopwords: [tôi, em, của, là, bao, nhiêu, mấy, thế, nào, có, không, được, và, cho, các, một, những, này, đó, ở, ai, gì]
+page:
+  question_max_chars: 300
+  utc_offset_hours: 7      # the default as-of date is today in Vietnam

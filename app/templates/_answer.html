@@ -1,0 +1,8 @@
+<article class="panel card card-answer">
+  <h2>Trả lời</h2>
+  <p class="who">{{ card.lines[0] }}</p>
+  <p class="lead">{{ card.lines[1] }}</p>
+  {% for line in card.lines[2:] %}
+  <p class="source">{{ line }}</p>
+  {% endfor %}
+</article>

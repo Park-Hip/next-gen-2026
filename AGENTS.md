@@ -46,6 +46,15 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - Credit any public source or solution used.
 - The repository is public: no API keys, passwords or sensitive data.
 
+## Config
+
+- Every tunable value lives in `config.yaml` at the repository root: top k, score thresholds, limits, model ids and the like.
+  Code reads them only through `app/config.py`; never hard-code them and never open `config.yaml` anywhere else.
+- `app/config.py` loads the file once into frozen dataclasses and raises `ValueError` on a missing key, an unknown key or a wrong type.
+- Add a key in the PR whose code first reads it, and remove it with the last code that reads it; no keys "for later".
+- A value fixed by an ADR names that ADR in a comment next to it, and changing it needs a new ADR.
+- Secrets never go in `config.yaml`; API keys come from the environment only.
+
 ## Writing
 
 - Never use the em dash; use a plain "-".

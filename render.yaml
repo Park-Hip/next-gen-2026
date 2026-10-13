@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: appota-tri-thuc-noi-bo   # decision 7 in the #11 implementation plan
+    runtime: python
+    plan: free
+    region: singapore
+    branch: master
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.web:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false   # set only in the Render Dashboard; unused until #12
