@@ -8,18 +8,21 @@ All company data in this repository is simulated ("giả lập"); no real Appota
 | Mission | Goal | Status |
 |---|---|---|
 | 1 | Understand the problem (5-page analysis) | Submitted 08/10/2026 (`docs/mission1/submitted/`) |
-| 2 | Build v1 | Preparing: data files in `data/`, acceptance checklist in `docs/mission2/mission1_promises.md` |
+| 2 | Build v1 | In progress: plan and decisions in `docs/mission2/plan.md`, issues under the "Mission 2" milestone |
 | 3 | Adapt to change | Not started |
 
 ## Layout
 
 ```
+.github/            Issue forms and the PR template
 docs/competition/   Official brief, rules and AI policy (do not edit)
+docs/decisions/     One ADR per decision from Mission 2 on, with Hiep's reasons
+docs/research/      One write-up per research question; feeds an ADR
 docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking phase, redraft plan
   submitted/        The exact files submitted (do not edit)
-  redraft/          Current design, frozen decision register, simulated data and traces, reviews
+  redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
-docs/mission2/      Mission 2 preparation: what Mission 1 promised
+docs/mission2/      Mission 2 plan, and what Mission 1 promised
 data/               Simulated documents, org tree, personas and test cases as files
 evidence_log.md     AI usage log for all missions
 tools/              Helper scripts

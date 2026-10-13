@@ -1,0 +1,47 @@
+name: Bug report
+description: A wrong answer, a leak, or a defect in the tools, data or docs.
+labels: [bug]
+body:
+  - type: dropdown
+    id: failure
+    attributes:
+      label: Failure kind
+      description: Pick every kind that applies. A leak is always the most serious.
+      multiple: true
+      options:
+        - Leak - a document the asker may not see reached retrieval, the answer or a card (access)
+        - Wrong version - the cited document is not in force on the as-of date (validity)
+        - Wrong unit - the cited rule does not apply to the asker (applicability)
+        - Wrong precedence or card - "dùng thay", conflict pair or card choice is wrong
+        - Retrieval missed - the answering chunk was in scope but not retrieved
+        - Unfaithful answer - the answer misstates its source or cites a chunk that does not answer
+        - Over-cautious - refused when a correct answer was available
+        - Other - UI, tools, data files or docs
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: For a wrong answer, the asker, the as-of date and the verbatim question, so it can become a row in `data/test_cases.yaml`.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: For a wrong answer, the card, the key facts and the documents it must or must not cite.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happened. For a wrong answer, the card, the cited documents and the retrieved chunk ids.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The command or page steps, the commit and the LLM model. For an LLM answer, how many runs failed out of how many.
+    validations:
+      required: true

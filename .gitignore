@@ -1,14 +1,32 @@
 # Generated output (rebuild with tools/render_pdf.py)
 build/
 
+# Secrets: API keys live only in .env locally and in the host's environment
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.pyc
+*.egg-info/
 .venv/
-.env
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
 
 # Tool state
 .lavish/
+
+# Editors
+.idea/
+.vscode/
 
 # OS
 Thumbs.db

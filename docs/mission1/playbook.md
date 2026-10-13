@@ -405,7 +405,7 @@ All of these were dropped or deferred (M0, M8, M11, M1b).
 This section now only summarises; the sources are:
 
 - What v1 must do: `docs/mission2/mission1_promises.md`, every commitment in the submitted document and answers.
-- The design: `docs/mission1/redraft/current_design.md`.
+- The design: `docs/mission1/redraft/current_design.md` (Mission 1 baseline) plus the ADRs in `docs/decisions/`.
 - Metadata, personas, the 10 documents, the test matrix, metrics and the 3-day plan: `docs/mission1/redraft/artifacts.md`.
 - The rules, already running on the simulated data: `docs/mission1/redraft/checks/adopted_rules.py`.
 

@@ -1,0 +1,32 @@
+name: Research
+description: A question to research before a decision; it closes with a write-up and an ADR.
+labels: [research]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: The question as a question, what it covers, and why it matters for v1.
+    validations:
+      required: true
+  - type: textarea
+    id: feeds
+    attributes:
+      label: Decision it feeds
+      description: The ADR it will produce and the issues that wait for it.
+    validations:
+      required: true
+  - type: textarea
+    id: known
+    attributes:
+      label: Options already known
+      description: The working default, the options to compare, the criteria, and any constraint already checked (with its source).
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Usually a write-up in `docs/research/` and an ADR with Hiep's decision and reasons, in one PR that closes this issue.
+    validations:
+      required: true

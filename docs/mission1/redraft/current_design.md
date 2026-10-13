@@ -1,6 +1,10 @@
 # Current design - what is decided now
 
-The single source for the design in force.
+**Frozen on 12/10/2026 as the Mission 1 baseline.**
+Design changes from Mission 2 on are ADRs in `docs/decisions/`, each naming the row or Mission 1 ID it supersedes; how the built system works is described in the repo `README.md`.
+The design in force is this page plus the accepted ADRs.
+
+The single source for the design as submitted in Mission 1.
 Snapshot of 08/10/2026, 20:20, after commit `5fe9edb`; Mission 1 was submitted at about 21:30 the same day with no design change since.
 Claude draft from `decisions.md`, `document.md` and `answers.md`; Hiep checks it against his own understanding.
 
@@ -9,7 +13,7 @@ How to read this page:
 - It lists only what is in force now, grouped by where it shows in the submission.
 - The submitted text (`docs/mission1/submitted/`) is what judges hold; Mission 2 is checked against it through `docs/mission2/mission1_promises.md`.
 - `decisions.md` is frozen as the Mission 1 audit trail; old IDs appear here only in the "Trace" column.
-- From Mission 2 on, a decision change is made here: edit the row, add a line to "Changes since submission" with the date, the reason and who decided, and add an evidence log entry if AI shaped it.
+- From Mission 2 on, rows are not edited; a decision change is an ADR in `docs/decisions/`.
 - Origin uses four plain values: **Hiep** (his idea or his call), **Hiep + AI** (Hiep raised the problem or set the direction, AI shaped the solution), **AI, accepted** (AI proposed, Hiep approved), **AI, not reviewed** (still needs Hiep).
 
 ## ID prefixes in `decisions.md`
@@ -123,6 +127,7 @@ Each line is a change of mind; most are Hiep's calls and belong in the evidence 
 ## 7. Still open
 
 Found while building this page on 08/10.
+To move to follow-up issues (not opened yet, 12/10).
 
 1. **A8, card wording:** the register still says "AI proposal, not yet reviewed by Hiep", but the cards in the PDF were reworded under RV4, RV8 and V7, which he accepted. Hiep to confirm the three cards as they are in Section 2.
 2. **A11, who drafted the PDF:** still "to be confirmed by Hiep", although he has reviewed four batches since. Hiep to confirm the delegation in one line.
@@ -135,4 +140,4 @@ Closed after submission:
 
 ## Changes since submission
 
-None yet.
+None before the freeze on 12/10; later changes are ADRs in `docs/decisions/`.
