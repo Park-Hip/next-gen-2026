@@ -19,7 +19,7 @@ A claim that could not be checked against its source goes under "Claims that did
 
 | No. | Question | Issue | Feeds | Status |
 |---|---|---|---|---|
-| - | Build the RAG with a framework or with our own modules? | #4 | ADR 0001 | Open |
+| [0001](0001-rag-framework-or-own-modules.md) | Build the RAG with a framework or with our own modules? | #4 | ADR 0001 | Decided: option C (ADR 0001) |
 | - | Hybrid retrieval for Vietnamese | #5 | ADR 0002 | Open |
 | - | Which LLM, and how to make it answer only from the chunks, cite and refuse | #6 | ADR 0003 | Open |
 | - | Web UI and free hosting for the public demo | #7 | ADR 0004 | Open |
