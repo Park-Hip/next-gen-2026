@@ -8,7 +8,7 @@ Every unit, person, document and number here is simulated.
 | `documents/<id>.md` | The 10 documents: YAML front matter with the metadata, then the text, one "Điều" per line (the procedure document has plain steps, on purpose) |
 | `org.yaml` | The org tree; `hr` is the contact the cards name |
 | `personas.yaml` | Minh, Lan and Hà: unit and roles, the two fields the HR system would give |
-| `test_cases.yaml` | The 10 rows of the test matrix; only row 1 has its paraphrase and "văn nói" phrasings yet |
+| `test_cases.yaml` | The test cases: rows 1-10 of the Mission 1 test matrix and N1-N4; each has its wordings of the question, the card, the expected answer and the documents it must and must not cite (fields explained at the top of the file) |
 
 Metadata fields, as read by the rules:
 
@@ -24,7 +24,7 @@ Metadata fields, as read by the rules:
 | `complements` | "Bổ sung": series this document adds to without contradicting them |
 
 Source: `docs/mission1/redraft/artifacts.md` and `docs/mission1/redraft/checks/adopted_rules.py`.
-Check that the files still match them, and rerun the deterministic test matrix on the files:
+Check that the files still match them, and run the rules part of every test case on the files:
 
 ```
 python -I -X utf8 tools/check_data.py
