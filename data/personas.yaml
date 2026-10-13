@@ -1,0 +1,13 @@
+# Simulated askers (giả lập). They stand in for the HR system, which gives v1 the same two fields: unit and roles.
+- id: minh
+  name: Minh
+  unit: Studio
+  roles: [employee]
+- id: lan
+  name: Lan
+  unit: Nhân sự Tập đoàn
+  roles: [employee, hr_group]
+- id: ha
+  name: Hà
+  unit: Kế toán
+  roles: [employee]
