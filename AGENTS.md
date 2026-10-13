@@ -22,7 +22,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 
 - Code is implemented through GitHub issues and PRs.
   Every code change starts from an issue made with a form in `.github/ISSUE_TEMPLATE/`, is built on its own branch named `<issue>-<short-title>`, and lands through a PR that fills in `.github/pull_request_template.md` and says `Closes #<issue>`.
-  Never commit code directly to `master`.
+  Never commit code directly to `main`.
 - Small doc edits and trivial fixes may skip the issue; their PR says "No issue - minor fix".
 - Ask Hiep before opening or closing an issue or a PR; Hiep merges.
 - Before coding an issue, post its implementation plan as a comment on that issue: what was checked, the decisions Hiep must take with a recommendation for each, the files, the tests, the order of work and how to verify.
