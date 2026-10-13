@@ -1,104 +1,56 @@
 # AGENTS.md
 
-## Project
+Appota NextGen AI Talent 2026, Bài test B - "Tri thức nội bộ Appota": an AI assistant that gives each employee the right knowledge for their unit, their access rights, and the version in force today.
+Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) is in progress; Mission 3 (adapt to change) follows.
 
-Appota NextGen AI Talent 2026, Bài test B - "Tri thức nội bộ Appota".
-Goal: an AI assistant that gives each employee the right knowledge for their unit, their access rights, and the version in force today.
-Current stage: Mission 1 submitted on 08/10/2026; preparing Mission 2 (build v1) before its brief arrives.
-Mission 3 (adapt to change) is expected to follow.
+## Read first
 
-## Files
+- `docs/competition/mission2_brief.md` - what Mission 2 must show and submit.
+- `docs/mission1/redraft/current_design.md` plus the ADRs in `docs/decisions/` - the design in force.
+- `docs/mission2/mission1_promises.md` - the acceptance checklist.
+- `docs/mission2/plan.md` - Hiep's decisions D1-D15 and the roadmap; the issues are under the "Mission 2" milestone on GitHub.
 
-Read `docs/mission1/redraft/current_design.md` first.
+`README.md` shows the repository layout.
 
-Competition (do not edit):
+## Product rules
 
-- `docs/competition/mission1_brief.md` - official brief. Source of truth.
-- `docs/competition/rules.md` - competition rules.
-- `docs/competition/ai_policies.md` - AI usage policy. Binding, overrides anything here.
+- A relevant document is not necessarily allowed, in force, or applicable to the asker; keep access, validity and applicability separate everywhere.
+- Deterministic rules decide access, validity, applicability, precedence and the card; the LLM only interprets language.
+- All Appota data is simulated: label it "giả lập" and never invent research or measurements.
 
-Current:
+## Workflow
 
-- `docs/mission1/redraft/current_design.md` - the single source for the design in force, grouped by submission section, with origin and old IDs as a trace; every design change is made here and listed under "Changes since submission".
-- `docs/mission2/mission1_promises.md` - every commitment in the submitted Mission 1 text, as the Mission 2 acceptance checklist.
-- `data/` - the simulated documents, org tree, personas and test cases as files (see `data/README.md`). Check them with `python -I -X utf8 tools/check_data.py`.
-- `docs/mission1/redraft/artifacts.md` - simulated data model, personas, documents, Minh's worked trace, test matrix, metrics and the 3-day plan.
-- `docs/mission1/redraft/checks/adopted_rules.py` - the adopted core model run on the simulated data, plus the publish-time check and the deterministic part of the test matrix. Run with `python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py`.
-- `docs/mission1/playbook.md` - strategy notes; section 9 prepares Missions 2-3; "Deferred ideas" lists what is out of scope.
-- `evidence_log.md` - AI usage log for all missions; Mission 1 is Phần A-B, Mission 2 has its own section. Add an entry whenever AI shapes the result.
-- `tools/render_pdf.py` (Markdown to PDF), `tools/ai_sessions.py` (lists Pi and Claude Code sessions for the evidence log), `tools/check_data.py`.
-- `build/` - generated output, not committed.
+- Code is implemented through GitHub issues and PRs.
+  Every code change starts from an issue made with a form in `.github/ISSUE_TEMPLATE/`, is built on its own branch named `<issue>-<short-title>`, and lands through a PR that fills in `.github/pull_request_template.md` and says `Closes #<issue>`.
+  Never commit code directly to `master`.
+- Small doc edits and trivial fixes may skip the issue; their PR says "No issue - minor fix".
+- Ask Hiep before opening or closing an issue or a PR; Hiep merges.
+- A design change is an ADR in `docs/decisions/`, added in the same PR; `current_design.md` stays frozen as the Mission 1 baseline.
+- A choice with real alternatives starts from a research issue (label `research`).
+  Hiep runs the research with his own agent; its results are filed in `docs/research/` from the template there, and the ADR records Hiep's decision and his reasons in his words.
+  Never write an ADR's reasons for Hiep; draft only from what he said, and ask when it is missing.
+- A known failure that stays in v1 keeps its issue open with the `limitation` label, so the test suite, README and video report it.
+- Before a PR, run `python -I -X utf8 tools/check_data.py` (until #9 retires it) and the test suite.
+- Do not edit `docs/competition/` or `docs/mission1/`, except "Deferred ideas" in `docs/mission1/playbook.md`.
+- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of `evidence_log.md`, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
+  Take tool, model and time from `tools/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
 
-Mission 1 record (do not edit):
+## Competition rules
 
-- `docs/mission1/submitted/` - the exact files submitted on 08/10, with a README on where each came from.
-- `docs/mission1/document.md` and `docs/mission1/answers.md` - sources of the submitted document and answers; render with `python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf` (5 pages).
-- `docs/mission1/redraft/decisions.md` - decision register, frozen on 08/10; the audit trail behind the submitted text and the evidence log.
+- `docs/competition/ai_policies.md` is binding and overrides this file.
+- Every AI tool and prompt that shaped the result is declared in the evidence log with how it was checked; undeclared use costs 30% of the score.
+- Hiep must be able to explain or rebuild any part in the PITCH round: explain your reasoning and flag every factual claim that needs checking, because an unverified hallucination fails the criterion.
+- Credit any public source or solution used.
+- The repository is public: no API keys, passwords or sensitive data.
 
-Mission 1 history (cited by the evidence log and the register; read only to trace a past decision):
+## Writing
 
-- `docs/mission1/redraft_plan.md` - the redraft plan, Phases 0-7.
-- `docs/mission1/criteria.md` - what Mission 1 was judged on, and the rewrite principles.
-- `docs/mission1/thinking/` - thinking-phase workbook and the candidate's decisions (Round 1-3).
-- `docs/mission1/redraft/open_issues.md` - gaps found while building the artifacts.
-- `docs/mission1/redraft/production_review.md` - review of the core model against real practice (findings P1-P9).
-- `docs/mission1/redraft/phase2_prompt.md`, `phase3_decisions.md`, `review_notes.md` - Phase 2 prompt, the A-vs-B arguments for Section 4, Hiep's review notes.
-- `docs/mission1/review_prompt_reader.md`, `docs/mission1/redraft/review_reader_output.md` - new-reader review prompt and its Claude output (same model family, not independent).
-- `docs/mission1/review_prompt_answers.md`, `docs/mission1/redraft/review_answers_output.md` - independent ChatGPT/Gemini review of the answers and its verbatim output (A13).
-- `docs/mission1/review_prompt.md`, `docs/mission1/review_output.md` - pre-redraft review of the first draft.
-- `docs/mission1/redraft/checks/current_rules.py`, `proposed_rules.py` - rule scripts from the production review.
-
-## Competition rules that affect agents
-
-- Mission 1 scoring (from the brief): 40% Khung vấn đề - "bạn có hiểu đúng vấn đề không?", 35% Thực thi - "giải pháp có chạy thật không?", 25% Chất lượng quyết định - "lý do chọn A thay vì B có thuyết phục không?".
-- Every AI tool and prompt that shaped the final result must be declared in the evidence log, with how the output was verified. Undeclared AI use costs 30% of the score.
-- The candidate must be able to explain or rebuild any part during the PITCH round. Explain your reasoning; never hand over output the candidate cannot defend.
-- Unverified hallucinations fail the criterion. Flag every factual claim that needs checking.
-- No plagiarism. Credit any public solution or source that is used.
+- Never use the em dash; use a plain "-".
+- One sentence per line in Markdown.
 - Code comments in English.
 
-## Mission 1 deliverable
+## Scope
 
-Three parts are submitted (brief, "Nộp gì cho mission 1"), and no code is required:
-
-1. One PDF/DOCX or a Notion link, at most 5 pages, written in Vietnamese (English technical terms are fine).
-   It covers 5 sections: problem and users, solution and flow, AI/data/people, decisions and risks, validation and MVP.
-2. The 3 mandatory "Forced Decision" answers, submitted separately from the PDF.
-   The brief requires "Trả lời ngắn gọn, rõ quyết định và lý do. Khuyến nghị 60–150 từ.": each answer opens with the decision, gives the reason, and is 60-150 words counted by whitespace.
-3. The evidence log (`evidence_log.md`): AI tools, prompts, and decisions.
-   It is a judged deliverable, so keep it accurate, readable and in Vietnamese.
-
-## Core thesis
-
-A relevant document is not necessarily allowed, in force, or applicable to the person asking.
-Keep access, validity and applicability separate in every design and every piece of writing.
-
-## Working rules
-
-- All Appota data is simulated. Label it "giả lập" and never invent research or measurements.
-- Deterministic rules decide access, validity and precedence. The LLM only interprets language.
-- Promise only what can be built in Mission 2.
-- Do not use the em dash. Use a plain "-".
-- Put each sentence on its own line in Markdown.
-- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of `evidence_log.md`, in Vietnamese: date and time, tool and model, task, Hiep's decision (kept, changed or rejected), and how the result was checked.
-  Take tool, model and time from `tools/ai_sessions.py`; if Hiep's decision is unknown, write "[chờ Hiệp]" instead of guessing.
-
-## Scope discipline (MVP first)
-
-AI suggestions that sound impressive but do not fit the MVP are a real risk to shipping time.
-Treat every suggestion as out of scope until it proves it serves the current mission.
-
-- Before proposing or accepting a feature, architecture or tool, ask: does it directly serve the Mission 1 deliverable or the Mission 2 MVP?
-  If not, do not add it.
-- Prefer the simplest design that works end to end.
-  Do not add abstractions, layers, services, frameworks or config systems "for later".
-- Do not build for scale, extensibility or edge cases that the brief does not require.
-  Note them as future work in one line instead.
-- When a suggestion is impressive but out of scope, do not implement it.
-  Name it, say in one sentence why it is deferred, and park it under "Deferred ideas" in `docs/mission1/playbook.md`.
-- Flag complexity honestly.
-  If a suggestion adds a new dependency, a new moving part, or more than about half a day of work, say so and ask before proceeding.
-- Never let a deferred idea leak into the document as a promise.
-  Only promise what can be built in Mission 2.
-- When unsure whether something is in scope, ask the candidate.
-  Do not decide silently.
+- Build only what the Mission 2 brief or a promise in `mission1_promises.md` needs, in the simplest way that works end to end; no layers, frameworks or config "for later".
+- Ask Hiep before adding a dependency, a new moving part, or more than about half a day of work, and whenever scope is unclear.
+- Park an out-of-scope idea as one line under "Deferred ideas" in `docs/mission1/playbook.md`; never promise it in a deliverable.

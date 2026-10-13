@@ -1,0 +1,28 @@
+name: Follow-up
+description: Track a risk, a known issue or a follow-up found during other work.
+labels: [follow-up]
+body:
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: What was observed, where, and why it matters. Link the originating issue, PR or test case.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High - blocks the submission, correctness or no-leak
+        - Medium - before the mission deadline
+        - Low - when convenient, or after the mission
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: The observable condition that closes this issue.
+    validations:
+      required: true
