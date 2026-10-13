@@ -30,3 +30,4 @@ The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Missio
 |---|---|---|---|
 | [0001](0001-langchain-core-with-own-retrieval.md) | Build steps 5-6 on LangChain core, with our own Vietnamese BM25 and fusion | Accepted | None |
 | [0002](0002-syllable-bm25-gemini-001-rrf.md) | Hybrid retrieval: syllable BM25 of our own, gemini-embedding-001 and RRF, for now | Accepted | None |
+| [0003](0003-gemini-38-flash-enum-citations-quote-check.md) | Step 6 on gemini-3.8-flash at low thinking, citing only retrieved ids, with a quote that step 7 checks | Accepted | None |

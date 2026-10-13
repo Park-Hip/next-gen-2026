@@ -21,7 +21,7 @@ A claim that could not be checked against its source goes under "Claims that did
 |---|---|---|---|---|
 | [0001](0001-rag-framework-or-own-modules.md) | Build the RAG with a framework or with our own modules? | #4 | ADR 0001 | Decided: option C (ADR 0001) |
 | [0002](0002-hybrid-retrieval-for-vietnamese.md) | How should v1 do hybrid search over Vietnamese policy text? | #5 | ADR 0002 | Decided, temporary for synthetic data (ADR 0002) |
-| - | Which LLM, and how to make it answer only from the chunks, cite and refuse | #6 | ADR 0003 | Open |
+| [0003](0003-llm-grounded-answers-citations-refusal.md) | Which LLM, and how to make it answer only from the chunks, cite and refuse | #6 | ADR 0003 | Decided: AI recommendation as it stands (ADR 0003) |
 | - | Web UI and free hosting for the public demo | #7 | ADR 0004 | Open |
 | - | How to evaluate a small RAG | #8 | ADR 0006 | Open |
 
