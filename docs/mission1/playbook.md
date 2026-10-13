@@ -508,6 +508,8 @@ None of them may appear in the Mission 1 document as a promise.
 | Alert before an `effective_to` passes with no successor | Only matters once owners set end dates; the MVP data has none | M10 |
 | "Hỏi cho" selector: the user picks the target unit for questions about another unit's rules | Stated as a known limitation in v1 (HR cannot ask about another unit); no AI guesses the target | M13 |
 | `covers`: a question key per Điều, so precedence and conflicts work per question and a company can change one clause | Needs a label on every chunk and fails on unstructured documents; `complements` covers the common case | M14 |
+| "Báo sai" button and its records (Mission 1 P2, part of C2) | Adds little value to Mission 2 (Hiep, 13/10/2026); records would not survive a restart on the free host | ADR 0004 |
+| Owners' page listing conflict records (Mission 1 P1) | Dropped with "Báo sai"; Hiep will revisit it later (13/10/2026) | ADR 0004 |
 | Owner screen for publish-time triage (new version / overrides / complements / duplicate) | The MVP runs the same check as a script on the simulated data | M15 |
 | Periodic review: owners re-confirm documents and their relations on a schedule | Real practice (NAVEX, Guru); needs owners and time, not code | M15 |
 | Similarity scan that flags near-duplicate documents for the owner | Real practice (Guru); the MVP has too few documents to need it | M15 |
