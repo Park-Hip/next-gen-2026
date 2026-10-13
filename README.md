@@ -23,7 +23,7 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
 docs/mission2/      Mission 2 plan, and what Mission 1 promised
-app/                The rules engine (data.py, rules.py) plus the page: config.py, stub.py, cards.py, web.py, templates/
+app/                The rules engine (data.py, rules.py), hybrid retrieval (retrieval.py) and the page: config.py, stub.py, cards.py, web.py, templates/
 tests/              The deterministic test suite for the rules, the stub, the cards and the page
 config.yaml         Tunable values (top k, thresholds, limits); read only through app/config.py
 render.yaml         Deploy config for the Render free web service (ADR 0004)
@@ -69,6 +69,22 @@ See one asker's scope by hand:
 ```bash
 python -m app.rules minh 2026-10-07
 ```
+
+## Check retrieval by hand
+
+Step 5 searches only the asker's scope: syllable BM25 and `gemini-embedding-001`, fused with reciprocal rank fusion (ADRs 0001 and 0002).
+It needs a Gemini API key in the environment and the network; the tests do not (they use a fake embedder).
+All documents are simulated ("giả lập").
+
+```bash
+export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
+python -m app.retrieval minh 2026-10-07 "Phép năm của tôi là bao nhiêu ngày?"
+python -m app.retrieval          # the top 5 for every row and wording of data/test_cases.yaml
+```
+
+Each line shows the chunk id, its RRF score, and its BM25 and dense scores with their ranks.
+Every search also logs one JSON line (persona, as-of date, question, scope size, and the same numbers per chunk) on the `app.retrieval` logger.
+The page does not use this yet; #13 wires it in.
 
 ## Run the page locally
 

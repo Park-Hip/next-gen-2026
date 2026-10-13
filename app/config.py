@@ -16,6 +16,10 @@ CONFIG = Path(__file__).resolve().parent.parent / "config.yaml"
 @dataclass(frozen=True)
 class Retrieval:
     top_k: int
+    rrf_k: int
+    bm25_k1: float
+    bm25_b: float
+    embedding_model: str
 
 
 @dataclass(frozen=True)
@@ -74,6 +78,32 @@ def _positive_int(path: Path, key: str, value) -> int:
     return value
 
 
+def _positive_float(path: Path, key: str, value) -> float:
+    """A number above zero, stored as float; bool is rejected and ints are accepted."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{path.name} {key}: must be a number above 0, got {type(value).__name__}")
+    result = float(value)
+    if not result > 0:
+        raise ValueError(f"{path.name} {key}: must be above 0")
+    return result
+
+
+def _unit_float(path: Path, key: str, value) -> float:
+    """A number from 0 to 1 inclusive, stored as float; bool is rejected and ints are accepted."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{path.name} {key}: must be a number from 0 to 1, got {type(value).__name__}")
+    result = float(value)
+    if not (0.0 <= result <= 1.0):
+        raise ValueError(f"{path.name} {key}: must be between 0 and 1")
+    return result
+
+
+def _non_empty_str(path: Path, key: str, value) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{path.name} {key}: must be a non-empty string")
+    return value
+
+
 def _stopwords(path: Path, key: str, value) -> frozenset[str]:
     if not isinstance(value, list) or any(not isinstance(s, str) for s in value):
         raise ValueError(f"{path.name} {key}: must be a list of strings")
@@ -81,8 +111,14 @@ def _stopwords(path: Path, key: str, value) -> frozenset[str]:
 
 
 def _load_retrieval(raw, path: Path) -> Retrieval:
-    _check_keys(path, "retrieval", raw, {"top_k"})
-    return Retrieval(top_k=_positive_int(path, "retrieval.top_k", raw["top_k"]))
+    _check_keys(path, "retrieval", raw, {"top_k", "rrf_k", "bm25_k1", "bm25_b", "embedding_model"})
+    return Retrieval(
+        top_k=_positive_int(path, "retrieval.top_k", raw["top_k"]),
+        rrf_k=_positive_int(path, "retrieval.rrf_k", raw["rrf_k"]),
+        bm25_k1=_positive_float(path, "retrieval.bm25_k1", raw["bm25_k1"]),
+        bm25_b=_unit_float(path, "retrieval.bm25_b", raw["bm25_b"]),
+        embedding_model=_non_empty_str(path, "retrieval.embedding_model", raw["embedding_model"]),
+    )
 
 
 def _load_stub(raw, path: Path) -> Stub:
