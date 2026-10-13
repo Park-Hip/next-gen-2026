@@ -2,13 +2,12 @@
 
 Loads data/documents/*.md, data/org.yaml, data/personas.yaml and data/test_cases.yaml, then:
 1. compares them field by field with DOCS, PERSONAS, ORG_TREE and TEST_MATRIX in adopted_rules.py
-   (test cases 1-10 are the rows of TEST_MATRIX; the N rows are new) and checks every test case is well formed,
+   (test cases 1-10 are the rows of TEST_MATRIX; the later rows are new) and checks every test case is well formed,
 2. compares each document body with its text in artifacts.md ("Bodies"),
-3. runs the rules part of every test case (steps 1-4 and step 7 with correct citations) on the loaded documents,
-   and checks that the known limitation N5 still reproduces.
+3. runs the rules part of every test case (steps 1-4 and step 7 with correct citations) on the loaded documents;
+   a limitation row states the ideal result, so its check must fail, or the limitation no longer reproduces.
 Run: python -I -X utf8 tools/check_data.py
 """
-from datetime import date
 from pathlib import Path
 import importlib.util
 import re
@@ -102,8 +101,13 @@ for c in cases:
         check(len(c.get("conflict_pair", [])) == 2 and not cites, f"{tag}: a conflict row needs conflict_pair only")
     else:
         check(not cites and "conflict_pair" not in c, f"{tag}: a refusal row cites nothing")
+    if "data_edit" in c:
+        # Rules never read the body; the edit matters to retrieval and the LLM, so only check it still applies.
+        edit = c["data_edit"]
+        body = next((d["body"] for d in docs if d["id"] == edit["document"]), "")
+        check(edit["remove"] in body.splitlines(), f"{tag}: data_edit line not found in {edit['document']}")
 
-check(ids[:len(ar.TEST_MATRIX)] == [str(r["n"]) for r in ar.TEST_MATRIX], "rows 1-10 differ from TEST_MATRIX")
+check(ids[:len(ar.TEST_MATRIX)] == [r["n"] for r in ar.TEST_MATRIX], "rows 1-10 differ from TEST_MATRIX")
 for c, r in zip(cases, ar.TEST_MATRIX):
     tag = f"test case {c['id']}"
     check(c["persona"] == r["persona"] and dmy(c["as_of"]) == r["asof"], f"{tag}: persona or as_of differs")
@@ -142,26 +146,19 @@ for c in cases:
     problems += [f"{i} in scope" for i in c["forbidden_by_rules"] if i in scope]
     if not got.startswith(c["card"].upper()):
         problems.append(f"expected {c['card'].upper()}, got {got}")
-    failed += bool(problems)
-    print(f"  {c['id']:>3} {c['kind']:<5} {c['persona']:<5} {c['as_of']}  {'FAIL' if problems else 'PASS'}  {got}")
+    if c["kind"] == "limitation":
+        status = "LIMITATION" if problems else "FAIL"
+        if not problems:
+            problems = ["the limitation no longer reproduces: update the row and its limitation issue"]
+    else:
+        status = "FAIL" if problems else "PASS"
+    failed += status == "FAIL"
+    print(f"  {c['id']:>2} {c['kind']:<10} {c['persona']:<5} {c['as_of']}  {status:<10}  {got}")
     for p in problems:
         print(f"        {p}")
     if c["forbidden_for_llm"]:
         lured = ar.answer(loaded, c["persona"], c["as_of"], c["forbidden_for_llm"])
         print(f"        if the LLM cites {' + '.join(c['forbidden_for_llm'])}: {lured}")
 
-# N5, known limitation (Mission 1 M1a): "dùng thay" replaces a whole series, never one clause.
-# Edit: GameCo's leave policy keeps only its leave-days clause and drops its notice clause (Điều 3), so the
-# Group's notice clause should still apply to Minh. Rules still drop the whole Group policy, so no document in
-# Minh's scope says how many days ahead to ask, and "Xin nghỉ phép phải báo trước mấy ngày?" gets a refusal.
-body = {d["id"]: d["body"] for d in docs}
-body["LEAVE-GAMECO-v2"] = "\n".join(line for line in body["LEAVE-GAMECO-v2"].splitlines() if not line.startswith("Điều 3."))
-scope = [d["id"] for d in ar.rulebook(loaded, "minh", date(2026, 10, 7))[0]]
-notice = [i for i in scope if "ngày làm việc" in body[i]]
-reproduces = "LEAVE-GROUP-v1" not in scope and not notice
-failed += not reproduces
-print(f"   N5 limitation minh 2026-10-07  {'LIMITATION' if reproduces else 'FAIL'}  "
-      f"{'Group notice clause dropped with the whole Group policy; v1 refuses' if reproduces else 'no longer reproduces, update the limitation issue'}")
-
-print(f"  {len(cases) + 1 - failed}/{len(cases) + 1} test cases as expected")
+print(f"  {len(cases) - failed}/{len(cases)} test cases as expected")
 sys.exit(1 if failed else 0)
