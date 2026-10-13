@@ -10,6 +10,7 @@ from app.rules import (
     REFUSAL_TEXT,
     allowed,
     applies,
+    conflict_quotes,
     in_force,
     pick_card,
     refusal_text,
@@ -27,9 +28,9 @@ def make_doc(id="DOC", series="SER", topic="topic", access="all_staff", applies_
                     effective_to=effective_to, overrides=overrides, complements=complements, body=body)
 
 
-def make_persona(id="p", unit="Studio", path=("Tập đoàn", "GameCo", "Studio"),
+def make_persona(id="p", unit="Studio", company="GameCo", path=("Tập đoàn", "GameCo", "Studio"),
                  roles=("employee",), hr="HR GameCo"):
-    return Persona(id=id, name=id, unit=unit, path=path, roles=roles, hr=hr)
+    return Persona(id=id, name=id, unit=unit, company=company, path=path, roles=roles, hr=hr)
 
 
 def test_scope_manual_check(personas, documents):
@@ -143,6 +144,48 @@ def test_leak_hr_gameco_sees_salary(personas, documents):
     p = replace(personas["minh"], roles=("employee", "hr_gameco"))
     s = scope(p, date(2026, 10, 7), documents)
     assert any(c.document_id == "SAL-BAND-GAMECO" for c in s.chunks)
+
+
+def test_conflict_quotes(personas, documents):
+    ha = personas["ha"]
+    as_of = date(2026, 10, 7)
+    s = scope(ha, as_of, documents)
+    group = next(d for d in documents if d.id == "LEAVE-GROUP-v1")
+    payco = next(d for d in documents if d.id == "LEAVE-PAYCO-v1")
+    group_chunks = tuple(chunks(group))
+    payco_chunks = tuple(chunks(payco))
+
+    # Citing only the Group side quotes the PayCo side from its top retrieved chunk.
+    retrieved = (group_chunks[0], payco_chunks[0])
+    card = pick_card(s, [c.id for c in retrieved], ["LEAVE-GROUP-v1#1"])
+    left, right = conflict_quotes(card, retrieved)[0]
+    assert [c.id for c in left] == ["LEAVE-GROUP-v1#1"]
+    assert [c.id for c in right] == ["LEAVE-PAYCO-v1#1"]
+
+    # Citing both quotes both.
+    card = pick_card(s, [c.id for c in retrieved], ["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"])
+    left, right = conflict_quotes(card, retrieved)[0]
+    assert [c.id for c in left] == ["LEAVE-GROUP-v1#1"]
+    assert [c.id for c in right] == ["LEAVE-PAYCO-v1#1"]
+
+    # Nothing retrieved from the PayCo side quotes all its chunks.
+    retrieved_group_only = (group_chunks[0],)
+    card = pick_card(s, [c.id for c in retrieved_group_only], ["LEAVE-GROUP-v1#1"])
+    left, right = conflict_quotes(card, retrieved_group_only)[0]
+    assert [c.id for c in left] == ["LEAVE-GROUP-v1#1"]
+    assert [c.id for c in right] == [c.id for c in payco_chunks]
+
+
+def test_conflict_quotes_only_for_conflict_cards(personas, documents):
+    as_of = date(2026, 10, 7)
+    s_minh = scope(personas["minh"], as_of, documents)
+    s_ha = scope(personas["ha"], as_of, documents)
+    v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
+    v2_chunks = tuple(chunks(v2))
+    answer = pick_card(s_minh, [c.id for c in v2_chunks], ["LEAVE-GAMECO-v2#2"])
+    assert conflict_quotes(answer, v2_chunks) == ()
+    refusal = pick_card(s_ha, s_ha.chunk_ids, [])
+    assert conflict_quotes(refusal, ()) == ()
 
 
 def test_refusal_text(personas, documents, cases):

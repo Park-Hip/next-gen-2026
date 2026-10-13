@@ -23,8 +23,11 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
 docs/mission2/      Mission 2 plan, and what Mission 1 promised
-app/                The rules engine: data loading (data.py) and steps 1-4 and 7 (rules.py)
-tests/              The deterministic test suite for the rules
+app/                The rules engine (data.py, rules.py) plus the page: config.py, stub.py, cards.py, web.py, templates/
+tests/              The deterministic test suite for the rules, the stub, the cards and the page
+config.yaml         Tunable values (top k, thresholds, limits); read only through app/config.py
+render.yaml         Deploy config for the Render free web service (ADR 0004)
+.python-version     Pins Python 3.12 for Render
 data/               Simulated documents, org tree, personas and test cases as files
 evidence_log.md     AI usage log for all missions (local only, ignored by git; lives in the main checkout, not in worktrees)
 tools/              Helper scripts
@@ -66,3 +69,17 @@ See one asker's scope by hand:
 ```bash
 python -m app.rules minh 2026-10-07
 ```
+
+## Run the page locally
+
+The page is a FastAPI app that runs the scope, a keyword stub for steps 5-6, and the three cards.
+Until the real retrieval and LLM land (#12 and #13), the answer text is a cited clause word for word, and the page says so.
+Every unit, person, document and number on the page is simulated ("giả lập").
+
+```bash
+pip install -r requirements.txt
+uvicorn app.web:app --reload
+```
+
+Then open http://127.0.0.1:8000, pick Minh, Lan or Hà and an as-of date, and ask a question.
+The public demo URL and the first-load warning are added once the Render service is live.

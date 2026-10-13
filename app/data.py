@@ -51,6 +51,7 @@ class Persona:
     id: str
     name: str
     unit: str
+    company: str
     path: tuple[str, ...]
     roles: tuple[str, ...]
     hr: str
@@ -68,11 +69,15 @@ class Org:
             unit = self.parent[unit]
         return tuple(path)
 
-    def hr_for(self, unit: str) -> str:
+    def hr_unit(self, unit: str) -> str:
+        """The nearest unit on the path with an HR contact; the card's company name."""
         for name in reversed(self.path(unit)):
             if name in self.hr:
-                return self.hr[name]
+                return name
         raise ValueError(f"{unit}: no HR contact on its path")
+
+    def hr_for(self, unit: str) -> str:
+        return self.hr[self.hr_unit(unit)]
 
 
 def _load_document(path: Path) -> Document:
@@ -176,6 +181,7 @@ def load_personas(org: Org, root: Path = DATA) -> dict[str, Persona]:
             id=p["id"],
             name=p["name"],
             unit=unit,
+            company=org.hr_unit(unit),
             path=org.path(unit),
             roles=tuple(p["roles"]),
             hr=org.hr_for(unit),

@@ -114,6 +114,9 @@ def test_chunks_reject_repeated_dieu():
 
 def test_org_paths_and_hr(org):
     assert org.path("Studio") == ("Tập đoàn", "GameCo", "Studio")
+    assert org.hr_unit("Studio") == "GameCo"
+    assert org.hr_unit("Kế toán") == "PayCo"
+    assert org.hr_unit("Nhân sự Tập đoàn") == "Tập đoàn"
     assert org.hr_for("Studio") == "HR GameCo"
     assert org.hr_for("Kế toán") == "HR PayCo"
     assert org.hr_for("Nhân sự Tập đoàn") == "HR Tập đoàn"
@@ -122,11 +125,14 @@ def test_org_paths_and_hr(org):
 def test_personas(personas):
     assert personas["minh"].name == "Minh"
     assert personas["minh"].unit == "Studio"
+    assert personas["minh"].company == "GameCo"
     assert personas["minh"].roles == ("employee",)
     assert personas["lan"].unit == "Nhân sự Tập đoàn"
+    assert personas["lan"].company == "Tập đoàn"
     assert personas["lan"].roles == ("employee", "hr_group")
     assert personas["ha"].name == "Hà"
     assert personas["ha"].unit == "Kế toán"
+    assert personas["ha"].company == "PayCo"
     assert personas["ha"].roles == ("employee",)
 
 
