@@ -25,6 +25,8 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
   Never commit code directly to `master`.
 - Small doc edits and trivial fixes may skip the issue; their PR says "No issue - minor fix".
 - Ask Hiep before opening or closing an issue or a PR; Hiep merges.
+- Before coding an issue, post its implementation plan as a comment on that issue: what was checked, the decisions Hiep must take with a recommendation for each, the files, the tests, the order of work and how to verify.
+  When Hiep answers, edit the comment to record his decisions; the work follows the comment.
 - A design change is an ADR in `docs/decisions/`, added in the same PR; `current_design.md` stays frozen as the Mission 1 baseline.
 - A choice with real alternatives starts from a research issue (label `research`).
   Hiep runs the research with his own agent; its results are filed in `docs/research/` from the template there, and the ADR records Hiep's decision and his reasons in his words.

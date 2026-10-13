@@ -1,6 +1,10 @@
 # Tunable values. Read only through app/config.py; see AGENTS.md "Config". Secrets never go here.
 retrieval:
-  top_k: 5                 # chunks passed on to step 6 (ADR 0002); the stub uses it now, #12 later
+  top_k: 5                 # chunks passed on to step 6 (ADR 0002)
+  rrf_k: 60                # reciprocal rank fusion constant (ADR 0002)
+  bm25_k1: 1.2             # BM25 term-frequency saturation (ADR 0002)
+  bm25_b: 0.75             # BM25 length normalisation (ADR 0002)
+  embedding_model: gemini-embedding-001  # dense ranking model (ADR 0002)
 stub:                      # keyword stand-in for steps 5-6; removed with app/stub.py in #13
   min_shared_tokens: 2
   stopwords: [tôi, em, của, là, bao, nhiêu, mấy, thế, nào, có, không, được, và, cho, các, một, những, này, đó, ở, ai, gì]
