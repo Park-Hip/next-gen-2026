@@ -32,7 +32,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - A known failure that stays in v1 keeps its issue open with the `limitation` label, so the test suite, README and video report it.
 - Before a PR, run `python -I -X utf8 tools/check_data.py` (until #9 retires it) and the test suite.
 - Do not edit `docs/competition/` or `docs/mission1/`, except "Deferred ideas" in `docs/mission1/playbook.md`.
-- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of `evidence_log.md`, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
+- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of `evidence_log.md` (a local file, ignored by git), in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
   Take tool, model and time from `tools/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
 
 ## Competition rules

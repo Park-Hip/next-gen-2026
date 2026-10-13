@@ -24,7 +24,7 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
     checks/         Scripts that run the core model on the simulated data
 docs/mission2/      Mission 2 plan, and what Mission 1 promised
 data/               Simulated documents, org tree, personas and test cases as files
-evidence_log.md     AI usage log for all missions
+evidence_log.md     AI usage log for all missions (local only, ignored by git)
 tools/              Helper scripts
 build/              Generated output (not committed)
 ```

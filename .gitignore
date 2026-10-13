@@ -31,3 +31,6 @@ htmlcov/
 # OS
 Thumbs.db
 .DS_Store
+
+# Evidence log: kept locally, not published
+evidence_log.md
