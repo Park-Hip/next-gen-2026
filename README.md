@@ -60,14 +60,14 @@ The rules engine in `app/` loads `data/`, runs steps 1-4 and 7, and is checked b
 `data/` is now the source of truth; `artifacts.md` stays as the Mission 1 snapshot.
 
 ```bash
-pip install -r requirements.txt
-python -m pytest
+uv sync
+uv run python -m pytest
 ```
 
 See one asker's scope by hand:
 
 ```bash
-python -m app.rules minh 2026-10-07
+uv run python -m app.rules minh 2026-10-07
 ```
 
 ## Check retrieval by hand
@@ -78,8 +78,8 @@ All documents are simulated ("giả lập").
 
 ```bash
 export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
-python -m app.retrieval minh 2026-10-07 "Phép năm của tôi là bao nhiêu ngày?"
-python -m app.retrieval          # the top 5 for every row and wording of data/test_cases.yaml
+uv run python -m app.retrieval minh 2026-10-07 "Phép năm của tôi là bao nhiêu ngày?"
+uv run python -m app.retrieval          # the top 5 for every row and wording of data/test_cases.yaml
 ```
 
 Each line shows the chunk id, its RRF score, and its BM25 and dense scores with their ranks.
@@ -93,8 +93,8 @@ Until the real retrieval and LLM land (#12 and #13), the answer text is a cited 
 Every unit, person, document and number on the page is simulated ("giả lập").
 
 ```bash
-pip install -r requirements.txt
-uvicorn app.web:app --reload
+uv sync
+uv run uvicorn app.web:app --reload
 ```
 
 Then open http://127.0.0.1:8000, pick Minh, Lan or Hà and an as-of date, and ask a question.

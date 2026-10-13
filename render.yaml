@@ -6,8 +6,8 @@ services:
     region: singapore
     branch: master
     autoDeploy: true
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.web:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install uv && uv sync --locked --no-dev
+    startCommand: uv run --no-sync uvicorn app.web:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /healthz
     envVars:
       - key: GEMINI_API_KEY

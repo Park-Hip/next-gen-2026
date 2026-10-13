@@ -1,0 +1,24 @@
+[project]
+name = "next-gen"
+version = "0.1.0"
+description = "Appota NextGen AI Talent 2026 - internal knowledge assistant"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml==6.0.3",
+    "fastapi==0.143.0",
+    "uvicorn==0.54.0",
+    "jinja2==3.1.6",
+    "httpx==0.28.1",
+    "langchain-core==1.6.10",
+    "langchain-google-genai==4.4.1",
+    "numpy==2.5.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+]
+
+[tool.uv]
+package = false
