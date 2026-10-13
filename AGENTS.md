@@ -30,7 +30,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
   Hiep runs the research with his own agent; its results are filed in `docs/research/` from the template there, and the ADR records Hiep's decision and his reasons in his words.
   Never write an ADR's reasons for Hiep; draft only from what he said, and ask when it is missing.
 - A known failure that stays in v1 keeps its issue open with the `limitation` label, so the test suite, README and video report it.
-- Before a PR, run `python -I -X utf8 tools/check_data.py` (until #9 retires it) and the test suite.
+- Before a PR, run `python -m pytest`.
 - Do not edit `docs/competition/` or `docs/mission1/`, except "Deferred ideas" in `docs/mission1/playbook.md`.
 - At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of the evidence log, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
   Take tool, model and time from `tools/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
