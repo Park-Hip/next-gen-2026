@@ -14,12 +14,24 @@ MISSION1_IDS = [
 ]
 
 
+LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
 @pytest.fixture(autouse=True)
 def no_network(monkeypatch):
+    """Blocks every connection off this machine. Loopback stays open because asyncio's
+    event loop on Windows (used by FastAPI's TestClient) connects a local socket pair."""
+    connect = socket.socket.connect
+
+    def guarded(sock, address):
+        if isinstance(address, tuple) and address[0] in LOOPBACK:
+            return connect(sock, address)
+        raise RuntimeError("network is disabled during tests")
+
     def blocked(*args, **kwargs):
         raise RuntimeError("network is disabled during tests")
 
-    monkeypatch.setattr(socket.socket, "connect", blocked)
+    monkeypatch.setattr(socket.socket, "connect", guarded)
     monkeypatch.setattr(socket, "create_connection", blocked)
 
 
