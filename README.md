@@ -23,6 +23,8 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
 docs/mission2/      Mission 2 plan, and what Mission 1 promised
+app/                The rules engine: data loading (data.py) and steps 1-4 and 7 (rules.py)
+tests/              The deterministic test suite for the rules
 data/               Simulated documents, org tree, personas and test cases as files
 evidence_log.md     AI usage log for all missions (local only, ignored by git; lives in the main checkout, not in worktrees)
 tools/              Helper scripts
@@ -49,11 +51,18 @@ No dependencies beyond Python 3.
 python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py
 ```
 
-## Check the data files
+## Run the tests
 
-Checks that `data/` matches the simulated data in `docs/mission1/redraft/artifacts.md` and `adopted_rules.py`, then reruns the test matrix on the files.
-Requires PyYAML (`pip install pyyaml`).
+The rules engine in `app/` loads `data/`, runs steps 1-4 and 7, and is checked by the test suite.
+`data/` is now the source of truth; `artifacts.md` stays as the Mission 1 snapshot.
 
 ```bash
-python -I -X utf8 tools/check_data.py
+pip install -r requirements.txt
+python -m pytest
+```
+
+See one asker's scope by hand:
+
+```bash
+python -m app.rules minh 2026-10-07
 ```

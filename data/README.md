@@ -24,10 +24,5 @@ Metadata fields, as read by the rules:
 | `complements` | "Bổ sung": series this document adds to without contradicting them |
 
 Source: `docs/mission1/redraft/artifacts.md` and `docs/mission1/redraft/checks/adopted_rules.py`.
-Check that the files still match them, and run the rules part of every test case on the files:
-
-```
-python -I -X utf8 tools/check_data.py
-```
-
-If the data changes on purpose (Mission 3), change `artifacts.md` and `adopted_rules.py` with it, or retire the check once the Mission 2 code takes over as the source.
+The tests in `tests/` check the files and run the rules on them.
+`data/` is now the source of truth; `artifacts.md` stays as the Mission 1 snapshot.
