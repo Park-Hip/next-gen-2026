@@ -14,13 +14,13 @@ Metadata fields, as read by the rules:
 
 | Field | Meaning |
 |---|---|
-| `series` | One policy across its versions; the published version with the latest `effective_from` not after the as-of date is in force |
+| `series` | One policy across its versions; the published version with the latest `effective_from` not after the as-of date is in force; two published versions of one series with the same `effective_from` fail the load |
 | `topic` | One per document; only used to find conflict pairs |
 | `access` | Who may read it: `all_staff`, `unit:<unit>` or `roles:<role>,<role>` |
 | `applies_to` | The unit it covers, with every unit below it |
 | `status` | `published` or `draft` |
 | `effective_from`, `effective_to` | `effective_to` only when the document really ends |
-| `overrides` | "Dùng thay": one series this document is used instead of, for the units it applies to |
+| `overrides` | "Dùng thay": one series this document is used instead of, for the units it applies to; a series that overrides itself, or a cycle of overrides, fails the load |
 | `complements` | "Bổ sung": series this document adds to without contradicting them |
 
 Source: `docs/mission1/redraft/artifacts.md` and `docs/mission1/redraft/checks/adopted_rules.py`.
