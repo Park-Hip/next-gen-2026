@@ -1,7 +1,7 @@
 """Step 6: one grounded Gemini call that returns points with citations, or nothing.
 
 The chat model sees only the retrieved chunks and the asker's unit, which the rules
-decided. Its output is one JSON object {points: [{chunks, quote, text}]}; the card and
+decided. Its output is one JSON object {points: [{chunks, quote}]}; the card and
 the sources come from step 7 (services/citations.py), never from this text.
 """
 import json
@@ -76,7 +76,7 @@ class Answerer:
                     "model": getattr(self.chat, "model", None),
                     "retrieved": list(retrieved),
                     "points": None if points is None else [
-                        {"chunks": list(p.chunks), "quote": p.quote, "text": p.text}
+                        {"chunks": list(p.chunks), "quote": p.quote}
                         for p in points
                     ],
                     "raw": raw,

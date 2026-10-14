@@ -59,9 +59,7 @@ def committed_fixture(root: Path, documents, personas, rows, run_id="20261015-14
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     first = row_by_id(rows, 1)
     replies = {row["questions"][0]: no_points() for row in rows}
-    replies[first["questions"][0]] = reply_citing(
-        "LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}, text="Bạn được nghỉ phép năm 14 ngày mỗi năm."
-    )
+    replies[first["questions"][0]] = reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote})
     meta = {**fake_meta(), "run_id": run_id}
     if cases_sha256 is not None:
         meta["cases_sha256"] = cases_sha256

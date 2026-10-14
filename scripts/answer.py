@@ -42,6 +42,6 @@ if __name__ == "__main__":
         print("points: malformed output")
     else:
         for point in reply.points:
-            print(f"  chunks={list(point.chunks)} quote={point.quote!r} text={point.text!r}")
+            print(f"  chunks={list(point.chunks)} quote={point.quote!r}")
     card = card_for_answer(scoped, reply.retrieved, reply.points)
     print(f"card: {card.kind} reason={card.reason!r}")

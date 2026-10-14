@@ -82,7 +82,6 @@ def test_answer_card_row_1(documents):
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
-        text="Bạn được nghỉ phép năm 14 ngày mỗi năm.",
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
@@ -101,7 +100,6 @@ def test_conflict_card_row_7(documents):
     reply = reply_citing(
         "LEAVE-GROUP-v1#1",
         quote_from={"LEAVE-GROUP-v1#1": quote},
-        text="LLM TEXT MUST NOT APPEAR",
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
@@ -127,7 +125,7 @@ def test_refusal_row_8_ha(documents):
 
 
 def test_invented_citation_is_refused(documents):
-    reply = json.dumps({"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x", "text": "y"}]})
+    reply = json.dumps({"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]})
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
@@ -157,7 +155,6 @@ def test_cache_same_question_one_call(documents):
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
-        text="Bạn được nghỉ phép năm 14 ngày mỗi năm.",
     )
     client, chat = _client(documents, reply=reply)
     _, page1 = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
@@ -231,7 +228,7 @@ class CiteAllGemini(FakeGemini):
         user = messages[-1].content
         points = []
         for match in re.finditer(r'<chunk id="([^"]+)"[^>]*>(.*?)</chunk>', user):
-            points.append({"chunks": [match.group(1)], "quote": match.group(2), "text": f"MARKER {match.group(1)}"})
+            points.append({"chunks": [match.group(1)], "quote": match.group(2)})
         return ChatResult(generations=[ChatGeneration(message=AIMessage(content=json.dumps({"points": points})))])
 
 

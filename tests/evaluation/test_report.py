@@ -58,7 +58,7 @@ def test_report_incomplete_writes_nothing(cases, personas, documents, tmp_path, 
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     answerer = scripted_answerer(
         documents,
-        {row["questions"][0]: reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}, text="x")},
+        {row["questions"][0]: reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote})},
     )
     path = tmp_path / "partial.jsonl"
     run(answerer, [row], documents, personas, path, fake_meta())

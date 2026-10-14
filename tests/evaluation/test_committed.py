@@ -37,7 +37,7 @@ def test_committed_run_matches_the_report(cases, documents, personas, tmp_path):
     assert first.verdict == "Đạt"
     assert first.lesson == "Bài học hàng 1."
     assert first.card["kind"] == "answer"
-    assert first.card["lines"][1] == "Bạn được nghỉ phép năm 14 ngày mỗi năm."
+    assert first.card["lines"][1] == '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'
     assert first.failures == ()
 
     # A refusal row that expects a refusal passes; a row that expects an answer fails.
