@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import date
 from itertools import combinations
 from typing import Literal
+import unicodedata
 
 from app.data import Chunk, Document, Persona, chunks as document_chunks
 
@@ -80,11 +81,52 @@ def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
 
 
 @dataclass(frozen=True)
+class Point:
+    """One grounded fact from the model: the chunks it cites, a verbatim quote and the sentence."""
+    chunks: tuple[str, ...]
+    quote: str
+    text: str
+
+
+@dataclass(frozen=True)
 class Card:
     kind: Literal["answer", "conflict", "refusal"]
     hr: str
     cited: tuple[Chunk, ...]
     conflicts: tuple[tuple[Document, Document], ...]
+    reason: str | None = None  # refusals only, for the log and #14; never shown (R10)
+
+
+def fold(text: str) -> str:
+    """NFC, then every run of whitespace to one space, stripped (ADR 0003)."""
+    return " ".join(unicodedata.normalize("NFC", text).split())
+
+
+def card_for_answer(scope: Scope, retrieved, points: tuple[Point, ...] | None) -> Card:
+    """Step 7 for a model reply: refuse on malformed output, no points, a point without
+    chunks, a cited id outside `retrieved`, or a quote that is empty or not a substring
+    of any chunk the point cites (both sides folded); otherwise pick_card."""
+    if not set(retrieved) <= scope.chunk_ids:
+        raise ValueError("retrieved chunks outside the asker's scope")
+    if points is None:
+        return Card("refusal", scope.persona.hr, (), (), reason="malformed")
+    if not points:
+        return Card("refusal", scope.persona.hr, (), (), reason="no_points")
+    by_id = {c.id: c for c in scope.chunks}
+    cited = []
+    for point in points:
+        if not point.chunks:
+            return Card("refusal", scope.persona.hr, (), (), reason="outside_retrieved")
+        for cid in point.chunks:
+            if cid not in retrieved:
+                return Card("refusal", scope.persona.hr, (), (), reason="outside_retrieved")
+        quote = fold(point.quote)
+        if not quote:
+            return Card("refusal", scope.persona.hr, (), (), reason="quote_mismatch")
+        if not any(quote in fold(by_id[cid].text) for cid in point.chunks):
+            return Card("refusal", scope.persona.hr, (), (), reason="quote_mismatch")
+        cited.extend(point.chunks)
+    return pick_card(scope, retrieved, cited)
 
 
 def pick_card(scope: Scope, retrieved, cited) -> Card:

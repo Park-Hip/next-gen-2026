@@ -23,8 +23,8 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
 docs/mission2/      Mission 2 plan, and what Mission 1 promised
-app/                The rules engine (data.py, rules.py), hybrid retrieval (retrieval.py) and the page: config.py, stub.py, cards.py, web.py, templates/
-tests/              The deterministic test suite for the rules, the stub, the cards and the page
+app/                The rules engine (data.py, rules.py), hybrid retrieval (retrieval.py), the grounded answer (answer.py) and the page: config.py, cards.py, web.py, templates/
+tests/              The deterministic test suite for the rules, retrieval, the answerer, the cards and the page
 config.yaml         Tunable values (top k, thresholds, limits); read only through app/config.py
 render.yaml         Deploy config for the Render free web service (ADR 0004)
 .python-version     Pins Python 3.12 for Render
@@ -56,7 +56,7 @@ python -I -X utf8 docs/mission1/redraft/checks/adopted_rules.py
 
 ## Run the tests
 
-The rules engine in `app/` loads `data/`, runs steps 1-4 and 7, and is checked by the test suite.
+The pipeline in `app/` loads `data/` and runs steps 1-7: scope, retrieval, one grounded Gemini call, and the card.
 `data/` is now the source of truth; `artifacts.md` stays as the Mission 1 snapshot.
 
 ```bash
@@ -84,17 +84,30 @@ uv run python -m app.retrieval          # the top 5 for every row and wording of
 
 Each line shows the chunk id, its RRF score, and its BM25 and dense scores with their ranks.
 Every search also logs one JSON line (persona, as-of date, question, scope size, and the same numbers per chunk) on the `app.retrieval` logger.
-The page does not use this yet; #13 wires it in.
+
+## Check the grounded answer by hand
+
+Step 6 asks `gemini-3.8-flash` for points citing retrieved chunk ids, and step 7 picks the card from those citations, never from the model's own words (ADR 0003).
+It needs a Gemini API key in the environment and the network; the tests do not (they use a fake model).
+All documents are simulated ("giả lập").
+
+```bash
+export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
+uv run python -m app.answer minh 2026-10-07 "Phép năm của tôi là bao nhiêu ngày?"
+```
+
+It prints the retrieved ids, the raw model output, each point with its quote, and the card kind with its refusal reason.
+Every answer also logs one JSON line (persona, as-of date, question, model, retrieved ids, points, raw output and latency) on the `app.answer` logger.
 
 ## Run the page locally
 
-The page is a FastAPI app that runs the scope, a keyword stub for steps 5-6, and the three cards.
-Until the real retrieval and LLM land (#12 and #13), the answer text is a cited clause word for word, and the page says so.
+The page runs the whole pipeline: steps 1-4 build the asker's scope, step 5 retrieves, step 6 asks Gemini, and step 7 picks the card.
+It needs a Gemini API key in the environment, and the index is built eagerly, so a missing key or a failed embedding stops the start.
 Every unit, person, document and number on the page is simulated ("giả lập").
 
 ```bash
-uv sync
-uv run uvicorn app.web:app --reload
+export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
+uv run uvicorn app.web:main --factory --reload
 ```
 
 Then open http://127.0.0.1:8000, pick Minh, Lan or Hà and an as-of date, and ask a question.

@@ -10,9 +10,12 @@ from app.rules import (
     REFUSAL_TEXT,
     allowed,
     applies,
+    card_for_answer,
     conflict_quotes,
+    fold,
     in_force,
     pick_card,
+    Point,
     refusal_text,
     scope,
 )
@@ -231,6 +234,103 @@ def test_step7(personas, documents):
 
     with pytest.raises(ValueError):
         pick_card(s_minh, set(s_minh.chunk_ids) | {"SAL-BAND-GAMECO#2"}, ["LEAVE-GAMECO-v2#2"])
+
+
+def _chunk_by_id(documents, chunk_id):
+    doc_id, _ = chunk_id.rsplit("#", 1)
+    return next(c for d in documents if d.id == doc_id for c in chunks(d) if c.id == chunk_id)
+
+
+def _point(chunk_id, documents, quote=None, text="some text"):
+    chunk = _chunk_by_id(documents, chunk_id)
+    return Point(chunks=(chunk_id,), quote=chunk.text if quote is None else quote, text=text)
+
+
+def test_fold_nfc_and_whitespace():
+    assert fold("a   b\nc") == "a b c"
+    assert fold("  x  ") == "x"
+    assert fold("nghỉ") == fold("nghỉ")
+    import unicodedata
+    assert fold(unicodedata.normalize("NFD", "nghỉ")) == "nghỉ"
+
+
+def test_card_for_answer_row_1_answer(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    points = (_point("LEAVE-GAMECO-v2#2", documents, text="Bạn được nghỉ 14 ngày."),)
+    card = card_for_answer(s, ("LEAVE-GAMECO-v2#2",), points)
+    assert card.kind == "answer"
+    assert card.reason is None
+    assert card.cited and card.cited[0].id == "LEAVE-GAMECO-v2#2"
+
+
+def test_card_for_answer_malformed_and_no_points(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    malformed = card_for_answer(s, s.chunk_ids, None)
+    assert malformed.kind == "refusal" and malformed.reason == "malformed"
+    empty = card_for_answer(s, (), ())
+    assert empty.kind == "refusal" and empty.reason == "no_points"
+
+
+def test_card_for_answer_invented_id_is_refused(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    # In the scope but not retrieved.
+    retrieved = ("LEAVE-GAMECO-v2#2",)
+    in_scope_but_foreign = _point("LEAVE-PROC-GAMECO-v1#1", documents)
+    card = card_for_answer(s, retrieved, (in_scope_but_foreign,))
+    assert card.kind == "refusal" and card.reason == "outside_retrieved"
+    # Outside the scope: reaching step 7 as data, not via the enum.
+    outside = _point("SAL-BAND-GAMECO#2", documents)
+    card = card_for_answer(s, retrieved, (outside,))
+    assert card.kind == "refusal" and card.reason == "outside_retrieved"
+    # One good point plus one invented still refuses the whole answer (R7).
+    good = _point("LEAVE-GAMECO-v2#2", documents)
+    card = card_for_answer(s, retrieved, (good, in_scope_but_foreign))
+    assert card.kind == "refusal" and card.reason == "outside_retrieved"
+
+
+def test_card_for_answer_quote_rules(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    retrieved = ("LEAVE-GAMECO-v2#2",)
+    # Quote not in the cited chunk.
+    bad = _point("LEAVE-GAMECO-v2#2", documents, quote="không có câu này")
+    card = card_for_answer(s, retrieved, (bad,))
+    assert card.kind == "refusal" and card.reason == "quote_mismatch"
+    # Quote present in another retrieved chunk but not the one cited.
+    proc = _chunk_by_id(documents, "LEAVE-PROC-GAMECO-v1#1")
+    wrong = _point("LEAVE-GAMECO-v2#2", documents, quote=proc.text)
+    card = card_for_answer(s, ("LEAVE-GAMECO-v2#2", "LEAVE-PROC-GAMECO-v1#1"), (wrong,))
+    assert card.kind == "refusal" and card.reason == "quote_mismatch"
+    # Empty and whitespace-only quotes fail ("" is a substring of everything).
+    for quote in ("", "   ", "\n\t"):
+        card = card_for_answer(s, retrieved, (_point("LEAVE-GAMECO-v2#2", documents, quote=quote),))
+        assert card.kind == "refusal" and card.reason == "quote_mismatch"
+
+
+def test_card_for_answer_quote_folding_accepted(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    chunk = _chunk_by_id(documents, "LEAVE-GAMECO-v2#2")
+    import unicodedata
+    nfd = unicodedata.normalize("NFD", chunk.text)
+    widened = "  ".join(chunk.text.split())
+    assert card_for_answer(s, (chunk.id,), (_point(chunk.id, documents, quote=nfd),)).kind == "answer"
+    assert card_for_answer(s, (chunk.id,), (_point(chunk.id, documents, quote=widened),)).kind == "answer"
+
+
+def test_card_for_answer_conflict_ha(personas, documents):
+    s = scope(personas["ha"], date(2026, 10, 7), documents)
+    group = _point("LEAVE-GROUP-v1#1", documents)
+    card = card_for_answer(s, ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"), (group,))
+    assert card.kind == "conflict"
+    assert [(a.id, b.id) for a, b in card.conflicts] == [("LEAVE-GROUP-v1", "LEAVE-PAYCO-v1")]
+    payco = _point("LEAVE-PAYCO-v1#1", documents)
+    card = card_for_answer(s, ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"), (payco,))
+    assert card.kind == "conflict"
+
+
+def test_card_for_answer_retrieved_outside_scope_raises(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    with pytest.raises(ValueError):
+        card_for_answer(s, ("SAL-BAND-GAMECO#2",), None)
 
 
 def test_mutations(personas, documents, mutations):
