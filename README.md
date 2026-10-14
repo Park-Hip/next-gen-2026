@@ -94,7 +94,7 @@ Every search also logs one JSON line (persona, as-of date, question, scope size,
 
 ## Check the grounded answer by hand
 
-Step 6 asks `gemini-3.8-flash` for points citing retrieved chunk ids, and step 7 picks the card from those citations, never from the model's own words (ADR 0003).
+Step 6 asks `gemini-3.5-flash-lite` (ADR 0008) for points citing retrieved chunk ids, and step 7 picks the card from those citations, never from the model's own words (ADR 0003).
 It needs a Gemini API key in the environment and the network; the tests do not (they use a fake model).
 All documents are simulated ("giả lập").
 
@@ -133,6 +133,6 @@ uv run python -m appota_kb.evaluation.run --rows 1,7,8    # a quota-limited prac
 uv run python -m appota_kb.evaluation.report results/<run_id>.jsonl
 ```
 
-One full run is 15 answer calls and 15 query embeddings, about 75% of a day on the free tier of `gemini-3.8-flash`, shared with the demo.
+One full run is 15 answer calls and 15 query embeddings, about 3% of the 500 requests a day the free tier of `gemini-3.5-flash-lite` allows, shared with the demo.
 A run stopped by the daily quota is resumed with `--resume results/<run_id>.jsonl` (under another project's key); a resume re-asks only rows without a reply and refuses when the commit, the model settings or the test file changed.
 The test report is [`docs/mission2/test_report.md`](docs/mission2/test_report.md); it is generated, never edited by hand.

@@ -14,11 +14,11 @@ def test_real_config_loads():
     assert isinstance(config.retrieval.bm25_k1, float) and config.retrieval.bm25_k1 > 0
     assert isinstance(config.retrieval.bm25_b, float) and 0 <= config.retrieval.bm25_b <= 1
     assert isinstance(config.retrieval.embedding_model, str) and config.retrieval.embedding_model
-    assert config.llm.model == "gemini-3.8-flash"
-    assert isinstance(config.llm.thinking_level, str) and config.llm.thinking_level
+    assert config.llm.model == "gemini-3.5-flash-lite"
+    assert config.llm.thinking_level == "medium"
     assert isinstance(config.llm.max_retries, int) and config.llm.max_retries > 0
     assert isinstance(config.llm.timeout_seconds, float) and config.llm.timeout_seconds > 0
-    assert isinstance(config.llm.requests_per_minute, float) and config.llm.requests_per_minute > 0
+    assert config.llm.requests_per_minute == 12.0
     assert config.page.question_max_chars > 0
     assert config.page.utc_offset_hours > 0
     assert config.page.answer_cache_size > 0

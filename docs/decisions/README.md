@@ -30,8 +30,9 @@ The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Missio
 |---|---|---|---|
 | [0001](0001-langchain-core-with-own-retrieval.md) | Build steps 5-6 on LangChain core, with our own Vietnamese BM25 and fusion | Accepted | None |
 | [0002](0002-syllable-bm25-gemini-001-rrf.md) | Hybrid retrieval: syllable BM25 of our own, gemini-embedding-001 and RRF, for now | Accepted | None |
-| [0003](0003-gemini-38-flash-enum-citations-quote-check.md) | Step 6 on gemini-3.8-flash at low thinking, citing only retrieved ids, with a quote that step 7 checks | Accepted | None |
+| [0003](0003-gemini-38-flash-enum-citations-quote-check.md) | Step 6 on gemini-3.8-flash at low thinking, citing only retrieved ids, with a quote that step 7 checks | Accepted; Model line superseded by 0008 | None |
 | [0004](0004-render-free-singapore-no-bao-sai.md) | Demo on a Render free web service in Singapore; "Báo sai" and the owners' page out of scope for Mission 2 | Accepted | Mission 1 P1, P2 and the "Báo sai" button in C2 |
 | [0005](0005-conflict-card-quotes-per-side-without-meaning.md) | The conflict card quotes one clause per side, chosen without reading meaning | Proposed | None |
 | [0006](0006-own-harness-one-run-main-wording.md) | Evaluate with our own harness: one run per case, main wording only, unsafe answers judged on the card and on the raw reply | Accepted | Mission 1 V4, the 3 phrasings of A2 and V1, and the "Evaluation" line of ADR 0003 |
 | [0007](0007-defer-context-recall.md) | Context recall is deferred until we have real documents | Accepted | The "context recall" row of Mission 1 V1 and RV13 |
+| [0008](0008-gemini-35-flash-lite-at-medium.md) | Step 6 on gemini-3.5-flash-lite at medium thinking | Accepted | The "Model" line of ADR 0003 |
