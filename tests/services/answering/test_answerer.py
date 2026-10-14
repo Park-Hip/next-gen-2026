@@ -27,7 +27,6 @@ def test_answerer_row1_reply(personas, documents):
     chat = FakeGemini(reply=reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
-        text="Bạn được nghỉ 14 ngày một năm.",
     ))
     answerer = Answerer(index, chat, RETRIEVAL)
     reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
@@ -37,14 +36,14 @@ def test_answerer_row1_reply(personas, documents):
     point = reply.points[0]
     assert point.chunks == ("LEAVE-GAMECO-v2#2",)
     assert point.quote == quote
-    assert point.text == "Bạn được nghỉ 14 ngày một năm."
+    assert not hasattr(point, "text")
 
 
 def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=json.dumps(
-        {"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x", "text": "y"}]}
+        {"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]}
     ))
     answerer = Answerer(index, chat, RETRIEVAL)
     reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
@@ -58,7 +57,7 @@ def test_answerer_malformed_output_gives_none(personas, documents):
     index = build_index(documents, SyllableEmbeddings())
     bad_outputs = [
         "not json at all",
-        json.dumps({"points": [{"chunks": ["LEAVE-GAMECO-v2#2"], "quote": "x"}]}),  # missing text
+        json.dumps({"points": [{"chunks": ["LEAVE-GAMECO-v2#2"], "text": "x"}]}),  # missing quote
         json.dumps({"points": "nope"}),
     ]
     for bad in bad_outputs:

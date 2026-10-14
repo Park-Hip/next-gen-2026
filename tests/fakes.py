@@ -68,12 +68,12 @@ class FakeGemini(ChatGoogleGenerativeAI):
         )
 
 
-def reply_citing(*ids: str, quote_from: dict[str, str], text: str = "FAKE ANSWER TEXT") -> str:
+def reply_citing(*ids: str, quote_from: dict[str, str]) -> str:
     """JSON {points: [...]}: one point per id, quoting quote_from[id] word for word."""
     return json.dumps(
         {
             "points": [
-                {"chunks": [cid], "quote": quote_from[cid], "text": text}
+                {"chunks": [cid], "quote": quote_from[cid]}
                 for cid in ids
             ]
         },

@@ -28,8 +28,8 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 |---|---|---|---|---|
 | R1 | Steps 1-4 build the scope "từ metadata, không đọc câu hỏi và không dùng AI" | Phần 2 | Code: the scope function takes persona and date only, never the question | Built: `scope()` takes the persona, the date and the documents, never the question |
 | R2 | Step 1: each series keeps the version in force: published, latest effective date not after the as-of date; drafts and future versions are out | Phần 2, Câu 3 | Rows 1, 2 | Built: rows 1, 2 |
-| R3 | Step 2: keep documents the asker may see and that apply to their unit | Phần 2, Câu 3 | Rows 5, 6, 10 | Built: rows 5, 6, 10 |
-| R4 | Step 3: drop a document when another kept document declares "dùng thay" over its whole series, including later versions | Phần 2 | Row 1 (Group rule dropped for Minh) | Built: row 1 |
+| R3 | Step 2: keep documents the asker may see and that apply to their unit | Phần 2, Câu 3 | Rows 5, 6, 10 | Changed (ADR 0010): access is applied after step 3, so a document the asker may not read still replaces its series and never brings it back; rows 5, 6, 10 |
+| R4 | Step 3: drop a document when another kept document declares "dùng thay" over its whole series, including later versions | Phần 2 | Row 1 (Group rule dropped for Minh) | Built: row 1; a document the asker may not read also counts (ADR 0010) |
 | R5 | No default "đơn vị cấp dưới thắng"; precedence exists only where the owner declared it | Phần 2, Phần 4 | Row 7 (PayCo gets a conflict, not the lower unit) | Built: row 7 |
 | R6 | Step 4: same topic, both apply, no declared relation means a conflict pair; "bổ sung" documents are not a conflict | Phần 2 | Rows 3, 7 | Built: rows 3, 7 |
 | R7 | Step 7: a cited document in a conflict pair gives the conflict card; no citation, or a citation of a chunk that was not retrieved, refuses the whole answer | Phần 2 | Rows 7, 8, 9, 10; a test with an invented citation | Built, and stricter (ADR 0003): citations are checked against the chunks actually retrieved, and each point's quote must be in the chunk it cites |
@@ -53,8 +53,8 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 | # | Promise | Where | Shown by | Status |
 |---|---|---|---|---|
 | C1 | Every card shows "Bạn đang hỏi với tư cách" with unit and department | Phần 2 | All three cards | Built |
-| C2 | Answer card: the answer, source title and version, Điều, effective date, "Hỏi thêm: HR <unit>", button "Báo sai" | Phần 2 | Row 1 in the demo | Changed (ADR 0004): built without the "Báo sai" button |
-| C3 | Conflict card: neutral headline, both clauses quoted word for word with Điều and effective date, no LLM text, "Vui lòng hỏi HR <unit>", and "Đã ghi nhận để HR ... xác nhận" | Phần 2, Câu 3 | Row 7 in the demo; the conflict is recorded for the owners | Built, except the line "Đã ghi nhận để HR ... xác nhận", which waits for the conflict records file (#15) |
+| C2 | Answer card: the answer, source title and version, Điều, effective date, "Hỏi thêm: HR <unit>", button "Báo sai" | Phần 2 | Row 1 in the demo | Changed (ADRs 0004, 0009): built without the "Báo sai" button, and the answer line is the quote step 7 verified, word for word, not a sentence the model writes |
+| C3 | Conflict card: neutral headline, both clauses quoted word for word with Điều and effective date, no LLM text, "Vui lòng hỏi HR <unit>", and "Đã ghi nhận để HR ... xác nhận" | Phần 2, Câu 3 | Row 7 in the demo; the conflict is recorded for the owners | Built, except the line "Đã ghi nhận để HR ... xác nhận": the conflict records file was cut (#15), because records would be lost on every restart of the free host (ADR 0004) |
 | C4 | Refusal card: "Hệ thống không tìm thấy quy định phù hợp...", "Hệ thống chỉ trả lời các quy định áp dụng cho bạn", contact HR of the asker's unit | Phần 2 | Rows 6, 9, 10 | Built |
 
 ## 5. People
@@ -91,7 +91,10 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
   Settled: the page has the persona and date picker; "Báo sai" and the owners' list were cut by ADR 0004 (B3).
 - **Invented citations (R7):** the rule script checks citations against the whole scope, because there is no retriever yet; v1 must check them against the chunks actually retrieved.
   Settled: step 7 checks them against the retrieved chunks, and checks each quote (ADR 0003).
+- **Answer line wording (C2, A4):** Phần 2 shows the answer as a sentence the model writes, "Phép năm của bạn là 14 ngày mỗi năm.".
+  A4 says the card never comes from LLM text, and nothing checks such a sentence, so v1 shows the quote step 7 verified (ADR 0009).
+  The answer, the source line and the contact line are all still on the card.
 - **Conflict record (C3):** the conflict card says the conflict "đã ghi nhận", so v1 needs at least a record in a file, even if the owners' page is cut.
-  Open: the records file is #15.
+  Cut: the records file (#15) was closed as not planned on 14/10/2026, so the card does not say "đã ghi nhận" (C3).
 - **Not promised, do not build unless the brief asks:** a measured naive-RAG comparison (Phần 1 only predicts "dễ xếp"), the LLM suggesting relations at publish time (only under "Đổi khi" in Quyết định 1), choosing another unit to ask about, partial overrides of one clause.
   None was built; they are listed under "Deferred" in `docs/scope.md`.

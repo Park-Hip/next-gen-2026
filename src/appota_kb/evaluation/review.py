@@ -67,8 +67,7 @@ def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> st
         if points:
             out.append("- Points:")
             for point in points:
-                out.append(f"  - text: {point['text']}")
-                out.append(f"    quote: {point['quote']}")
+                out.append(f"  - quote: {point['quote']}")
                 for cid in point.get("chunks", []):
                     full = score.record.get("retrieved_text") or {}
                     out.append(f"    chunk {cid}: {full.get(cid, '(not retrieved)')}")

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import persona_label %}
-{% block title %}Test cases{% endblock %}
+{% block title %}Tình huống kiểm thử{% endblock %}
 {% macro case_panel(c) %}
 {% set result = run.rows[c.id] if run else None %}
 <section class="panel guide-panel case" id="case-{{ c.id }}">
@@ -58,7 +58,7 @@
 ({{ all_cases|selectattr('kind', 'equalto', 'good')|list|length }} làm tốt,
 {{ all_cases|selectattr('kind', 'equalto', 'hard')|list|length }} khó,
 {{ all_cases|selectattr('kind', 'equalto', 'limitation')|list|length }} chưa xử lý tốt).</p>
-<p class="lede muted">Bấm Thử ngay để hỏi lại trên trang "Ask"; đó là một lần hỏi mới tới Gemini, nên câu chữ có thể khác lần chạy đánh giá.</p>
+<p class="lede muted">Bấm Thử ngay để hỏi lại trên trang "Hỏi"; đó là một lần hỏi mới tới Gemini, nên câu chữ có thể khác lần chạy đánh giá.</p>
 
 {% if run %}
 <section class="panel guide-panel" aria-label="Lần chạy đánh giá">

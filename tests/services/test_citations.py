@@ -19,9 +19,9 @@ def _chunk_by_id(documents, chunk_id):
     return next(c for d in documents if d.id == doc_id for c in chunks(d) if c.id == chunk_id)
 
 
-def _point(chunk_id, documents, quote=None, text="some text"):
+def _point(chunk_id, documents, quote=None):
     chunk = _chunk_by_id(documents, chunk_id)
-    return Point(chunks=(chunk_id,), quote=chunk.text if quote is None else quote, text=text)
+    return Point(chunks=(chunk_id,), quote=chunk.text if quote is None else quote)
 
 
 def test_conflict_quotes(personas, documents):
@@ -101,7 +101,7 @@ def test_fold_nfc_and_whitespace():
 
 def test_card_for_answer_row_1_answer(personas, documents):
     s = scope(personas["minh"], date(2026, 10, 7), documents)
-    points = (_point("LEAVE-GAMECO-v2#2", documents, text="Bạn được nghỉ 14 ngày."),)
+    points = (_point("LEAVE-GAMECO-v2#2", documents),)
     card = card_for_answer(s, ("LEAVE-GAMECO-v2#2",), points)
     assert card.kind == "answer"
     assert card.reason is None

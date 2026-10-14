@@ -4,10 +4,9 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Point:
-    """One grounded fact from the model: the chunks it cites, a verbatim quote and the sentence."""
+    """One grounded fact from the model: the chunks it cites and a verbatim quote that step 7 checks."""
     chunks: tuple[str, ...]
     quote: str
-    text: str
 
 
 @dataclass(frozen=True)
