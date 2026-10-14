@@ -131,3 +131,24 @@ def _render(request: Request, context: dict, status_code: int):
     return templates.TemplateResponse(
         request=request, name="index.html", context=context, status_code=status_code
     )
+
+
+class _LazyApp:
+    """Proxy that builds the real app on first use, so tests can import app.web without GEMINI_API_KEY."""
+
+    def __init__(self) -> None:
+        self._app: FastAPI | None = None
+
+    def _get_app(self) -> FastAPI:
+        if self._app is None:
+            self._app = main()
+        return self._app
+
+    def __getattr__(self, name: str):
+        return getattr(self._get_app(), name)
+
+    async def __call__(self, scope, receive, send):
+        await self._get_app()(scope, receive, send)
+
+
+app = _LazyApp()

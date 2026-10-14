@@ -231,8 +231,10 @@ def test_unknown_persona_selects_the_placeholder(page_client):
 
 def test_import_web_builds_nothing():
     import app.web
-    # Decision 8: no import-time `app`; importing needs no key and no network.
-    assert not hasattr(app.web, "app")
+    # Import must not trigger expensive initialization (Gemini calls, network).
+    # app is a lazy proxy; the real app is only built on first request.
+    assert hasattr(app.web, "app")
+    assert isinstance(app.web.app, app.web._LazyApp)
 
 
 class CiteAllGemini(FakeGemini):
