@@ -2,7 +2,7 @@
 
 - Status: Proposed
 - Date: 2026-10-13
-- Origin: AI, not reviewed
+- Origin: Hiep + AI
 - Supersedes: None
 - Issue: #11
 - Research: None
@@ -28,7 +28,7 @@ The choice never reads the text of any document and never calls the LLM.
 
 ## Reasons
 
-[chờ Hiệp] - Hiep writes his own reasons.
+The rule is deterministic, which fits the pipeline description.
 
 ## Consequences
 
