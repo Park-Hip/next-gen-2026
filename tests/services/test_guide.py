@@ -129,7 +129,7 @@ def test_same_question_groups(cases):
 def test_case_views_order(cases, personas, documents):
     featured, rest = case_views(cases, personas, documents)
     assert [c.id for c in featured] == [1, 5, 7]
-    assert [c.id for c in rest] == [i for i in range(1, 16) if i not in (1, 5, 7)]
+    assert [c.id for c in rest] == [row["id"] for row in cases if row["id"] not in (1, 5, 7)]
     assert sorted(c.id for c in featured + rest) == [r["id"] for r in cases]
 
 

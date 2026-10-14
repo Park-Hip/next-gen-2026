@@ -331,7 +331,7 @@ def test_cases_page_lists_every_row(page_client, cases, personas):
     assert "<details class=\"purpose\" open" not in page
     # The featured group comes first, then the other rows in file order, each once.
     order = [int(i) for i in re.findall(r'<section class="panel guide-panel case" id="case-(\d+)"', page)]
-    assert order == [1, 5, 7] + [i for i in range(1, 16) if i not in (1, 5, 7)]
+    assert order == [1, 5, 7] + [row["id"] for row in cases if row["id"] not in (1, 5, 7)]
     assert page.index("Bắt buộc theo đề") < page.index('id="case-1"')
 
 
