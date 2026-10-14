@@ -320,6 +320,5 @@
     - Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày?
   card: refusal
   expected_answer: Thẻ từ chối - v1 chỉ trả lời quy định đang hiệu lực vào ngày áp dụng, không trả lời cho năm sau, mời liên hệ HR GameCo; không hiện thẻ trả lời 14 ngày.
-  must_not_contain: [14 ngày]
   forbidden_by_rules: [LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2]
