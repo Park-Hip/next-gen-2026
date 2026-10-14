@@ -10,6 +10,7 @@ from app.data import (
     load_documents,
     with_edit,
 )
+from app.rules import fold
 from conftest import MISSION1_IDS
 
 
@@ -162,6 +163,18 @@ def test_cases_well_formed(cases, documents, personas):
             edit = c["data_edit"]
             body = next(d.body for d in documents if d.id == edit["document"])
             assert edit["remove"] in body.splitlines(), f"{tag}: data_edit line not found"
+
+
+def test_cases_key_facts(cases):
+    for c in cases:
+        tag = f"test case {c['id']}"
+        if c["card"] == "answer":
+            facts = c.get("key_facts", [])
+            assert facts, tag
+            for fact in facts:
+                assert fold(fact).casefold() in fold(c["expected_answer"]).casefold(), tag
+        else:
+            assert "key_facts" not in c, tag
 
 
 def test_with_edit_removes_the_line(documents):

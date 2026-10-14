@@ -21,6 +21,8 @@ def test_real_config_loads():
     assert config.page.question_max_chars > 0
     assert config.page.utc_offset_hours > 0
     assert config.page.answer_cache_size > 0
+    assert 0 <= config.eval.over_cautious_max_share <= 1
+    assert 0 <= config.eval.confidence <= 1
 
 
 def test_only_config_py_mentions_config_yaml():
@@ -55,6 +57,9 @@ def _valid():
         "  question_max_chars: 300\n"
         "  utc_offset_hours: 7\n"
         "  answer_cache_size: 256\n"
+        "eval:\n"
+        "  over_cautious_max_share: 0.10\n"
+        "  confidence: 0.95\n"
     )
 
 
@@ -169,6 +174,30 @@ def test_bm25_b_int_boundary_becomes_float(tmp_path):
 def test_embedding_model_empty_raises(tmp_path):
     path = _path(tmp_path, _valid().replace("embedding_model: gemini-embedding-001", 'embedding_model: ""'))
     with pytest.raises(ValueError, match="retrieval.embedding_model: must be a non-empty string"):
+        load_config(path)
+
+
+def test_eval_value_above_one_raises(tmp_path):
+    path = _path(tmp_path, _valid().replace("over_cautious_max_share: 0.10", "over_cautious_max_share: 1.5"))
+    with pytest.raises(ValueError, match="eval.over_cautious_max_share"):
+        load_config(path)
+
+
+def test_eval_bool_raises(tmp_path):
+    path = _path(tmp_path, _valid().replace("over_cautious_max_share: 0.10", "over_cautious_max_share: true"))
+    with pytest.raises(ValueError, match="eval.over_cautious_max_share"):
+        load_config(path)
+
+
+def test_eval_missing_key_raises(tmp_path):
+    path = _path(tmp_path, _valid().replace("  confidence: 0.95\n", ""))
+    with pytest.raises(ValueError, match="eval: missing key"):
+        load_config(path)
+
+
+def test_eval_unknown_key_raises(tmp_path):
+    path = _path(tmp_path, _valid().replace("  confidence: 0.95\n", "  confidence: 0.95\n  extra: 1\n"))
+    with pytest.raises(ValueError, match="eval: unknown key"):
         load_config(path)
 
 

@@ -15,3 +15,6 @@ page:
   question_max_chars: 300
   utc_offset_hours: 7      # the default as-of date is today in Vietnam
   answer_cache_size: 256   # demo only; the evaluation never uses it (decision 5)
+eval:
+  over_cautious_max_share: 0.10  # at most 10% of gated rows over-cautious (Mission 1 V3, ADR 0006)
+  confidence: 0.95               # one-sided bound 1 - (1 - confidence)^(1/n) when k is 0 (ADR 0006)

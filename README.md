@@ -22,9 +22,12 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   submitted/        The exact files submitted (do not edit)
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
-docs/mission2/      Mission 2 plan, and what Mission 1 promised
+docs/mission2/      Mission 2 plan, and what Mission 1 promised; the test report (`test_report.md`) is generated
 app/                The rules engine (data.py, rules.py), hybrid retrieval (retrieval.py), the grounded answer (answer.py) and the page: config.py, cards.py, web.py, templates/
-tests/              The deterministic test suite for the rules, retrieval, the answerer, the cards and the page
+tests/              The deterministic test suite for the rules, retrieval, the answerer, the cards, the page and the evaluation
+eval/               The evaluation harness: `run.py` asks each test case once, `report.py` scores it and writes the report
+eval/score.py       The offline checks, gate flags and the 95% upper bound (no model, no network)
+results/            Committed runs: one `<run_id>.jsonl` per run plus Hiep's review files
 config.yaml         Tunable values (top k, thresholds, limits); read only through app/config.py
 render.yaml         Deploy config for the Render free web service (ADR 0004)
 .python-version     Pins Python 3.12 for Render
@@ -112,3 +115,20 @@ uv run uvicorn app.web:main --factory --reload
 
 Then open http://127.0.0.1:8000, pick Minh, Lan or Hà and an as-of date, and ask a question.
 The public demo URL and the first-load warning are added once the Render service is live.
+
+## Run the evaluation
+
+The harness asks every row of `data/test_cases.yaml` once, in its main wording, through the same `Answerer` and step 7 as the page (ADR 0006).
+It writes one JSON record per row, then a separate offline step scores the saved replies and writes `docs/mission2/test_report.md` in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được".
+It needs a Gemini API key in the environment; the tests do not (they use fake replies).
+
+```bash
+export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
+uv run python -m eval.run                       # every row, once
+uv run python -m eval.run --rows 1,7,8          # a quota-limited practice subset
+uv run python -m eval.report results/<run_id>.jsonl
+```
+
+One full run is 15 answer calls and 15 query embeddings, about 75% of a day on the free tier of `gemini-3.8-flash`, shared with the demo.
+A run stopped by the daily quota is resumed with `--resume results/<run_id>.jsonl` (under another project's key); a resume re-asks only rows without a reply and refuses when the commit, the model settings or the test file changed.
+The test report is [`docs/mission2/test_report.md`](docs/mission2/test_report.md); it is generated, never edited by hand.

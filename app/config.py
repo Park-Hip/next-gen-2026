@@ -37,17 +37,24 @@ class Page:
 
 
 @dataclass(frozen=True)
+class Eval:
+    over_cautious_max_share: float
+    confidence: float
+
+
+@dataclass(frozen=True)
 class Config:
     retrieval: Retrieval
     llm: Llm
     page: Page
+    eval: Eval
 
 
 def load_config(path: Path = CONFIG) -> Config:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError(f"{path.name}: must be a mapping")
-    expected = {"retrieval", "llm", "page"}
+    expected = {"retrieval", "llm", "page", "eval"}
     unknown = set(raw) - expected
     if unknown:
         raise ValueError(f"{path.name}: unknown section(s) {', '.join(sorted(unknown))}")
@@ -58,6 +65,7 @@ def load_config(path: Path = CONFIG) -> Config:
         retrieval=_load_retrieval(raw["retrieval"], path),
         llm=_load_llm(raw["llm"], path),
         page=_load_page(raw["page"], path),
+        eval=_load_eval(raw["eval"], path),
     )
 
 
@@ -137,4 +145,12 @@ def _load_page(raw, path: Path) -> Page:
         question_max_chars=_positive_int(path, "page.question_max_chars", raw["question_max_chars"]),
         utc_offset_hours=_positive_int(path, "page.utc_offset_hours", raw["utc_offset_hours"]),
         answer_cache_size=_positive_int(path, "page.answer_cache_size", raw["answer_cache_size"]),
+    )
+
+
+def _load_eval(raw, path: Path) -> Eval:
+    _check_keys(path, "eval", raw, {"over_cautious_max_share", "confidence"})
+    return Eval(
+        over_cautious_max_share=_unit_float(path, "eval.over_cautious_max_share", raw["over_cautious_max_share"]),
+        confidence=_unit_float(path, "eval.confidence", raw["confidence"]),
     )
