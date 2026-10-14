@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#051525">
-<title>{% block title %}Ask{% endblock %} - Tri thức nội bộ Appota (giả lập)</title>
+<title>{% block title %}Hỏi{% endblock %} - Tri thức nội bộ Appota (giả lập)</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23008ee4'/%3E%3Cpath d='M16 7l8 18h-4.2l-1.6-3.8h-4.4L12.2 25H8z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
   /* Appota palette, taken from appota.com's stylesheet; darker shades keep text at WCAG AA. */
@@ -215,9 +215,9 @@
   </div>
   <div class="wrap">
     <nav class="tabs" aria-label="Các trang">
-      <a href="/"{% if active == "ask" %} aria-current="page"{% endif %}>Ask</a>
-      <a href="/data"{% if active == "data" %} aria-current="page"{% endif %}>Simulated data</a>
-      <a href="/cases"{% if active == "cases" %} aria-current="page"{% endif %}>Test cases</a>
+      <a href="/"{% if active == "ask" %} aria-current="page"{% endif %}>Hỏi</a>
+      <a href="/data"{% if active == "data" %} aria-current="page"{% endif %}>Dữ liệu giả lập</a>
+      <a href="/cases"{% if active == "cases" %} aria-current="page"{% endif %}>Tình huống kiểm thử</a>
     </nav>
   </div>
 </header>
