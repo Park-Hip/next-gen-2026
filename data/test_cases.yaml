@@ -1,5 +1,6 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
-# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5.
+# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
+# found by probing v1 on 14/10/2026 (issues #51, #52, #53), kept as limitation rows.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
 # purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
@@ -268,3 +269,57 @@
   key_facts: [3 ngày làm việc]
   forbidden_by_rules: [LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
+- id: 16
+  kind: limitation
+  purpose: >-
+    Hạn chế đã biết của v1, ghi ở issue #51; tình huống này được chờ là chưa đạt. Minh hỏi một câu thực tế: muốn nghỉ
+    thứ Hai 19/10/2026 thì hạn chót nộp đơn là ngày nào. Điều 3 quy chế GameCo bản 2 trả lời được (báo trước ít nhất
+    3 ngày làm việc) và thường được tìm thấy đầu tiên, nhưng lời dặn "chỉ trả lời điều được viết rõ" khiến mô hình
+    không trả điểm nào nên hệ thống từ chối. Kết quả đúng là thẻ trả lời nêu quy định, không tự tính ngày, vì một
+    ngày do mô hình tính không có trong văn bản nào để kiểm.
+  persona: minh
+  as_of: 2026-10-07
+  questions:
+    - Tôi muốn nghỉ phép thứ Hai ngày 19/10/2026 thì hạn chót nộp đơn là ngày nào?
+  card: answer
+  expected_answer: Đơn nghỉ phép phải gửi cho trưởng nhóm trước ít nhất 3 ngày làm việc, theo Quy chế nghỉ phép GameCo (bản 2), Điều 3; hệ thống nêu quy định, không tự tính ngày.
+  must_cite: [LEAVE-GAMECO-v2]
+  may_cite: [LEAVE-PROC-GAMECO-v1]
+  key_facts: [3 ngày làm việc]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3]
+  forbidden_for_llm: [OT-GAMECO-v1, TRAVEL-GAMECO-v1]
+- id: 17
+  kind: limitation
+  purpose: >-
+    Hạn chế đã biết của v1, ghi ở issue #52; tình huống này được chờ là chưa đạt. Hà hỏi đơn nghỉ phép gửi cho ai
+    duyệt; hai quy chế của hàng 7 mâu thuẫn về số ngày phép và số ngày báo trước, nhưng cùng nói đơn gửi cho quản lý
+    trực tiếp. Đúng ra Hà nhận thẻ trả lời "quản lý trực tiếp", nhưng v1 xét mâu thuẫn theo văn bản chứ không theo
+    câu hỏi: trích một văn bản trong cặp mâu thuẫn là ra thẻ mâu thuẫn, vì quyết định hai điều có nói giống nhau
+    hay không là đọc nghĩa, việc thiết kế để cho con người.
+  persona: ha
+  as_of: 2026-10-07
+  questions:
+    - Đơn nghỉ phép gửi cho ai duyệt?
+  card: answer
+  expected_answer: Đơn nghỉ phép được gửi cho quản lý trực tiếp, theo Quy chế nghỉ phép PayCo, Điều 2; Quy chế nghỉ phép Tập đoàn, Điều 2 nói giống vậy.
+  must_cite: [LEAVE-PAYCO-v1]
+  may_cite: [LEAVE-GROUP-v1]
+  key_facts: [quản lý trực tiếp]
+  forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
+  forbidden_for_llm: []
+- id: 18
+  kind: limitation
+  purpose: >-
+    Hạn chế đã biết của v1, ghi ở issue #53; tình huống này được chờ là chưa đạt. Minh hỏi ngày 15/12/2026 rằng từ
+    năm sau mình được nghỉ phép năm bao nhiêu ngày; từ 01/01/2027 quy chế GameCo bản 3 cho 15 ngày, nhưng v1 chỉ
+    dùng bản đang hiệu lực vào ngày hỏi (bản 2, 14 ngày) và không đọc câu hỏi để biết nó hỏi về thời điểm khác. Kết
+    quả an toàn là thẻ từ chối mời liên hệ HR GameCo; thẻ trả lời 14 ngày cho năm sau là sai.
+  persona: minh
+  as_of: 2026-12-15
+  questions:
+    - Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày?
+  card: refusal
+  expected_answer: Thẻ từ chối - v1 chỉ trả lời quy định đang hiệu lực vào ngày áp dụng, không trả lời cho năm sau, mời liên hệ HR GameCo; không hiện thẻ trả lời 14 ngày.
+  must_not_contain: [14 ngày]
+  forbidden_by_rules: [LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  forbidden_for_llm: [LEAVE-GAMECO-v2]
