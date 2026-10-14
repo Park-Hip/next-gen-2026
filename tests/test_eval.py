@@ -449,7 +449,6 @@ def test_score_row8_points_in_raw_caught_by_step7(personas, documents, cases):
 
 def test_score_errors_only_has_no_verdict(personas, documents, cases):
     row = _row_by_id(cases, 1)
-    scope = _scope_for(row, personas, documents)
     error = {
         "row": row["id"], "persona": row["persona"], "status": "error",
         "error": {"type": "AnswerUnavailable", "message": "x"},

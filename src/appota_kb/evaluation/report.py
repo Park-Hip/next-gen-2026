@@ -395,7 +395,7 @@ def main(argv: list[str]) -> int:
     if complete:
         report = build_report(run_id, results_rel, records, rows, scores, reviews, config.eval, personas)
         REPORT_PATH.write_text(report, encoding="utf-8")
-        print(f"Report written to docs/mission2/test_report.md")
+        print("Report written to docs/mission2/test_report.md")
     else:
         missing = [s.row["id"] for s in scores if s.record is None]
         sys.stderr.write(

@@ -3,7 +3,6 @@ from dataclasses import replace
 from datetime import date
 import json
 import logging
-import unicodedata
 
 import pytest
 from google.genai.errors import ServerError
