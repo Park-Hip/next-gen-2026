@@ -37,8 +37,8 @@ Step 6 uses `gemini-3.5-flash-lite` at `thinking_level: medium`, with `requests_
 
 ## Reasons
 
-[chờ Hiệp] - Hiep approved the recommendation on issue #41 on 14/10/2026 ("approve implement it") but has not yet given his reasons in his own words.
-An agent must not supply them; they are to be added by Hiep or from his words before the PR is merged.
+Hiep, 14/10/2026: it has a generous rate limit, and it has enough reasoning level for the task.
+Approved on issue #41 ("approve implement it"); the sentence above is his wording of the reasons, tidied only for grammar.
 
 ## Consequences
 
