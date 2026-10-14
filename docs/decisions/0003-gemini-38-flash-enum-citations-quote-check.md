@@ -1,6 +1,6 @@
 # 0003. Step 6 on gemini-3.8-flash at low thinking, citing only retrieved ids, with a quote that step 7 checks
 
-- Status: Accepted
+- Status: Accepted; its "Evaluation" line is superseded by ADR 0006
 - Date: 2026-10-13
 - Origin: AI, accepted
 - Supersedes: None (fixes the working default of plan decision D2; replaces the draft output contract `{found, points}` in issue #6)
