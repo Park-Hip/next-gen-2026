@@ -1,10 +1,8 @@
 """The FastAPI page: persona and date picker (GET), the three cards, and /healthz.
 
-create_app(config, answerer) builds nothing at import time; main() builds the index and
-the chat model and returns the app, so a broken file or a missing key fails the deploy's
-health check instead of failing on the first visitor.
+HTTP only: the route checks the query, builds the scope and hands the question to
+services.ask; build_app takes the answerer so the tests can inject one on offline fakes.
 """
-from collections import OrderedDict
 from datetime import date, datetime, timedelta, timezone
 import json
 import logging
@@ -15,17 +13,15 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from appota_kb.core.config import Config, load_config
+from appota_kb.core.config import Config
 from appota_kb.integrations.data_files import load_documents, load_org, load_personas
-from appota_kb.integrations.gemini import gemini_chat, gemini_embeddings
 from appota_kb.models.answer import Reply
 from appota_kb.models.scope import Scope
-from appota_kb.services.answering.answerer import Answerer, AnswerUnavailable
-from appota_kb.services.card_text import show
-from appota_kb.services.retrieval.index import build_index
+from appota_kb.services.answering.answerer import AnswerUnavailable
+from appota_kb.services.ask import ReplyCache, ask
 from appota_kb.services.scope import scope as build_scope
 
-logger = logging.getLogger("app.web")
+logger = logging.getLogger(__name__)
 
 BUSY_MESSAGE = "Hệ thống tạm thời không trả lời được. Vui lòng thử lại sau ít phút."
 
@@ -33,12 +29,11 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
-def create_app(config: Config, answerer: Callable[[Scope, str], Reply]):
+def build_app(config: Config, answerer: Callable[[Scope, str], Reply]) -> FastAPI:
     """Data and config are loaded once here; the answerer is injected (the real one needs a key)."""
     documents = load_documents()
     personas = load_personas(load_org())
-    cache_size = config.page.answer_cache_size
-    cache: OrderedDict = OrderedDict()  # demo LRU of finished Reply objects (decision 5)
+    cache = ReplyCache(config.page.answer_cache_size)
 
     app = FastAPI()
 
@@ -80,75 +75,32 @@ def create_app(config: Config, answerer: Callable[[Scope, str], Reply]):
 
         persona_obj = personas[persona_id]
         scoped = build_scope(persona_obj, parsed, documents)
-        key = (persona_id, tuple(sorted(scoped.chunk_ids)), question)
-        if key in cache:
-            reply = cache.pop(key)
-            cache[key] = reply  # mark as most recently used
-            cache_hit = True
-        else:
-            cache_hit = False
-            try:
-                reply = answerer(scoped, question)
-            except AnswerUnavailable:
-                return _render(request, {**context, "error": BUSY_MESSAGE}, 503)
-            cache[key] = reply
-            while len(cache) > cache_size:
-                cache.popitem(last=False)
-
-        card, lines = show(scoped, reply.retrieved, reply.points)
+        try:
+            asked = ask(scoped, question, answerer, cache)
+        except AnswerUnavailable:
+            return _render(request, {**context, "error": BUSY_MESSAGE}, 503)
         logger.info(
             json.dumps(
                 {
                     "persona": persona_id,
                     "as_of": parsed.isoformat(),
                     "question": question,
-                    "card": card.kind,
-                    "reason": card.reason,
-                    "cache_hit": cache_hit,
+                    "card": asked.card.kind,
+                    "reason": asked.card.reason,
+                    "cache_hit": asked.cache_hit,
                 },
                 ensure_ascii=False,
             )
         )
         context["persona_id"] = persona_id
         context["as_of"] = parsed.isoformat()
-        context["card"] = {"kind": card.kind, "lines": lines}
+        context["card"] = {"kind": asked.card.kind, "lines": asked.lines}
         return _render(request, context, 200)
 
     return app
-
-
-def main() -> FastAPI:
-    """uvicorn factory: build the index and the chat model eagerly, then the app."""
-    logging.basicConfig(level=logging.INFO)
-    config = load_config()
-    documents = load_documents()
-    index = build_index(documents, gemini_embeddings(config.retrieval.embedding_model))
-    answerer = Answerer(index, gemini_chat(config.llm), config.retrieval)
-    return create_app(config, answerer)
 
 
 def _render(request: Request, context: dict, status_code: int):
     return templates.TemplateResponse(
         request=request, name="index.html", context=context, status_code=status_code
     )
-
-
-class _LazyApp:
-    """Proxy that builds the real app on first use, so tests can import app.web without GEMINI_API_KEY."""
-
-    def __init__(self) -> None:
-        self._app: FastAPI | None = None
-
-    def _get_app(self) -> FastAPI:
-        if self._app is None:
-            self._app = main()
-        return self._app
-
-    def __getattr__(self, name: str):
-        return getattr(self._get_app(), name)
-
-    async def __call__(self, scope, receive, send):
-        await self._get_app()(scope, receive, send)
-
-
-app = _LazyApp()

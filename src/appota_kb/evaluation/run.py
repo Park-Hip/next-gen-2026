@@ -21,8 +21,8 @@ from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.evaluation.score import load_run
 from appota_kb.integrations.data_files import cases_sha256, load_documents, load_org, load_personas, load_test_cases
 from appota_kb.integrations.gemini import gemini_chat, gemini_embeddings
-from appota_kb.services.answering.answerer import Answerer, AnswerUnavailable
-from appota_kb.services.card_text import show
+from appota_kb.services.answering.answerer import AnswerUnavailable, Answerer
+from appota_kb.services.ask import ask
 from appota_kb.services.retrieval.index import build_index
 from appota_kb.services.retrieval.search import ScopeLeakError
 from appota_kb.services.scope import scope as build_scope
@@ -59,7 +59,7 @@ def run_meta(config: Config, run_id: str) -> dict:
 
 
 def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
-    """One record: apply data_edit, build the scope, ask questions[0] once, step 7 via cards.show.
+    """One record: apply data_edit, build the scope, ask questions[0] once, steps 5-7 via services.ask.
 
     AnswerUnavailable -> status error; ScopeLeakError -> status leak; anything else propagates.
     """
@@ -102,7 +102,7 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
 
     started = time.perf_counter()
     try:
-        reply = answerer(scoped, question)
+        asked = ask(scoped, question, answerer)
     except AnswerUnavailable as exc:
         record["status"] = "error"
         record["error"] = {"type": type(exc).__name__, "message": str(exc)}
@@ -113,7 +113,7 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
         return record
     record["latency_ms"] = round((time.perf_counter() - started) * 1000)
 
-    card, lines = show(scoped, reply.retrieved, reply.points)
+    reply, card, lines = asked.reply, asked.card, asked.lines
     by_text = {c.id: c.text for c in scoped.chunks}
     record["status"] = "ok"
     record["retrieved"] = list(reply.retrieved)

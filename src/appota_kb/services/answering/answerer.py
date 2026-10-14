@@ -16,7 +16,7 @@ from appota_kb.models.scope import Scope
 from appota_kb.services.answering.output import answer_schema, parse_points, raw_text
 from appota_kb.services.answering.prompt import build_messages
 from appota_kb.services.retrieval.index import Index
-from appota_kb.services.retrieval.search import retrieve, ScopeLeakError
+from appota_kb.services.retrieval.search import ScopeLeakError, retrieve
 
 logger = logging.getLogger(__name__)
 

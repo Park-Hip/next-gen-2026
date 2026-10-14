@@ -24,7 +24,7 @@ from appota_kb.integrations.gemini import gemini_embeddings
 from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.services.retrieval.bm25 import bm25_scores, tokens
 from appota_kb.services.retrieval.index import build_index, index_text
-from appota_kb.services.retrieval.search import retrieve, rrf, ScopeLeakError
+from appota_kb.services.retrieval.search import ScopeLeakError, retrieve, rrf
 from appota_kb.services.scope import allowed, applies, scope as build_scope
 
 

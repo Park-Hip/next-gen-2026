@@ -15,11 +15,11 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 
 from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
-from appota_kb.core.config import load_config, Retrieval
+from appota_kb.api.page import BUSY_MESSAGE, build_app
+from appota_kb.core.config import Retrieval, load_config
 from appota_kb.services.answering.answerer import Answerer
 from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.services.retrieval.index import build_index
-from appota_kb.web import BUSY_MESSAGE, create_app
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 LEAVE_QUESTION = "Phép năm của tôi là bao nhiêu ngày?"
@@ -35,7 +35,7 @@ def _client(documents, reply="", error=None):
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=reply, error=error)
     answerer = Answerer(index, chat, RETRIEVAL)
-    return TestClient(create_app(load_config(), answerer)), chat
+    return TestClient(build_app(load_config(), answerer)), chat
 
 
 def _ask(client, persona, as_of, q):
@@ -229,14 +229,6 @@ def test_unknown_persona_selects_the_placeholder(page_client):
     assert "<option value=\"minh\" selected>" not in response.text
 
 
-def test_import_web_builds_nothing():
-    import appota_kb.web
-    # Import must not trigger expensive initialization (Gemini calls, network).
-    # app is a lazy proxy; the real app is only built on first request.
-    assert hasattr(appota_kb.web, "app")
-    assert isinstance(appota_kb.web.app, appota_kb.web._LazyApp)
-
-
 class CiteAllGemini(FakeGemini):
     """A hostile model that cites every retrieved chunk, quoting each word for word."""
 
@@ -253,7 +245,7 @@ def test_page_never_shows_forbidden_title(documents, cases):
     titles = {d.id: d.title for d in documents}
     index = build_index(documents, SyllableEmbeddings())
     answerer = Answerer(index, CiteAllGemini(), RETRIEVAL)
-    client = TestClient(create_app(load_config(), answerer))
+    client = TestClient(build_app(load_config(), answerer))
     for row in cases:
         if "data_edit" in row:
             continue  # the page always runs on the real data

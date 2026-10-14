@@ -3,9 +3,8 @@ from datetime import date
 
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card
-from appota_kb.services.card_text import render, show
+from appota_kb.services.card_text import render
 from appota_kb.services.chunking import chunks
-from appota_kb.services.citations import card_for_answer
 from appota_kb.services.scope import scope
 
 
@@ -62,25 +61,3 @@ def test_refusal_card_wording(personas, documents):
         "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.",
         "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo.",
     )
-
-
-def test_show_matches_card_for_answer_plus_render(personas, documents):
-    def _expected(scope_obj, retrieved, points):
-        card = card_for_answer(scope_obj, retrieved, points)
-        docs = {c.id: c for c in scope_obj.chunks}
-        return card, render(card, scope_obj, points, tuple(docs[cid] for cid in retrieved))
-
-    # answer card (row 1)
-    s = scope(personas["minh"], date(2026, 10, 7), documents)
-    c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
-    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=c2.text, text="Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.")
-    assert show(s, ("LEAVE-GAMECO-v2#2",), (point,)) == _expected(s, ("LEAVE-GAMECO-v2#2",), (point,))
-
-    # conflict card (row 7)
-    s_ha = scope(personas["ha"], date(2026, 10, 7), documents)
-    g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
-    conflict_point = Point(chunks=("LEAVE-GROUP-v1#1",), quote=g1.text, text="LLM TEXT MUST NOT APPEAR")
-    assert show(s_ha, ("LEAVE-GROUP-v1#1",), (conflict_point,)) == _expected(s_ha, ("LEAVE-GROUP-v1#1",), (conflict_point,))
-
-    # refusal card
-    assert show(s, (), ()) == _expected(s, (), ())

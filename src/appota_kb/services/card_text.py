@@ -8,7 +8,7 @@ from appota_kb.models.card import Card
 from appota_kb.models.document import Chunk, Document
 from appota_kb.models.org import Persona
 from appota_kb.models.scope import Scope
-from appota_kb.services.citations import card_for_answer, conflict_quotes
+from appota_kb.services.citations import conflict_quotes
 
 REFUSAL_TEXT = (
     "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
@@ -99,10 +99,3 @@ def render(
     if card.kind == "conflict":
         return conflict_card(card, scope, conflict_quotes(card, retrieved), recorded)
     return refusal_card(card, scope)
-
-
-def show(scope: Scope, retrieved: tuple[str, ...], points: tuple[Point, ...] | None) -> tuple[Card, tuple[str, ...]]:
-    """Step 7 and the card's lines, exactly as the page shows them; used by app.web and eval.run."""
-    card = card_for_answer(scope, retrieved, points)
-    by_id = {c.id: c for c in scope.chunks}
-    return card, render(card, scope, points, tuple(by_id[cid] for cid in retrieved))
