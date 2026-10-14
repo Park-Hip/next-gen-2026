@@ -1,7 +1,9 @@
-"""Steps 1-4: the documents in force, readable by and applying to the asker, after overrides.
+"""Steps 1-4: the documents in force, applying to the asker and not replaced, then the ones the asker may read.
 
 Deterministic rules decide access, validity, applicability and precedence; nothing here
-reads the question and nothing calls an LLM. Ported from adopted_rules.py.
+reads the question and nothing calls an LLM. Ported from adopted_rules.py, with one change
+(ADR 0009): access is the last filter, so a document the asker may not read still replaces
+its series and never brings the replaced one back.
 """
 from datetime import date
 from itertools import combinations
@@ -47,11 +49,14 @@ def declared(a: Document, b: Document) -> bool:
 
 
 def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
-    """Steps 1-4: documents in force, readable by and applying to the asker, after overrides,
-    plus the conflict pairs. Never reads the question."""
-    kept = [d for d in in_force(documents, as_of) if allowed(d, persona) and applies(d, persona)]
-    beaten = {d.overrides for d in kept if d.overrides is not None}
-    winners = sorted([d for d in kept if d.series not in beaten], key=lambda d: d.id)
+    """Steps 1-4: documents in force, applying to the asker and not replaced, then those the asker
+    may read, plus the conflict pairs. Never reads the question.
+
+    Order: validity, applicability, precedence, access (ADR 0009). Access never decides which
+    rule applies, so a restricted document that replaces a series leaves the asker with neither."""
+    current = [d for d in in_force(documents, as_of) if applies(d, persona)]
+    beaten = {d.overrides for d in current if d.overrides is not None}
+    winners = sorted([d for d in current if d.series not in beaten and allowed(d, persona)], key=lambda d: d.id)
     pairs = []
     for a, b in combinations(winners, 2):
         if a.topic == b.topic and not declared(a, b):

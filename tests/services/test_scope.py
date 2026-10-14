@@ -103,6 +103,57 @@ def test_applies():
     assert not applies(make_doc(applies_to="PayCo"), p)
 
 
+def _override_pair(access="roles:hr_gameco"):
+    """A Group policy and a GameCo policy that replaces it, readable only with `access`."""
+    group = make_doc(id="GROUP-v1", series="GROUP", applies_to="Tập đoàn")
+    company = make_doc(id="CO-v1", series="CO", applies_to="GameCo", access=access, overrides="GROUP")
+    return [group, company]
+
+
+def test_restricted_override_still_replaces_its_series():
+    """Issue #48, ADR 0009: access never decides precedence."""
+    docs = _override_pair()
+    s = scope(make_persona(), date(2026, 10, 7), docs)
+    assert s.documents == () and s.conflicts == () and s.chunks == ()
+    s = scope(make_persona(roles=("employee", "hr_gameco")), date(2026, 10, 7), docs)
+    assert [d.id for d in s.documents] == ["CO-v1"]
+
+
+def test_restricted_override_leaves_units_it_does_not_cover_alone():
+    """Issue 4's constraint, with the overrider hidden too: applicability still comes first."""
+    docs = _override_pair()
+    payco = make_persona(unit="Kế toán", company="PayCo", path=("Tập đoàn", "PayCo", "Kế toán"),
+                         roles=("employee", "hr_gameco"), hr="HR PayCo")
+    assert [d.id for d in scope(payco, date(2026, 10, 7), docs).documents] == ["GROUP-v1"]
+    hr = make_persona(unit="Nhân sự Tập đoàn", path=("Tập đoàn", "Nhân sự Tập đoàn"))
+    assert [d.id for d in scope(hr, date(2026, 10, 7), docs).documents] == ["GROUP-v1"]
+
+
+def test_hidden_v3_does_not_bring_the_group_policy_back(personas, documents):
+    """The snippet of issue #48: Minh on 01/01/2027 with LEAVE-GAMECO-v3 restricted."""
+    edited = [replace(d, access="roles:hr_gameco") if d.id == "LEAVE-GAMECO-v3" else d for d in documents]
+    s = scope(personas["minh"], date(2027, 1, 1), edited)
+    assert [d.id for d in s.documents] == ["LEAVE-PROC-GAMECO-v1", "OT-GAMECO-v1", "TRAVEL-GAMECO-v1"]
+    assert s.conflicts == ()
+    assert not {c.document_id for c in s.chunks} & {"LEAVE-GROUP-v1", "LEAVE-GAMECO-v3"}
+
+
+def test_hiding_one_document_removes_only_that_document(personas, dates, documents):
+    """Access is the last filter: hiding a document takes it and its conflict pairs out, nothing else."""
+    def pairs(s):
+        return [(a.id, b.id) for a, b in s.conflicts]
+
+    for hidden in documents:
+        edited = [replace(d, access="roles:nobody") if d.id == hidden.id else d for d in documents]
+        for persona in personas.values():
+            for day in dates:
+                full = scope(persona, day, documents)
+                part = scope(persona, day, edited)
+                where = (hidden.id, persona.id, day)
+                assert [d.id for d in part.documents] == [d.id for d in full.documents if d.id != hidden.id], where
+                assert pairs(part) == [p for p in pairs(full) if hidden.id not in p], where
+
+
 @pytest.mark.parametrize("row", _case_params())
 def test_case_row(personas, documents, row):
     docs = documents

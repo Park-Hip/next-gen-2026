@@ -36,3 +36,4 @@ The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Missio
 | [0006](0006-own-harness-one-run-main-wording.md) | Evaluate with our own harness: one run per case, main wording only, unsafe answers judged on the card and on the raw reply | Accepted | Mission 1 V4, the 3 phrasings of A2 and V1, and the "Evaluation" line of ADR 0003 |
 | [0007](0007-defer-context-recall.md) | Context recall is deferred until we have real documents | Accepted | The "context recall" row of Mission 1 V1 and RV13 |
 | [0008](0008-gemini-35-flash-lite-at-medium.md) | Step 6 on gemini-3.5-flash-lite at medium thinking | Accepted | The "Model" line of ADR 0003 |
+| [0009](0009-access-never-decides-precedence.md) | Access is the last filter: a document the asker may not read still replaces its series | Accepted | The order of step 2 and step 3 (M3b, M12) for a restricted overriding document; R3 and R4 |

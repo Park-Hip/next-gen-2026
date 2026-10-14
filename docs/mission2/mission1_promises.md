@@ -23,8 +23,8 @@ Quotes are from the submitted text.
 |---|---|---|---|
 | R1 | Steps 1-4 build the scope "từ metadata, không đọc câu hỏi và không dùng AI" | Phần 2 | Code: the scope function takes persona and date only, never the question |
 | R2 | Step 1: each series keeps the version in force: published, latest effective date not after the as-of date; drafts and future versions are out | Phần 2, Câu 3 | Rows 1, 2 |
-| R3 | Step 2: keep documents the asker may see and that apply to their unit | Phần 2, Câu 3 | Rows 5, 6, 10 |
-| R4 | Step 3: drop a document when another kept document declares "dùng thay" over its whole series, including later versions | Phần 2 | Row 1 (Group rule dropped for Minh) |
+| R3 | Step 2: keep documents the asker may see and that apply to their unit (the build applies access after step 3, ADR 0009) | Phần 2, Câu 3 | Rows 5, 6, 10 |
+| R4 | Step 3: drop a document when another kept document declares "dùng thay" over its whole series, including later versions (the build also counts a document the asker may not read, ADR 0009) | Phần 2 | Row 1 (Group rule dropped for Minh) |
 | R5 | No default "đơn vị cấp dưới thắng"; precedence exists only where the owner declared it | Phần 2, Phần 4 | Row 7 (PayCo gets a conflict, not the lower unit) |
 | R6 | Step 4: same topic, both apply, no declared relation means a conflict pair; "bổ sung" documents are not a conflict | Phần 2 | Rows 3, 7 |
 | R7 | Step 7: a cited document in a conflict pair gives the conflict card; no citation, or a citation of a chunk that was not retrieved, refuses the whole answer | Phần 2 | Rows 7, 8, 9, 10; a test with an invented citation |

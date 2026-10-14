@@ -16,11 +16,11 @@ Metadata fields, as read by the rules:
 |---|---|
 | `series` | One policy across its versions; the published version with the latest `effective_from` not after the as-of date is in force |
 | `topic` | One per document; only used to find conflict pairs |
-| `access` | Who may read it: `all_staff`, `unit:<unit>` or `roles:<role>,<role>` |
+| `access` | Who may read it: `all_staff`, `unit:<unit>` or `roles:<role>,<role>`; never who it is for, and it never changes which document replaces which (ADR 0009) |
 | `applies_to` | The unit it covers, with every unit below it |
 | `status` | `published` or `draft` |
 | `effective_from`, `effective_to` | `effective_to` only when the document really ends |
-| `overrides` | "Dùng thay": one series this document is used instead of, for the units it applies to |
+| `overrides` | "Dùng thay": one series this document is used instead of, for the units it applies to, whether or not the asker may read this document (ADR 0009) |
 | `complements` | "Bổ sung": series this document adds to without contradicting them |
 
 Source: `docs/mission1/redraft/artifacts.md` and `docs/mission1/redraft/checks/adopted_rules.py`.
