@@ -39,7 +39,7 @@ What changed is around them:
 | The conflict card says the conflict is recorded for HR | No conflict record, so the card does not say so | Cut for Mission 2 with the owners' page, for the same reason (Hiep, 14/10/2026) | [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) |
 | Each case asked in 3 wordings, and run several times, one failure failing the case | Each case asked once, in its main wording; the other wordings stay in the test file | The Gemini free-tier rate limit, shared with the demo | [ADR 0006](../decisions/0006-own-harness-one-run-main-wording.md) |
 | Context recall tracked | Not measured | Too soon on 10 simulated documents; revisit with real documents | [ADR 0007](../decisions/0007-defer-context-recall.md) |
-| 10 test cases | 15 | The brief asks for a case the product handles well, a hard one and a failing one | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10) |
+| 10 test cases | 18 | The brief asks for a case the product handles well, a hard one and a failing one; three more failures found by probing the live pipeline became limitation cases | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
 
 Every promise of the Mission 1 document, with what shipped: [`docs/mission2/mission1_promises.md`](mission1_promises.md).
 Each decision links the research it came from in [`docs/research/`](../research/); the index of decisions is [`docs/decisions/`](../decisions/README.md).
@@ -52,7 +52,7 @@ Each decision links the research it came from in [`docs/research/`](../research/
 
 **Most likely to use the wrong knowledge: a mistake in the metadata an owner sets ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)).**
 The rules guarantee the right version, unit and access only when the metadata is right, and nothing in v1 checks it.
-If PayCo's leave policy is tagged with a different topic, Hà's conflict pair disappears and she can get an answer card "13 ngày" instead of the conflict card.
+If PayCo's leave policy is tagged with a different topic, Hà's conflict pair disappears and Hà can get an answer card "13 ngày" instead of the conflict card.
 If an amendment that changes one clause is declared "bổ sung", the old clause stays in scope with no conflict, so an answer can cite the old "14 ngày".
 "0 leaks" holds on the same condition: a wrong access field leaks every time.
 How we found it: editing a copy of the simulated data and printing the scope the rules build, with no model.
