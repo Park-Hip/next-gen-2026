@@ -16,6 +16,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from app.answer import AnswerUnavailable, Answerer, gemini_chat
 from app.cards import show
 from app.config import Config, load_config
@@ -190,6 +192,7 @@ def main(argv: list[str]) -> int:
         else:
             raise SystemExit("usage: python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
 
+    load_dotenv(REPO / ".env")
     if not os.environ.get("GEMINI_API_KEY"):
         sys.stderr.write("GEMINI_API_KEY is not set; set it to a Gemini API key to run the evaluation\n")
         return 1

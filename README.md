@@ -120,7 +120,7 @@ The public demo URL and the first-load warning are added once the Render service
 
 The harness asks every row of `data/test_cases.yaml` once, in its main wording, through the same `Answerer` and step 7 as the page (ADR 0006).
 It writes one JSON record per row, then a separate offline step scores the saved replies and writes `docs/mission2/test_report.md` in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được".
-It needs a Gemini API key in the environment; the tests do not (they use fake replies).
+It needs a Gemini API key in the environment or in a `.env` file at the repository root (ignored by git, read by `eval.run` only); the tests do not (they use fake replies).
 
 ```bash
 export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."

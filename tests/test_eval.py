@@ -228,8 +228,12 @@ def test_select_rows(cases):
 
 
 def test_run_main_no_key(monkeypatch):
+    # load_dotenv is stubbed so a developer's real .env cannot put the key back.
+    loaded = []
+    monkeypatch.setattr("eval.run.load_dotenv", lambda path: loaded.append(path))
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     assert run_main(["eval.run"]) == 1
+    assert loaded == [REPO / ".env"]
 
 
 def test_run_meta_from_git_and_cases():
