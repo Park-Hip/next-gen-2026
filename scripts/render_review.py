@@ -3,7 +3,7 @@
 Uses the same HTML and CSS as render_pdf.py, so line breaks match the PDF.
 Run render_pdf.py first: the page markers come from the text of each PDF page.
 
-Usage: python tools/render_review.py docs/mission1/document.md build/mission1_draft.pdf .lavish/document.html
+Usage: python scripts/render_review.py docs/mission1/document.md build/mission1_draft.pdf .lavish/document.html
 """
 
 import json

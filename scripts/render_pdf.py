@@ -1,6 +1,6 @@
 """Render a Markdown draft to an A4 PDF via headless Edge, then report the page count.
 
-Usage: python tools/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf
+Usage: python scripts/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf
 """
 
 import pathlib

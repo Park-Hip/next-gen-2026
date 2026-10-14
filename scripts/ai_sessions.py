@@ -1,9 +1,9 @@
 """List the AI sessions recorded for this project, to check the evidence log against them.
 
 Usage:
-  python tools/ai_sessions.py                 # one block per session: tool, time, models, prompts, files changed
-  python tools/ai_sessions.py --since 09/10   # only sessions that started on or after that day (dd/mm, this year)
-  python tools/ai_sessions.py --prompts 19:24 # verbatim prompts of the session that started at 19:24 local time
+  python scripts/ai_sessions.py                 # one block per session: tool, time, models, prompts, files changed
+  python scripts/ai_sessions.py --since 09/10   # only sessions that started on or after that day (dd/mm, this year)
+  python scripts/ai_sessions.py --prompts 19:24 # verbatim prompts of the session that started at 19:24 local time
 
 Two sources, both read-only here:
 - Pi: ~/.pi/agent/sessions/<encoded project path>/*.jsonl
