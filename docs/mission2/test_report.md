@@ -13,6 +13,7 @@ All data is simulated ("giả lập").
 - Test file rows: 15 in `data/test_cases.yaml`
 - Each case ran once, in its main wording (`questions[0]`); run-to-run variance and paraphrased questions are not measured (ADR 0006).
 - Context recall is not measured (ADR 0007).
+- Warning: the test file changed since this run (`cases_sha256` differs); re-run the evaluation for a report on the current test file.
 
 ## Gates
 

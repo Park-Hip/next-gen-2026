@@ -115,6 +115,8 @@ def test_cases_well_formed(cases, documents, personas):
         assert c["as_of"], tag
         assert c["questions"] and all(isinstance(q, str) and q for q in c["questions"]), tag
         assert c["expected_answer"], tag
+        # A purpose says what is set up, what must happen and what counts as a failure: not one line.
+        assert isinstance(c["purpose"], str) and ". " in c["purpose"], tag
         cites = c.get("must_cite", []) + c.get("may_cite", [])
         if c["card"] == "answer":
             assert c.get("must_cite") and "conflict_pair" not in c, tag

@@ -8,7 +8,7 @@ Every unit, person, document and number here is simulated.
 | `documents/<id>.md` | The 10 documents: YAML front matter with the metadata, then the text, one "Điều" per line (the procedure document has plain steps, on purpose) |
 | `org.yaml` | The org tree; `hr` is the contact the cards name |
 | `personas.yaml` | Minh, Lan and Hà: unit and roles, the two fields the HR system would give |
-| `test_cases.yaml` | The test cases: rows 1-10 of the Mission 1 test matrix and rows 11-15 from issue #10; each has its wordings of the question, the card, the expected answer, the documents it must and must not cite, and the `key_facts` an answer must state (fields explained at the top of the file) |
+| `test_cases.yaml` | The test cases: rows 1-10 of the Mission 1 test matrix and rows 11-15 from issue #10; each has its `purpose` (why it is tested, shown to the judges), its wordings of the question, the card, the expected answer, the documents it must and must not cite, and the `key_facts` an answer must state (fields explained at the top of the file) |
 
 Metadata fields, as read by the rules:
 

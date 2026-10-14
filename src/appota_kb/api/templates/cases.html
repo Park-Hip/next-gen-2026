@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "_macros.html" import persona_label %}
+{% block title %}Test cases{% endblock %}
+{% macro case_panel(c) %}
+{% set result = run.rows[c.id] if run else None %}
+<section class="panel guide-panel case" id="case-{{ c.id }}">
+  <div class="head">
+    <h3>Tình huống #{{ c.id }}</h3>
+    <span class="badge {% if c.kind == 'good' %}badge-ok{% elif c.kind == 'hard' %}badge-info{% else %}badge-warn{% endif %}">{{ c.kind_label }}</span>
+  </div>
+  <details class="purpose">
+    <summary>Vì sao kiểm thử tình huống này</summary>
+    <p>{{ c.purpose }}</p>
+  </details>
+  <dl class="facts">
+    <div><dt>Người hỏi</dt><dd>{{ persona_label(c.persona) }}</dd></div>
+    <div><dt>Ngày áp dụng</dt><dd>{{ c.as_of }}</dd></div>
+    <div>
+      <dt>{% if c.wordings|length > 1 %}Cùng một câu hỏi, {{ c.wordings|length }} cách nói{% else %}Câu hỏi{% endif %}</dt>
+      <dd>
+        <ul class="wordings">
+          {% for w in c.wordings %}
+          <li>
+            <span class="q">{{ w.text }}</span>
+            {% if w.href %}<a class="try" href="{{ w.href }}" target="_blank" rel="noopener nofollow">Thử ngay</a>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% if c.data_edit_note %}<p class="hint">{{ c.data_edit_note }}</p>{% endif %}
+      </dd>
+    </div>
+    <div><dt>Kỳ vọng: thẻ {{ c.card_label }}</dt><dd>{{ c.expected_answer }}</dd></div>
+  </dl>
+  {% if c.limitation_issue %}
+  <p class="warn-line">Hạn chế đã biết, theo dõi ở issue {{ c.limitation_issue }}.</p>
+  {% endif %}
+  {% if result %}
+  <div class="case-result">
+    <h4>Kết quả thực tế</h4>
+    {% if result.card %}
+    {% with card = result.card %}{% include "_" ~ card.kind ~ ".html" %}{% endwith %}
+    {% else %}
+    <p class="hint">Lần chạy này không có thẻ nào để hiển thị cho tình huống này.</p>
+    {% endif %}
+    <p>
+      <span class="badge {% if result.verdict == 'Đạt' %}badge-ok{% elif result.verdict == 'Chưa đạt' %}badge-warn{% else %}badge-grey{% endif %}">{{ result.verdict }}</span>
+      {% if result.failures %}Không đạt ở: {{ result.failures|join(", ") }}.{% endif %}
+    </p>
+    <p><strong>Điều học được:</strong> {{ result.lesson }}</p>
+  </div>
+  {% endif %}
+</section>
+{% endmacro %}
+{% block content %}
+{% set all_cases = featured + others %}
+<h2 class="page-title">Tình huống kiểm thử</h2>
+<p class="lede">Bộ kiểm thử giả lập trong <code>data/test_cases.yaml</code>: {{ all_cases|length }} tình huống
+({{ all_cases|selectattr('kind', 'equalto', 'good')|list|length }} làm tốt,
+{{ all_cases|selectattr('kind', 'equalto', 'hard')|list|length }} khó,
+{{ all_cases|selectattr('kind', 'equalto', 'limitation')|list|length }} chưa xử lý tốt).</p>
+<p class="lede muted">Bấm Thử ngay để hỏi lại trên trang "Ask"; đó là một lần hỏi mới tới Gemini, nên câu chữ có thể khác lần chạy đánh giá.</p>
+
+{% if run %}
+<section class="panel guide-panel" aria-label="Lần chạy đánh giá">
+  <p class="run-line">Kết quả lần chạy đánh giá <code>{{ run.run_id }}</code>
+    (bắt đầu {{ run.started }}, commit <code>{{ run.commit }}</code>, {{ run.model }}){% if run.dirty %} (chạy khi còn thay đổi chưa commit){% endif %},
+    đọc từ <code>{{ run.results_path }}</code>; trang này không chạy lại đánh giá.</p>
+  <ul class="counts">
+    {% for name, n in run.counts %}
+    <li><span class="badge {% if name == 'Đạt' %}badge-ok{% elif name == 'Chưa đạt' %}badge-warn{% else %}badge-grey{% endif %}">{{ name }}: {{ n }}</span></li>
+    {% endfor %}
+  </ul>
+  {% if run.stale %}
+  <p class="warn-line">Bộ kiểm thử đã thay đổi sau lần chạy này; kết quả có thể không khớp với tình huống hiện tại.</p>
+  {% endif %}
+</section>
+{% else %}
+<p class="organiser" role="note">Chưa có lần chạy đánh giá nào được ghi trong báo cáo kiểm thử.</p>
+{% endif %}
+
+{% if featured %}
+<h2 class="section">Bắt buộc theo đề: cùng một câu hỏi, người hỏi khác nhau, kết quả khác nhau</h2>
+{% for c in featured %}{{ case_panel(c) }}{% endfor %}
+<h2 class="section">Các tình huống khác</h2>
+{% endif %}
+{% for c in others %}{{ case_panel(c) }}{% endfor %}
+{% endblock %}
