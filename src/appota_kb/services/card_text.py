@@ -1,6 +1,7 @@
 """The three cards' lines of text, word for word from the submitted document (Phần 2).
 
 No FastAPI and no LLM here: the page and the templates render these lines.
+Every fact on an answer card is a quote that step 7 checked against its cited chunk (ADR 0009).
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
 from appota_kb.models.answer import Point
@@ -8,7 +9,7 @@ from appota_kb.models.card import Card
 from appota_kb.models.document import Chunk, Document
 from appota_kb.models.org import Persona
 from appota_kb.models.scope import Scope
-from appota_kb.services.citations import conflict_quotes
+from appota_kb.services.citations import conflict_quotes, fold
 
 REFUSAL_TEXT = (
     "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
@@ -53,9 +54,19 @@ def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]
     return [(doc_id, tuple(by_doc[doc_id])) for doc_id in order]
 
 
+def _quotes(points: tuple[Point, ...]) -> list[str]:
+    """The folded quotes step 7 verified, in order, each once; the card never shows any other model text."""
+    seen: list[str] = []
+    for point in points:
+        quote = fold(point.quote)
+        if quote not in seen:
+            seen.append(quote)
+    return seen
+
+
 def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[str, ...]:
     docs = {d.id: d for d in scope.documents}
-    answer = " ".join(p.text.strip() for p in points)
+    answer = " ".join(f'"{quote}"' for quote in _quotes(points))
     lines = [intro(scope.persona), answer]
     for doc_id, doc_chunks in _group_cited(card.cited):
         lines.append(_source_line(docs[doc_id], doc_chunks, card.hr))
