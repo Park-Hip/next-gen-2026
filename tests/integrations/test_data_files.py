@@ -79,6 +79,53 @@ def test_load_raises_on_unknown_overrides(tmp_path):
         load_documents(tmp_path)
 
 
+def test_load_raises_on_versions_tied_on_effective_from(tmp_path):
+    _write(tmp_path, "S-v1.md", "S-v1")
+    _write(tmp_path, "S-v1-fix.md", "S-v1-fix")
+    with pytest.raises(ValueError, match="S-v1, S-v1-fix") as error:
+        load_documents(tmp_path)
+    assert "2026-01-01" in str(error.value)
+
+
+def test_load_accepts_a_tie_that_is_not_two_published_dates(tmp_path):
+    _write(tmp_path, "S-v1.md", "S-v1")
+    _write(tmp_path, "S-v2.md", "S-v2", effective_from=date(2026, 6, 1))
+    _write(tmp_path, "S-v3-DRAFT.md", "S-v3-DRAFT", status="draft", effective_from=None)
+    _write(tmp_path, "S-v4-DRAFT.md", "S-v4-DRAFT", status="draft", effective_from=None)
+    _write(tmp_path, "T-v1.md", "T-v1", series="S-T")
+    assert len(load_documents(tmp_path)) == 5
+
+
+def test_load_raises_on_self_override(tmp_path):
+    _write(tmp_path, "X.md", "X", series="S-X", overrides="S-X")
+    with pytest.raises(ValueError, match="X: overrides names its own series S-X"):
+        load_documents(tmp_path)
+
+
+def test_load_raises_on_override_cycle(tmp_path):
+    _write(tmp_path, "A.md", "A", series="S-A", overrides="S-B")
+    _write(tmp_path, "B.md", "B", series="S-B", overrides="S-A")
+    with pytest.raises(ValueError, match=r"overrides cycle: S-A -> S-B -> S-A \(A, B\)"):
+        load_documents(tmp_path)
+
+
+def test_load_raises_on_longer_override_cycle(tmp_path):
+    _write(tmp_path, "A.md", "A", series="S-A", overrides="S-B")
+    _write(tmp_path, "B.md", "B", series="S-B", overrides="S-C")
+    _write(tmp_path, "C.md", "C", series="S-C", overrides="S-A")
+    with pytest.raises(ValueError, match=r"overrides cycle: S-A -> S-B -> S-C -> S-A \(A, B, C\)"):
+        load_documents(tmp_path)
+
+
+def test_load_accepts_an_override_chain_and_a_draft_cycle(tmp_path):
+    _write(tmp_path, "A.md", "A", series="S-A", overrides="S-B")
+    _write(tmp_path, "B.md", "B", series="S-B", overrides="S-C")
+    _write(tmp_path, "C.md", "C", series="S-C")
+    # A draft is not checked until it is published.
+    _write(tmp_path, "C-DRAFT.md", "C-DRAFT", series="S-C", status="draft", effective_from=None, overrides="S-A")
+    assert len(load_documents(tmp_path)) == 4
+
+
 def test_org_paths_and_hr(org):
     assert org.path("Studio") == ("Tập đoàn", "GameCo", "Studio")
     assert org.hr_unit("Studio") == "GameCo"
