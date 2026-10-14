@@ -37,3 +37,4 @@ The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Missio
 | [0007](0007-defer-context-recall.md) | Context recall is deferred until we have real documents | Accepted | The "context recall" row of Mission 1 V1 and RV13 |
 | [0008](0008-gemini-35-flash-lite-at-medium.md) | Step 6 on gemini-3.5-flash-lite at medium thinking | Accepted | The "Model" line of ADR 0003 |
 | [0009](0009-answer-card-shows-the-verified-quote.md) | The answer card shows the quote that step 7 verified, not the model's sentence | Accepted | The `text` field of ADR 0003 and the answer line wording of Mission 1 C2 |
+| [0010](0010-access-never-decides-precedence.md) | Access is the last filter: a document the asker may not read still replaces its series | Accepted | The order of step 2 and step 3 (M3b, M12) for a restricted overriding document; R3 and R4 |
