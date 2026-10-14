@@ -6,7 +6,6 @@ the sources come from app.rules.card_for_answer (step 7), never from this text.
 
 Run by hand: `python -m app.answer <persona> <as_of> <question>` (needs GEMINI_API_KEY).
 """
-from dataclasses import dataclass
 from datetime import date
 import json
 import logging
@@ -17,14 +16,16 @@ from typing import Literal
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
-from langchain_core.rate_limiters import InMemoryRateLimiter
-from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field, ValidationError, create_model
 
-from appota_kb.config import Llm, Retrieval, load_config
-from appota_kb.data import load_documents, load_org, load_personas
-from appota_kb.retrieval import Hit, Index, ScopeLeakError, build_index, gemini_embeddings, retrieve
-from appota_kb.rules import Point, Scope, card_for_answer, scope as build_scope
+from appota_kb.core.config import Retrieval, load_config
+from appota_kb.integrations.data_files import load_documents, load_org, load_personas
+from appota_kb.integrations.gemini import gemini_chat, gemini_embeddings
+from appota_kb.models.answer import Point, Reply
+from appota_kb.models.retrieval import Hit
+from appota_kb.models.scope import Scope
+from appota_kb.retrieval import Index, ScopeLeakError, build_index, retrieve
+from appota_kb.rules import card_for_answer, scope as build_scope
 
 logger = logging.getLogger("app.answer")
 
@@ -53,13 +54,6 @@ class _LoosePoint(BaseModel):
 
 class _LooseAnswer(BaseModel):
     points: list[_LoosePoint]
-
-
-@dataclass(frozen=True)
-class Reply:
-    retrieved: tuple[str, ...]          # chunk ids, best first
-    points: tuple[Point, ...] | None    # None: the output was not valid JSON of the contract
-    raw: str                            # the model's text, for the log
 
 
 class AnswerUnavailable(RuntimeError):
@@ -198,22 +192,6 @@ class Answerer:
                 ensure_ascii=False,
             )
         )
-
-
-def gemini_chat(settings: Llm) -> ChatGoogleGenerativeAI:
-    """The chat model, with the key read from GEMINI_API_KEY only and no sampling (ADR 0003)."""
-    key = os.environ.get("GEMINI_API_KEY")
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY is not set; set it to a Gemini API key to answer questions")
-    return ChatGoogleGenerativeAI(
-        model=settings.model,
-        google_api_key=key,
-        thinking_level=settings.thinking_level,
-        max_retries=settings.max_retries,
-        timeout=settings.timeout_seconds,
-        cache=False,
-        rate_limiter=InMemoryRateLimiter(requests_per_second=settings.requests_per_minute / 60.0),
-    )
 
 
 if __name__ == "__main__":

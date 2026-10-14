@@ -13,9 +13,9 @@ from pathlib import Path
 
 import yaml
 
-from appota_kb.config import load_config
+from appota_kb.core.config import load_config
 from appota_kb.core.paths import RESULTS, ROOT
-from appota_kb.data import load_org, load_personas, load_test_cases
+from appota_kb.integrations.data_files import cases_sha256, load_org, load_personas, load_test_cases
 from appota_kb.evaluation.score import (
     CHECKS,
     Gate,
@@ -146,7 +146,7 @@ def build_report(
         "paraphrased questions are not measured (ADR 0006)."
     )
     out.append("- Context recall is not measured (ADR 0007).")
-    if first.get("cases_sha256") and first["cases_sha256"] != _cases_sha256():
+    if first.get("cases_sha256") and first["cases_sha256"] != cases_sha256():
         out.append(
             "- Warning: the test file changed since this run (`cases_sha256` differs); re-run "
             "the evaluation for a report on the current test file."
@@ -305,12 +305,6 @@ def _lesson(review: dict | None) -> str:
         return "[chờ Hiệp]"
     lesson = review.get("lesson")
     return lesson.strip() if isinstance(lesson, str) and lesson.strip() else "[chờ Hiệp]"
-
-
-def _cases_sha256() -> str:
-    import hashlib
-
-    return hashlib.sha256((ROOT / "data" / "test_cases.yaml").read_bytes()).hexdigest()
 
 
 def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> str:

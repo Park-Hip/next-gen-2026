@@ -4,12 +4,10 @@ import unicodedata
 
 import pytest
 
-from appota_kb.data import (
-    Document,
-    chunks,
-    load_documents,
-    with_edit,
-)
+from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.integrations.data_files import load_documents
+from appota_kb.models.document import Document
+from appota_kb.services.chunking import chunks
 from appota_kb.rules import fold
 from conftest import MISSION1_IDS
 

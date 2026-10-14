@@ -2,8 +2,10 @@
 from datetime import date
 
 from appota_kb.cards import render, show
-from appota_kb.data import chunks
-from appota_kb.rules import Card, Point, card_for_answer, scope
+from appota_kb.models.answer import Point
+from appota_kb.models.card import Card
+from appota_kb.rules import card_for_answer, scope
+from appota_kb.services.chunking import chunks
 
 
 def _doc(documents, doc_id):

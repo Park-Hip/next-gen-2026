@@ -3,13 +3,16 @@
 Deterministic rules decide access, validity, applicability, precedence and the card;
 nothing here reads the question and nothing calls an LLM.
 """
-from dataclasses import dataclass
 from datetime import date
 from itertools import combinations
-from typing import Literal
 import unicodedata
 
-from appota_kb.data import Chunk, Document, Persona, chunks as document_chunks
+from appota_kb.models.answer import Point
+from appota_kb.models.card import Card
+from appota_kb.models.document import Chunk, Document
+from appota_kb.models.org import Persona
+from appota_kb.models.scope import Scope
+from appota_kb.services.chunking import chunks as document_chunks
 
 REFUSAL_TEXT = (
     "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
@@ -51,19 +54,6 @@ def declared(a: Document, b: Document) -> bool:
     return b.series in a.complements or a.series in b.complements
 
 
-@dataclass(frozen=True)
-class Scope:
-    persona: Persona
-    as_of: date
-    documents: tuple[Document, ...]
-    conflicts: tuple[tuple[Document, Document], ...]
-    chunks: tuple[Chunk, ...]
-
-    @property
-    def chunk_ids(self) -> frozenset[str]:
-        return frozenset(c.id for c in self.chunks)
-
-
 def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
     """Steps 1-4: documents in force, readable by and applying to the asker, after overrides,
     plus the conflict pairs. Never reads the question."""
@@ -78,23 +68,6 @@ def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
     scoped = tuple(winners)
     chunk_tuple = tuple(c for d in scoped for c in document_chunks(d))
     return Scope(persona=persona, as_of=as_of, documents=scoped, conflicts=conflicts, chunks=chunk_tuple)
-
-
-@dataclass(frozen=True)
-class Point:
-    """One grounded fact from the model: the chunks it cites, a verbatim quote and the sentence."""
-    chunks: tuple[str, ...]
-    quote: str
-    text: str
-
-
-@dataclass(frozen=True)
-class Card:
-    kind: Literal["answer", "conflict", "refusal"]
-    hr: str
-    cited: tuple[Chunk, ...]
-    conflicts: tuple[tuple[Document, Document], ...]
-    reason: str | None = None  # refusals only, for the log and #14; never shown (R10)
 
 
 def fold(text: str) -> str:
@@ -185,7 +158,7 @@ def _quotes_for(document: Document, cited: tuple[Chunk, ...], retrieved: tuple[C
 if __name__ == "__main__":
     import sys
 
-    from appota_kb.data import load_documents, load_org, load_personas
+    from appota_kb.integrations.data_files import load_documents, load_org, load_personas
 
     if len(sys.argv) != 3:
         sys.exit("usage: python -m app.rules <persona> <as_of>")

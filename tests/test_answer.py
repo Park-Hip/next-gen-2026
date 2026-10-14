@@ -20,10 +20,10 @@ from appota_kb.answer import (
     SYSTEM_INSTRUCTION,
     answer_schema,
     build_messages,
-    gemini_chat,
 )
-from appota_kb.config import Retrieval, load_config
-from appota_kb.data import chunks as document_chunks
+from appota_kb.core.config import Retrieval, load_config
+from appota_kb.integrations.gemini import gemini_chat
+from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.retrieval import ScopeLeakError, build_index, retrieve
 from appota_kb.rules import card_for_answer, scope as build_scope
 

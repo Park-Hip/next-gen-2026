@@ -5,7 +5,8 @@ import socket
 
 import pytest
 
-from appota_kb.data import Document, load_documents, load_org, load_personas, load_test_cases
+from appota_kb.integrations.data_files import load_documents, load_org, load_personas, load_test_cases
+from appota_kb.models.document import Document
 
 MISSION1_IDS = [
     "LEAVE-GROUP-v1", "LEAVE-GAMECO-v1", "LEAVE-GAMECO-v2", "LEAVE-GAMECO-v3",

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import json
 from typing import Literal
 
-from appota_kb.config import Eval
+from appota_kb.core.config import Eval
 from appota_kb.rules import fold
 
 # The named checks, in the order the report and the review sheet show them. A check is

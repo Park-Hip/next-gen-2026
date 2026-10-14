@@ -6,7 +6,6 @@ Run by hand: `python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl
 Scoring is a separate step (`python -m eval.report results/<run_id>.jsonl`) so a check or
 a report fix re-scores saved replies with no API call (ADR 0006).
 """
-import hashlib
 import json
 import logging
 import os
@@ -16,16 +15,16 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from appota_kb.answer import AnswerUnavailable, Answerer, gemini_chat
+from appota_kb.answer import AnswerUnavailable, Answerer
 from appota_kb.cards import show
-from appota_kb.config import Config, load_config
-from appota_kb.core.paths import DATA, RESULTS, ROOT
-from appota_kb.data import load_documents, load_org, load_personas, load_test_cases, with_edit
-from appota_kb.retrieval import ScopeLeakError, build_index, gemini_embeddings
+from appota_kb.core.config import Config, load_config
+from appota_kb.core.paths import RESULTS, ROOT
+from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.integrations.data_files import cases_sha256, load_documents, load_org, load_personas, load_test_cases
+from appota_kb.integrations.gemini import gemini_chat, gemini_embeddings
+from appota_kb.retrieval import ScopeLeakError, build_index
 from appota_kb.rules import scope as build_scope
 from appota_kb.evaluation.score import load_run
-
-CASES = DATA / "test_cases.yaml"
 
 # settings that a resumed run must keep, so the file stays one coherent run
 RESUME_KEYS = ("run_id", "commit", "dirty", "cases_sha256", "model", "thinking_level",
@@ -49,7 +48,7 @@ def run_meta(config: Config, run_id: str) -> dict:
         "run_id": run_id,
         "commit": commit,
         "dirty": dirty,
-        "cases_sha256": hashlib.sha256(CASES.read_bytes()).hexdigest(),
+        "cases_sha256": cases_sha256(),
         "model": config.llm.model,
         "thinking_level": config.llm.thinking_level,
         "embedding_model": config.retrieval.embedding_model,

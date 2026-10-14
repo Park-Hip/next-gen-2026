@@ -16,8 +16,8 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
 from appota_kb.answer import Answerer
-from appota_kb.config import Retrieval, load_config
-from appota_kb.data import chunks as document_chunks
+from appota_kb.core.config import Retrieval, load_config
+from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.retrieval import build_index
 from appota_kb.web import BUSY_MESSAGE, create_app
 

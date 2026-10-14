@@ -1,83 +1,24 @@
-"""Load and validate the simulated data in data/.
+"""Load and validate the simulated data in data/; the only code that reads data/.
 
 Every unit, person, document and number here is simulated ("giả lập").
 Nothing is loaded at import time; callers load what they need.
 Malformed data raises ValueError naming the offending file or unit.
 """
-from dataclasses import dataclass, replace
-from datetime import date
+import hashlib
 from pathlib import Path
 import re
 
 import yaml
 
 from appota_kb.core.paths import DATA
+from appota_kb.models.document import Document
+from appota_kb.models.org import Org, Persona
 
 _FRONT_MATTER = re.compile(r"---\n(.*?)\n---\n\n(.*)", re.S)
 _FIELDS = frozenset({
     "id", "title", "owner", "series", "topic", "access",
     "applies_to", "status", "effective_from", "effective_to", "overrides", "complements",
 })
-_DIEU = re.compile(r"^Điều (\d+)\. (.+)$")
-
-
-@dataclass(frozen=True)
-class Document:
-    id: str
-    title: str
-    owner: str
-    series: str
-    topic: str
-    access: str
-    applies_to: str
-    status: str
-    effective_from: date | None
-    effective_to: date | None
-    overrides: str | None
-    complements: tuple[str, ...]
-    body: str
-
-
-@dataclass(frozen=True)
-class Chunk:
-    id: str
-    document_id: str
-    label: str | None
-    text: str
-
-
-@dataclass(frozen=True)
-class Persona:
-    id: str
-    name: str
-    unit: str
-    company: str
-    path: tuple[str, ...]
-    roles: tuple[str, ...]
-    hr: str
-
-
-@dataclass(frozen=True)
-class Org:
-    parent: dict[str, str | None]
-    hr: dict[str, str]
-
-    def path(self, unit: str) -> tuple[str, ...]:
-        path = []
-        while unit is not None:
-            path.insert(0, unit)
-            unit = self.parent[unit]
-        return tuple(path)
-
-    def hr_unit(self, unit: str) -> str:
-        """The nearest unit on the path with an HR contact; the card's company name."""
-        for name in reversed(self.path(unit)):
-            if name in self.hr:
-                return name
-        raise ValueError(f"{unit}: no HR contact on its path")
-
-    def hr_for(self, unit: str) -> str:
-        return self.hr[self.hr_unit(unit)]
 
 
 def _load_document(path: Path) -> Document:
@@ -128,26 +69,6 @@ def load_documents(root: Path = DATA) -> list[Document]:
     return documents
 
 
-def chunks(document: Document) -> list[Chunk]:
-    """One chunk per non-empty body line; the procedure is chunked by plain line, the rest by Điều."""
-    lines = [line for line in document.body.splitlines() if line.strip()]
-    matches = [_DIEU.match(line) for line in lines]
-    if any(matches):
-        if not all(matches):
-            raise ValueError(f"{document.id}: mixes Điều and plain lines")
-        numbers = [m.group(1) for m in matches]
-        if len(numbers) != len(set(numbers)):
-            raise ValueError(f"{document.id}: repeated Điều number")
-        return [
-            Chunk(id=f"{document.id}#{n}", document_id=document.id, label=f"Điều {n}", text=m.group(2))
-            for n, m in zip(numbers, matches)
-        ]
-    return [
-        Chunk(id=f"{document.id}#{i}", document_id=document.id, label=None, text=line)
-        for i, line in enumerate(lines, start=1)
-    ]
-
-
 def load_org(root: Path = DATA) -> Org:
     units = yaml.safe_load((root / "org.yaml").read_text(encoding="utf-8"))
     parent = {u["name"]: u["parent"] for u in units}
@@ -193,21 +114,6 @@ def load_test_cases(root: Path = DATA) -> list[dict]:
     return yaml.safe_load((root / "test_cases.yaml").read_text(encoding="utf-8"))
 
 
-def with_edit(documents: list[Document], edit: dict) -> list[Document]:
-    """A copy of documents with the line edit["remove"] removed from edit["document"]."""
-    doc_id = edit["document"]
-    remove = edit["remove"]
-    found = False
-    out = []
-    for d in documents:
-        if d.id != doc_id:
-            out.append(d)
-            continue
-        found = True
-        if remove not in d.body.splitlines():
-            raise ValueError(f"{doc_id}: data_edit line not found")
-        body = "\n".join(line for line in d.body.splitlines() if line != remove)
-        out.append(replace(d, body=body))
-    if not found:
-        raise ValueError(f"{doc_id}: not a loaded document")
-    return out
+def cases_sha256(root: Path = DATA) -> str:
+    """The hash of data/test_cases.yaml, recorded with every run to detect a changed test file."""
+    return hashlib.sha256((root / "test_cases.yaml").read_bytes()).hexdigest()

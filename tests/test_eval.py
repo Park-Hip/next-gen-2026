@@ -12,8 +12,9 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from fakes import ScriptedGemini, SyllableEmbeddings, no_points, reply_citing
 
 from appota_kb.answer import Answerer
-from appota_kb.config import Eval, Retrieval
-from appota_kb.data import chunks as document_chunks, with_edit
+from appota_kb.core.config import Eval, Retrieval
+from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.retrieval import build_index
 from appota_kb.rules import scope as build_scope
 
@@ -233,7 +234,7 @@ def test_run_main_no_key(monkeypatch):
 
 
 def test_run_meta_from_git_and_cases():
-    from appota_kb.config import load_config
+    from appota_kb.core.config import load_config
 
     meta = run_meta(load_config(), "test-run")
     assert re.fullmatch(r"[0-9a-f]{40}", meta["commit"])
@@ -625,11 +626,11 @@ def test_committed_report_matches_source():
     results_path = REPO / "results" / match.group(1)
     run_id = results_path.stem
 
-    rows = __import__("appota_kb.data", fromlist=["load_test_cases"]).load_test_cases()
-    personas = __import__("appota_kb.data", fromlist=["load_personas"]).load_personas(
-        __import__("appota_kb.data", fromlist=["load_org"]).load_org()
-    )
-    from appota_kb.config import load_config
+    from appota_kb.core.config import load_config
+    from appota_kb.integrations.data_files import load_org, load_personas, load_test_cases
+
+    rows = load_test_cases()
+    personas = load_personas(load_org())
 
     records = load_run(results_path)
     scores = score_all(rows, records)

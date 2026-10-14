@@ -18,19 +18,20 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import SyllableEmbeddings
 
-from appota_kb.config import Retrieval
-from appota_kb.data import chunks as document_chunks, with_edit
+from appota_kb.core.config import Retrieval
+from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.integrations.gemini import gemini_embeddings
 from appota_kb.retrieval import (
     ScopeLeakError,
     bm25_scores,
     build_index,
-    gemini_embeddings,
     index_text,
     retrieve,
     rrf,
     tokens,
 )
 from appota_kb.rules import allowed, applies, scope as build_scope
+from appota_kb.services.chunking import chunks as document_chunks
 
 
 class CountingEmbeddings(SyllableEmbeddings):

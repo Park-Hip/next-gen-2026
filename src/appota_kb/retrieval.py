@@ -19,12 +19,16 @@ import unicodedata
 from langchain_core.documents import Document as LCDocument
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from appota_kb.config import Retrieval, load_config
-from appota_kb.data import Chunk, Document, chunks as document_chunks
-from appota_kb.data import load_documents, load_org, load_personas, load_test_cases, with_edit
-from appota_kb.rules import Scope, scope as build_scope
+from appota_kb.core.config import Retrieval, load_config
+from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.integrations.data_files import load_documents, load_org, load_personas, load_test_cases
+from appota_kb.integrations.gemini import gemini_embeddings
+from appota_kb.models.document import Chunk, Document
+from appota_kb.models.retrieval import Hit
+from appota_kb.models.scope import Scope
+from appota_kb.rules import scope as build_scope
+from appota_kb.services.chunking import chunks as document_chunks
 
 logger = logging.getLogger("app.retrieval")
 
@@ -74,16 +78,6 @@ def rrf(rankings: list[list[str]], k: int) -> dict[str, float]:
         for rank, cid in enumerate(ranking, start=1):
             fused[cid] = fused.get(cid, 0.0) + 1.0 / (k + rank)
     return fused
-
-
-@dataclass(frozen=True)
-class Hit:
-    chunk: Chunk
-    score: float
-    bm25: float
-    bm25_rank: int
-    dense: float
-    dense_rank: int
 
 
 class ScopeLeakError(RuntimeError):
@@ -202,14 +196,6 @@ def _log(scope: Scope, question: str, hits: list[Hit]) -> None:
             ensure_ascii=False,
         )
     )
-
-
-def gemini_embeddings(model: str) -> GoogleGenerativeAIEmbeddings:
-    """The embedding model, with the key read from GEMINI_API_KEY only (decision 7)."""
-    key = os.environ.get("GEMINI_API_KEY")
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY is not set; set it to a Gemini API key to build the index")
-    return GoogleGenerativeAIEmbeddings(model=model, google_api_key=key)
 
 
 def _print_hits(hits: list[Hit]) -> None:
