@@ -137,7 +137,7 @@ def test_select_rows(cases):
 
 def test_run_main_no_key(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    assert run_main(["eval.run"]) == 1
+    assert run_main(["appota_kb.evaluation.run"]) == 1
 
 
 def test_run_meta_from_git_and_cases():

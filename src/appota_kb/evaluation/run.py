@@ -1,10 +1,11 @@
 """Ask every row of data/test_cases.yaml once and record one JSON line per row.
 
-Run by hand: `python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]`
-(needs GEMINI_API_KEY). It calls the same Answerer and step 7 as the page, with no cache.
+Run by hand (needs GEMINI_API_KEY):
+  python -m appota_kb.evaluation.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]
+It goes through services.ask like the page, with no cache.
 
-Scoring is a separate step (`python -m eval.report results/<run_id>.jsonl`) so a check or
-a report fix re-scores saved replies with no API call (ADR 0006).
+Scoring is a separate step (`python -m appota_kb.evaluation.report results/<run_id>.jsonl`) so a
+check or a report fix re-scores saved replies with no API call (ADR 0006).
 """
 import json
 import logging
@@ -178,16 +179,16 @@ def main(argv: list[str]) -> int:
     while i < len(args):
         if args[i] == "--rows":
             if i + 1 >= len(args):
-                raise SystemExit("usage: python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
+                raise SystemExit("usage: python -m appota_kb.evaluation.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
             rows_spec = args[i + 1]
             i += 2
         elif args[i] == "--resume":
             if i + 1 >= len(args):
-                raise SystemExit("usage: python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
+                raise SystemExit("usage: python -m appota_kb.evaluation.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
             resume_arg = args[i + 1]
             i += 2
         else:
-            raise SystemExit("usage: python -m eval.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
+            raise SystemExit("usage: python -m appota_kb.evaluation.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
 
     if not os.environ.get("GEMINI_API_KEY"):
         sys.stderr.write("GEMINI_API_KEY is not set; set it to a Gemini API key to run the evaluation\n")

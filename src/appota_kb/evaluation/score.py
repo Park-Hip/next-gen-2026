@@ -1,4 +1,4 @@
-"""Offline scoring of the records eval/run.py wrote.
+"""Offline scoring of the records evaluation/run.py wrote.
 
 Pure functions over the results file, the test file and Hiep's review file: no network,
 no model, no I/O beyond reading the files it is given. The same code re-scores a saved
