@@ -489,43 +489,11 @@ Asking precise questions is itself a signal they screen for ("biết đặt câu
 
 ## Deferred ideas
 
-Ideas that are out of scope for the Mission 2 MVP.
-None of them may appear in the Mission 1 document as a promise.
+Out-of-scope product ideas moved to the "Deferred" section of `docs/scope.md` on 14/10/2026, where new ones are added.
+The process ideas stay here.
 
 | Idea | Why deferred | Source decision |
 |---|---|---|
-| Employment type and seniority as applicability dimensions | Not in the brief; adds fields, personas and a calculation without a new kind of trap; can be added later as a data field | M0 |
-| Legal rules and legal minimums (Bộ luật Lao động) | Adds a relation type and facts that must be verified, without a new trap | M1c |
-| Clause-level relations (override one clause, inherit the rest) | Only needed for partial overrides, which the MVP data avoids by requiring complete policies | M1a |
-| Questions about another unit's rules | Requires AI to detect the target unit, which puts AI into a correctness decision | M3a |
-| A person in two units (kiêm nhiệm) | Not in the brief; needs a rule for choosing between companies | M5 |
-| Questions about past or future dates | Users get today's rule; the date is only a test input | M6 |
-| Multi-topic documents (e.g. Nội quy lao động covering leave and OT) | MVP documents have exactly one topic; a list of topics is a later data change | M4 |
-| AI check that may add (never remove) a conflict warning when topics look wrong | Only needed if owners often mis-tag topics | M4 |
-| Showing a future version as "sắp thay đổi" | The brief asks for the version in force; early disclosure raises its own access question | M8 |
-| Notice to owners of overriding series when the parent series publishes a new version | Production safeguard for M11; needs a publishing workflow the MVP does not have | M11 |
-| "Mandatory, cannot be overridden" flag on parent rules | Production answer to a parent change that companies must follow; adds a rule type | M11 |
-| Alert before an `effective_to` passes with no successor | Only matters once owners set end dates; the MVP data has none | M10 |
-| "Hỏi cho" selector: the user picks the target unit for questions about another unit's rules | Stated as a known limitation in v1 (HR cannot ask about another unit); no AI guesses the target | M13 |
-| `covers`: a question key per Điều, so precedence and conflicts work per question and a company can change one clause | Needs a label on every chunk and fails on unstructured documents; `complements` covers the common case | M14 |
-| "Báo sai" button and its records (Mission 1 P2, part of C2) | Adds little value to Mission 2 (Hiep, 13/10/2026); records would not survive a restart on the free host | ADR 0004 |
-| Owners' page listing conflict records (Mission 1 P1) | Dropped with "Báo sai"; Hiep will revisit it later (13/10/2026) | ADR 0004 |
-| Owner screen for publish-time triage (new version / overrides / complements / duplicate) | The MVP runs the same check as a script on the simulated data | M15 |
-| Periodic review: owners re-confirm documents and their relations on a schedule | Real practice (NAVEX, Guru); needs owners and time, not code | M15 |
-| Similarity scan that flags near-duplicate documents for the owner | Real practice (Guru); the MVP has too few documents to need it | M15 |
-| Embedding experiment: similarity scores of the near-identical leave documents for Minh's question | A new dependency and 1-2 hours; the document describes the failure qualitatively | V3, A1 |
-| Email or chat notices to owners for "Báo sai" reports and conflicts | Needs an integration; the MVP keeps the records in one owners' list | V4 |
-| LLM judge for faithfulness | About 45 answers on the 30-case set can be read by hand; a judge adds a second model to trust | V1 |
-| Latency target | No decision depends on it in v1; it is only logged | V1 |
-| Asking each test row in 3 phrasings (as written, paraphrase, "văn nói") | The Gemini free-tier rate limit; test the main wording of each row first (Hiep, 14/10/2026) | A2, V1 |
-| A document that applies only to some roles of a unit | `access` is who may read, never who the document is for (ADR 0010); applicability by role would be a separate field | M0, P7 |
-| Running each test case 3 times, one wrong run failing the case | The Gemini free-tier rate limit; each case runs once in Mission 2 (Hiep, 14/10/2026) | V4 |
-| Naive-RAG baseline: the same retriever and LLM over all documents with the rules switched off, to measure the Section 1 prediction | Not part of the MVP; the document keeps the naive-RAG failure as a hedged prediction ("dễ xếp") | RV10 (reverses V5) |
-| Pilot with real employees measuring the user outcome (answered without HR, refusal and conflict rate, confirmed reports) | After Mission 2; the document only includes what the MVP does | RV9 (reverses RV3) |
-| DOCX or PDF source documents instead of Markdown | DOCX is about 2-3 hours, PDF needs OCR for scans; neither tests the riskiest assumption | RV14 |
 | Reorganise the project docs: one ID scheme, superseded rows archived, history files merged | Most of a day and breaks the links between the evidence log, the register and the commits; judges do not see the repo. Do it before Mission 2, which needs a clean spec; `current_design.md` covers the need for now | - |
 | No-AI rebuild drill for the core rules, logged in the evidence log | Hiep chose to keep the Mission 2 log simple; documentation for each part can come later | `docs/mission2/evidence_log_research.md`, section 7 |
 | Exported AI session transcripts as an appendix to the evidence log | Focus first on what the judge reads; reconsider when the project is finished (GitHub issue #2) | `docs/mission2/evidence_log_research.md`, section 7 |
-| Context recall: label the chunks that answer each test question and report how many of them retrieval returned | Too soon to measure with 10 simulated documents; revisit when we have real documents (Hiep, 13/10/2026) | ADR 0007 (reverses the "chỉ theo dõi" row of V1, RV13) |
-| "Simulated data" page: for each persona, every document outside the scope with the reason (not in force, not readable, not applicable, replaced by "dùng thay") | Re-derives part of `scope()` and needs a test that it agrees with it, about 1-2 hours; the page lists the titles the rules leave in scope (Hiep, 14/10/2026) | Issue #34, decision 5 |
-| "Test cases" page: one "Thử ngay" link per row, on the main wording only, opened in the same tab | Each wording gets its own link in a new tab so the case list stays open for comparison (Hiep, 14/10/2026) | Issue #34, decision 7 |

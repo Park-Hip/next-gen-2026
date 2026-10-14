@@ -28,6 +28,9 @@ def _print_hits(hits: list[Hit]) -> None:
 
 
 if __name__ == "__main__":
+    # Windows consoles default to cp1252, which cannot print Vietnamese.
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     logging.basicConfig(level=logging.INFO)
     if not os.environ.get("GEMINI_API_KEY"):
         sys.exit("GEMINI_API_KEY is not set; set it to a Gemini API key to run the manual check")
