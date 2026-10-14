@@ -9,9 +9,10 @@ What v1 simplifies, defers and gets wrong is in [`scope.md`](scope.md); each des
 The core loop of the brief is "câu hỏi + bối cảnh người dùng → tìm đúng tri thức → sử dụng đúng phạm vi → trả lời có nguồn kiểm chứng".
 v1 splits it in two.
 First, deterministic rules build the asker's scope from document metadata, the asker's unit and roles, and the as-of date, without reading the question and without any AI.
-Then search and one LLM call work only inside that scope, and rules check the LLM's citations before choosing which of three cards to show.
+Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer and quotes them, and rules check every citation and quote before choosing which of three cards to show.
 So a wrong version, another unit's rule or a restricted document cannot reach an answer, because the AI never sees them.
-What the AI can still get wrong is reading the documents that are in scope, which is what the test report measures.
+No card shows text the LLM wrote: the answer card shows the quotes the rules verified, word for word.
+What the AI can still get wrong is choosing which clause in the scope answers the question, which is what the test report measures.
 
 ## The 7 steps
 
@@ -21,8 +22,8 @@ flowchart TD
 
     subgraph rules1["Rules only: no AI, the question is not read"]
         s1["1. Keep each policy's version in force on the as-of date"]
-        s2["2. Keep what the asker may read and what applies to their unit"]
-        s3["3. Drop a policy that a kept policy declares it is used instead of"]
+        s2["2. Keep what applies to the asker's unit"]
+        s3["3. Drop a policy that a kept policy declares it is used instead of; then keep only what the asker may read"]
         s4["4. Mark conflict pairs: same topic, no declared relation"]
         s1 --> s2 --> s3 --> s4
     end
@@ -32,7 +33,7 @@ flowchart TD
 
     subgraph ai["AI reads language, inside the scope only"]
         s5["5. Hybrid search: keyword BM25 and embeddings, fused; the top 5 chunks"]
-        s6["6. The LLM answers in points; each point cites retrieved chunk ids and quotes one word for word"]
+        s6["6. The LLM answers in points; each point cites retrieved chunk ids and quotes the clause word for word"]
         s5 --> s6
     end
 
@@ -46,7 +47,7 @@ flowchart TD
     question --> ai
     ai --> rules2
     scope -. conflict pairs .-> rules2
-    rules2 --> answer["Answer card: answer and its source"]
+    rules2 --> answer["Answer card: the verified quotes and their source"]
     rules2 --> conflict["Conflict card: both clauses quoted, no LLM text"]
     rules2 --> refusal["Refusal card: one text, the asker's HR contact"]
 
@@ -57,23 +58,25 @@ flowchart TD
 
 The question enters only at step 5.
 Steps 1-4 give the same scope for every question the same asker asks on the same date.
+The Mission 1 design checked access in step 2; v1 checks it last, after step 3, so that whether the asker may read a document never decides which policy applies (ADR 0010).
+A document the asker may not read still replaces its series, and the asker gets the refusal card instead of the replaced policy.
 
 ## Who decides what
 
 Deterministic rules decide access, validity, applicability, precedence and the card.
-The AI only works with language: it ranks chunks and writes the answer sentence.
+The AI only works with language: it ranks chunks, and it picks and quotes the clauses that answer the question.
 
 | Decision | Decided by | How | Code | If it goes wrong |
 |---|---|---|---|---|
 | Which version is in force (validity) | Rules, step 1 | Per series, the published version with the latest `effective_from` not after the as-of date; a draft or a future version never counts | `in_force` in `services/scope.py` | Deterministic and tested; wrong metadata gives a wrong version, so the owner must keep it right |
-| Who may read it (access) | Rules, step 2 | `access` against the asker's roles or unit | `allowed` in `services/scope.py` | As above |
+| Who may read it (access) | Rules, last, after step 3 (ADR 0010) | `access` against the asker's roles or unit; never decides which policy applies | `allowed` in `services/scope.py` | As above |
 | Whether it applies to the asker (applicability) | Rules, step 2 | `applies_to` is the asker's unit or a unit above it | `applies` in `services/scope.py` | As above |
 | Which policy wins (precedence) | Rules, step 3 | Only an `overrides` ("dùng thay") the owner declared; there is no default "lower unit wins" | `scope` in `services/scope.py` | An undeclared pair is not resolved, it becomes a conflict pair |
 | Which policies conflict | Rules, step 4 | Same `topic`, both kept, neither lists the other in `complements` ("bổ sung") | `scope` in `services/scope.py` | The rules never decide a conflict; the card sends the asker to HR |
 | Which chunks are relevant | Search, step 5: BM25 plus `gemini-embedding-001` (ADRs 0001, 0002) | Ranks only the scope's chunks; anything outside the scope raises an error | `services/retrieval/search.py` | A missed chunk means the LLM finds nothing, so the asker gets a refusal: safe, but over-cautious |
-| What the answer says, and which chunk supports it | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks and the asker's unit; may cite only retrieved ids | `services/answering/` | See "What the rules cannot catch" below |
+| Which clauses answer the question | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks and the asker's unit; may cite only retrieved ids, and quotes each clause word for word, or returns no points | `services/answering/` | See "What the rules cannot catch" below |
 | Whether the answer is shown, and which card | Rules, step 7 (ADR 0003) | Refuses the whole answer if any point has no citation, cites a chunk that was not retrieved, or its quote is not in the cited chunk; a cited document in a conflict pair gives the conflict card | `card_for_answer` and `pick_card` in `services/citations.py` | Deterministic and tested |
-| The card's text | Rules | Fixed wording from the Mission 1 design; the LLM writes only the answer sentence of the answer card; the conflict card quotes one clause per side, chosen without reading meaning (ADR 0005), with no LLM text | `services/card_text.py` | Deterministic and tested |
+| The card's text | Rules | Fixed wording from the Mission 1 design; the answer card shows the quotes step 7 verified, never a sentence the LLM wrote (ADR 0009); the conflict card quotes one clause per side, chosen without reading meaning (ADR 0005) | `services/card_text.py` | Deterministic and tested |
 
 If Gemini fails after retries, the page shows an error, never a card.
 
@@ -86,10 +89,15 @@ If Gemini fails after retries, the page shows an error, never a card.
 
 ### What the rules cannot catch
 
-- The LLM cites a valid chunk in the scope that does not answer the question, or writes a sentence that misstates the clause it quoted correctly.
-  The quote check proves the quote exists, not that the sentence means the same; the test report reads faithfulness by hand.
-- Wrong metadata from an owner, such as a wrong "bổ sung" that merges two different rules: the rules trust the metadata.
-- A company that changes only one clause of a Group policy: "dùng thay" drops the whole Group policy ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24), test row 15).
+- The LLM cites and quotes a clause in the scope that is real but does not answer the question.
+  The quote check proves the clause exists, not that it answers; the test report reads every answer by hand.
+- A question that needs the clause applied to a case, such as "nghỉ thứ Hai thì hạn chót nộp đơn là ngày nào?", is often refused although the clause is retrieved, because the LLM is told to answer only what is written ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
+- A question about another period, such as next year, gets the version in force on the as-of date, because the rules never read the question ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)).
+- Wrong metadata from an owner, such as a wrong topic or a wrong "bổ sung": the rules trust the metadata, and v1 has no check at publish time ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)).
+- Conflicts are per document, not per question: when two policies in a conflict pair agree on the point asked, the asker still gets the conflict card ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)).
+- A company that changes only one clause of a Group policy: "dùng thay" drops the whole Group policy ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)).
+
+Each is an open issue labelled `limitation`; [`scope.md`](scope.md#known-limitations) lists them with the test rows that show them.
 
 ## What the brief asks the MVP to show
 
@@ -142,7 +150,7 @@ Generated by `uv run python scripts/show_scope.py <minh|lan|ha> 2026-10-07 --why
 | `LEAVE-PAYCO-v1` | PayCo leave policy, 13 days, from 01/01/2025 | Dropped, step 2: applies to PayCo | Dropped, step 2: applies to PayCo | **Kept** |
 | `LEAVE-PROC-GAMECO-v1` | How to request leave in GameCo's HR system; declared "bổ sung" to the GameCo leave policy | **Kept** | Dropped, step 2: applies to GameCo | Dropped, step 2: applies to GameCo |
 | `OT-GAMECO-v1` | GameCo overtime rules | **Kept** | Dropped, step 2: applies to GameCo | Dropped, step 2: applies to GameCo |
-| `SAL-BAND-GAMECO` | GameCo salary bands, readable by GameCo HR only | Dropped, step 2: access is GameCo HR only | Dropped, step 2: access is GameCo HR only, and it applies to GameCo | Dropped, step 2: access is GameCo HR only, and it applies to GameCo |
+| `SAL-BAND-GAMECO` | GameCo salary bands, readable by GameCo HR only | Dropped after step 3: access is GameCo HR only | Dropped, step 2: applies to GameCo | Dropped, step 2: applies to GameCo |
 | `TRAVEL-GAMECO-v1` | GameCo travel expenses | **Kept** | Dropped, step 2: applies to GameCo | Dropped, step 2: applies to GameCo |
 | **Conflict pairs (step 4)** | | None: the leave policy and the procedure share a topic, but the procedure declares "bổ sung" | None | `LEAVE-GROUP-v1` and `LEAVE-PAYCO-v1`: same topic, and neither declares a relation |
 
@@ -151,25 +159,26 @@ Minh's search runs on 11 chunks, Lan's on 2 and Hà's on 4.
 
 ### Steps 5-7: the cards
 
-From the committed evaluation run [`20261014-1317`](../results/20261014-1317.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
+From the committed evaluation run [`20261014-2102`](../results/20261014-2102.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
 
 **Minh: answer card.**
-Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and its quote "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm." is in that chunk.
+Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the quote.
 
 > Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.
-> Phép năm của bạn là 14 ngày mỗi năm.
+> "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.
 
 **Lan: answer card.**
 Her scope has two chunks; the LLM cited `LEAVE-GROUP-v1#1`.
+The quote keeps the condition "chính thức", which the rules do not check; the employee reads it on the card.
 
 > Bạn đang hỏi với tư cách: nhân sự Tập đoàn, Nhân sự Tập đoàn.
-> Bạn được nghỉ phép năm 12 ngày mỗi năm.
+> "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép Tập đoàn, Điều 1, hiệu lực từ 01/01/2024. Hỏi thêm: HR Tập đoàn.
 
 **Hà: conflict card.**
-The LLM answered "13 ngày" from the PayCo policy, with a correct citation and quote.
-Step 7 saw that the cited document is in a conflict pair, so the LLM's sentence is not shown: the card quotes both clauses and lets HR decide.
+The LLM cited the PayCo clause, 13 days, with a correct quote.
+Step 7 saw that the cited document is in a conflict pair, so it does not pick a side: the card quotes both clauses and sends Hà to HR.
 
 > Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.
 > Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. Hệ thống không tự chọn.
@@ -188,7 +197,7 @@ In production the document owner, the HR of the unit, sets these fields; here th
 | `series` | `LEAVE-GAMECO`: one policy across its versions | Step 1 |
 | `status` | `published` or `draft` | Step 1 |
 | `effective_from`, `effective_to` | `2026-01-01`; `effective_to` only when the policy really ends | Step 1, and the card's date |
-| `access` | `all_staff`, `unit:<unit>` or `roles:<role>,<role>` | Step 2 |
+| `access` | `all_staff`, `unit:<unit>` or `roles:<role>,<role>`; who may read, never who the document is for (ADR 0010) | Last, after step 3 |
 | `applies_to` | `GameCo`: the unit and every unit below it | Step 2 |
 | `overrides` | `LEAVE-GROUP`: the series this document is used instead of ("dùng thay"), for the units it applies to | Step 3 |
 | `topic` | `nghi_phep`, one per document | Step 4, only to find conflict pairs |
@@ -204,11 +213,11 @@ All code is in `src/appota_kb/`; the folder layout is in the [README](../README.
 
 | Step | Code | Tests | Settings and decisions |
 |---|---|---|---|
-| Load and validate the data | `integrations/data_files.py` | `tests/integrations/test_data_files.py` | - |
-| 1-4, the scope | `services/scope.py`, `services/chunking.py` | `tests/services/test_scope.py`, `tests/services/test_chunking.py`, `tests/test_parity.py` | - |
+| Load and validate the data; the load fails on two versions with the same start date, a self-override or an override cycle | `integrations/data_files.py` | `tests/integrations/test_data_files.py` | - |
+| 1-4, the scope | `services/scope.py`, `services/chunking.py` | `tests/services/test_scope.py`, `tests/services/test_chunking.py`, `tests/test_parity.py` | ADR 0010 |
 | 5, search | `services/retrieval/` | `tests/services/retrieval/` | `retrieval` in `config.yaml`; ADRs 0001, 0002 |
 | 6, the LLM answer | `services/answering/`, `integrations/gemini.py` | `tests/services/answering/`, `tests/integrations/test_gemini.py` | `llm` in `config.yaml`; ADRs 0003, 0008 |
-| 7, the card | `services/citations.py`, `services/card_text.py` | `tests/services/test_citations.py`, `tests/services/test_card_text.py` | ADRs 0003, 0005 |
+| 7, the card | `services/citations.py`, `services/card_text.py` | `tests/services/test_citations.py`, `tests/services/test_card_text.py` | ADRs 0003, 0005, 0009 |
 | One question end to end | `services/ask.py`, used by both the page and the evaluation | `tests/services/test_ask.py` | - |
 | The page | `api/page.py`, `api/templates/` | `tests/api/test_page.py` | `page` in `config.yaml`; ADR 0004 |
 | The evaluation | `evaluation/` | `tests/evaluation/` | `eval` in `config.yaml`; ADRs 0006, 0007 |

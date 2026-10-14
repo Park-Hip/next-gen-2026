@@ -35,17 +35,16 @@ def why(persona: Persona, as_of: date, documents: list[Document], s: Scope) -> l
         if current.get(d.series) is not d:
             lines.append((d.id, f"dropped at step 1: {_step1_reason(d, current, as_of)}"))
             continue
-        reasons = []
-        if not allowed(d, persona):
-            reasons.append(f"access {d.access} excludes {persona.name}")
         if not applies(d, persona):
-            reasons.append(f"applies to {d.applies_to}, not to {persona.unit}")
-        if reasons:
-            lines.append((d.id, "dropped at step 2: " + "; ".join(reasons)))
+            lines.append((d.id, f"dropped at step 2: applies to {d.applies_to}, not to {persona.unit}"))
             continue
-        if d.id not in kept_ids:
-            winners = [w.id for w in s.documents if w.overrides == d.series]
+        winners = [w.id for w in current.values() if w.overrides == d.series and applies(w, persona)]
+        if winners:
             lines.append((d.id, f"dropped at step 3: {', '.join(winners)} declares it overrides {d.series}"))
+            continue
+        # Access comes last, after "dùng thay", so it never decides precedence (ADR 0010).
+        if not allowed(d, persona):
+            lines.append((d.id, f"dropped after step 3, access: {d.access} excludes {persona.name}"))
             continue
         lines.append((d.id, "kept"))
     if {i for i, fate in lines if fate == "kept"} != kept_ids:

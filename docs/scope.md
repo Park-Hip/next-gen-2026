@@ -38,9 +38,10 @@ New out-of-scope product ideas are added here.
 | "Hỏi cho": the user picks another unit to ask about its rules | Detecting the target unit from the question would put AI into a correctness decision; v1 refuses other-unit questions instead | HR staff need to answer for other units; the unit is then picked by the user, never guessed by AI |
 | Clause-level relations: a company replaces one clause of a Group policy and keeps the rest | "Dùng thay" works on the whole policy, which is simpler to declare and check; this is a known failure of v1 (see Known limitations) | A real company overrides only part of a Group policy |
 | A question key per clause, so precedence and conflicts work per question | Needs a label on every chunk and fails on unstructured documents; "bổ sung" covers the common case | Clause-level relations are built |
-| Questions about past or future dates ("năm ngoái tôi được bao nhiêu ngày?") | Employees act under today's rule; in v1 the date is a test input | Employees need to check a past decision |
+| Questions about past or future dates ("năm ngoái tôi được bao nhiêu ngày?") | Employees act under today's rule; in v1 the date is a test input, and such a question is answered with today's version (see Known limitations) | Employees need to check a past decision or plan across a version change |
 | Showing a future version as "sắp thay đổi" | The brief asks for the version in force, and early disclosure raises its own access question | Owners want to announce changes ahead |
 | Multi-turn conversation | Each question is answered on its own, so each answer can be checked on its own | Users ask follow-up questions |
+| A document that applies only to some roles of a unit | `access` means only who may read a document, never who it is for (ADR 0010); applicability by role would need its own field | A real policy is written for some roles only |
 | Employment type and seniority as dimensions of applicability | The brief names only unit, access and version | A real policy depends on them |
 | Legal rules and legal minimums (Bộ luật Lao động) | Adds a relation type and facts that must be verified, without a new kind of trap | The assistant must check a policy against the law |
 | A person in two units (kiêm nhiệm) | Not in the brief; needs a rule for choosing between companies | Real staff hold two positions |
@@ -91,6 +92,9 @@ This section is completed after the final evaluation run; it lists only what tha
 | Limitation | Seen in | Issue |
 |---|---|---|
 | A company that changes only one clause of a Group policy cannot express it: "dùng thay" drops the whole Group policy, so the asker loses the Group clauses the company did not change | Test row 15, kept as an expected failure in the test suite | [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) |
-| [Filled after the final run: each failure the run shows] | | |
+| A question that needs a clause applied to a case ("nghỉ thứ Hai 19/10 thì hạn chót nộp đơn là ngày nào?") is refused, although the clause that answers it was retrieved first; the strict-grounding instruction of ADR 0003 makes the model return no points | A probe on 14/10/2026, 1 of 1 run; test row [after the final run] | [#51](https://github.com/Park-Hip/next-gen-2026/issues/51) |
+| Conflicts are per document, not per question: when both policies of a conflict pair say the same thing on the point asked, the asker still gets the conflict card instead of the answer | A probe on 14/10/2026, 1 of 1 run; test row [after the final run] | [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) |
+| A question about another period ("từ năm sau tôi được nghỉ bao nhiêu ngày?") gets an answer card with the version in force on the as-of date, because the rules never read the question and the model is not given dates | A probe on 14/10/2026, 1 of 1 run; test row [after the final run] | [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
+| A mistake in an owner's metadata, such as a wrong topic or a separate amendment declared "bổ sung", gives a normal answer card, and nothing in v1 detects it: the rules are only as right as the metadata | Rules run on edited copies of the simulated data; no test row | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) |
 
 The results of every test row are in the [test report](mission2/test_report.md).
