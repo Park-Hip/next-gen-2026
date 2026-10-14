@@ -17,6 +17,9 @@ from appota_kb.services.scope import scope as build_scope
 
 
 if __name__ == "__main__":
+    # Windows consoles default to cp1252, which cannot print Vietnamese.
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     logging.basicConfig(level=logging.INFO)
     config = load_config()
     documents = load_documents()
