@@ -3,8 +3,9 @@ from datetime import date
 
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card
-from appota_kb.services.card_text import render
+from appota_kb.services.card_text import REFUSAL_TEXT, refusal_text, render
 from appota_kb.services.chunking import chunks
+from appota_kb.services.citations import pick_card
 from appota_kb.services.scope import scope
 
 
@@ -61,3 +62,23 @@ def test_refusal_card_wording(personas, documents):
         "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.",
         "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo.",
     )
+
+
+def test_refusal_text(personas, documents, cases):
+    as_of = date(2026, 10, 7)
+    cards = {}
+    for pid, hr in (("ha", "HR PayCo"), ("minh", "HR GameCo")):
+        s = scope(personas[pid], as_of, documents)
+        card = pick_card(s, s.chunk_ids, [])
+        assert card.kind == "refusal"
+        assert card.cited == () and card.conflicts == ()
+        assert card.hr == hr
+        assert refusal_text(card) == REFUSAL_TEXT.format(hr=hr)
+        cards[pid] = card
+    assert refusal_text(cards["ha"]).replace("HR PayCo", "X") == refusal_text(cards["minh"]).replace("HR GameCo", "X")
+    row10 = next(c for c in cases if c["id"] == 10)
+    for text in (refusal_text(cards["ha"]), refusal_text(cards["minh"])):
+        for d in documents:
+            assert d.id not in text and d.title not in text
+        for bad in row10["must_not_contain"]:
+            assert bad not in text

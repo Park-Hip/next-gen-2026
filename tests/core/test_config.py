@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import appota_kb
 from appota_kb.core.config import load_config
 
 
@@ -26,11 +27,11 @@ def test_real_config_loads():
 
 
 def test_only_config_py_mentions_config_yaml():
-    root = Path(__file__).resolve().parent.parent / "app"
-    for path in root.glob("*.py"):
-        if path.name == "config.py":
-            continue
-        assert "config.yaml" not in path.read_text(encoding="utf-8"), path.name
+    package = Path(appota_kb.__file__).resolve().parent
+    modules = [p for p in package.rglob("*.py") if p != package / "core" / "config.py"]
+    assert package / "services" / "scope.py" in modules, "the package modules were not found"
+    for path in modules:
+        assert "config.yaml" not in path.read_text(encoding="utf-8"), path.relative_to(package)
 
 
 def _path(tmp_path, text):

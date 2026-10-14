@@ -13,22 +13,15 @@ from google.genai.errors import ServerError
 from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 
+from builders import RETRIEVAL, chunk_text
 from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
 from appota_kb.api.page import BUSY_MESSAGE, build_app
-from appota_kb.core.config import Retrieval, load_config
+from appota_kb.core.config import load_config
 from appota_kb.services.answering.answerer import Answerer
-from appota_kb.services.chunking import chunks as document_chunks
 from appota_kb.services.retrieval.index import build_index
 
-RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 LEAVE_QUESTION = "Phép năm của tôi là bao nhiêu ngày?"
-
-
-def _chunk_text(documents, chunk_id):
-    doc_id, _ = chunk_id.rsplit("#", 1)
-    doc = next(d for d in documents if d.id == doc_id)
-    return next(c for c in document_chunks(doc) if c.id == chunk_id).text
 
 
 def _client(documents, reply="", error=None):
@@ -84,7 +77,7 @@ def test_healthz(page_client):
 
 
 def test_answer_card_row_1(documents):
-    quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
@@ -103,7 +96,7 @@ def test_answer_card_row_1(documents):
 
 
 def test_conflict_card_row_7(documents):
-    quote = _chunk_text(documents, "LEAVE-GROUP-v1#1")
+    quote = chunk_text(documents, "LEAVE-GROUP-v1#1")
     reply = reply_citing(
         "LEAVE-GROUP-v1#1",
         quote_from={"LEAVE-GROUP-v1#1": quote},
@@ -159,7 +152,7 @@ def test_unavailable_is_503_without_card_and_not_cached(documents):
 
 
 def test_cache_same_question_one_call(documents):
-    quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},

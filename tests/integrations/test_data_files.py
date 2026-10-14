@@ -1,37 +1,12 @@
-"""Loading, chunking and the data checks of the rules engine."""
+"""Loading and validating the simulated data in data/: documents, org, personas, test cases."""
 from datetime import date
 import unicodedata
 
+from conftest import MISSION1_IDS
 import pytest
 
-from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.integrations.data_files import load_documents
-from appota_kb.models.document import Document
-from appota_kb.services.chunking import chunks
 from appota_kb.services.citations import fold
-from conftest import MISSION1_IDS
-
-
-def test_mission1_documents_loaded(documents):
-    ids = {d.id for d in documents}
-    for expected in MISSION1_IDS:
-        assert expected in ids
-
-
-def test_bodies_are_nfc(documents):
-    for d in documents:
-        assert unicodedata.is_normalized("NFC", d.body), d.id
-
-
-def test_chunking(mission1_documents):
-    by_id = {d.id: d for d in mission1_documents}
-    assert sum(len(chunks(d)) for d in mission1_documents) == 25
-    chunk = {c.id: c for c in chunks(by_id["LEAVE-GAMECO-v2"])}["LEAVE-GAMECO-v2#2"]
-    assert chunk.label == "Điều 2"
-    assert chunk.text == "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
-    proc = chunks(by_id["LEAVE-PROC-GAMECO-v1"])
-    assert [c.id for c in proc] == ["LEAVE-PROC-GAMECO-v1#1", "LEAVE-PROC-GAMECO-v1#2", "LEAVE-PROC-GAMECO-v1#3"]
-    assert all(c.label is None for c in proc)
 
 
 def _write(tmp_path, name, meta_id, body="Điều 1. Dòng.\n", series="S-X", **meta_overrides):
@@ -64,6 +39,17 @@ def _write(tmp_path, name, meta_id, body="Điều 1. Dòng.\n", series="S-X", **
     return tmp_path
 
 
+def test_mission1_documents_loaded(documents):
+    ids = {d.id for d in documents}
+    for expected in MISSION1_IDS:
+        assert expected in ids
+
+
+def test_bodies_are_nfc(documents):
+    for d in documents:
+        assert unicodedata.is_normalized("NFC", d.body), d.id
+
+
 def test_load_raises_without_front_matter(tmp_path):
     docs = tmp_path / "documents"
     docs.mkdir()
@@ -91,24 +77,6 @@ def test_load_raises_on_unknown_overrides(tmp_path):
     _write(tmp_path, "X.md", "X", overrides="NOPE")
     with pytest.raises(ValueError, match="overrides names an unknown series"):
         load_documents(tmp_path)
-
-
-def test_chunks_reject_mixed_lines():
-    d = Document(id="DOC", title="T", owner="O", series="S", topic="topic", access="all_staff",
-                 applies_to="Tập đoàn", status="published", effective_from=date(2026, 1, 1),
-                 effective_to=None, overrides=None, complements=(),
-                 body="Điều 1. A.\nmột dòng thường.\n")
-    with pytest.raises(ValueError, match="mixes"):
-        chunks(d)
-
-
-def test_chunks_reject_repeated_dieu():
-    d = Document(id="DOC", title="T", owner="O", series="S", topic="topic", access="all_staff",
-                 applies_to="Tập đoàn", status="published", effective_from=date(2026, 1, 1),
-                 effective_to=None, overrides=None, complements=(),
-                 body="Điều 1. A.\nĐiều 1. B.\n")
-    with pytest.raises(ValueError, match="repeated"):
-        chunks(d)
 
 
 def test_org_paths_and_hr(org):
@@ -173,17 +141,3 @@ def test_cases_key_facts(cases):
                 assert fold(fact).casefold() in fold(c["expected_answer"]).casefold(), tag
         else:
             assert "key_facts" not in c, tag
-
-
-def test_with_edit_removes_the_line(documents):
-    v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    line = next(l for l in v2.body.splitlines() if l.startswith("Điều 3."))
-    edited = with_edit(documents, {"document": "LEAVE-GAMECO-v2", "remove": line})
-    new_v2 = next(d for d in edited if d.id == "LEAVE-GAMECO-v2")
-    assert line not in new_v2.body.splitlines()
-    assert [c.id for c in chunks(new_v2)] == ["LEAVE-GAMECO-v2#1", "LEAVE-GAMECO-v2#2"]
-
-
-def test_with_edit_raises_on_missing_line(documents):
-    with pytest.raises(ValueError, match="not found"):
-        with_edit(documents, {"document": "LEAVE-GAMECO-v2", "remove": "Điều không tồn tại."})

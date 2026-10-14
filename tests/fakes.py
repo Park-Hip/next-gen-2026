@@ -112,3 +112,20 @@ class ScriptedGemini(FakeGemini):
         return ChatResult(
             generations=[ChatGeneration(message=AIMessage(content=action))]
         )
+
+
+class CountingEmbeddings(SyllableEmbeddings):
+    """Records how many embed_documents and embed_query calls retrieval makes."""
+
+    def __init__(self):
+        super().__init__()
+        self.document_calls = 0
+        self.query_calls = 0
+
+    def embed_documents(self, texts):
+        self.document_calls += 1
+        return super().embed_documents(texts)
+
+    def embed_query(self, text):
+        self.query_calls += 1
+        return super().embed_query(text)

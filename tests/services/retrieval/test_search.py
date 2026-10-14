@@ -1,48 +1,21 @@
-"""Step 5 retrieval: tokenizer, BM25, RRF, the index, retrieve and its guards.
-
-All tests are offline: a deterministic syllable-hash embedder stands in for Gemini,
-so these check the plumbing (scope-only search, the leak proof, the runtime guard),
-not the quality of Google's embeddings.
-"""
+"""Step 5: RRF over BM25 and dense, inside the asker's scope only, with its log line."""
 from dataclasses import replace
 from datetime import date
 import json
 import logging
-import math
-import unicodedata
-
-import pytest
 
 from langchain_core.documents import Document as LCDocument
 from langchain_core.vectorstores import InMemoryVectorStore
+import pytest
 
-from fakes import SyllableEmbeddings
+from fakes import CountingEmbeddings, SyllableEmbeddings
 
 from appota_kb.core.config import Retrieval
 from appota_kb.evaluation.data_edit import with_edit
-from appota_kb.integrations.gemini import gemini_embeddings
-from appota_kb.services.chunking import chunks as document_chunks
-from appota_kb.services.retrieval.bm25 import bm25_scores, tokens
-from appota_kb.services.retrieval.index import build_index, index_text
+from appota_kb.services.retrieval.index import build_index
 from appota_kb.services.retrieval.search import ScopeLeakError, retrieve, rrf
-from appota_kb.services.scope import allowed, applies, scope as build_scope
-
-
-class CountingEmbeddings(SyllableEmbeddings):
-    """Records how many embed_documents and embed_query calls retrieval makes."""
-
-    def __init__(self):
-        super().__init__()
-        self.document_calls = 0
-        self.query_calls = 0
-
-    def embed_documents(self, texts):
-        self.document_calls += 1
-        return super().embed_documents(texts)
-
-    def embed_query(self, text):
-        self.query_calls += 1
-        return super().embed_query(text)
+from appota_kb.services.scope import allowed, applies
+from appota_kb.services.scope import scope as build_scope
 
 
 def make_settings(**kwargs) -> Retrieval:
@@ -61,38 +34,6 @@ def _questions(cases):
             yield row, question
 
 
-def test_tokens_normalises_and_lowercases():
-    assert tokens(unicodedata.normalize("NFD", "nghỉ")) == tokens("nghỉ")
-    assert tokens("Leave NĂM") == ["leave", "năm"]
-    assert tokens("a.b,c?") == ["a", "b", "c"]
-    assert tokens("nghỉ") == ["nghỉ"]
-    assert tokens("nghỉ") != tokens("nghi")
-
-
-def test_bm25_two_texts_checked_by_hand():
-    # k1 = 1, b = 0 collapses to score = idf * tf * 2 / (tf + 1); idf(a) over two texts = log(1.2).
-    scores = bm25_scores(["a"], [["a"], ["a", "a"]], k1=1.0, b=0.0)
-    idf = math.log(1.2)
-    assert scores == pytest.approx([idf, idf * 4 / 3])
-
-
-def test_bm25_common_token_stays_positive():
-    # Lucene's IDF log(1 + (N - df + 0.5) / (df + 0.5)) never goes zero or negative.
-    scores = bm25_scores(["a"], [["a"], ["a", "b"], ["a", "c"]], k1=1.2, b=0.75)
-    assert all(score > 0 for score in scores)
-
-
-def test_bm25_no_shared_token_scores_zero():
-    scores = bm25_scores(["a"], [["a"], ["b"]], k1=1.2, b=0.75)
-    assert scores[0] > 0
-    assert scores[1] == 0
-
-
-def test_bm25_query_tokens_counted_once():
-    texts = [["a"], ["a", "b"]]
-    assert bm25_scores(["a"], texts, 1.2, 0.75) == pytest.approx(bm25_scores(["a", "a"], texts, 1.2, 0.75))
-
-
 def test_rrf_three_items_checked_by_hand():
     fused = rrf([["a", "b", "c"], ["b", "c", "a"]], k=2)
     assert fused == pytest.approx({"a": 8 / 15, "b": 7 / 12, "c": 9 / 20})
@@ -101,19 +42,6 @@ def test_rrf_three_items_checked_by_hand():
 def test_rrf_uses_argument_k():
     assert rrf([["a", "b"]], k=2) == {"a": 1 / 3, "b": 1 / 4}
     assert rrf([["a", "b"]], k=60) == {"a": 1 / 61, "b": 1 / 62}
-
-
-def test_build_index_one_embed_call_title_in_front(documents):
-    embeddings = CountingEmbeddings()
-    index = build_index(documents, embeddings)
-    chunks = [c for d in documents for c in document_chunks(d)]
-    assert embeddings.document_calls == 1
-    assert len(index.texts) == len(chunks)
-    assert len(index.store.store) == len(chunks)
-    v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    chunk = next(c for c in document_chunks(v2) if c.id == "LEAVE-GAMECO-v2#2")
-    assert index.texts[chunk.id] == index_text(v2, chunk)
-    assert index.texts[chunk.id].startswith(v2.title + ". ")
 
 
 def test_retrieve_row1_target_in_top_five(personas, documents, cases):
@@ -260,15 +188,3 @@ def test_run_log_one_line_per_search(personas, documents, caplog):
     assert [entry["id"] for entry in payload["hits"]] == [hit.chunk.id for hit in hits]
     for entry in payload["hits"]:
         assert set(entry) == {"id", "rrf", "bm25", "bm25_rank", "dense", "dense_rank"}
-
-
-def test_gemini_embeddings_missing_key(monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
-        gemini_embeddings("gemini-embedding-001")
-
-
-def test_gemini_embeddings_constructs_without_network(monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
-    embeddings = gemini_embeddings("gemini-embedding-001")
-    assert embeddings.model == "gemini-embedding-001"

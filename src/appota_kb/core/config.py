@@ -1,6 +1,6 @@
 """Load and validate config.yaml into frozen dataclasses.
 
-Nothing is read at import time; web.py calls load_config() once at start-up.
+Nothing is read at import time; main.create_app calls load_config() once at start-up.
 Any missing key, unknown key or wrong type raises ValueError naming the key,
 so a bad edit fails the deploy's health check instead of running with a wrong value.
 """
@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 import yaml
 
-from appota_kb.core.paths import CONFIG
+from appota_kb.core.paths import ROOT
+
+CONFIG = ROOT / "config.yaml"
 
 
 @dataclass(frozen=True)

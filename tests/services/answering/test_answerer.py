@@ -1,131 +1,29 @@
-"""Step 6 offline: the schema, the prompt, the built request, and the Answerer seam."""
+"""The Answerer on offline fakes: one call, points as data, errors as AnswerUnavailable."""
 from dataclasses import replace
 from datetime import date
 import json
 import logging
 
-import pytest
 from google.genai.errors import ServerError
 from httpx import TimeoutException
 from langchain_core.documents import Document as LCDocument
-from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.vectorstores import InMemoryVectorStore
+import pytest
 
+from builders import RETRIEVAL, chunk_text, minh_scope
 from fakes import FakeGemini, SyllableEmbeddings, reply_citing
 
-from appota_kb.core.config import Retrieval, load_config
-from appota_kb.integrations.gemini import gemini_chat
-from appota_kb.services.answering.answerer import AnswerUnavailable, Answerer
-from appota_kb.services.answering.output import answer_schema
-from appota_kb.services.answering.prompt import SYSTEM_INSTRUCTION, build_messages
-from appota_kb.services.chunking import chunks as document_chunks
+from appota_kb.services.answering.answerer import Answerer, AnswerUnavailable
 from appota_kb.services.citations import card_for_answer
 from appota_kb.services.retrieval.index import build_index
-from appota_kb.services.retrieval.search import ScopeLeakError, retrieve
+from appota_kb.services.retrieval.search import ScopeLeakError
 from appota_kb.services.scope import scope as build_scope
-
-RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
-
-
-def _chunk_text(documents, chunk_id):
-    doc_id, _ = chunk_id.rsplit("#", 1)
-    doc = next(d for d in documents if d.id == doc_id)
-    return next(c for c in document_chunks(doc) if c.id == chunk_id).text
-
-
-def _minh_scope(personas, documents, as_of=date(2026, 10, 7)):
-    return build_scope(personas["minh"], as_of, documents)
-
-
-def test_answer_schema_enum_and_order():
-    schema = answer_schema(("LEAVE-GAMECO-v2#2", "LEAVE-PROC-GAMECO-v1#1"))
-    point = schema["$defs"]["Point"]
-    assert list(point["properties"]) == ["chunks", "quote", "text"]
-    chunks = point["properties"]["chunks"]
-    assert chunks["type"] == "array"
-    assert chunks["items"]["type"] == "string"
-    assert chunks["items"]["enum"] == ["LEAVE-GAMECO-v2#2", "LEAVE-PROC-GAMECO-v1#1"]
-    assert point["required"] == ["chunks", "quote", "text"]
-    assert schema["properties"]["points"]["minItems"] == 1
-
-
-def test_answer_schema_single_id_is_still_an_enum():
-    schema = answer_schema(("LEAVE-GAMECO-v2#2",))
-    assert schema["$defs"]["Point"]["properties"]["chunks"]["items"]["enum"] == ["LEAVE-GAMECO-v2#2"]
-
-
-def test_answer_schema_empty_ids_raises():
-    with pytest.raises(ValueError):
-        answer_schema(())
-
-
-def test_build_messages_structure(personas, documents):
-    s = _minh_scope(personas, documents)
-    question = "Phép năm của tôi là bao nhiêu ngày?"
-    index = build_index(documents, SyllableEmbeddings())
-    hits = retrieve(index, s, question, RETRIEVAL)
-    messages = build_messages(hits, s, question)
-    assert isinstance(messages[0], SystemMessage)
-    assert messages[0].content == SYSTEM_INSTRUCTION
-    user = messages[1].content
-    assert isinstance(messages[1], HumanMessage)
-    # The asker line (decision 1) and the question last.
-    assert "<asker>Nhân sự GameCo, Studio.</asker>" in user
-    assert "Based on the information above, answer this question:" in user
-    assert user.rstrip().endswith(f"<question>{question}</question>")
-    # Every hit chunk appears in hit order with id, title and Điều.
-    positions = []
-    for hit in hits:
-        assert f'id="{hit.chunk.id}"' in user
-        positions.append(user.index(f'id="{hit.chunk.id}"'))
-    assert positions == sorted(positions)
-    v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    assert f'document="{v2.title}"' in user
-    assert 'clause="Điều 2"' in user
-    # No chunk outside the hits appears (a procedure chunk is rarely in the top 5).
-    for c in s.chunks:
-        if c.id not in {h.chunk.id for h in hits}:
-            assert f'id="{c.id}"' not in user
-
-
-def test_gemini_request_built_from_config(monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
-    config = load_config()
-    chat = gemini_chat(config.llm)
-    request = chat._prepare_request([HumanMessage(content="hi")])
-    assert request["model"] == "gemini-3.8-flash"
-    cfg = request["config"]
-    assert cfg.thinking_config.thinking_level.name == "LOW"
-    assert cfg.temperature is None
-    assert cfg.http_options.timeout == config.llm.timeout_seconds * 1000
-    assert cfg.http_options.retry_options.attempts == config.llm.max_retries
-    dumped = json.dumps(cfg.model_dump(exclude_none=True), default=str)
-    for param in ("temperature", "top_p", "top_k", "seed"):
-        assert param not in dumped
-
-
-def test_gemini_chat_missing_key(monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    config = load_config()
-    with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
-        gemini_chat(config.llm)
-
-
-def test_gemini_chat_attributes(monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "dummy")
-    config = load_config()
-    chat = gemini_chat(config.llm)
-    assert chat.cache is False
-    assert chat.model == config.llm.model
-    assert chat.timeout == config.llm.timeout_seconds
-    assert chat.max_retries == config.llm.max_retries
-    assert chat.rate_limiter.requests_per_second == config.llm.requests_per_minute / 60.0
 
 
 def test_answerer_row1_reply(personas, documents):
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
-    quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     chat = FakeGemini(reply=reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
@@ -143,7 +41,7 @@ def test_answerer_row1_reply(personas, documents):
 
 
 def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=json.dumps(
         {"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x", "text": "y"}]}
@@ -156,7 +54,7 @@ def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
 
 
 def test_answerer_malformed_output_gives_none(personas, documents):
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     bad_outputs = [
         "not json at all",
@@ -183,7 +81,7 @@ def test_answerer_empty_scope_makes_no_call(personas, documents):
 
 
 def test_answerer_errors_become_unavailable(personas, documents):
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     for error in (ServerError(429, {"error": "rate limit"}), TimeoutException("timeout")):
         chat = FakeGemini(error=error)
@@ -199,16 +97,16 @@ def test_answerer_leak_raises_scope_leak_error(personas, documents):
 
     index = build_index(documents, SyllableEmbeddings())
     leaky = replace(index, store=LeakyStore(index.store.embedding))
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     answerer = Answerer(leaky, FakeGemini(reply=""), RETRIEVAL)
     with pytest.raises(ScopeLeakError):
         answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
 
 
 def test_answerer_called_twice_calls_model_twice(personas, documents):
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
-    quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     chat = FakeGemini(reply=reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}))
     answerer = Answerer(index, chat, RETRIEVAL)
     question = "Phép năm của tôi là bao nhiêu ngày?"
@@ -219,9 +117,9 @@ def test_answerer_called_twice_calls_model_twice(personas, documents):
 
 def test_answer_log_line(personas, documents, caplog):
     caplog.set_level(logging.INFO, logger="appota_kb.services.answering.answerer")
-    s = _minh_scope(personas, documents)
+    s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
-    quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     chat = FakeGemini(reply=reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}))
     answerer = Answerer(index, chat, RETRIEVAL)
     question = "Phép năm của tôi là bao nhiêu ngày?"
