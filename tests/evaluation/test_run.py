@@ -10,6 +10,7 @@ import pytest
 from builders import RETRIEVAL, chunk_text, fake_meta, scripted_answerer
 from fakes import ScriptedGemini, SyllableEmbeddings, no_points, reply_citing
 
+from appota_kb.core.paths import ROOT
 from appota_kb.evaluation.run import _check_resume, _select_rows, ask_row, run, run_meta
 from appota_kb.evaluation.run import main as run_main
 from appota_kb.evaluation.score import load_run
@@ -136,8 +137,12 @@ def test_select_rows(cases):
 
 
 def test_run_main_no_key(monkeypatch):
+    # load_dotenv is stubbed so a developer's real .env cannot put the key back.
+    loaded = []
+    monkeypatch.setattr("appota_kb.evaluation.run.load_dotenv", lambda path: loaded.append(path))
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     assert run_main(["appota_kb.evaluation.run"]) == 1
+    assert loaded == [ROOT / ".env"]
 
 
 def test_run_meta_from_git_and_cases():

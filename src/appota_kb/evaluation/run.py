@@ -16,6 +16,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from appota_kb.core.config import Config, load_config
 from appota_kb.core.paths import RESULTS, ROOT
 from appota_kb.evaluation.data_edit import with_edit
@@ -190,6 +192,7 @@ def main(argv: list[str]) -> int:
         else:
             raise SystemExit("usage: python -m appota_kb.evaluation.run [--rows 1,7,8] [--resume results/<run_id>.jsonl]")
 
+    load_dotenv(ROOT / ".env")
     if not os.environ.get("GEMINI_API_KEY"):
         sys.stderr.write("GEMINI_API_KEY is not set; set it to a Gemini API key to run the evaluation\n")
         return 1
