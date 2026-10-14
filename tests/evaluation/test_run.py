@@ -152,5 +152,5 @@ def test_run_meta_from_git_and_cases():
     assert re.fullmatch(r"[0-9a-f]{40}", meta["commit"])
     assert isinstance(meta["dirty"], bool)
     assert re.fullmatch(r"[0-9a-f]{64}", meta["cases_sha256"])
-    assert meta["model"] == "gemini-3.8-flash"
+    assert meta["model"] == "gemini-3.5-flash-lite"
     assert meta["top_k"] == load_config().retrieval.top_k

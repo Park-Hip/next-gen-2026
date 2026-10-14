@@ -25,9 +25,9 @@ def test_gemini_request_built_from_config(monkeypatch):
     config = load_config()
     chat = gemini_chat(config.llm)
     request = chat._prepare_request([HumanMessage(content="hi")])
-    assert request["model"] == "gemini-3.8-flash"
+    assert request["model"] == "gemini-3.5-flash-lite"
     cfg = request["config"]
-    assert cfg.thinking_config.thinking_level.name == "LOW"
+    assert cfg.thinking_config.thinking_level.name == "MEDIUM"
     assert cfg.temperature is None
     assert cfg.http_options.timeout == config.llm.timeout_seconds * 1000
     assert cfg.http_options.retry_options.attempts == config.llm.max_retries
