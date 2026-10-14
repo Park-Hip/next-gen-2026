@@ -4,7 +4,7 @@ No FastAPI and no LLM here: the page and the templates render these lines.
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
 from app.data import Chunk, Document, Persona
-from app.rules import Card, Scope, conflict_quotes, refusal_text
+from app.rules import Card, Point, Scope, conflict_quotes, refusal_text
 
 CONFLICT_HEADLINE = (
     "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. "
@@ -44,9 +44,10 @@ def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]
     return [(doc_id, tuple(by_doc[doc_id])) for doc_id in order]
 
 
-def answer_card(card: Card, scope: Scope, text: str) -> tuple[str, ...]:
+def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[str, ...]:
     docs = {d.id: d for d in scope.documents}
-    lines = [intro(scope.persona), text]
+    answer = " ".join(p.text.strip() for p in points)
+    lines = [intro(scope.persona), answer]
     for doc_id, doc_chunks in _group_cited(card.cited):
         lines.append(_source_line(docs[doc_id], doc_chunks, card.hr))
     return tuple(lines)
@@ -76,12 +77,12 @@ def refusal_card(card: Card, scope: Scope) -> tuple[str, ...]:
 def render(
     card: Card,
     scope: Scope,
-    answer_text: str | None,
+    points: tuple[Point, ...] | None,
     retrieved: tuple[Chunk, ...],
     recorded: bool = False,
 ) -> tuple[str, ...]:
     if card.kind == "answer":
-        return answer_card(card, scope, answer_text or "")
+        return answer_card(card, scope, tuple(points or ()))
     if card.kind == "conflict":
         return conflict_card(card, scope, conflict_quotes(card, retrieved), recorded)
     return refusal_card(card, scope)

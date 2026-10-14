@@ -6,8 +6,6 @@ so a bad edit fails the deploy's health check instead of running with a wrong va
 """
 from dataclasses import dataclass
 from pathlib import Path
-import unicodedata
-
 import yaml
 
 CONFIG = Path(__file__).resolve().parent.parent / "config.yaml"
@@ -23,21 +21,25 @@ class Retrieval:
 
 
 @dataclass(frozen=True)
-class Stub:
-    min_shared_tokens: int
-    stopwords: frozenset[str]
+class Llm:
+    model: str
+    thinking_level: str
+    max_retries: int
+    timeout_seconds: float
+    requests_per_minute: float
 
 
 @dataclass(frozen=True)
 class Page:
     question_max_chars: int
     utc_offset_hours: int
+    answer_cache_size: int
 
 
 @dataclass(frozen=True)
 class Config:
     retrieval: Retrieval
-    stub: Stub
+    llm: Llm
     page: Page
 
 
@@ -45,7 +47,7 @@ def load_config(path: Path = CONFIG) -> Config:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError(f"{path.name}: must be a mapping")
-    expected = {"retrieval", "stub", "page"}
+    expected = {"retrieval", "llm", "page"}
     unknown = set(raw) - expected
     if unknown:
         raise ValueError(f"{path.name}: unknown section(s) {', '.join(sorted(unknown))}")
@@ -54,7 +56,7 @@ def load_config(path: Path = CONFIG) -> Config:
         raise ValueError(f"{path.name}: missing section(s) {', '.join(sorted(missing))}")
     return Config(
         retrieval=_load_retrieval(raw["retrieval"], path),
-        stub=_load_stub(raw["stub"], path),
+        llm=_load_llm(raw["llm"], path),
         page=_load_page(raw["page"], path),
     )
 
@@ -104,12 +106,6 @@ def _non_empty_str(path: Path, key: str, value) -> str:
     return value
 
 
-def _stopwords(path: Path, key: str, value) -> frozenset[str]:
-    if not isinstance(value, list) or any(not isinstance(s, str) for s in value):
-        raise ValueError(f"{path.name} {key}: must be a list of strings")
-    return frozenset(unicodedata.normalize("NFC", s).lower() for s in value)
-
-
 def _load_retrieval(raw, path: Path) -> Retrieval:
     _check_keys(path, "retrieval", raw, {"top_k", "rrf_k", "bm25_k1", "bm25_b", "embedding_model"})
     return Retrieval(
@@ -121,17 +117,24 @@ def _load_retrieval(raw, path: Path) -> Retrieval:
     )
 
 
-def _load_stub(raw, path: Path) -> Stub:
-    _check_keys(path, "stub", raw, {"min_shared_tokens", "stopwords"})
-    return Stub(
-        min_shared_tokens=_positive_int(path, "stub.min_shared_tokens", raw["min_shared_tokens"]),
-        stopwords=_stopwords(path, "stub.stopwords", raw["stopwords"]),
+def _load_llm(raw, path: Path) -> Llm:
+    _check_keys(path, "llm", raw, {"model", "thinking_level", "max_retries", "timeout_seconds", "requests_per_minute"})
+    thinking_level = _non_empty_str(path, "llm.thinking_level", raw["thinking_level"])
+    if thinking_level not in ("low", "medium", "high"):
+        raise ValueError(f"{path.name} llm.thinking_level: must be low, medium or high")
+    return Llm(
+        model=_non_empty_str(path, "llm.model", raw["model"]),
+        thinking_level=thinking_level,
+        max_retries=_positive_int(path, "llm.max_retries", raw["max_retries"]),
+        timeout_seconds=_positive_float(path, "llm.timeout_seconds", raw["timeout_seconds"]),
+        requests_per_minute=_positive_float(path, "llm.requests_per_minute", raw["requests_per_minute"]),
     )
 
 
 def _load_page(raw, path: Path) -> Page:
-    _check_keys(path, "page", raw, {"question_max_chars", "utc_offset_hours"})
+    _check_keys(path, "page", raw, {"question_max_chars", "utc_offset_hours", "answer_cache_size"})
     return Page(
         question_max_chars=_positive_int(path, "page.question_max_chars", raw["question_max_chars"]),
         utc_offset_hours=_positive_int(path, "page.utc_offset_hours", raw["utc_offset_hours"]),
+        answer_cache_size=_positive_int(path, "page.answer_cache_size", raw["answer_cache_size"]),
     )

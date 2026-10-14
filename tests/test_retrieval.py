@@ -6,7 +6,6 @@ not the quality of Google's embeddings.
 """
 from dataclasses import replace
 from datetime import date
-import hashlib
 import json
 import logging
 import math
@@ -15,8 +14,9 @@ import unicodedata
 import pytest
 
 from langchain_core.documents import Document as LCDocument
-from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
+
+from fakes import SyllableEmbeddings
 
 from app.config import Retrieval
 from app.data import chunks as document_chunks, with_edit
@@ -31,32 +31,6 @@ from app.retrieval import (
     tokens,
 )
 from app.rules import allowed, applies, scope as build_scope
-
-DIM = 256
-
-
-class SyllableEmbeddings(Embeddings):
-    """Deterministic, lexical stand-in: each syllable hashes into a 256-d L2-normalised vector.
-
-    Not Gemini; it ranks by shared syllables, so it checks the retrieval plumbing.
-    """
-
-    def _embed(self, text: str) -> list[float]:
-        vector = [0.0] * DIM
-        for syllable in tokens(text):
-            digest = hashlib.sha256(syllable.encode("utf-8")).digest()
-            index = int.from_bytes(digest[:4], "big") % DIM
-            vector[index] += 1.0
-        norm = math.sqrt(sum(v * v for v in vector))
-        if norm == 0:
-            return vector
-        return [v / norm for v in vector]
-
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        return [self._embed(text) for text in texts]
-
-    def embed_query(self, text: str) -> list[float]:
-        return self._embed(text)
 
 
 class CountingEmbeddings(SyllableEmbeddings):

@@ -3,7 +3,7 @@ from datetime import date
 
 from app.cards import render
 from app.data import chunks
-from app.rules import Card, scope
+from app.rules import Card, Point, scope
 
 
 def _doc(documents, doc_id):
@@ -20,7 +20,8 @@ def test_answer_card_wording(personas, documents):
     s = scope(persona, date(2026, 10, 7), documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
-    lines = render(card, s, c2.text, (c2,))
+    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=c2.text, text="Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.")
+    lines = render(card, s, (point,), (c2,))
     assert lines == (
         "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.",
         "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.",
@@ -36,7 +37,8 @@ def test_conflict_card_wording(personas, documents):
     g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
     p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
     card = Card("conflict", persona.hr, (g1,), ((group, payco),))
-    lines = render(card, s, "NO LLM TEXT ON THIS CARD", (g1, p1))
+    marker = Point(chunks=("LEAVE-GROUP-v1#1",), quote=g1.text, text="LLM TEXT MUST NOT APPEAR")
+    lines = render(card, s, (marker,), (g1, p1))
     assert lines == (
         "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.",
         "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. Hệ thống không tự chọn.",
@@ -44,7 +46,7 @@ def test_conflict_card_wording(personas, documents):
         'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."',
         "Vui lòng hỏi HR PayCo.",
     )
-    assert all("NO LLM TEXT" not in line for line in lines)
+    assert all("LLM TEXT" not in line for line in lines)
 
 
 def test_refusal_card_wording(personas, documents):

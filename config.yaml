@@ -5,9 +5,13 @@ retrieval:
   bm25_k1: 1.2             # BM25 term-frequency saturation (ADR 0002)
   bm25_b: 0.75             # BM25 length normalisation (ADR 0002)
   embedding_model: gemini-embedding-001  # dense ranking model (ADR 0002)
-stub:                      # keyword stand-in for steps 5-6; removed with app/stub.py in #13
-  min_shared_tokens: 2
-  stopwords: [tôi, em, của, là, bao, nhiêu, mấy, thế, nào, có, không, được, và, cho, các, một, những, này, đó, ở, ai, gì]
+llm:
+  model: gemini-3.8-flash  # step 6 model, pinned (ADR 0003)
+  thinking_level: low      # (ADR 0003)
+  max_retries: 6           # langchain's default, passed to the SDK (ADR 0003)
+  timeout_seconds: 30      # per attempt (decision 6)
+  requests_per_minute: 4   # 80% of the 5 RPM AI Studio shows for gemini-3.8-flash (decision 6)
 page:
   question_max_chars: 300
   utc_offset_hours: 7      # the default as-of date is today in Vietnam
+  answer_cache_size: 256   # demo only; the evaluation never uses it (decision 5)
