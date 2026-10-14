@@ -159,7 +159,7 @@ Minh's search runs on 11 chunks, Lan's on 2 and Hà's on 4.
 
 ### Steps 5-7: the cards
 
-From the committed evaluation run [`20261014-2102`](../results/20261014-2102.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
+From the committed evaluation run [`20261014-2239`](../results/20261014-2239.jsonl), the final run, rows 1, 5 and 7; the card lines are copied word for word.
 
 **Minh: answer card.**
 Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the quote.

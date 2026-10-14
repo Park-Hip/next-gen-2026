@@ -33,7 +33,7 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 | R5 | No default "đơn vị cấp dưới thắng"; precedence exists only where the owner declared it | Phần 2, Phần 4 | Row 7 (PayCo gets a conflict, not the lower unit) | Built: row 7 |
 | R6 | Step 4: same topic, both apply, no declared relation means a conflict pair; "bổ sung" documents are not a conflict | Phần 2 | Rows 3, 7 | Built: rows 3, 7 |
 | R7 | Step 7: a cited document in a conflict pair gives the conflict card; no citation, or a citation of a chunk that was not retrieved, refuses the whole answer | Phần 2 | Rows 7, 8, 9, 10; a test with an invented citation | Built, and stricter (ADR 0003): citations are checked against the chunks actually retrieved, and each point's quote must be in the chunk it cites |
-| R8 | "văn bản người hỏi không được xem không bao giờ được đưa vào bước tìm kiếm" | Phần 1 | Leak check on chunk ids, 0 cases | Built: steps 1-4 run before search, and a runtime check raises an error if a chunk outside the scope is returned; leaks in the final run: [after the final run] |
+| R8 | "văn bản người hỏi không được xem không bao giờ được đưa vào bước tìm kiếm" | Phần 1 | Leak check on chunk ids, 0 cases | Built: steps 1-4 run before search, and a runtime check raises an error if a chunk outside the scope is returned; 0 leaks in the 18 rows of the final run `20261014-2239` |
 | R9 | v1 answers only rules that apply to the asker; other-unit questions are refused and sent to HR, even when the asker may read the document | Phần 2, Phần 5 | Row 6 | Built: row 6 |
 | R10 | One refusal text for "not allowed" and "not found", so a restricted document is never revealed | Phần 2, Phần 5 | Rows 9 and 10 give the same text apart from the unit | Built: rows 9 and 10 |
 
@@ -68,12 +68,12 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 
 | # | Promise | Where | Shown by | Status |
 |---|---|---|---|---|
-| V1 | A test set of simulated questions, each with the right result and the documents that must not be cited | Phần 5 | The 10 rows times 3 phrasings, as a data file | Changed (ADR 0006): 15 rows, rows 1-10 plus five added for the brief, each asked in its main wording |
+| V1 | A test set of simulated questions, each with the right result and the documents that must not be cited | Phần 5 | The 10 rows times 3 phrasings, as a data file | Changed (ADR 0006): 18 rows, rows 1-10, five added for the brief and three limitation rows, each asked in its main wording |
 | V2 | The five situations: two units, before and after a new version, undeclared conflict, other unit's rule, restricted document | Phần 5 | Rows 1 and 5; 1 and 2; 7; 6; 10 | Built: same rows |
 | V3 | Metrics and targets: rules correct in every case, 0 leaks, 0 unsafe LLM answers, faithfulness read by hand for every answer, at most 10% over-cautious, context recall tracked only | Phần 5 | Results table from the final run | Changed (ADR 0007): context recall is not tracked; the other metrics are gates in the test report, and faithfulness is read by Hiep |
 | V4 | "Mỗi ca chạy nhiều lần ... một lần sai tính là trượt" | Phần 5 | Each case run 3 times | Changed (ADR 0006): each case runs once, because of the Gemini free-tier rate limit |
 | V5 | The first four metrics are the condition to open to employees; passing them on a small simulated set is not proof | Phần 5, Phần 4 | Stated next to the results | Built: stated under the gates in the test report |
-| V6 | Riskiest assumption: with no answering document the LLM says it found nothing; with one, it cites that one; one unsafe answer disproves it | Phần 5 | Rows 8, 9, 10 and the answer rows; report honestly if it fails | Built: unsafe answers are counted on the card and, separately, on the raw model reply; result: [after the final run] |
+| V6 | Riskiest assumption: with no answering document the LLM says it found nothing; with one, it cites that one; one unsafe answer disproves it | Phần 5 | Rows 8, 9, 10 and the answer rows; report honestly if it fails | Built: unsafe answers are counted on the card and, separately, on the raw model reply; final run `20261014-2239`: 0 unsafe in the 14 gated rows, on the card and in the raw reply; limitation row 18 gave an unsafe answer card for a question about next year (#53) |
 
 ## 7. Build order and scope
 
