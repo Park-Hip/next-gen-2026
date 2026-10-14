@@ -21,10 +21,10 @@ from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field, ValidationError, create_model
 
-from app.config import Llm, Retrieval, load_config
-from app.data import load_documents, load_org, load_personas
-from app.retrieval import Hit, Index, ScopeLeakError, build_index, gemini_embeddings, retrieve
-from app.rules import Point, Scope, card_for_answer, scope as build_scope
+from appota_kb.config import Llm, Retrieval, load_config
+from appota_kb.data import load_documents, load_org, load_personas
+from appota_kb.retrieval import Hit, Index, ScopeLeakError, build_index, gemini_embeddings, retrieve
+from appota_kb.rules import Point, Scope, card_for_answer, scope as build_scope
 
 logger = logging.getLogger("app.answer")
 

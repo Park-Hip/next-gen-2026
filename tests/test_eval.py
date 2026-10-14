@@ -11,15 +11,15 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import ScriptedGemini, SyllableEmbeddings, no_points, reply_citing
 
-from app.answer import Answerer
-from app.config import Eval, Retrieval
-from app.data import chunks as document_chunks, with_edit
-from app.retrieval import build_index
-from app.rules import scope as build_scope
+from appota_kb.answer import Answerer
+from appota_kb.config import Eval, Retrieval
+from appota_kb.data import chunks as document_chunks, with_edit
+from appota_kb.retrieval import build_index
+from appota_kb.rules import scope as build_scope
 
-from eval.run import _check_resume, _select_rows, ask_row, run, run_meta
-from eval.run import main as run_main
-from eval.score import (
+from appota_kb.evaluation.run import _check_resume, _select_rows, ask_row, run, run_meta
+from appota_kb.evaluation.run import main as run_main
+from appota_kb.evaluation.score import (
     RowScore,
     faithful_of,
     gates,
@@ -30,9 +30,9 @@ from eval.score import (
     upper_bound,
     verdicts,
 )
-import eval.report as report_mod
-from eval.report import build_report, load_reviews, review_skeleton
-from eval.report import main as report_main
+import appota_kb.evaluation.report as report_mod
+from appota_kb.evaluation.report import build_report, load_reviews, review_skeleton
+from appota_kb.evaluation.report import main as report_main
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 REPO = Path(__file__).resolve().parent.parent
@@ -233,7 +233,7 @@ def test_run_main_no_key(monkeypatch):
 
 
 def test_run_meta_from_git_and_cases():
-    from app.config import load_config
+    from appota_kb.config import load_config
 
     meta = run_meta(load_config(), "test-run")
     assert re.fullmatch(r"[0-9a-f]{40}", meta["commit"])
@@ -625,11 +625,11 @@ def test_committed_report_matches_source():
     results_path = REPO / "results" / match.group(1)
     run_id = results_path.stem
 
-    rows = __import__("app.data", fromlist=["load_test_cases"]).load_test_cases()
-    personas = __import__("app.data", fromlist=["load_personas"]).load_personas(
-        __import__("app.data", fromlist=["load_org"]).load_org()
+    rows = __import__("appota_kb.data", fromlist=["load_test_cases"]).load_test_cases()
+    personas = __import__("appota_kb.data", fromlist=["load_personas"]).load_personas(
+        __import__("appota_kb.data", fromlist=["load_org"]).load_org()
     )
-    from app.config import load_config
+    from appota_kb.config import load_config
 
     records = load_run(results_path)
     scores = score_all(rows, records)

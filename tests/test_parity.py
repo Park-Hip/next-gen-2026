@@ -2,8 +2,8 @@
 import importlib.util
 from pathlib import Path
 
-from app.data import chunks
-from app.rules import pick_card, scope
+from appota_kb.data import chunks
+from appota_kb.rules import pick_card, scope
 
 
 def _load_adopted_rules():

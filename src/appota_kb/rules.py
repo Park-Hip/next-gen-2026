@@ -9,7 +9,7 @@ from itertools import combinations
 from typing import Literal
 import unicodedata
 
-from app.data import Chunk, Document, Persona, chunks as document_chunks
+from appota_kb.data import Chunk, Document, Persona, chunks as document_chunks
 
 REFUSAL_TEXT = (
     "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
@@ -185,7 +185,7 @@ def _quotes_for(document: Document, cited: tuple[Chunk, ...], retrieved: tuple[C
 if __name__ == "__main__":
     import sys
 
-    from app.data import load_documents, load_org, load_personas
+    from appota_kb.data import load_documents, load_org, load_personas
 
     if len(sys.argv) != 3:
         sys.exit("usage: python -m app.rules <persona> <as_of>")

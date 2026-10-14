@@ -14,7 +14,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import FakeGemini, SyllableEmbeddings, reply_citing
 
-from app.answer import (
+from appota_kb.answer import (
     AnswerUnavailable,
     Answerer,
     SYSTEM_INSTRUCTION,
@@ -22,10 +22,10 @@ from app.answer import (
     build_messages,
     gemini_chat,
 )
-from app.config import Retrieval, load_config
-from app.data import chunks as document_chunks
-from app.retrieval import ScopeLeakError, build_index, retrieve
-from app.rules import card_for_answer, scope as build_scope
+from appota_kb.config import Retrieval, load_config
+from appota_kb.data import chunks as document_chunks
+from appota_kb.retrieval import ScopeLeakError, build_index, retrieve
+from appota_kb.rules import card_for_answer, scope as build_scope
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 

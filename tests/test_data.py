@@ -4,13 +4,13 @@ import unicodedata
 
 import pytest
 
-from app.data import (
+from appota_kb.data import (
     Document,
     chunks,
     load_documents,
     with_edit,
 )
-from app.rules import fold
+from appota_kb.rules import fold
 from conftest import MISSION1_IDS
 
 

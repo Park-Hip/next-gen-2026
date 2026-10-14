@@ -13,9 +13,10 @@ from pathlib import Path
 
 import yaml
 
-from app.config import load_config
-from app.data import load_org, load_personas, load_test_cases
-from eval.score import (
+from appota_kb.config import load_config
+from appota_kb.core.paths import RESULTS, ROOT
+from appota_kb.data import load_org, load_personas, load_test_cases
+from appota_kb.evaluation.score import (
     CHECKS,
     Gate,
     RowScore,
@@ -26,9 +27,7 @@ from eval.score import (
     verdicts,
 )
 
-REPO = Path(__file__).resolve().parent.parent
-RESULTS = REPO / "results"
-REPORT_PATH = REPO / "docs" / "mission2" / "test_report.md"
+REPORT_PATH = ROOT / "docs" / "mission2" / "test_report.md"
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
 LIMITATION_ISSUES = {15: "#24"}
@@ -311,7 +310,7 @@ def _lesson(review: dict | None) -> str:
 def _cases_sha256() -> str:
     import hashlib
 
-    return hashlib.sha256((REPO / "data" / "test_cases.yaml").read_bytes()).hexdigest()
+    return hashlib.sha256((ROOT / "data" / "test_cases.yaml").read_bytes()).hexdigest()
 
 
 def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> str:

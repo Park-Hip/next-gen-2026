@@ -21,10 +21,10 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-from app.config import Retrieval, load_config
-from app.data import Chunk, Document, chunks as document_chunks
-from app.data import load_documents, load_org, load_personas, load_test_cases, with_edit
-from app.rules import Scope, scope as build_scope
+from appota_kb.config import Retrieval, load_config
+from appota_kb.data import Chunk, Document, chunks as document_chunks
+from appota_kb.data import load_documents, load_org, load_personas, load_test_cases, with_edit
+from appota_kb.rules import Scope, scope as build_scope
 
 logger = logging.getLogger("app.retrieval")
 

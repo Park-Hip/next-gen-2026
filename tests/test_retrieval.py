@@ -18,9 +18,9 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import SyllableEmbeddings
 
-from app.config import Retrieval
-from app.data import chunks as document_chunks, with_edit
-from app.retrieval import (
+from appota_kb.config import Retrieval
+from appota_kb.data import chunks as document_chunks, with_edit
+from appota_kb.retrieval import (
     ScopeLeakError,
     bm25_scores,
     build_index,
@@ -30,7 +30,7 @@ from app.retrieval import (
     rrf,
     tokens,
 )
-from app.rules import allowed, applies, scope as build_scope
+from appota_kb.rules import allowed, applies, scope as build_scope
 
 
 class CountingEmbeddings(SyllableEmbeddings):

@@ -5,8 +5,8 @@ import inspect
 
 import pytest
 
-from app.data import Document, Persona, chunks, load_test_cases, with_edit
-from app.rules import (
+from appota_kb.data import Document, Persona, chunks, load_test_cases, with_edit
+from appota_kb.rules import (
     REFUSAL_TEXT,
     allowed,
     applies,

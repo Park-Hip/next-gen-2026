@@ -16,17 +16,16 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from app.answer import AnswerUnavailable, Answerer, gemini_chat
-from app.cards import show
-from app.config import Config, load_config
-from app.data import load_documents, load_org, load_personas, load_test_cases, with_edit
-from app.retrieval import ScopeLeakError, build_index, gemini_embeddings
-from app.rules import scope as build_scope
-from eval.score import load_run
+from appota_kb.answer import AnswerUnavailable, Answerer, gemini_chat
+from appota_kb.cards import show
+from appota_kb.config import Config, load_config
+from appota_kb.core.paths import DATA, RESULTS, ROOT
+from appota_kb.data import load_documents, load_org, load_personas, load_test_cases, with_edit
+from appota_kb.retrieval import ScopeLeakError, build_index, gemini_embeddings
+from appota_kb.rules import scope as build_scope
+from appota_kb.evaluation.score import load_run
 
-REPO = Path(__file__).resolve().parent.parent
-RESULTS = REPO / "results"
-CASES = REPO / "data" / "test_cases.yaml"
+CASES = DATA / "test_cases.yaml"
 
 # settings that a resumed run must keep, so the file stays one coherent run
 RESUME_KEYS = ("run_id", "commit", "dirty", "cases_sha256", "model", "thinking_level",
@@ -35,7 +34,7 @@ RESUME_KEYS = ("run_id", "commit", "dirty", "cases_sha256", "model", "thinking_l
 
 def _git(args: list[str]) -> str:
     result = subprocess.run(
-        ["git", *args], cwd=REPO, capture_output=True, text=True, encoding="utf-8"
+        ["git", *args], cwd=ROOT, capture_output=True, text=True, encoding="utf-8"
     )
     if result.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)} failed: {result.stderr.strip()}")

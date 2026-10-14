@@ -15,11 +15,11 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 
 from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
-from app.answer import Answerer
-from app.config import Retrieval, load_config
-from app.data import chunks as document_chunks
-from app.retrieval import build_index
-from app.web import BUSY_MESSAGE, create_app
+from appota_kb.answer import Answerer
+from appota_kb.config import Retrieval, load_config
+from appota_kb.data import chunks as document_chunks
+from appota_kb.retrieval import build_index
+from appota_kb.web import BUSY_MESSAGE, create_app
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 LEAVE_QUESTION = "Phép năm của tôi là bao nhiêu ngày?"
@@ -230,11 +230,11 @@ def test_unknown_persona_selects_the_placeholder(page_client):
 
 
 def test_import_web_builds_nothing():
-    import app.web
+    import appota_kb.web
     # Import must not trigger expensive initialization (Gemini calls, network).
     # app is a lazy proxy; the real app is only built on first request.
-    assert hasattr(app.web, "app")
-    assert isinstance(app.web.app, app.web._LazyApp)
+    assert hasattr(appota_kb.web, "app")
+    assert isinstance(appota_kb.web.app, appota_kb.web._LazyApp)
 
 
 class CiteAllGemini(FakeGemini):

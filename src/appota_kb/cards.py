@@ -3,8 +3,8 @@
 No FastAPI and no LLM here: the page and the templates render these lines.
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
-from app.data import Chunk, Document, Persona
-from app.rules import Card, Point, Scope, card_for_answer, conflict_quotes, refusal_text
+from appota_kb.data import Chunk, Document, Persona
+from appota_kb.rules import Card, Point, Scope, card_for_answer, conflict_quotes, refusal_text
 
 CONFLICT_HEADLINE = (
     "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. "

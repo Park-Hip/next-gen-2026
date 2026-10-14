@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import yaml
 
-CONFIG = Path(__file__).resolve().parent.parent / "config.yaml"
+from appota_kb.core.paths import CONFIG
 
 
 @dataclass(frozen=True)

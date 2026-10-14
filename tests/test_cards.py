@@ -1,9 +1,9 @@
 """The three cards' wording, word for word from the submitted document (Phần 2)."""
 from datetime import date
 
-from app.cards import render, show
-from app.data import chunks
-from app.rules import Card, Point, card_for_answer, scope
+from appota_kb.cards import render, show
+from appota_kb.data import chunks
+from appota_kb.rules import Card, Point, card_for_answer, scope
 
 
 def _doc(documents, doc_id):

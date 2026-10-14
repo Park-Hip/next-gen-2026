@@ -5,7 +5,7 @@ import socket
 
 import pytest
 
-from app.data import Document, load_documents, load_org, load_personas, load_test_cases
+from appota_kb.data import Document, load_documents, load_org, load_personas, load_test_cases
 
 MISSION1_IDS = [
     "LEAVE-GROUP-v1", "LEAVE-GAMECO-v1", "LEAVE-GAMECO-v2", "LEAVE-GAMECO-v3",

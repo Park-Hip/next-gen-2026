@@ -14,7 +14,7 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import PrivateAttr
 
-from app.retrieval import tokens
+from appota_kb.retrieval import tokens
 
 DIM = 256
 

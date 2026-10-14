@@ -11,7 +11,7 @@ import re
 
 import yaml
 
-DATA = Path(__file__).resolve().parent.parent / "data"
+from appota_kb.core.paths import DATA
 
 _FRONT_MATTER = re.compile(r"---\n(.*?)\n---\n\n(.*)", re.S)
 _FIELDS = frozenset({

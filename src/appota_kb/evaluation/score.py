@@ -11,8 +11,8 @@ from dataclasses import dataclass
 import json
 from typing import Literal
 
-from app.config import Eval
-from app.rules import fold
+from appota_kb.config import Eval
+from appota_kb.rules import fold
 
 # The named checks, in the order the report and the review sheet show them. A check is
 # absent from RowScore.checks when it does not apply to the row's card.

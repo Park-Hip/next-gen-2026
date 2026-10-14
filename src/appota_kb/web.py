@@ -15,12 +15,12 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.answer import AnswerUnavailable, Answerer, Reply, gemini_chat
-from app.cards import show
-from app.config import Config, load_config
-from app.data import load_documents, load_org, load_personas
-from app.retrieval import build_index, gemini_embeddings
-from app.rules import Scope, scope as build_scope
+from appota_kb.answer import AnswerUnavailable, Answerer, Reply, gemini_chat
+from appota_kb.cards import show
+from appota_kb.config import Config, load_config
+from appota_kb.data import load_documents, load_org, load_personas
+from appota_kb.retrieval import build_index, gemini_embeddings
+from appota_kb.rules import Scope, scope as build_scope
 
 logger = logging.getLogger("app.web")
 

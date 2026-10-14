@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from app.config import load_config
+from appota_kb.config import load_config
 
 
 def test_real_config_loads():
