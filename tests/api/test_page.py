@@ -250,7 +250,7 @@ def test_page_never_shows_forbidden_title(documents, cases):
 
 # The judges' guide pages: /data and /cases are built from files and never call the model.
 
-TABS = (("/", "Ask"), ("/data", "Simulated data"), ("/cases", "Test cases"))
+TABS = (("/", "Hỏi"), ("/data", "Dữ liệu giả lập"), ("/cases", "Tình huống kiểm thử"))
 
 
 def _today_text():
