@@ -26,10 +26,10 @@ docs/mission2/      Mission 2 plan, and what Mission 1 promised; the test report
 src/appota_kb/      The installed package; `main.py` is the uvicorn factory
   models/           Data types only, no I/O: documents, org, scope, answer, card, search hit
   integrations/     The only code that reads `data/` (`data_files.py`) or calls Gemini (`gemini.py`)
-  services/         Steps 1-7: `scope.py` (1-4), `retrieval/` (5), `answering/` (6), `citations.py` (7), `card_text.py`, and `ask.py`, one question end to end
-  api/              The page: `page.py` and `templates/`, HTTP only
+  services/         Steps 1-7: `scope.py` (1-4), `retrieval/` (5), `answering/` (6), `citations.py` (7), `card_text.py`, and `ask.py`, one question end to end; `guide.py` builds the judges' pages
+  api/              The pages: `page.py` and `templates/` (the question form, `/data`, `/cases`), HTTP only
   core/             `config.py` (reads `config.yaml`) and `paths.py`
-  evaluation/       The harness: `run.py` asks each test case once, `score.py` checks offline, `report.py` and `review.py` write the report and Hiep's review files
+  evaluation/       The harness: `run.py` asks each test case once, `score.py` checks offline, `report.py` and `review.py` write the report and Hiep's review files, `committed.py` reads the committed run back for the "Test cases" page
 tests/              The deterministic test suite, one folder per package folder
 results/            Committed runs: one `<run_id>.jsonl` per run plus Hiep's review files
 config.yaml         Tunable values (top k, thresholds, limits); read only through src/appota_kb/core/config.py
@@ -118,6 +118,8 @@ uv run uvicorn appota_kb.main:create_app --factory --reload
 ```
 
 Then open http://127.0.0.1:8000, pick Minh, Lan or Hà and an as-of date, and ask a question.
+Two more pages are made for the judges and call no model: "Simulated data" (`/data`) lists the units, the askers and every document with its status for today, and "Test cases" (`/cases`) lists every test case with why it is tested, its expectation and the result of the committed run, with a "Thử ngay" link that asks the same case again on the main page.
+"Test cases" shows the run that `docs/mission2/test_report.md` names, so the page and the report cannot disagree.
 The public demo URL and the first-load warning are added once the Render service is live.
 
 ## Run the evaluation

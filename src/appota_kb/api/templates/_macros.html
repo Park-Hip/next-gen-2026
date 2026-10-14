@@ -1,0 +1,4 @@
+{# The label of a simulated asker, as in the main page's picker: "Minh - Studio, GameCo (giả lập)". #}
+{% macro persona_label(p) -%}
+{{ p.name }} - {{ p.unit }}{% if p.company not in p.unit %}, {{ p.company }}{% endif %} (giả lập)
+{%- endmacro %}

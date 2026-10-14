@@ -1,14 +1,13 @@
 """evaluation.report: the generated test report, on a full fake run and on the committed run."""
-import re
-
 import pytest
 
 from builders import chunk_text, fake_meta, row_by_id, scripted_answerer
 from fakes import no_points, reply_citing
 
 from appota_kb.core.paths import ROOT
+from appota_kb.evaluation.committed import report_run_path
 import appota_kb.evaluation.report as report_mod
-from appota_kb.evaluation.report import build_report
+from appota_kb.evaluation.report import REPORT_REL, build_report
 from appota_kb.evaluation.report import main as report_main
 from appota_kb.evaluation.review import load_reviews
 from appota_kb.evaluation.run import run
@@ -68,13 +67,13 @@ def test_report_incomplete_writes_nothing(cases, personas, documents, tmp_path, 
 
 
 def test_committed_report_matches_source():
-    report_path = ROOT / "docs" / "mission2" / "test_report.md"
+    report_path = ROOT / REPORT_REL
     if not report_path.exists():
         pytest.skip("no committed report yet; generated after the final run")
     text = report_path.read_text(encoding="utf-8")
-    match = re.search(r"`results/([^`]+\.jsonl)`", text)
-    assert match, "the report header must name its results file"
-    results_path = ROOT / "results" / match.group(1)
+    rel = report_run_path(text)
+    assert rel, "the report header must name its results file"
+    results_path = ROOT / rel
     run_id = results_path.stem
 
     from appota_kb.core.config import load_config

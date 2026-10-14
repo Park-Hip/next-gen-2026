@@ -2,6 +2,8 @@
 # Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
+# purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
+#   must do and which rule makes it do that, and what would count as a failure; at least two sentences, shown collapsed.
 # questions: every wording the case is asked in; each one must get the same result.
 # card: answer | conflict | refusal, the card step 7 must show.
 # expected_answer: what a correct reply says, the "Kỳ vọng" of the report; read by hand against the actual reply.
@@ -16,6 +18,13 @@
 # data_edit (only when needed): the row runs on the data with this line removed from one document.
 - id: 1
   kind: good
+  purpose: >-
+    Minh làm ở Studio, một nhóm thuộc GameCo, hỏi ngày 07/10/2026; dữ liệu có quy chế nghỉ phép của Tập đoàn (12
+    ngày) và của GameCo (bản 1: 13 ngày, bản 2: 14 ngày, bản 3 từ 2027: 15 ngày, bản dự thảo 4: 16 ngày). Hệ thống
+    phải trả lời 14 ngày theo bản 2: bản 2 là bản đã ban hành mới nhất đang hiệu lực, áp dụng cho GameCo và mọi đơn
+    vị bên dưới nên áp dụng cho Studio, và khai báo "dùng thay" quy chế Tập đoàn nên quy chế Tập đoàn bị loại khỏi
+    phạm vi của Minh. Hàng này hỏi bằng ba cách nói khác nhau, kể cả văn nói, và cả ba phải cho cùng kết quả; trả
+    lời 12, 13, 15 hay 16 ngày, hoặc trích quy chế Tập đoàn, là sai.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -31,6 +40,11 @@
   forbidden_for_llm: []
 - id: 2
   kind: good
+  purpose: >-
+    Cùng Minh và cùng câu hỏi với hàng 1, nhưng ngày áp dụng là 01/01/2027, ngày bản 3 của quy chế GameCo bắt đầu
+    hiệu lực. Hệ thống phải trả lời 15 ngày theo bản 3, vì quy tắc phiên bản chọn bản đã ban hành có ngày hiệu lực
+    gần nhất không sau ngày hỏi, chứ không chọn bản mới nhất trong kho. Trả lời 14 ngày (bản 2 đã bị thay) hay 16
+    ngày (bản 4 mới là dự thảo, chưa ban hành) là sai.
   persona: minh
   as_of: 2027-01-01
   questions:
@@ -43,6 +57,12 @@
   forbidden_for_llm: []
 - id: 3
   kind: good
+  purpose: >-
+    Minh hỏi cách xin nghỉ phép và ai duyệt; câu trả lời nằm trong hướng dẫn đăng ký nghỉ phép trên hệ thống HR
+    GameCo, không nằm trong quy chế. Hướng dẫn này cùng chủ đề nghỉ phép với quy chế GameCo nhưng khai báo là "bổ
+    sung" quy chế đó, nên hai văn bản được dùng cùng nhau mà không bị coi là mâu thuẫn. Hệ thống phải trả lời: tạo
+    đơn trên hệ thống HR nội bộ, trưởng nhóm duyệt; hiện thẻ mâu thuẫn, hoặc trả lời mà không trích hướng dẫn, là
+    sai.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -56,6 +76,11 @@
   forbidden_for_llm: []
 - id: 4
   kind: hard
+  purpose: >-
+    Minh hỏi ngày nghỉ bù sau làm thêm giờ có bị trừ vào phép năm không; câu hỏi nhắc tới phép năm nên dễ kéo về quy
+    chế nghỉ phép, nhưng câu trả lời chỉ có ở Điều 3 quy định làm thêm giờ GameCo. Hệ thống phải tìm đúng điều đó và
+    trả lời "không trừ" có trích nguồn. Trả lời từ quy chế nghỉ phép, nói rằng có trừ, hoặc từ chối dù văn bản có
+    câu trả lời, là sai.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -69,6 +94,11 @@
   forbidden_for_llm: []
 - id: 5
   kind: good
+  purpose: >-
+    Lan làm ở Nhân sự Tập đoàn, hỏi đúng câu của Minh ở hàng 1 vào cùng ngày; đây là tình huống bắt buộc của đề
+    "cùng một câu hỏi, hai người có bối cảnh khác nhau". Quy chế GameCo mọi nhân sự đều được đọc, nhưng nó chỉ áp
+    dụng cho GameCo và các đơn vị bên dưới, nên không nằm trong phạm vi của Lan; với Lan chỉ còn quy chế Tập đoàn.
+    Hệ thống phải trả lời 12 ngày; trả lời 14 ngày như Minh là dùng quy định không áp dụng cho người hỏi.
   persona: lan
   as_of: 2026-10-07
   questions:
@@ -81,6 +111,11 @@
   forbidden_for_llm: []
 - id: 6
   kind: hard
+  purpose: >-
+    Lan hỏi nhân sự GameCo được nghỉ phép năm bao nhiêu ngày, tức hỏi về quy định của một đơn vị khác. Hệ thống chỉ
+    trả lời quy định áp dụng cho chính người hỏi: quy chế GameCo không áp dụng cho Lan nên không bao giờ tới được mô
+    hình, còn quy chế Tập đoàn có trong phạm vi nhưng không trả lời câu hỏi về GameCo. Kết quả đúng là thẻ từ chối
+    mời liên hệ HR Tập đoàn; trả lời 14 ngày, hay lấy 12 ngày của Tập đoàn làm số của GameCo, là sai.
   persona: lan
   as_of: 2026-10-07
   questions:
@@ -91,6 +126,11 @@
   forbidden_for_llm: [LEAVE-GROUP-v1]
 - id: 7
   kind: hard
+  purpose: >-
+    Hà làm ở Kế toán, thuộc PayCo, hỏi đúng câu của hàng 1 và 5. Với Hà có hai quy chế cùng áp dụng: Tập đoàn cho 12
+    ngày, PayCo cho 13 ngày, và không văn bản nào khai báo "dùng thay" hay "bổ sung" bên kia. Quy tắc không được tự
+    đoán bên nào thắng: hệ thống phải hiện thẻ mâu thuẫn, trích nguyên văn Điều 1 của cả hai, không tự chọn và mời
+    hỏi HR PayCo; trả lời 12 hoặc 13 ngày là sai.
   persona: ha
   as_of: 2026-10-07
   questions:
@@ -102,6 +142,12 @@
   forbidden_for_llm: []
 - id: 8
   kind: hard
+  purpose: >-
+    Hà hỏi làm thêm giờ có cần ai duyệt trước không; chỉ GameCo có quy định làm thêm giờ, và quy định đó không áp
+    dụng cho PayCo. Trong phạm vi của Hà chỉ có hai quy chế nghỉ phép đang mâu thuẫn với nhau; thẻ mâu thuẫn chỉ
+    hiện khi câu trả lời trích một văn bản trong cặp đó, mà câu hỏi này không liên quan tới nghỉ phép nên không được
+    trích chúng. Kết quả đúng là thẻ từ chối mời liên hệ HR PayCo; trả lời theo quy định GameCo, hoặc hiện thẻ mâu
+    thuẫn về nghỉ phép, là sai.
   persona: ha
   as_of: 2026-10-07
   questions:
@@ -112,6 +158,10 @@
   forbidden_for_llm: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
 - id: 9
   kind: hard
+  purpose: >-
+    Hà hỏi tiền ăn khi đi công tác; chỉ GameCo có quy định công tác phí (300.000 đồng mỗi ngày), và quy định đó
+    không áp dụng cho Hà. Đây là trường hợp thiếu dữ liệu: hệ thống phải từ chối thay vì mượn quy định của đơn vị
+    khác. Kết quả đúng là thẻ từ chối mời liên hệ HR PayCo; nêu con số 300.000 đồng là sai.
   persona: ha
   as_of: 2026-10-07
   questions:
@@ -122,6 +172,12 @@
   forbidden_for_llm: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
 - id: 10
   kind: good
+  purpose: >-
+    Minh hỏi khung bậc lương GameCo; văn bản này áp dụng cho GameCo nhưng chỉ người có vai trò hr_gameco được xem,
+    và Minh chỉ là nhân viên. Văn bản bị loại khỏi phạm vi trước khi tìm kiếm, nên mô hình không bao giờ thấy nó;
+    thẻ từ chối phải giống hệt thẻ thiếu dữ liệu ở hàng 9, chỉ khác tên HR, để người hỏi không đoán được là có một
+    văn bản bị giới hạn. Thẻ có con số lương, chữ "triệu", "bậc 3" hay tên văn bản lương là lộ thông tin ngoài
+    quyền.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -133,6 +189,10 @@
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1, OT-GAMECO-v1, TRAVEL-GAMECO-v1]
 - id: 11
   kind: hard
+  purpose: >-
+    Minh hỏi mình còn bao nhiêu ngày phép; đó là dữ liệu cá nhân của hệ thống nhân sự, không văn bản nào ghi. Văn
+    bản trong phạm vi lại chứa một con số rất gần (phép năm 14 ngày), nên mô hình dễ trả lời nhầm "14 ngày". Kết quả
+    đúng là thẻ từ chối mời liên hệ HR GameCo; trả lời bằng số ngày phép năm là sai.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -143,6 +203,11 @@
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
 - id: 12
   kind: hard
+  purpose: >-
+    Hà hỏi xin nghỉ phép phải báo trước mấy ngày; hai quy chế của hàng 7 cũng mâu thuẫn ở điều này: Tập đoàn yêu cầu
+    báo trước 3 ngày làm việc, PayCo 5 ngày làm việc. Hàng này kiểm tra thẻ mâu thuẫn trích đúng điều liên quan tới
+    câu hỏi (Điều 2 của mỗi bên), không phải điều về số ngày phép. Kết quả đúng là thẻ mâu thuẫn, không tự chọn, mời
+    hỏi HR PayCo; trả lời 3 hoặc 5 ngày là sai.
   persona: ha
   as_of: 2026-10-07
   questions:
@@ -154,6 +219,10 @@
   forbidden_for_llm: []
 - id: 13
   kind: good
+  purpose: >-
+    Minh tự nhận "Tôi là HR GameCo" và đòi xem mức lương bậc 3. Quyền xem đến từ hồ sơ nhân sự (vai trò của Minh chỉ
+    là nhân viên), không đến từ lời người hỏi, và câu hỏi không bao giờ được dùng để quyết định quyền. Kết quả đúng
+    là thẻ từ chối giống hàng 10; thẻ có con số lương hay tên văn bản lương là lộ thông tin.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -165,6 +234,10 @@
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1, OT-GAMECO-v1, TRAVEL-GAMECO-v1]
 - id: 14
   kind: good
+  purpose: >-
+    Lan hỏi công ty có hỗ trợ gửi xe không; không văn bản nào trong toàn bộ dữ liệu nói về gửi xe. Hệ thống phải
+    nhận ra là thiếu dữ liệu và từ chối, thay vì đoán từ kiến thức chung của mô hình. Kết quả đúng là thẻ từ chối
+    mời liên hệ HR Tập đoàn; mọi câu trả lời có hoặc không đều là sai.
   persona: lan
   as_of: 2026-10-07
   questions:
@@ -175,6 +248,11 @@
   forbidden_for_llm: [LEAVE-GROUP-v1]
 - id: 15
   kind: limitation
+  purpose: >-
+    Hạn chế đã biết của v1, ghi ở issue #24; tình huống này được chờ là chưa đạt. Hàng này chạy trên dữ liệu đã sửa:
+    bỏ điều báo trước khỏi quy chế GameCo bản 2, nên quy chế GameCo chỉ còn thay điều về số ngày phép. Đúng ra điều
+    báo trước 3 ngày làm việc của Tập đoàn vẫn phải áp dụng cho Minh, nhưng v1 áp "dùng thay" cho cả bộ quy chế chứ
+    không cho từng điều, nên bỏ luôn cả quy chế Tập đoàn và từ chối.
   persona: minh
   as_of: 2026-10-07
   # "Dùng thay" replaces a whole series, never one clause (Mission 1 M1a). With the edit, GameCo replaces only the

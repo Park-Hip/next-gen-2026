@@ -24,7 +24,8 @@ from appota_kb.evaluation.review import (
 from appota_kb.evaluation.score import CHECKS, Gate, RowScore, gates, load_run, score_all, verdicts
 from appota_kb.integrations.data_files import cases_sha256, load_org, load_personas, load_test_cases
 
-REPORT_PATH = ROOT / "docs" / "mission2" / "test_report.md"
+REPORT_REL = Path("docs") / "mission2" / "test_report.md"
+REPORT_PATH = ROOT / REPORT_REL
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
 LIMITATION_ISSUES = {15: "#24"}
@@ -35,7 +36,7 @@ def _cell(text) -> str:
     return str(text).replace("|", "\\|").replace("\n", "<br>")
 
 
-def _failures(score: RowScore) -> list[str]:
+def failures(score: RowScore) -> list[str]:
     out = [name for name in CHECKS if name in score.checks and score.checks[name] is False]
     for flag, name in (
         (score.rules_wrong, "rules"),
@@ -65,9 +66,9 @@ def _actual(score: RowScore) -> str:
     else:
         detail = card.get("reason") or ""
     text = f"{label}: {detail}" if detail else label
-    failures = _failures(score)
-    if failures:
-        text += ". Không đạt ở: " + ", ".join(failures)
+    failed = failures(score)
+    if failed:
+        text += ". Không đạt ở: " + ", ".join(failed)
     return text
 
 
@@ -182,7 +183,7 @@ def build_report(
         lesson = lesson_of(reviews.get(row["id"]))
         out.append(
             f"| {row['id']} | {_cell(situation)} | {_cell(row['expected_answer'])} | "
-            f"{_cell(_actual(score))} | {_cell(marks[row['id']] or '—')} | {_cell(lesson)} |"
+            f"{_cell(_actual(score))} | {_cell(marks[row['id']] or '-')} | {_cell(lesson)} |"
         )
     out.append("")
 
@@ -212,7 +213,7 @@ def build_report(
         for s in limitation:
             issue = LIMITATION_ISSUES.get(s.row["id"], "a limitation issue")
             out.append(
-                f"- Row {s.row['id']}: {_cell(marks[s.row['id']] or '—')} (issue {issue}). "
+                f"- Row {s.row['id']}: {_cell(marks[s.row['id']] or '-')} (issue {issue}). "
                 f"{_cell(s.row['expected_answer'])}"
             )
     else:

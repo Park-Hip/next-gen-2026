@@ -3,6 +3,7 @@
 Each test injects an Answerer whose FakeGemini returns scripted replies, so the page
 runs retrieval, the real with_structured_output path and step 7 end to end, offline.
 """
+from datetime import datetime, timedelta, timezone
 import html
 import json
 import re
@@ -246,3 +247,179 @@ def test_page_never_shows_forbidden_title(documents, cases):
             _, page = _ask(client, row["persona"], str(row["as_of"]), question)
             for doc_id in row["forbidden_by_rules"]:
                 assert titles[doc_id] not in page, (row["id"], question, doc_id)
+
+# The judges' guide pages: /data and /cases are built from files and never call the model.
+
+TABS = (("/", "Ask"), ("/data", "Simulated data"), ("/cases", "Test cases"))
+
+
+def _today_text():
+    config = load_config()
+    today = (datetime.now(timezone.utc) + timedelta(hours=config.page.utc_offset_hours)).date()
+    return today.strftime("%d/%m/%Y")
+
+
+CASE_START = '<section class="panel guide-panel case" id="case-'
+
+
+def _case_html(page):
+    """{row id: the HTML of its case panel}; a case panel holds no nested <section>."""
+    out = {}
+    for chunk in page.split(CASE_START)[1:]:
+        row_id, rest = chunk.split('"', 1)
+        out[int(row_id)] = rest.split("</section>", 1)[0]
+    return out
+
+
+def _case_panels(page):
+    """{row id: the visible text of its case panel}, tags removed and whitespace collapsed."""
+    return {i: " ".join(re.sub(r"<[^>]+>", " ", body).split()) for i, body in _case_html(page).items()}
+
+
+def test_tabs_on_every_page(page_client):
+    for path, label in TABS:
+        page = page_client.get(path).text
+        links = re.findall(r'<a href="([^"]+)"( aria-current="page")?>([^<]+)</a>', page.split("</nav>")[0])
+        assert [(href, text) for href, _, text in links] == list(TABS), path
+        assert [text for _, current, text in links if current] == [label], path
+        assert f"<title>{label} - Tri thức nội bộ Appota (giả lập)</title>" in page
+
+
+def test_banner_on_main_page_only(page_client):
+    banner = 'Lần đầu dùng? Xem <a href="/data">dữ liệu</a> và <a href="/cases">tình huống mẫu</a>.'
+    assert banner in page_client.get("/").text
+    assert banner not in page_client.get("/data").text
+    assert banner not in page_client.get("/cases").text
+
+
+def test_data_page_lists_everything(page_client, documents, personas, org):
+    response = page_client.get("/data")
+    assert response.status_code == 200
+    page = html.unescape(response.text)
+    assert "Góc nhìn ban tổ chức" in page
+    assert "kể cả văn bản bị giới hạn quyền xem" in page
+    assert _today_text() in page
+    for unit in org.parent:
+        assert unit in page, unit
+    for persona in personas.values():
+        assert persona.name in page
+        assert " > ".join(persona.path) in page
+        assert ", ".join(persona.roles) in page
+    for doc in documents:
+        assert doc.id in page
+        assert doc.title in page
+    # Documents are listed with their clauses, the restricted one included, under the organiser label.
+    assert "Bậc 3 có mức lương từ 18 đến 25 triệu đồng mỗi tháng (số liệu giả lập)." in page
+    assert "Chỉ vai trò: hr_gameco" in page
+    assert "Dự thảo, chưa ban hành" in page
+    assert "<article" not in page
+
+
+def test_cases_page_lists_every_row(page_client, cases, personas):
+    response = page_client.get("/cases")
+    assert response.status_code == 200
+    page = html.unescape(response.text)
+    panels = _case_panels(page)
+    assert set(panels) == {row["id"] for row in cases}
+    for row in cases:
+        text = panels[row["id"]]
+        assert " ".join(row["purpose"].split()) in text
+        assert row["expected_answer"] in text
+        assert personas[row["persona"]].name in text
+        assert row["as_of"].strftime("%d/%m/%Y") in text
+        for question in row["questions"]:
+            assert question in text
+    # The purpose is collapsed by default: a <details> with no open attribute, once per row.
+    assert len(re.findall(r'<details class="purpose">', page)) == len(cases)
+    assert "<details class=\"purpose\" open" not in page
+    # The featured group comes first, then the other rows in file order, each once.
+    order = [int(i) for i in re.findall(r'<section class="panel guide-panel case" id="case-(\d+)"', page)]
+    assert order == [1, 5, 7] + [i for i in range(1, 16) if i not in (1, 5, 7)]
+    assert page.index("Bắt buộc theo đề") < page.index('id="case-1"')
+
+
+def test_cases_page_try_links(page_client, cases):
+    page = html.unescape(page_client.get("/cases").text)
+    link = r'<a class="try" href="[^"]+" target="_blank" rel="noopener nofollow">Thử ngay</a>'
+    bodies = _case_html(page)
+    for row in cases:
+        expected = 0 if "data_edit" in row else len(row["questions"])
+        assert len(re.findall(link, bodies[row["id"]])) == expected, row["id"]
+    note = _case_panels(page)[15]
+    assert "Tình huống này chạy trên dữ liệu đã sửa" in note
+    assert "Hạn chế đã biết, theo dõi ở issue #24" in note
+
+
+def test_cases_page_without_run(documents, tmp_path):
+    index = build_index(documents, SyllableEmbeddings())
+    client = TestClient(build_app(load_config(), Answerer(index, FakeGemini(), RETRIEVAL), root=tmp_path))
+    page = html.unescape(client.get("/cases").text)
+    assert "Chưa có lần chạy đánh giá nào được ghi trong báo cáo kiểm thử." in page
+    assert "Kết quả thực tế" not in page
+    assert 'id="case-1"' in page
+
+
+def test_cases_page_shows_committed_run(page_client, cases):
+    from appota_kb.evaluation.committed import committed_run
+
+    run = committed_run(cases)
+    page = html.unescape(page_client.get("/cases").text)
+    assert run.run_id in page
+    assert run.commit in page
+    assert run.model in page
+    assert run.results_path in page
+    panels = _case_panels(page)
+    for row in cases:
+        text = panels[row["id"]]
+        assert "Kết quả thực tế" in text
+        assert run.rows[row["id"]].verdict in text
+        assert run.rows[row["id"]].lesson in text
+    # Row 1 shows the card the employee saw, rendered by the main page's own template.
+    assert "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2" in panels[1]
+    assert "Hệ thống không tìm thấy quy định phù hợp" in panels[6]
+
+
+def test_cases_page_marks_a_stale_run(page_client, cases):
+    from appota_kb.evaluation.committed import committed_run
+
+    page = html.unescape(page_client.get("/cases").text)
+    stale = "Bộ kiểm thử đã thay đổi sau lần chạy này" in page
+    assert stale == committed_run(cases).stale
+
+
+def test_broken_committed_run_fails_start_up(documents, cases, personas, tmp_path):
+    from builders import committed_fixture
+
+    run_id = committed_fixture(tmp_path, documents, personas, cases)
+    (tmp_path / "results" / f"{run_id}.jsonl").unlink()
+    index = build_index(documents, SyllableEmbeddings())
+    with pytest.raises(ValueError, match=run_id):
+        build_app(load_config(), Answerer(index, FakeGemini(), RETRIEVAL), root=tmp_path)
+
+
+def test_guide_pages_never_call_the_model(documents):
+    client, chat = _client(documents, reply="")
+    assert client.get("/data").status_code == 200
+    assert client.get("/cases").status_code == 200
+    assert chat.call_count == 0
+
+
+def test_try_links_answer_on_the_main_page(documents):
+    index = build_index(documents, SyllableEmbeddings())
+    answerer = Answerer(index, CiteAllGemini(), RETRIEVAL)
+    client = TestClient(build_app(load_config(), answerer))
+    bodies = _case_html(html.unescape(client.get("/cases").text))
+    href_of = {i: re.search(r'<a class="try" href="([^"]+)"', body).group(1) for i, body in bodies.items() if "<a class=\"try\"" in body}
+
+    pages = {}
+    for row_id, persona_id in ((1, "minh"), (5, "lan")):
+        response = client.get(href_of[row_id])
+        assert response.status_code == 200
+        page = html.unescape(response.text)
+        assert re.search(rf'<option value="{persona_id}" selected>', page)
+        assert 'value="2026-10-07"' in page
+        assert f'value="{LEAVE_QUESTION}"' in page
+        pages[row_id] = _card_text(page)
+    assert "nhân sự GameCo, Studio" in pages[1]
+    assert "nhân sự Tập đoàn, Nhân sự Tập đoàn" in pages[5]
+    assert pages[1] != pages[5]
