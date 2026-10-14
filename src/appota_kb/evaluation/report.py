@@ -28,7 +28,7 @@ REPORT_REL = Path("docs") / "mission2" / "test_report.md"
 REPORT_PATH = ROOT / REPORT_REL
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
-LIMITATION_ISSUES = {15: "#24"}
+LIMITATION_ISSUES = {15: "#24", 16: "#51", 17: "#52", 18: "#53"}
 
 
 def _cell(text) -> str:

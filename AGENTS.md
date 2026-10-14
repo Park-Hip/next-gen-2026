@@ -67,4 +67,4 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 
 - Build only what the Mission 2 brief or a promise in `mission1_promises.md` needs, in the simplest way that works end to end; no layers, frameworks or config "for later".
 - Ask Hiep before adding a dependency, a new moving part, or more than about half a day of work, and whenever scope is unclear.
-- Park an out-of-scope idea as one line under "Deferred ideas" in `docs/mission1/playbook.md`; never promise it in a deliverable.
+- Park an out-of-scope product idea as one row under "Deferred" in `docs/scope.md`, and a process idea under "Deferred ideas" in `docs/mission1/playbook.md`; never promise either in a deliverable.
