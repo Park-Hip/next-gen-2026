@@ -12,7 +12,7 @@ import json
 from typing import Literal
 
 from appota_kb.core.config import Eval
-from appota_kb.rules import fold
+from appota_kb.services.citations import fold
 
 # The named checks, in the order the report and the review sheet show them. A check is
 # absent from RowScore.checks when it does not apply to the row's card.

@@ -1,11 +1,12 @@
 """The three cards' wording, word for word from the submitted document (Phần 2)."""
 from datetime import date
 
-from appota_kb.cards import render, show
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card
-from appota_kb.rules import card_for_answer, scope
+from appota_kb.services.card_text import render, show
 from appota_kb.services.chunking import chunks
+from appota_kb.services.citations import card_for_answer
+from appota_kb.services.scope import scope
 
 
 def _doc(documents, doc_id):

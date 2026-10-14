@@ -2,8 +2,9 @@
 import importlib.util
 from pathlib import Path
 
-from appota_kb.rules import pick_card, scope
 from appota_kb.services.chunking import chunks
+from appota_kb.services.citations import pick_card
+from appota_kb.services.scope import scope
 
 
 def _load_adopted_rules():

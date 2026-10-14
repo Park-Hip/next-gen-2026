@@ -10,19 +10,10 @@ from appota_kb.integrations.data_files import load_test_cases
 from appota_kb.models.answer import Point
 from appota_kb.models.document import Document
 from appota_kb.models.org import Persona
+from appota_kb.services.card_text import REFUSAL_TEXT, refusal_text
 from appota_kb.services.chunking import chunks
-from appota_kb.rules import (
-    REFUSAL_TEXT,
-    allowed,
-    applies,
-    card_for_answer,
-    conflict_quotes,
-    fold,
-    in_force,
-    pick_card,
-    refusal_text,
-    scope,
-)
+from appota_kb.services.citations import card_for_answer, conflict_quotes, fold, pick_card
+from appota_kb.services.scope import allowed, applies, in_force, scope
 
 CASES = load_test_cases()
 

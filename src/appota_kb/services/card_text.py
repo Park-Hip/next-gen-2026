@@ -8,7 +8,12 @@ from appota_kb.models.card import Card
 from appota_kb.models.document import Chunk, Document
 from appota_kb.models.org import Persona
 from appota_kb.models.scope import Scope
-from appota_kb.rules import card_for_answer, conflict_quotes, refusal_text
+from appota_kb.services.citations import card_for_answer, conflict_quotes
+
+REFUSAL_TEXT = (
+    "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
+    "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ {hr}."
+)
 
 CONFLICT_HEADLINE = (
     "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. "
@@ -72,6 +77,10 @@ def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[str
                     owners.append(doc.owner)
         lines.append("Đã ghi nhận để " + " và ".join(owners) + " xác nhận.")
     return tuple(lines)
+
+
+def refusal_text(card: Card) -> str:
+    return REFUSAL_TEXT.format(hr=card.hr)
 
 
 def refusal_card(card: Card, scope: Scope) -> tuple[str, ...]:

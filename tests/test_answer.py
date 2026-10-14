@@ -13,18 +13,16 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import FakeGemini, SyllableEmbeddings, reply_citing
 
-from appota_kb.answer import (
-    AnswerUnavailable,
-    Answerer,
-    SYSTEM_INSTRUCTION,
-    answer_schema,
-    build_messages,
-)
-from appota_kb.core.config import Retrieval, load_config
+from appota_kb.core.config import load_config, Retrieval
 from appota_kb.integrations.gemini import gemini_chat
+from appota_kb.services.answering.answerer import Answerer, AnswerUnavailable
+from appota_kb.services.answering.output import answer_schema
+from appota_kb.services.answering.prompt import build_messages, SYSTEM_INSTRUCTION
 from appota_kb.services.chunking import chunks as document_chunks
-from appota_kb.retrieval import ScopeLeakError, build_index, retrieve
-from appota_kb.rules import card_for_answer, scope as build_scope
+from appota_kb.services.citations import card_for_answer
+from appota_kb.services.retrieval.index import build_index
+from appota_kb.services.retrieval.search import retrieve, ScopeLeakError
+from appota_kb.services.scope import scope as build_scope
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 
@@ -220,7 +218,7 @@ def test_answerer_called_twice_calls_model_twice(personas, documents):
 
 
 def test_answer_log_line(personas, documents, caplog):
-    caplog.set_level(logging.INFO, logger="app.answer")
+    caplog.set_level(logging.INFO, logger="appota_kb.services.answering.answerer")
     s = _minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     quote = _chunk_text(documents, "LEAVE-GAMECO-v2#2")
@@ -229,7 +227,7 @@ def test_answer_log_line(personas, documents, caplog):
     question = "Phép năm của tôi là bao nhiêu ngày?"
     answerer(s, question)
 
-    records = [r for r in caplog.records if r.name == "app.answer"]
+    records = [r for r in caplog.records if r.name == "appota_kb.services.answering.answerer"]
     assert len(records) == 1
     payload = json.loads(records[0].getMessage())
     assert payload["persona"] == "minh"

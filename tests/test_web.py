@@ -15,10 +15,10 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 
 from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
-from appota_kb.answer import Answerer
-from appota_kb.core.config import Retrieval, load_config
+from appota_kb.core.config import load_config, Retrieval
+from appota_kb.services.answering.answerer import Answerer
 from appota_kb.services.chunking import chunks as document_chunks
-from appota_kb.retrieval import build_index
+from appota_kb.services.retrieval.index import build_index
 from appota_kb.web import BUSY_MESSAGE, create_app
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")

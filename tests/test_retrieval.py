@@ -21,17 +21,11 @@ from fakes import SyllableEmbeddings
 from appota_kb.core.config import Retrieval
 from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.integrations.gemini import gemini_embeddings
-from appota_kb.retrieval import (
-    ScopeLeakError,
-    bm25_scores,
-    build_index,
-    index_text,
-    retrieve,
-    rrf,
-    tokens,
-)
-from appota_kb.rules import allowed, applies, scope as build_scope
 from appota_kb.services.chunking import chunks as document_chunks
+from appota_kb.services.retrieval.bm25 import bm25_scores, tokens
+from appota_kb.services.retrieval.index import build_index, index_text
+from appota_kb.services.retrieval.search import retrieve, rrf, ScopeLeakError
+from appota_kb.services.scope import allowed, applies, scope as build_scope
 
 
 class CountingEmbeddings(SyllableEmbeddings):
@@ -249,14 +243,14 @@ def test_runtime_guard_raises_scope_leak(personas, documents):
 
 
 def test_run_log_one_line_per_search(personas, documents, caplog):
-    caplog.set_level(logging.INFO, logger="app.retrieval")
+    caplog.set_level(logging.INFO, logger="appota_kb.services.retrieval.search")
     index = build_index(documents, SyllableEmbeddings())
     settings = make_settings()
     scoped = build_scope(personas["minh"], date(2026, 10, 7), documents)
     question = "Phép năm của tôi là bao nhiêu ngày?"
     hits = retrieve(index, scoped, question, settings)
 
-    records = [r for r in caplog.records if r.name == "app.retrieval"]
+    records = [r for r in caplog.records if r.name == "appota_kb.services.retrieval.search"]
     assert len(records) == 1
     payload = json.loads(records[0].getMessage())
     assert payload["persona"] == "minh"

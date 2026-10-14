@@ -11,15 +11,14 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 from fakes import ScriptedGemini, SyllableEmbeddings, no_points, reply_citing
 
-from appota_kb.answer import Answerer
 from appota_kb.core.config import Eval, Retrieval
 from appota_kb.evaluation.data_edit import with_edit
+from appota_kb.services.answering.answerer import Answerer
 from appota_kb.services.chunking import chunks as document_chunks
-from appota_kb.retrieval import build_index
-from appota_kb.rules import scope as build_scope
+from appota_kb.services.retrieval.index import build_index
+from appota_kb.services.scope import scope as build_scope
 
-from appota_kb.evaluation.run import _check_resume, _select_rows, ask_row, run, run_meta
-from appota_kb.evaluation.run import main as run_main
+from appota_kb.evaluation.run import _check_resume, _select_rows, ask_row, main as run_main, run, run_meta
 from appota_kb.evaluation.score import (
     RowScore,
     faithful_of,
@@ -32,8 +31,7 @@ from appota_kb.evaluation.score import (
     verdicts,
 )
 import appota_kb.evaluation.report as report_mod
-from appota_kb.evaluation.report import build_report, load_reviews, review_skeleton
-from appota_kb.evaluation.report import main as report_main
+from appota_kb.evaluation.report import build_report, load_reviews, main as report_main, review_skeleton
 
 RETRIEVAL = Retrieval(top_k=5, rrf_k=60, bm25_k1=1.2, bm25_b=0.75, embedding_model="test")
 REPO = Path(__file__).resolve().parent.parent
