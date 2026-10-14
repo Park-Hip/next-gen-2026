@@ -1,4 +1,4 @@
-# Tunable values. Read only through app/config.py; see AGENTS.md "Config". Secrets never go here.
+# Tunable values. Read only through src/appota_kb/core/config.py; see AGENTS.md "Config". Secrets never go here.
 retrieval:
   top_k: 5                 # chunks passed on to step 6 (ADR 0002)
   rrf_k: 60                # reciprocal rank fusion constant (ADR 0002)

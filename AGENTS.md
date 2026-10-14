@@ -35,7 +35,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - Before a PR, run `python -m pytest`.
 - Do not edit `docs/competition/` or `docs/mission1/`, except "Deferred ideas" in `docs/mission1/playbook.md`.
 - At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of the evidence log, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
-  Take tool, model and time from `tools/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
+  Take tool, model and time from `scripts/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
   The log is one local file, ignored by git, so a worktree does not contain it.
   Always write to the copy in the main checkout: `$(git rev-parse --path-format=absolute --git-common-dir)/../evidence_log.md`.
   Never create a second copy inside a worktree.
@@ -51,8 +51,8 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 ## Config
 
 - Every tunable value lives in `config.yaml` at the repository root: top k, score thresholds, limits, model ids and the like.
-  Code reads them only through `app/config.py`; never hard-code them and never open `config.yaml` anywhere else.
-- `app/config.py` loads the file once into frozen dataclasses and raises `ValueError` on a missing key, an unknown key or a wrong type.
+  Code reads them only through `src/appota_kb/core/config.py`; never hard-code them and never open `config.yaml` anywhere else.
+- `src/appota_kb/core/config.py` loads the file once into frozen dataclasses and raises `ValueError` on a missing key, an unknown key or a wrong type.
 - Add a key in the PR whose code first reads it, and remove it with the last code that reads it; no keys "for later".
 - A value fixed by an ADR names that ADR in a comment next to it, and changing it needs a new ADR.
 - Secrets never go in `config.yaml`; API keys come from the environment only.
