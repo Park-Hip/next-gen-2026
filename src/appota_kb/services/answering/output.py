@@ -20,7 +20,8 @@ class _LooseAnswer(BaseModel):
 
 
 def answer_schema(ids: tuple[str, ...]) -> dict:
-    """JSON schema of {points: [{chunks, quote, text}]} with chunks an enum of `ids`, min 1 item.
+    """JSON schema of {points: [{chunks, quote, text}]} with chunks an enum of `ids`, min 1 item;
+    `points` may be empty, which means "không tìm thấy".
 
     A Pydantic model is built per request so the enum is the retrieved set, then its
     model_json_schema is handed to the model as a dict (so the JsonOutputParser stays
@@ -30,11 +31,11 @@ def answer_schema(ids: tuple[str, ...]) -> dict:
         raise ValueError("answer_schema needs at least one retrieved id")
     point = create_model(
         "Point",
-        chunks=(tuple[Literal[ids], ...], ...),
+        chunks=(tuple[Literal[ids], ...], Field(min_length=1)),
         quote=(str, ...),
         text=(str, ...),
     )
-    answer = create_model("Answer", points=(list[point], Field(min_length=1)))
+    answer = create_model("Answer", points=(list[point], ...))
     schema = answer.model_json_schema()
     # A single-element Literal turns into JSON-schema `const`, which Gemini's enum-only
     # subset does not name; keep an `enum` so the constraint has the same shape every time.

@@ -13,7 +13,14 @@ def test_answer_schema_enum_and_order():
     assert chunks["items"]["type"] == "string"
     assert chunks["items"]["enum"] == ["LEAVE-GAMECO-v2#2", "LEAVE-PROC-GAMECO-v1#1"]
     assert point["required"] == ["chunks", "quote", "text"]
-    assert schema["properties"]["points"]["minItems"] == 1
+    assert point["properties"]["chunks"]["minItems"] == 1
+    assert "minItems" not in schema["properties"]["points"]
+
+
+def test_answer_schema_allows_empty_points():
+    points = answer_schema(("LEAVE-GAMECO-v2#2",))["properties"]["points"]
+    assert points["type"] == "array"
+    assert "minItems" not in points
 
 
 def test_answer_schema_single_id_is_still_an_enum():
