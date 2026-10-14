@@ -7,6 +7,8 @@
 # expected_answer: what a correct reply says, the "Kỳ vọng" of the report; read by hand against the actual reply.
 # must_cite, may_cite (answer rows): the reply cites every must_cite document and nothing outside must_cite + may_cite.
 # conflict_pair (conflict rows): the reply cites at least one of the pair; the card shows both.
+# key_facts (answer rows): short strings the answer text must contain, after NFC, whitespace folding and
+#   casefolding (ADR 0006, decision 3 of the #14 plan); reviewed by Hiep.
 # Refusal rows cite nothing: any citation is a failure.
 # forbidden_by_rules: outside the asker's scope, so rules guarantee they are never retrieved or cited.
 # forbidden_for_llm: inside the scope, so they can be retrieved and only the LLM can avoid citing them.
@@ -24,6 +26,7 @@
   expected_answer: Phép năm của bạn là 14 ngày mỗi năm, theo Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026.
   must_cite: [LEAVE-GAMECO-v2]
   may_cite: [LEAVE-PROC-GAMECO-v1]
+  key_facts: [14 ngày]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-PAYCO-v1]
   forbidden_for_llm: []
 - id: 2
@@ -35,6 +38,7 @@
   card: answer
   expected_answer: Phép năm của bạn là 15 ngày mỗi năm, theo Quy chế nghỉ phép GameCo (bản 3), Điều 2, hiệu lực từ 01/01/2027.
   must_cite: [LEAVE-GAMECO-v3]
+  key_facts: [15 ngày]
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-GAMECO-v1, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: []
 - id: 3
@@ -47,6 +51,7 @@
   expected_answer: Bạn tạo đơn trên hệ thống HR nội bộ, chọn loại nghỉ và ngày nghỉ; hệ thống tự gửi đơn cho trưởng nhóm phê duyệt và kết quả được gửi về email công ty, theo Hướng dẫn đăng ký nghỉ phép trên hệ thống HR GameCo.
   must_cite: [LEAVE-PROC-GAMECO-v1]
   may_cite: [LEAVE-GAMECO-v2]
+  key_facts: [hệ thống HR, trưởng nhóm]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1]
   forbidden_for_llm: []
 - id: 4
@@ -59,6 +64,7 @@
   expected_answer: Không, ngày nghỉ bù không trừ vào số ngày phép năm, theo Quy định làm thêm giờ GameCo, Điều 3.
   must_cite: [OT-GAMECO-v1]
   may_cite: [LEAVE-GAMECO-v2]
+  key_facts: [không trừ]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1]
   forbidden_for_llm: []
 - id: 5
@@ -70,6 +76,7 @@
   card: answer
   expected_answer: Phép năm của bạn là 12 ngày mỗi năm, theo Quy chế nghỉ phép Tập đoàn, Điều 1, hiệu lực từ 01/01/2024.
   must_cite: [LEAVE-GROUP-v1]
+  key_facts: [12 ngày]
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PAYCO-v1]
   forbidden_for_llm: []
 - id: 6
@@ -180,5 +187,6 @@
   card: answer
   expected_answer: Bạn gửi đơn nghỉ phép cho quản lý trực tiếp trước ít nhất 3 ngày làm việc, theo Quy chế nghỉ phép Tập đoàn, Điều 2, vì quy chế GameCo chỉ thay điều về số ngày phép.
   must_cite: [LEAVE-GROUP-v1]
+  key_facts: [3 ngày làm việc]
   forbidden_by_rules: [LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]

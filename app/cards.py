@@ -4,7 +4,7 @@ No FastAPI and no LLM here: the page and the templates render these lines.
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
 from app.data import Chunk, Document, Persona
-from app.rules import Card, Point, Scope, conflict_quotes, refusal_text
+from app.rules import Card, Point, Scope, card_for_answer, conflict_quotes, refusal_text
 
 CONFLICT_HEADLINE = (
     "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. "
@@ -86,3 +86,10 @@ def render(
     if card.kind == "conflict":
         return conflict_card(card, scope, conflict_quotes(card, retrieved), recorded)
     return refusal_card(card, scope)
+
+
+def show(scope: Scope, retrieved: tuple[str, ...], points: tuple[Point, ...] | None) -> tuple[Card, tuple[str, ...]]:
+    """Step 7 and the card's lines, exactly as the page shows them; used by app.web and eval.run."""
+    card = card_for_answer(scope, retrieved, points)
+    by_id = {c.id: c for c in scope.chunks}
+    return card, render(card, scope, points, tuple(by_id[cid] for cid in retrieved))

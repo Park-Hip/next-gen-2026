@@ -6,6 +6,7 @@ with_structured_output path (schema binding, request building, parsing) runs off
 import hashlib
 import json
 import math
+import re
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import AIMessage
@@ -82,3 +83,32 @@ def reply_citing(*ids: str, quote_from: dict[str, str], text: str = "FAKE ANSWER
 
 def no_points() -> str:
     return json.dumps({"points": []})
+
+
+def _question_of(messages) -> str:
+    """The question in the user turn, for scripted models keyed by it."""
+    for message in reversed(messages):
+        content = message.content if isinstance(message.content, str) else str(message.content)
+        match = re.search(r"<question>(.*?)</question>", content, re.S)
+        if match:
+            return match.group(1)
+    return ""
+
+
+class ScriptedGemini(FakeGemini):
+    """A chat model whose reply (or exception) is chosen by the question in the user turn."""
+
+    _script: dict = PrivateAttr(default_factory=dict)
+
+    def __init__(self, replies: dict):
+        super().__init__(reply="")
+        self._script = replies
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        self._calls.append((messages, kwargs))
+        action = self._script.get(_question_of(messages), "")
+        if isinstance(action, Exception):
+            raise action
+        return ChatResult(
+            generations=[ChatGeneration(message=AIMessage(content=action))]
+        )

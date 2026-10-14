@@ -16,11 +16,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.answer import AnswerUnavailable, Answerer, Reply, gemini_chat
-from app.cards import render as render_card
+from app.cards import show
 from app.config import Config, load_config
 from app.data import load_documents, load_org, load_personas
 from app.retrieval import build_index, gemini_embeddings
-from app.rules import Scope, card_for_answer, scope as build_scope
+from app.rules import Scope, scope as build_scope
 
 logger = logging.getLogger("app.web")
 
@@ -92,10 +92,7 @@ def create_app(config: Config, answerer: Callable[[Scope, str], Reply]):
             while len(cache) > cache_size:
                 cache.popitem(last=False)
 
-        card = card_for_answer(scoped, reply.retrieved, reply.points)
-        by_id = {c.id: c for c in scoped.chunks}
-        retrieved_chunks = tuple(by_id[cid] for cid in reply.retrieved)
-        lines = render_card(card, scoped, reply.points, retrieved_chunks)
+        card, lines = show(scoped, reply.retrieved, reply.points)
         logger.info(
             json.dumps(
                 {
