@@ -25,7 +25,6 @@ def test_ask_row_1_ok(personas, documents, cases):
         row["questions"][0]: reply_citing(
             "LEAVE-GAMECO-v2#2",
             quote_from={"LEAVE-GAMECO-v2#2": quote},
-            text="Bạn được nghỉ 14 ngày.",
         )
     }
     record = ask_row(scripted_answerer(documents, replies), row, documents, personas, fake_meta())
@@ -33,7 +32,10 @@ def test_ask_row_1_ok(personas, documents, cases):
     assert record["question"] == row["questions"][0]
     assert record["card"]["kind"] == "answer"
     assert "LEAVE-GAMECO-v2#2" in record["retrieved"]
-    assert record["card"]["answer_text"] == "Bạn được nghỉ 14 ngày."
+    # The answer text is the verified quote the card shows, nothing else.
+    assert record["card"]["answer_text"] == f'"{quote}"'
+    assert record["card"]["answer_text"] == record["card"]["lines"][1]
+    assert record["points"] == [{"chunks": ["LEAVE-GAMECO-v2#2"], "quote": quote}]
     assert record["retrieved_text"]["LEAVE-GAMECO-v2#2"] == quote
     assert record["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
     assert record["card"]["lines"]
@@ -82,7 +84,7 @@ def test_run_stops_at_first_error(personas, documents, cases, tmp_path):
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     replies = {
         rows[0]["questions"][0]: reply_citing(
-            "LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}, text="x"
+            "LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote}
         ),
         rows[1]["questions"][0]: ServerError(429, {"error": "quota"}),
     }
@@ -102,7 +104,7 @@ def test_run_resume_skips_ok_rows(personas, documents, cases, tmp_path):
     quote1 = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     q1, q3 = rows[0]["questions"][0], rows[1]["questions"][0]
     chat1 = scripted_answerer(
-        documents, {q1: reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote1}, text="x"),
+        documents, {q1: reply_citing("LEAVE-GAMECO-v2#2", quote_from={"LEAVE-GAMECO-v2#2": quote1}),
                     q3: ServerError(429, {"error": "quota"})}
     )
     path = tmp_path / "run.jsonl"

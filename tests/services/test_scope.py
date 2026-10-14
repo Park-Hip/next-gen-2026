@@ -111,7 +111,7 @@ def _override_pair(access="roles:hr_gameco"):
 
 
 def test_restricted_override_still_replaces_its_series():
-    """Issue #48, ADR 0009: access never decides precedence."""
+    """Issue #48, ADR 0010: access never decides precedence."""
     docs = _override_pair()
     s = scope(make_persona(), date(2026, 10, 7), docs)
     assert s.documents == () and s.conflicts == () and s.chunks == ()

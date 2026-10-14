@@ -4,6 +4,7 @@ Every unit, person, document and number here is simulated ("giả lập").
 Nothing is loaded at import time; callers load what they need.
 Malformed data raises ValueError naming the offending file or unit.
 """
+from datetime import date
 import hashlib
 from pathlib import Path
 import re
@@ -57,6 +58,47 @@ def _load_document(path: Path) -> Document:
     )
 
 
+def _check_versions_and_overrides(documents: list[Document]) -> None:
+    """Publish-time checks on published documents; a draft is checked when it is published.
+
+    A tie on effective_from, a self-override and an override cycle each make the rules
+    pick by file name or drop a series, so they fail the load instead.
+    """
+    published = [d for d in documents if d.status == "published"]
+    versions: dict[tuple[str, date], list[str]] = {}
+    for d in published:
+        if d.effective_from is not None:
+            versions.setdefault((d.series, d.effective_from), []).append(d.id)
+    for (series, effective_from), ids in versions.items():
+        if len(ids) > 1:
+            raise ValueError(
+                f"series {series} has two published versions with effective_from {effective_from}: "
+                + ", ".join(sorted(ids))
+            )
+    edges: dict[str, dict[str, list[str]]] = {}
+    for d in published:
+        if d.overrides is None:
+            continue
+        if d.overrides == d.series:
+            raise ValueError(f"{d.id}: overrides names its own series {d.series}")
+        edges.setdefault(d.series, {}).setdefault(d.overrides, []).append(d.id)
+    finished: set[str] = set()
+
+    def visit(series: str, path: list[str]) -> None:
+        if series in path:
+            cycle = path[path.index(series):] + [series]
+            ids = sorted({i for a, b in zip(cycle, cycle[1:]) for i in edges[a][b]})
+            raise ValueError(f"overrides cycle: {' -> '.join(cycle)} ({', '.join(ids)})")
+        if series in finished:
+            return
+        for target in sorted(edges.get(series, {})):
+            visit(target, path + [series])
+        finished.add(series)
+
+    for series in sorted(edges):
+        visit(series, [])
+
+
 def load_documents(root: Path = DATA) -> list[Document]:
     documents = [_load_document(path) for path in sorted((root / "documents").glob("*.md"))]
     series = {d.series for d in documents}
@@ -66,6 +108,7 @@ def load_documents(root: Path = DATA) -> list[Document]:
         for name in d.complements:
             if name not in series:
                 raise ValueError(f"{d.id}: complements names an unknown series {name}")
+    _check_versions_and_overrides(documents)
     return documents
 
 

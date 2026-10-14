@@ -1,4 +1,4 @@
-# 0009. Access is the last filter: a document the asker may not read still replaces its series
+# 0010. Access is the last filter: a document the asker may not read still replaces its series
 
 - Status: Accepted
 - Date: 2026-10-14

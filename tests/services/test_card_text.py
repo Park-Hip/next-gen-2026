@@ -23,13 +23,24 @@ def test_answer_card_wording(personas, documents):
     s = scope(persona, date(2026, 10, 7), documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
-    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=c2.text, text="Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.")
+    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=c2.text)
     lines = render(card, s, (point,), (c2,))
     assert lines == (
         "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.",
-        "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.",
+        '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."',
         "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.",
     )
+
+
+def test_answer_card_shows_the_folded_quote_once_per_distinct_quote(personas, documents):
+    persona = personas["minh"]
+    s = scope(persona, date(2026, 10, 7), documents)
+    c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
+    card = Card("answer", persona.hr, (c2,), ())
+    spaced = "  Nhân sự GameCo được nghỉ phép năm\n14 ngày mỗi năm.  "
+    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=spaced)
+    lines = render(card, s, (point, point), (c2,))
+    assert lines[1] == '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'
 
 
 def test_conflict_card_wording(personas, documents):
@@ -40,7 +51,7 @@ def test_conflict_card_wording(personas, documents):
     g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
     p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
     card = Card("conflict", persona.hr, (g1,), ((group, payco),))
-    marker = Point(chunks=("LEAVE-GROUP-v1#1",), quote=g1.text, text="LLM TEXT MUST NOT APPEAR")
+    marker = Point(chunks=("LEAVE-GROUP-v1#1",), quote="MODEL QUOTE MUST NOT APPEAR")
     lines = render(card, s, (marker,), (g1, p1))
     assert lines == (
         "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.",
@@ -49,7 +60,7 @@ def test_conflict_card_wording(personas, documents):
         'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."',
         "Vui lòng hỏi HR PayCo.",
     )
-    assert all("LLM TEXT" not in line for line in lines)
+    assert all("MODEL QUOTE" not in line for line in lines)
 
 
 def test_refusal_card_wording(personas, documents):

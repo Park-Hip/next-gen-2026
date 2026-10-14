@@ -518,7 +518,7 @@ None of them may appear in the Mission 1 document as a promise.
 | LLM judge for faithfulness | About 45 answers on the 30-case set can be read by hand; a judge adds a second model to trust | V1 |
 | Latency target | No decision depends on it in v1; it is only logged | V1 |
 | Asking each test row in 3 phrasings (as written, paraphrase, "văn nói") | The Gemini free-tier rate limit; test the main wording of each row first (Hiep, 14/10/2026) | A2, V1 |
-| A document that applies only to some roles of a unit | `access` is who may read, never who the document is for (ADR 0009); applicability by role would be a separate field | M0, P7 |
+| A document that applies only to some roles of a unit | `access` is who may read, never who the document is for (ADR 0010); applicability by role would be a separate field | M0, P7 |
 | Running each test case 3 times, one wrong run failing the case | The Gemini free-tier rate limit; each case runs once in Mission 2 (Hiep, 14/10/2026) | V4 |
 | Naive-RAG baseline: the same retriever and LLM over all documents with the rules switched off, to measure the Section 1 prediction | Not part of the MVP; the document keeps the naive-RAG failure as a hedged prediction ("dễ xếp") | RV10 (reverses V5) |
 | Pilot with real employees measuring the user outcome (answered without HR, refusal and conflict rate, confirmed reports) | After Mission 2; the document only includes what the MVP does | RV9 (reverses RV3) |

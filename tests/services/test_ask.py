@@ -37,13 +37,13 @@ class CountingAnswerer:
 
 def _row1_reply(documents):
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
-    point = Point(chunks=(c2.id,), quote=c2.text, text="Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.")
+    point = Point(chunks=(c2.id,), quote=c2.text)
     return Reply(retrieved=(c2.id,), points=(point,), raw="{}")
 
 
 def test_ask_is_card_for_answer_plus_render(personas, documents):
     g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
-    conflict_point = Point(chunks=(g1.id,), quote=g1.text, text="LLM TEXT MUST NOT APPEAR")
+    conflict_point = Point(chunks=(g1.id,), quote=g1.text)
     cases = [
         (scope(personas["minh"], AS_OF, documents), _row1_reply(documents)),               # answer card (row 1)
         (scope(personas["ha"], AS_OF, documents),
@@ -94,3 +94,16 @@ def test_cache_evicts_the_least_recently_used(personas, documents):
     assert ask(s, "a", answerer, cache).cache_hit is True
     assert ask(s, "b", answerer, cache).cache_hit is False
     assert answerer.calls == 4
+
+
+def test_ask_never_shows_text_the_model_added(personas, documents):
+    # Issue #47: a one-word quote used to carry an invented sentence onto the card.
+    # Pydantic drops a stray "text" at parse time; here the point has no such field at all.
+    s = scope(personas["minh"], AS_OF, documents)
+    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote="ngày")
+    reply = Reply(retrieved=("LEAVE-GAMECO-v2#2",), points=(point,), raw="{}")
+    asked = ask(s, "q", CountingAnswerer(reply))
+    assert asked.card.kind == "answer"
+    assert asked.lines[1] == '"ngày"'
+    assert asked.lines[2].startswith("Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2")
+    assert not hasattr(point, "text")

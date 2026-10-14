@@ -2,7 +2,7 @@
 
 Deterministic rules decide access, validity, applicability and precedence; nothing here
 reads the question and nothing calls an LLM. Ported from adopted_rules.py, with one change
-(ADR 0009): access is the last filter, so a document the asker may not read still replaces
+(ADR 0010): access is the last filter, so a document the asker may not read still replaces
 its series and never brings the replaced one back.
 """
 from datetime import date
@@ -52,7 +52,7 @@ def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
     """Steps 1-4: documents in force, applying to the asker and not replaced, then those the asker
     may read, plus the conflict pairs. Never reads the question.
 
-    Order: validity, applicability, precedence, access (ADR 0009). Access never decides which
+    Order: validity, applicability, precedence, access (ADR 0010). Access never decides which
     rule applies, so a restricted document that replaces a series leaves the asker with neither."""
     current = [d for d in in_force(documents, as_of) if applies(d, persona)]
     beaten = {d.overrides for d in current if d.overrides is not None}
