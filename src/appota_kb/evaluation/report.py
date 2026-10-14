@@ -1,4 +1,4 @@
-"""Generate the test report, the review sheet and Hiep's review skeleton from a run.
+"""Generate the test report from a run, with the review sheet and Hiep's review skeleton (review.py).
 
 Run by hand: `python -m eval.report results/<run_id>.jsonl`. It reads the results file
 offline, scores it, prints the gates, writes the review sheet, creates the review YAML
@@ -11,56 +11,28 @@ import json
 import sys
 from pathlib import Path
 
-import yaml
-
 from appota_kb.core.config import load_config
 from appota_kb.core.paths import RESULTS, ROOT
-from appota_kb.integrations.data_files import cases_sha256, load_org, load_personas, load_test_cases
-from appota_kb.evaluation.score import (
-    CHECKS,
-    Gate,
-    RowScore,
-    faithful_of,
-    gates,
-    load_run,
-    score_all,
-    verdicts,
+from appota_kb.evaluation.review import (
+    CARD_LABEL,
+    KIND_LABEL,
+    build_review_sheet,
+    lesson_of,
+    load_reviews,
+    review_skeleton,
 )
+from appota_kb.evaluation.score import CHECKS, Gate, RowScore, gates, load_run, score_all, verdicts
+from appota_kb.integrations.data_files import cases_sha256, load_org, load_personas, load_test_cases
 
 REPORT_PATH = ROOT / "docs" / "mission2" / "test_report.md"
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
 LIMITATION_ISSUES = {15: "#24"}
 
-KIND_LABEL = {"good": "good", "hard": "hard", "limitation": "limitation"}
-CARD_LABEL = {"answer": "Trả lời", "conflict": "Mâu thuẫn", "refusal": "Từ chối"}
-
 
 def _cell(text) -> str:
     """Escape a markdown table cell: pipes and newlines."""
     return str(text).replace("|", "\\|").replace("\n", "<br>")
-
-
-def review_skeleton(run_id: str, rows: list[dict]) -> str:
-    """The review YAML Hiep fills in: faithful (answer cards) and lesson (every row)."""
-    lines = [
-        f"# Hiep's reading of run {run_id} (decision D6). faithful: yes or no, answer cards only. "
-        "lesson: in Vietnamese.",
-    ]
-    for row in rows:
-        lines.append(f"- row: {row['id']}")
-        lines.append("  faithful:")
-        lines.append("  lesson:")
-        lines.append("  note:")
-    return "\n".join(lines) + "\n"
-
-
-def load_reviews(path: Path) -> dict:
-    """The review YAML as {row_id: entry}; an empty faithful is None."""
-    if not path.exists():
-        return {}
-    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or []
-    return {entry["row"]: entry for entry in raw}
 
 
 def _failures(score: RowScore) -> list[str]:
@@ -207,7 +179,7 @@ def build_report(
             f"{KIND_LABEL[row['kind']]}; {row['persona']}, {row['as_of']}; "
             f"{row['questions'][0]}"
         )
-        lesson = _lesson(reviews.get(row["id"]))
+        lesson = lesson_of(reviews.get(row["id"]))
         out.append(
             f"| {row['id']} | {_cell(situation)} | {_cell(row['expected_answer'])} | "
             f"{_cell(_actual(score))} | {_cell(marks[row['id']] or '—')} | {_cell(lesson)} |"
@@ -298,53 +270,6 @@ def _gate_result(gate: Gate) -> str:
     if gate.passed is None:
         return "[chờ Hiệp]"
     return "Đạt" if gate.passed else "Chưa đạt"
-
-
-def _lesson(review: dict | None) -> str:
-    if not review:
-        return "[chờ Hiệp]"
-    lesson = review.get("lesson")
-    return lesson.strip() if isinstance(lesson, str) and lesson.strip() else "[chờ Hiệp]"
-
-
-def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> str:
-    """The sheet Hiep reads: per row the question, expectation, card, raw reply and points."""
-    out = [f"# Review sheet for run {run_id}", ""]
-    out.append("Read every answer card against the cited chunks; mark `faithful` in the review YAML.")
-    out.append("")
-    for score in scores:
-        row = score.row
-        out.append(f"## Row {row['id']} ({KIND_LABEL[row['kind']]}, {CARD_LABEL[row['card']]})")
-        out.append("")
-        out.append(f"- Question: {row['questions'][0]}")
-        out.append(f"- Kỳ vọng: {row['expected_answer']}")
-        if score.record is None:
-            out.append("- Kết quả: chỉ có lỗi, không có thẻ.")
-            out.append("")
-            continue
-        card = score.record.get("card")
-        lines = card.get("lines") or [] if card else []
-        out.append("- Thẻ:")
-        for line in lines:
-            out.append(f"  - {line}")
-        out.append(f"- Raw reply: {score.record.get('raw') or '(empty)'}")
-        points = score.record.get("points")
-        if points:
-            out.append("- Points:")
-            for point in points:
-                out.append(f"  - text: {point['text']}")
-                out.append(f"    quote: {point['quote']}")
-                for cid in point.get("chunks", []):
-                    full = score.record.get("retrieved_text") or {}
-                    out.append(f"    chunk {cid}: {full.get(cid, '(not retrieved)')}")
-        elif points is None:
-            out.append("- Points: malformed output.")
-        failed = [name for name in CHECKS if name in score.checks and not score.checks[name]]
-        out.append("- Checks: " + (", ".join(f"{name}: FAIL" for name in failed) if failed else "all applied checks pass"))
-        out.append(f"- Faithful: {faithful_of(reviews.get(row['id'])) or '[chờ Hiệp]'}")
-        out.append(f"- Lesson: {_lesson(reviews.get(row['id']))}")
-        out.append("")
-    return "\n".join(out).rstrip() + "\n"
 
 
 def _print_summary(rows: list[dict], scores: list[RowScore], gate_list: list[Gate], marks: dict) -> None:
