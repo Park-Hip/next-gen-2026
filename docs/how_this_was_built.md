@@ -6,7 +6,9 @@ Mission 2 does not submit the evidence log, so this page is its public summary.
 
 ## Responsibility
 
-[Hiep writes this section in his own words.]
+I made every decision and technical choice in this system.
+AI tools drafted, researched and wrote code under my direction.
+I reviewed the content of every issue, every implementation plan and every pull request before it went ahead.
 
 ## Tools and models
 
@@ -22,8 +24,6 @@ Two separate uses of AI: the tools that built the project, and the models inside
 | Pi, as `researcher` subagents | Agnes 2.5 Flash, at max reasoning | Web search lanes for the four technical research questions; Claude then opened every source itself |
 | Lavish | None | Hiep's review notes, written directly on the draft plan |
 | GitHub Actions | None | Runs the test suite on every PR |
-
-[Hiep to confirm: the session list also shows Agnes 2.5 Flash sessions on 14/10 that the log does not describe, and one Pi session on 13/10 that called OpenAI models (`gpt-6.1-sol`, `gpt-5.6-sol`).]
 
 Every unit, person, document and number in the data is simulated ("giả lập"); no real Appota data and no personal data was given to any AI tool.
 
