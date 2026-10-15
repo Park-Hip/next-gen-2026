@@ -91,14 +91,14 @@ Mission 1 đã đặt ra: chỉ một câu trả lời nguy hiểm là đủ bá
 
 | Điều khiến thay đổi | Mission 1 → v1 | Chi tiết |
 |---|---|---|
-| 🧪 Một ca kiểm thử | ~~Lọc quyền xem trước "dùng thay"~~ → **kiểm quyền xem sau cùng**: một bản mới bị hạn chế đã làm quy định Tập đoàn cũ quay lại với Minh | [Quyết định](docs/decisions/0010-access-never-decides-precedence.md) |
-| 📖 Đọc lần chạy thật đầu tiên | ~~Thẻ hiện câu AI viết~~ → **thẻ hiện nguyên văn đoạn trích đã kiểm**: một câu AI viết đã bỏ mất điều kiện "chính thức" | [Quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md) |
-| 🔬 Nghiên cứu | ~~Chỉ kiểm mã đoạn được dẫn~~ → **kiểm cả đoạn trích nguyên văn**: mã đúng chưa chứng minh ý đó nói đúng điều văn bản nói | [Quyết định](docs/decisions/0003-gemini-38-flash-enum-citations-quote-check.md) |
-| 💸 Gói miễn phí Gemini | ~~`gemini-3.8-flash`~~ → **`gemini-3.5-flash-lite`**: bản đầu chỉ cho 20 yêu cầu một ngày và báo lỗi quá tải | [Quyết định](docs/decisions/0008-gemini-35-flash-lite-at-medium.md) |
-| 💸 Gói miễn phí Gemini | ~~Mỗi ca 3 cách hỏi, chạy nhiều lần~~ → **mỗi ca hỏi một lần**, dùng chung giới hạn với demo | [Quyết định](docs/decisions/0006-own-harness-one-run-main-wording.md) |
-| ✂️ Phạm vi Mission 2 | ~~Nút "Báo sai", trang cho chủ sở hữu, ghi nhận mâu thuẫn~~ → **không làm**: ít giá trị cho Mission 2, và máy chủ miễn phí mất tệp mỗi lần khởi động lại | [Quyết định](docs/decisions/0004-render-free-singapore-no-bao-sai.md), [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) |
-| ✂️ Phạm vi Mission 2 | ~~Theo dõi context recall~~ → **không đo**: quá sớm với 10 văn bản giả lập | [Quyết định](docs/decisions/0007-defer-context-recall.md) |
-| 📋 Đề Mission 2 | ~~10 ca kiểm thử~~ → **18 ca**: đề cần ca làm tốt, ca khó, ca thất bại; thêm 3 lỗi tìm thấy khi thử hệ thống thật | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
+| Một ca kiểm thử | ~~Lọc quyền xem trước "dùng thay"~~ → **kiểm quyền xem sau cùng**: một bản mới bị hạn chế đã làm quy định Tập đoàn cũ quay lại với Minh | [Quyết định](docs/decisions/0010-access-never-decides-precedence.md) |
+| Đọc lần chạy thật đầu tiên | ~~Thẻ hiện câu AI viết~~ → **thẻ hiện nguyên văn đoạn trích đã kiểm**: một câu AI viết đã bỏ mất điều kiện "chính thức" | [Quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md) |
+| Nghiên cứu | ~~Chỉ kiểm mã đoạn được dẫn~~ → **kiểm cả đoạn trích nguyên văn**: mã đúng chưa chứng minh ý đó nói đúng điều văn bản nói | [Quyết định](docs/decisions/0003-gemini-38-flash-enum-citations-quote-check.md) |
+| Gói miễn phí Gemini | ~~`gemini-3.8-flash`~~ → **`gemini-3.5-flash-lite`**: bản đầu chỉ cho 20 yêu cầu một ngày và báo lỗi quá tải | [Quyết định](docs/decisions/0008-gemini-35-flash-lite-at-medium.md) |
+| Gói miễn phí Gemini | ~~Mỗi ca 3 cách hỏi, chạy nhiều lần~~ → **mỗi ca hỏi một lần**, dùng chung giới hạn với demo | [Quyết định](docs/decisions/0006-own-harness-one-run-main-wording.md) |
+| Phạm vi Mission 2 | ~~Nút "Báo sai", trang cho chủ sở hữu, ghi nhận mâu thuẫn~~ → **không làm**: ít giá trị cho Mission 2, và máy chủ miễn phí mất tệp mỗi lần khởi động lại | [Quyết định](docs/decisions/0004-render-free-singapore-no-bao-sai.md), [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) |
+| Phạm vi Mission 2 | ~~Theo dõi context recall~~ → **không đo**: quá sớm với 10 văn bản giả lập | [Quyết định](docs/decisions/0007-defer-context-recall.md) |
+| Đề Mission 2 | ~~10 ca kiểm thử~~ → **18 ca**: đề cần ca làm tốt, ca khó, ca thất bại; thêm 3 lỗi tìm thấy khi thử hệ thống thật | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
 
 Mọi lời hứa của Mission 1 và trạng thái của từng lời hứa: [`docs/mission2/mission1_promises.md`](docs/mission2/mission1_promises.md).
 
@@ -121,27 +121,25 @@ flowchart LR
     style card fill:#ffebee,stroke:#c62828,color:#1b1b1b
 ```
 
-**Dễ sai nhất là hai dòng 🔴 đầu bảng**, vì câu trả lời sai trông giống hệt câu trả lời đúng.
+**Dễ sai nhất là hai dòng đầu bảng**, vì câu trả lời sai trông giống hệt câu trả lời đúng; ba dòng sau sai nhưng an toàn, vì người hỏi được chuyển tới HR.
 
-🔴 sai mà trông như đúng · 🟢 sai nhưng an toàn: người hỏi được chuyển tới HR
-
-| | Rủi ro | Do ai | Phát hiện | Kiểm soát hiện nay | Đã thấy ở |
+| Hậu quả | Rủi ro | Do ai | Phát hiện | Kiểm soát hiện nay | Đã thấy ở |
 |---|---|---|---|---|---|
-| 🔴 | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ chỉ hiện đoạn trích đã kiểm cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
-| 🔴 | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
-| 🟢 | Từ chối dù đã tìm thấy điều khoản trả lời | AI | Ca kiểm thử và thử tay | Mục tiêu tối đa 10% từ chối nhầm | Ca 16, lúc có lúc không ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) |
-| 🟢 | Thẻ mâu thuẫn dù hai văn bản nói giống nhau | Thiết kế | Thử tay | Thẻ trích cả hai bên và chuyển HR | Ca 17 ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) |
-| 🟢 | Công ty sửa một điều khoản làm mất cả quy định Tập đoàn | Thiết kế | Ca kiểm thử | Từ chối và chuyển HR | Ca 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
+| Sai mà trông như đúng | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ chỉ hiện đoạn trích đã kiểm cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
+| Sai mà trông như đúng | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
+| An toàn | Từ chối dù đã tìm thấy điều khoản trả lời | AI | Ca kiểm thử và thử tay | Mục tiêu tối đa 10% từ chối nhầm | Ca 16, lúc có lúc không ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) |
+| An toàn | Thẻ mâu thuẫn dù hai văn bản nói giống nhau | Thiết kế | Thử tay | Thẻ trích cả hai bên và chuyển HR | Ca 17 ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) |
+| An toàn | Công ty sửa một điều khoản làm mất cả quy định Tập đoàn | Thiết kế | Ca kiểm thử | Từ chối và chuyển HR | Ca 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
 
 **Rò rỉ không nằm trong bảng vì có hai lớp chặn:** luật lọc văn bản trước khi tìm kiếm, và bước tìm kiếm báo lỗi nếu trả về đoạn nào ngoài phạm vi.
 Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi câu hỏi, rồi thêm 7 biến đổi dữ liệu bẫy, và không đoạn nào ngoài phạm vi lọt ra; lần chạy cuối có 0 rò rỉ trong 18 ca.
 
 **Một rủi ro được phát hiện và kiểm soát ra sao ([#47](https://github.com/Park-Hip/next-gen-2026/issues/47)):**
 
-1. 👀 **Phát hiện:** đọc lần chạy thật đầu tiên, ca 5 trích "Nhân sự **chính thức** của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.", nhưng thẻ hiện câu AI viết "Bạn được nghỉ phép năm 12 ngày mỗi năm."
-2. 🔁 **Tái hiện:** không luật nào kiểm câu AI viết; một ý chỉ trích đúng chữ "ngày" kèm câu bịa "30 ngày" vẫn ra thẻ trả lời với dòng nguồn thật.
-3. 🔧 **Sửa bằng luật:** thẻ hiện đoạn trích đã kiểm, không bao giờ hiện câu AI viết ([quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md)).
-4. 🔒 **Khóa lại:** bài kiểm thử `test_ask_never_shows_text_the_model_added` giữ điều đó.
+1. **Phát hiện:** đọc lần chạy thật đầu tiên, ca 5 trích "Nhân sự **chính thức** của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.", nhưng thẻ hiện câu AI viết "Bạn được nghỉ phép năm 12 ngày mỗi năm."
+2. **Tái hiện:** không luật nào kiểm câu AI viết; một ý chỉ trích đúng chữ "ngày" kèm câu bịa "30 ngày" vẫn ra thẻ trả lời với dòng nguồn thật.
+3. **Sửa bằng luật:** thẻ hiện đoạn trích đã kiểm, không bao giờ hiện câu AI viết ([quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md)).
+4. **Khóa lại:** bài kiểm thử `test_ask_never_shows_text_the_model_added` giữ điều đó.
 
 ## Try it
 
