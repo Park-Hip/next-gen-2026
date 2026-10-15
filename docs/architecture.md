@@ -209,7 +209,7 @@ Documents are split into one chunk per "Điều", or per line for the procedure,
 
 ## Module map
 
-All code is in `src/appota_kb/`; the folder layout is in the [README](../README.md#layout).
+All code is in `src/appota_kb/`; the folder layout is in [`development.md`](development.md#repository-layout).
 
 | Step | Code | Tests | Settings and decisions |
 |---|---|---|---|
