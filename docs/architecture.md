@@ -17,43 +17,57 @@ What the AI can still get wrong is choosing which clause in the scope answers th
 ## The 7 steps
 
 ```mermaid
-flowchart TD
-    inputs["Documents with metadata, the as-of date, and the asker's unit and roles"]
-
-    subgraph rules1["Rules only: no AI, the question is not read"]
-        s1["1. Keep each policy's version in force on the as-of date"]
-        s2["2. Keep what applies to the asker's unit"]
-        s3["3. Drop a policy that a kept policy declares it is used instead of; then keep only what the asker may read"]
-        s4["4. Mark conflict pairs: same topic, no declared relation"]
-        s1 --> s2 --> s3 --> s4
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 400
+---
+flowchart TB
+    subgraph before[" "]
+        direction LR
+        inputs(["Documents<br/>with metadata,<br/>the as-of date,<br/>the asker's unit<br/>and roles"])
+        subgraph rules1["Rules only: no AI, the question is not read"]
+            direction LR
+            s1["1. Keep each policy's<br/>version in force<br/>on the as-of date"]
+            s2["2. Keep what<br/>applies to the<br/>asker's unit"]
+            s3["3. Apply declared<br/>replacements, then keep<br/>what the asker may read"]
+            s4["4. Mark conflict pairs:<br/>same topic, no<br/>declared relation"]
+            s1 --> s2 --> s3 --> s4
+        end
+        inputs --> rules1
     end
 
-    scope[("The asker's scope: documents, chunks, conflict pairs")]
-    question["Question"]
-
-    subgraph ai["AI reads language, inside the scope only"]
-        s5["5. Hybrid search: keyword BM25 and embeddings, fused; the top 5 chunks"]
-        s6["6. The LLM answers in points; each point cites retrieved chunk ids and quotes the clause word for word"]
-        s5 --> s6
+    subgraph after[" "]
+        direction LR
+        question(["The<br/>question"])
+        subgraph ai["AI, inside the scope only"]
+            direction LR
+            s5["5. Hybrid<br/>search, BM25<br/>and embeddings:<br/>top 5 chunks"]
+            s6["6. The LLM<br/>cites chunks,<br/>quotes clauses<br/>word for word"]
+            s5 --> s6
+        end
+        subgraph rules2["Rules again: no AI"]
+            direction LR
+            s7["7. Check<br/>every citation<br/>and quote,<br/>pick the card"]
+            cards["Answer,<br/>conflict or<br/>refusal card:<br/>no AI text"]
+            s7 --> cards
+        end
+        question --> ai --> rules2
     end
 
-    subgraph rules2["Rules again: no AI"]
-        s7["7. Check every citation and quote, then pick the card"]
-    end
+    before -- "the asker's scope and conflict pairs" --> after
 
-    inputs --> rules1
-    rules1 --> scope
-    scope --> ai
-    question --> ai
-    ai --> rules2
-    scope -. conflict pairs .-> rules2
-    rules2 --> answer["Answer card: the verified quotes and their source"]
-    rules2 --> conflict["Conflict card: both clauses quoted, no LLM text"]
-    rules2 --> refusal["Refusal card: one text, the asker's HR contact"]
-
-    style rules1 fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
-    style rules2 fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
-    style ai fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
+    classDef rule fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
+    classDef llm fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
+    class s1,s2,s3,s4,s7,cards rule
+    class s5,s6 llm
+    style rules1 fill:transparent,stroke:#2e7d32
+    style rules2 fill:transparent,stroke:#2e7d32
+    style ai fill:transparent,stroke:#ef6c00
+    style before fill:transparent,stroke:transparent
+    style after fill:transparent,stroke:transparent
 ```
 
 The question enters only at step 5.
