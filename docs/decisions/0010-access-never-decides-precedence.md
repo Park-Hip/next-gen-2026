@@ -32,8 +32,10 @@ A restricted document that replaces a series leaves the asker with neither docum
 
 ## Reasons
 
-[chờ Hiệp]
-Hiep approved the recommendation on issue #48 ("Approve, implement.") without giving reasons; they are his to write.
+Access decides who may read a document, not which rule applies.
+Hiding the current version must not bring back an old one; sending the asker to HR is safer.
+
+Drafted by AI; approved by Hiep on 15/10/2026 (issue #48).
 
 ## Consequences
 

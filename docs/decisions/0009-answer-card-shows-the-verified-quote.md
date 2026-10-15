@@ -32,9 +32,10 @@ There is no minimum quote length.
 
 ## Reasons
 
-[chờ Hiệp]
+The card shows only what step 7 checked.
+If the model's sentence sat next to the quote, it could still add a fact or drop a condition such as "chính thức".
 
-Hiep approved the plan on issue #47 with "approve" and gave no reasons in his own words yet.
+Drafted by AI; approved by Hiep on 15/10/2026 (issue #47).
 
 ## Consequences
 
