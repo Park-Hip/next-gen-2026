@@ -36,6 +36,17 @@ def _cell(text) -> str:
     return str(text).replace("|", "\\|").replace("\n", "<br>")
 
 
+def _write_lf(path: Path, text: str) -> None:
+    """Write `text` with LF endings on every OS.
+
+    Path.write_text opens in default text mode, which Python on Windows uses to
+    translate ``\n`` to CRLF; newline="\\n" keeps the written file LF-only so git's
+    `eol=lf` normalisation does not warn.
+    """
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+
+
 def failures(score: RowScore) -> list[str]:
     out = [name for name in CHECKS if name in score.checks and score.checks[name] is False]
     for flag, name in (
@@ -289,6 +300,10 @@ def _print_summary(rows: list[dict], scores: list[RowScore], gate_list: list[Gat
 
 
 def main(argv: list[str]) -> int:
+    # The summary is Vietnamese; a Windows console's cp1252 cannot encode it, so print
+    # as UTF-8 instead of raising UnicodeEncodeError on the first non-ASCII character.
+    if sys.stdout is not None and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     if len(argv) != 2:
         sys.stderr.write("usage: python -m appota_kb.evaluation.report results/<run_id>.jsonl\n")
         return 2
@@ -310,17 +325,17 @@ def main(argv: list[str]) -> int:
     _print_summary(rows, scores, gate_list, marks)
 
     review_md = RESULTS / f"{run_id}.review.md"
-    review_md.write_text(build_review_sheet(run_id, scores, reviews), encoding="utf-8")
+    _write_lf(review_md, build_review_sheet(run_id, scores, reviews))
 
     review_yaml = RESULTS / f"{run_id}.review.yaml"
     if not review_yaml.exists():
-        review_yaml.write_text(review_skeleton(run_id, rows), encoding="utf-8")
+        _write_lf(review_yaml, review_skeleton(run_id, rows))
 
     results_rel = f"results/{run_id}.jsonl"
     complete = all(s.record is not None for s in scores)
     if complete:
         report = build_report(run_id, results_rel, records, rows, scores, reviews, config.eval, personas)
-        REPORT_PATH.write_text(report, encoding="utf-8")
+        _write_lf(REPORT_PATH, report)
         print("Report written to docs/mission2/test_report.md")
     else:
         missing = [s.row["id"] for s in scores if s.record is None]

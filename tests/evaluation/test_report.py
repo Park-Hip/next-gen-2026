@@ -7,7 +7,7 @@ from fakes import no_points, reply_citing
 from appota_kb.core.paths import ROOT
 from appota_kb.evaluation.committed import report_run_path
 import appota_kb.evaluation.report as report_mod
-from appota_kb.evaluation.report import REPORT_REL, build_report
+from appota_kb.evaluation.report import REPORT_REL, _write_lf, build_report
 from appota_kb.evaluation.report import main as report_main
 from appota_kb.evaluation.review import load_reviews
 from appota_kb.evaluation.run import run
@@ -49,6 +49,15 @@ def test_report_on_full_fake_run(cases, personas, documents, tmp_path, monkeypat
         assert column in report_text
     assert "[chờ Hiệp]" in report_text
     assert "Bài học hàng 1." in report_text
+    # The report and the review sheet stay LF-only on every OS (issue #60).
+    assert b"\r\n" not in review_md.read_bytes()
+    assert b"\r\n" not in (tmp_path / "test_report.md").read_bytes()
+
+
+def test_write_lf_uses_lf_line_endings(tmp_path):
+    path = tmp_path / "r.review.md"
+    _write_lf(path, "đạt\nlỗi\n")
+    assert path.read_bytes() == "đạt\nlỗi\n".encode("utf-8")
 
 
 def test_report_incomplete_writes_nothing(cases, personas, documents, tmp_path, monkeypatch):

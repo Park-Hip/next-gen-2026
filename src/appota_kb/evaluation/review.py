@@ -75,7 +75,11 @@ def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> st
             out.append("- Points: malformed output.")
         failed = [name for name in CHECKS if name in score.checks and not score.checks[name]]
         out.append("- Checks: " + (", ".join(f"{name}: FAIL" for name in failed) if failed else "all applied checks pass"))
-        out.append(f"- Faithful: {faithful_of(reviews.get(row['id'])) or '[chờ Hiệp]'}")
-        out.append(f"- Lesson: {lesson_of(reviews.get(row['id']))}")
+        if card and card["kind"] == "answer":
+            faithful = faithful_of(reviews.get(row["id"])) or "[chờ Hiệp]"
+        else:
+            faithful = "-"
+        out.append(f"- Faithful: {faithful}")
+        out.append(f"- Lesson: {lesson_of(reviews.get(row["id"]))}")
         out.append("")
     return "\n".join(out).rstrip() + "\n"
