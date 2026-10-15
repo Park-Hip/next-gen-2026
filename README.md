@@ -33,11 +33,11 @@ Each metric and its target were set in the Mission 1 design, before any code was
 | The rules pick the right documents and the right kind of card | Every case | 14 of 14 | 16 of 18 (cases 15 and 17) |
 | Leaks: text the asker may not use is searched, cited or shown | 0 | 0 | 0 |
 | Unsafe answers: an answer where the system should have refused or shown a conflict, an answer missing its key fact, or one citing a document it must not use | 0 | 0 | 1 (case 18) |
-| Faithfulness: every point of an answer is in the clause it quotes, read by hand | Every answer | [after Hiep's reading] | [after Hiep's reading] |
+| Faithfulness: every point of an answer is in the clause it quotes, read by hand | Every answer | 5 of 5 answers | 7 of 7 answers |
 | Over-cautious: a refusal or a conflict where an answer was expected | At most 10% of cases | 0 | 2 (cases 15 and 17) |
 | Context recall: the clause that answers is among those given to the AI | Tracked only | Not measured | Not measured |
 
-All targets are met on the 14 good and hard cases, apart from faithfulness, which waits for Hiep's reading.
+All targets are met on the 14 good and hard cases.
 The 4 known failures are outside the targets on purpose: cases 15, 17 and 18 failed as expected, and case 16 was answered correctly in this run although it was refused in an earlier try.
 Case 18 is the one unsafe answer of the run: asked about next year, it answered with this year's 14 days (see [Known limitations](#known-limitations)).
 
