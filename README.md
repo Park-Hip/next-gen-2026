@@ -63,15 +63,39 @@ The cases themselves, each with why it is tested, are in [`data/test_cases.yaml`
 Luật cố định quyết định người hỏi được dùng văn bản nào, trước khi AI đọc câu hỏi.
 
 ```mermaid
-flowchart LR
-    who["Người hỏi và ngày"] --> rules["<b>Luật, không AI</b><br/>bản đang hiệu lực<br/>đúng đơn vị, được xem<br/>đã tính 'dùng thay'"]
-    rules --> ai["<b>AI, chỉ trong phạm vi đó</b><br/>trích nguyên văn hoặc từ chối"]
-    q["Câu hỏi"] --> ai
-    ai --> check["<b>Luật, không AI</b><br/>kiểm từng đoạn trích"]
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 400
+    diagramPadding: 8
+---
+flowchart TB
+    subgraph before[" "]
+        direction LR
+        who(["Người hỏi<br/>và ngày"]) --> rules["`**Luật, không AI**
+        bản đang hiệu lực,
+        đúng đơn vị, được xem,
+        đã tính 'dùng thay'`"]
+    end
+
+    subgraph after[" "]
+        direction LR
+        q(["Câu hỏi"]) --> ai["`**AI, chỉ trong phạm vi đó**
+        trích nguyên văn
+        hoặc từ chối`"]
+        ai --> check["`**Luật, không AI**
+        kiểm từng đoạn trích`"]
+    end
+
+    before --> after
 
     style rules fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
     style check fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
     style ai fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
+    style before fill:transparent,stroke:transparent
+    style after fill:transparent,stroke:transparent
 ```
 
 | Nếu điều này đúng | thì | Lần chạy cuối, 14 ca tốt và khó |
@@ -110,15 +134,40 @@ Mọi lời hứa của Mission 1 và trạng thái của từng lời hứa: [`
 Luật không tự sai: chúng làm đúng theo thông tin của văn bản, nên sai khi thông tin đó sai.
 
 ```mermaid
-flowchart LR
-    rules["<b>Luật</b><br/>chỉ sai khi thông tin<br/>khai báo sai"] --> search["<b>Tìm kiếm</b><br/>bỏ sót đoạn trả lời<br/>→ từ chối, an toàn"]
-    search --> ai["<b>AI</b><br/>trích đúng câu<br/>nhưng sai câu hỏi"]
-    ai --> card["<b>Thẻ</b><br/>trông như đúng"]
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 400
+    diagramPadding: 8
+---
+flowchart TB
+    subgraph before[" "]
+        direction LR
+        rules["`**Luật**
+        chỉ sai khi thông tin
+        khai báo sai`"] --> search["`**Tìm kiếm**
+        bỏ sót đoạn trả lời
+        → từ chối, an toàn`"]
+    end
+
+    subgraph after[" "]
+        direction LR
+        ai["`**AI**
+        trích đúng câu
+        nhưng sai câu hỏi`"] --> card["`**Thẻ**
+        trông như đúng`"]
+    end
+
+    before --> after
 
     style rules fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
     style search fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
     style ai fill:#ffebee,stroke:#c62828,color:#1b1b1b
     style card fill:#ffebee,stroke:#c62828,color:#1b1b1b
+    style before fill:transparent,stroke:transparent
+    style after fill:transparent,stroke:transparent
 ```
 
 **Dễ sai nhất là hai dòng đầu bảng**, vì câu trả lời sai trông giống hệt câu trả lời đúng; ba dòng sau sai nhưng an toàn, vì người hỏi được chuyển tới HR.
@@ -162,17 +211,47 @@ Two more pages call no AI model.
 The key choice: rules decide which documents the asker may use before any AI reads the question.
 
 ```mermaid
-flowchart TD
-    who["The asker's unit and roles, and the date"] --> rules1
-    rules1["<b>Rules, no AI</b><br/>keep the version in force on that date and what applies to the asker's unit,<br/>apply declared replacements, keep what the asker may read,<br/>mark conflicting policies"]
-    rules1 --> ai["<b>AI, inside those documents only</b><br/>search, then pick and quote the clauses that answer"]
-    question["The question"] --> ai
-    ai --> rules2["<b>Rules, no AI</b><br/>check every quote word for word against its source, then pick the card"]
-    rules2 --> cards["Answer, conflict or refusal card"]
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+    wrappingWidth: 400
+    diagramPadding: 8
+---
+flowchart TB
+    subgraph before[" "]
+        direction LR
+        who(["The asker's<br/>unit and roles,<br/>and the date"]) --> rules1["`**Rules, no AI**
+        keep the version in force on that date
+        and what applies to the asker's unit,
+        apply declared replacements,
+        keep what the asker may read,
+        mark conflicting policies`"]
+    end
+
+    subgraph after[" "]
+        direction LR
+        question(["The<br/>question"]) --> ai["`**AI, inside those**
+        **documents only**
+        search, then pick
+        and quote the clauses
+        that answer`"]
+        ai --> rules2["`**Rules, no AI**
+        check every quote
+        word for word against
+        its source, then pick
+        the answer, conflict
+        or refusal card`"]
+    end
+
+    before --> after
 
     style rules1 fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
     style rules2 fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
     style ai fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
+    style before fill:transparent,stroke:transparent
+    style after fill:transparent,stroke:transparent
 ```
 
 A wrong version, another unit's rule or a document the asker may not read cannot reach the answer, because the AI never sees it.
