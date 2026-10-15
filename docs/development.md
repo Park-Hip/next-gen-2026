@@ -1,7 +1,7 @@
 # Development
 
 Hand checks and tools for working on the repository.
-How to install, start the page and run the tests is in the [README](../README.md#chạy-trên-máy).
+How to install, start the page and run the tests is in the [README](../README.md#running-locally).
 All documents are simulated ("giả lập").
 
 ## Run the evaluation

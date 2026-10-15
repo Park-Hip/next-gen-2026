@@ -4,7 +4,7 @@ An AI assistant that gives each Appota employee the rule that applies to them: f
 NextGen AI Talent 2026, Bài test B, Mission 2.
 All company data in this repository is simulated ("giả lập"); no real Appota data is used.
 
-**[Demo trực tuyến](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video trình bày](VIDEO_URL)** [Hiep: add the video link] · **[3 câu hỏi bắt buộc](docs/mission2/answers.md)** · **[Báo cáo kiểm thử](docs/mission2/test_report.md)**
+**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](VIDEO_URL)** [Hiep: add the video link] · **[The 3 mandatory questions](docs/mission2/answers.md)** · **[Test report](docs/mission2/test_report.md)**
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
 
@@ -12,7 +12,7 @@ Same question, same day, three employees.
 Each gets the policy that applies to them, quoted with its source.
 Where two policies apply and nobody has said which one wins, the system does not guess: it quotes both and sends the employee to HR.
 
-## Bài toán
+## The problem
 
 Appota's rules exist at several levels, Group, company, department and team, and in several versions.
 A Group leave policy, a company policy that replaces it, last year's version and next year's draft read almost the same.
@@ -21,27 +21,37 @@ The same question, "Phép năm của tôi là bao nhiêu ngày?", must therefore
 
 The core loop the brief asks Mission 2 to prove: "Câu hỏi + bối cảnh người dùng → tìm đúng tri thức → sử dụng đúng phạm vi → trả lời có nguồn kiểm chứng".
 
-## Kết quả kiểm thử
+## Test results
 
 The final evaluation run, on 14/10/2026, asked all 18 test cases once, with the real model and through the same code as the demo.
 7 cases are things the product should handle well, 7 are hard or ambiguous, and 4 are known failures kept in the set on purpose.
 
-| On the 14 good and hard cases | Result |
-|---|---|
-| The rules picked the right documents for the asker | 14 of 14 |
-| Leaks: text the asker may not use was searched, cited or shown | 0 |
-| Unsafe answers: an answer where the system should have refused or shown a conflict, an answer missing its key fact, or one citing a document it must not use | 0 |
-| Over-cautious: a refusal or a conflict where an answer was expected | 0 |
-| Answer cards Hiep read against their source | [after Hiep's reading] |
+Each metric and its target were set in the Mission 1 design, before any code was written.
+
+| Metric | Mission 1 target | 14 good and hard cases | All 18, with the known failures |
+|---|---|---|---|
+| The rules pick the right documents and the right kind of card | Every case | 14 of 14 | 16 of 18 (cases 15 and 17) |
+| Leaks: text the asker may not use is searched, cited or shown | 0 | 0 | 0 |
+| Unsafe answers: an answer where the system should have refused or shown a conflict, an answer missing its key fact, or one citing a document it must not use | 0 | 0 | 1 (case 18) |
+| Faithfulness: every point of an answer is in the clause it quotes, read by hand | Every answer | [after Hiep's reading] | [after Hiep's reading] |
+| Over-cautious: a refusal or a conflict where an answer was expected | At most 10% of cases | 0 | 2 (cases 15 and 17) |
+| Context recall: the clause that answers is among those given to the AI | Tracked only | Not measured | Not measured |
+
+All targets are met on the 14 good and hard cases, apart from faithfulness, which waits for Hiep's reading.
+The 4 known failures are outside the targets on purpose: cases 15, 17 and 18 failed as expected, and case 16 was answered correctly in this run although it was refused in an earlier try.
+Case 18 is the one unsafe answer of the run: asked about next year, it answered with this year's 14 days (see [Known limitations](#known-limitations)).
 
 With 0 unsafe answers in 14 cases, the true rate of unsafe answers is below about 19% with 95% confidence.
-On a small simulated set, passing is the bar for letting real employees try it, not proof that it is safe.
-Of the 4 known failures, 3 failed as expected; the fourth was answered correctly in this run although it was refused in an earlier try, so it varies from run to run.
+On a small simulated set, meeting the first four targets is the bar for letting real employees try it, not proof that it is safe.
+
+Two things changed from the Mission 1 plan.
+Each case was asked once, not several times with one bad run failing the case, because of the rate limit of the free tier of the Gemini API.
+Context recall is not measured: it is too soon on 10 simulated documents, and it comes back with real documents.
 
 Every case in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được" is in the [test report](docs/mission2/test_report.md), generated from the committed run and never edited by hand.
 The cases themselves, each with why it is tested, are in [`data/test_cases.yaml`](data/test_cases.yaml).
 
-## Dùng thử
+## Try it
 
 Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/), pick an employee (Minh, Lan or Hà) and a date, and ask a question in Vietnamese.
 It runs on a free host that sleeps after 15 idle minutes, so the first page can take about a minute to load.
@@ -57,7 +67,7 @@ Two more pages call no AI model.
 "Dữ liệu giả lập" shows the simulated organisation, the employees and every document with its status today.
 "Tình huống kiểm thử" lists every test case with its expectation, its result in the final run and a link that asks it again.
 
-## Cách hoạt động
+## How it works
 
 The key choice: rules decide which documents the asker may use before any AI reads the question.
 
@@ -82,7 +92,7 @@ The AI is Google Gemini: `gemini-embedding-001` for search and `gemini-3.5-flash
 
 The full design, with each decision, who makes it and the same question traced step by step for all three employees, is in [`docs/architecture.md`](docs/architecture.md).
 
-## Hạn chế đã biết
+## Known limitations
 
 Known failures that stay in v1, each an open issue labelled [`limitation`](https://github.com/Park-Hip/next-gen-2026/issues?q=is%3Aissue+is%3Aopen+label%3Alimitation):
 
@@ -95,7 +105,7 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 v1 also simplifies on purpose: there is no login, so the asker is picked from three simulated employees, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
 
-## Tài liệu
+## Documentation
 
 | To see | Read |
 |---|---|
@@ -112,7 +122,7 @@ What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/sc
 | Working on the code: hand checks, the evaluation and the repository layout | [`docs/development.md`](docs/development.md) |
 | The Mission 1 design, as submitted | [`docs/mission1/submitted/`](docs/mission1/submitted/) |
 
-## Chạy trên máy
+## Running locally
 
 Requires [uv](https://docs.astral.sh/uv/), which installs Python 3.12, and, for the page, a Gemini API key from Google AI Studio; the free tier is enough.
 
