@@ -1,8 +1,20 @@
 # Development
 
 Hand checks and tools for working on the repository.
-How to install, start the page, run the tests and run the evaluation is in the [README](../README.md#running-locally).
+How to install, start the page and run the tests is in the [README](../README.md#chạy-trên-máy).
 All documents are simulated ("giả lập").
+
+## Run the evaluation
+
+Asks every row of `data/test_cases.yaml` once, through the same code as the page, then writes the report from the run.
+It needs a Gemini API key, from the environment or from a `.env` file at the repository root, which git ignores.
+
+```bash
+uv run python -m appota_kb.evaluation.run
+uv run python -m appota_kb.evaluation.report results/<run_id>.jsonl
+```
+
+One full run is 18 answer calls and 18 question embeddings, about 4% of the 500 answer calls a day the free tier of `gemini-3.5-flash-lite` allows.
 
 ## See one asker's scope by hand
 
@@ -70,3 +82,43 @@ python scripts/render_pdf.py docs/mission1/document.md build/mission1_draft.pdf
 ```
 
 The script prints the page count; the limit is 5 pages.
+
+## The README image
+
+`docs/images/same-question-three-askers.png` combines three screenshots of the answer cards on the live demo, taken on 15/10/2026 with Playwright driving Microsoft Edge.
+The screenshot script is not part of the repository; retake the image when the card design changes.
+
+## Repository layout
+
+```
+.github/            Issue forms, the PR template and the test workflow
+docs/architecture.md         How v1 answers one question
+docs/scope.md                What v1 simplifies, defers and gets wrong
+docs/how_this_was_built.md   AI tools, workflow and how results were checked
+docs/development.md          This page
+docs/images/        Images used by the README
+docs/competition/   Official brief, rules and AI policy (do not edit)
+docs/decisions/     One ADR per decision from Mission 2 on, with Hiep's reasons
+docs/research/      One write-up per research question; feeds an ADR
+docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking phase, redraft plan
+  submitted/        The exact files submitted (do not edit)
+  redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
+    checks/         Scripts that run the core model on the simulated data
+docs/mission2/      Mission 2 plan, the answers to the 3 mandatory questions (`answers.md`), the promise ledger (`mission1_promises.md`) and the generated test report
+src/appota_kb/      The installed package; `main.py` is the uvicorn factory
+  models/           Data types only, no I/O: documents, org, scope, answer, card, search hit
+  integrations/     The only code that reads `data/` (`data_files.py`) or calls Gemini (`gemini.py`)
+  services/         Steps 1-7: `scope.py` (1-4), `retrieval/` (5), `answering/` (6), `citations.py` (7), `card_text.py`, and `ask.py`, one question end to end; `guide.py` builds the judges' pages
+  api/              The pages: `page.py` and `templates/` (the question form, `/data`, `/cases`), HTTP only
+  core/             `config.py` (reads `config.yaml`) and `paths.py`
+  evaluation/       The harness: `run.py` asks each test case once, `score.py` checks offline, `report.py` and `review.py` write the report and Hiep's review files, `committed.py` reads the committed run back for the "Test cases" page
+tests/              The deterministic test suite, one folder per package folder
+results/            Committed runs: one `<run_id>.jsonl` per run plus Hiep's review files
+config.yaml         Tunable values (top k, thresholds, limits); read only through src/appota_kb/core/config.py
+render.yaml         Deploy config for the Render free web service (ADR 0004)
+.python-version     Pins Python 3.12 for Render
+data/               Simulated documents, org tree, personas and test cases as files
+evidence_log.md     AI usage log for all missions (local only, ignored by git; lives in the main checkout, not in worktrees)
+scripts/            Hand checks (`show_scope.py`, `search.py`, `answer.py`) and the document and evidence log tools
+build/              Generated output (not committed)
+```
