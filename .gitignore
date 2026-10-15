@@ -32,5 +32,6 @@ htmlcov/
 Thumbs.db
 .DS_Store
 
-# Evidence log: kept locally, not published
-evidence_log.md
+# Evidence log: the working copy at the repository root stays local;
+# docs/evidence_log.md is the published snapshot
+/evidence_log.md

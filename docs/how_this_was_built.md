@@ -2,7 +2,7 @@
 
 Who did what, which AI tools were used, and how their output was checked.
 The competition allows any AI tool but requires declaring the tools that shaped the result and how their output was verified ([`ai_policies.md`](competition/ai_policies.md)).
-Mission 2 does not submit the evidence log, so this page is its public summary.
+This page summarises the evidence log; the full log is published in [`evidence_log.md`](evidence_log.md).
 
 ## Responsibility
 
@@ -62,5 +62,5 @@ The rules for every AI agent working on the repository are in [`AGENTS.md`](../A
 
 Every AI session that changed the project has one line in the evidence log: date and time, tool and model, the task, Hiep's decision and how the result was checked.
 `scripts/ai_sessions.py` lists the recorded sessions of Pi and Claude Code, so the log can be checked against them.
-The Mission 2 log is a local file that Hiep chose not to publish (13/10/2026); he can show it in the PITCH round.
+The Mission 2 log is published as a snapshot in [`evidence_log.md`](evidence_log.md), in Vietnamese, refreshed from Hiep's local working copy before submission.
 The Mission 1 evidence log, as submitted, is in [`docs/mission1/submitted/`](mission1/submitted/).
