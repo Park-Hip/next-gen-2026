@@ -286,6 +286,7 @@ What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/sc
 | Why each design choice was made, and the options it was chosen over | [`docs/decisions/`](docs/decisions/README.md) |
 | The research behind those choices, with its sources | [`docs/research/`](docs/research/README.md) |
 | Which AI tools built this project, and how their output was checked | [`docs/how_this_was_built.md`](docs/how_this_was_built.md) |
+| The evidence log: every AI tool and prompt, the decision made and how it was checked (snapshot, in Vietnamese) | [`docs/evidence_log.md`](docs/evidence_log.md) |
 | The simulated organisation, employees, documents and test cases | [`data/`](data/README.md) |
 | Working on the code: hand checks, the evaluation and the repository layout | [`docs/development.md`](docs/development.md) |
 | The Mission 1 design, as submitted | [`docs/mission1/submitted/`](docs/mission1/submitted/) |

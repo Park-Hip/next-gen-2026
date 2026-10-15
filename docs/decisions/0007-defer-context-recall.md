@@ -33,7 +33,7 @@ Hiep, 13/10/2026: "it is too soon to measure recall in this mission and we shoul
 
 ## Consequences
 
-Drafted by Claude from Hiep's decision; to be approved by Hiep in the PR.
+Drafted by Claude from Hiep's decision; approved by Hiep when he merged PR #28 on 13/10/2026.
 
 - The issue #12 line "context recall printed for every row" became "the top 5 printed for every row", and #14 no longer tracks context recall.
 - A reader of the Mission 1 table will find "context recall" missing from the Mission 2 report; mandatory question 2 can cite this ADR as a change since Mission 1.

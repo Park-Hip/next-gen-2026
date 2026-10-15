@@ -26,7 +26,7 @@ The strongest alternative: DeepEval with only custom `BaseMetric` checks, for it
 
 ## Decision
 
-- **Harness:** `eval/run.py` calls the same `Answerer` and step 7 as the page, with no cache, and writes one JSON line per row to `results/`: persona, as-of date, question, model id, commit, retrieved ids, raw reply, card, refusal reason, latency.
+- **Harness:** `src/appota_kb/evaluation/run.py` (`eval/run.py` when this ADR was written) calls the same `Answerer` and step 7 as the page, with no cache, and writes one JSON line per row to `results/`: persona, as-of date, question, model id, commit, retrieved ids, raw reply, card, refusal reason, latency.
   A separate scoring step reads that file offline, applies the checks and generates `docs/mission2/test_report.md`; it is unit-tested in CI with fake replies.
   No evaluation library is added.
 - **Wording:** each row is asked only in its main wording, the first entry of `questions` in `data/test_cases.yaml`; the other wordings stay in the file and in the offline tests, which cost no quota.
@@ -49,12 +49,12 @@ The strongest alternative: DeepEval with only custom `BaseMetric` checks, for it
 Hiep, 14/10/2026, on runs and wordings: "Due to our constraints (the rate limit of the Gemini model), I want to ignore some rules, some promises, like every case needs to be run three times. That's not very valid now."
 And: "I want to test the main version of the tests first and we will defer the ideas of testing other paraphrasing versions of them for now."
 On the rest, Hiep took the research's recommendations: "Approve all the decisions except for the O, which is optional." (14/10/2026).
-Claude read "the O, which is optional" as the optional spot repeats (option P in the research), so no spot repeats are made; to be confirmed by Hiep in the PR.
+Claude read "the O, which is optional" as the optional spot repeats (option P in the research), so no spot repeats are made; confirmed by Hiep when he merged PR #33 on 14/10/2026.
 The comparison of the harness options is Claude's, in the research write-up under "AI recommendation", not Hiep's reasoning.
 
 ## Consequences
 
-Drafted by Claude from the research and Hiep's decisions; to be approved by Hiep in the PR.
+Drafted by Claude from the research and Hiep's decisions; approved by Hiep when he merged PR #33 on 14/10/2026.
 
 - One run is 15 answer calls and 15 query embeddings, about 75% of a day's answer quota on `gemini-3.8-flash`.
 - A pass is one sample: a row that passed may fail on the next identical call, and the report says so; this is a change since Mission 1 for mandatory question 2.

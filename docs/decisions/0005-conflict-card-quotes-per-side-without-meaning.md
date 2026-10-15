@@ -1,6 +1,6 @@
 # 0005. The conflict card quotes one clause per side, chosen without reading meaning
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-13
 - Origin: Hiep + AI
 - Supersedes: None
@@ -32,7 +32,7 @@ The rule is deterministic, which fits the pipeline description.
 
 ## Consequences
 
-- `app/rules.py` gains `conflict_quotes`, and `app/cards.py` renders the chosen clauses.
+- `services/citations.py` gains `conflict_quotes`, and `services/card_text.py` renders the chosen clauses (both under `app/` when this ADR was written).
 - The rule is deterministic and needs no LLM text, in line with promise A4.
 - It produces the submitted card for row 7 and row 12.
 

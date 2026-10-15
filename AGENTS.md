@@ -44,6 +44,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 
 - `docs/competition/ai_policies.md` is binding and overrides this file.
 - Every AI tool and prompt that shaped the result is declared in the evidence log with how it was checked; undeclared use costs 30% of the score.
+  The working copy is the local `evidence_log.md` in the main checkout; `docs/evidence_log.md` is the published snapshot and is refreshed from it before submission.
 - Hiep must be able to explain or rebuild any part in the PITCH round: explain your reasoning and flag every factual claim that needs checking, because an unverified hallucination fails the criterion.
 - Credit any public source or solution used.
 - The repository is public: no API keys, passwords or sensitive data.
