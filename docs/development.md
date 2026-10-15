@@ -104,7 +104,7 @@ docs/mission1/      Mission 1 document, answers, criteria, playbook, thinking ph
   submitted/        The exact files submitted (do not edit)
   redraft/          Mission 1 design baseline and decision register (both frozen), simulated data and traces, reviews
     checks/         Scripts that run the core model on the simulated data
-docs/mission2/      Mission 2 plan, the answers to the 3 mandatory questions (`answers.md`), the promise ledger (`mission1_promises.md`) and the generated test report
+docs/mission2/      Mission 2 plan, the promise ledger (`mission1_promises.md`) and the generated test report
 src/appota_kb/      The installed package; `main.py` is the uvicorn factory
   models/           Data types only, no I/O: documents, org, scope, answer, card, search hit
   integrations/     The only code that reads `data/` (`data_files.py`) or calls Gemini (`gemini.py`)

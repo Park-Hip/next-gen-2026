@@ -4,7 +4,7 @@ An AI assistant that gives each Appota employee the rule that applies to them: f
 NextGen AI Talent 2026, Bài test B, Mission 2.
 All company data in this repository is simulated ("giả lập"); no real Appota data is used.
 
-**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](VIDEO_URL)** [Hiep: add the video link] · **[The 3 mandatory questions](docs/mission2/answers.md)** · **[Test report](docs/mission2/test_report.md)**
+**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](VIDEO_URL)** [Hiep: add the video link] · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](docs/mission2/test_report.md)**
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
 
@@ -50,6 +50,70 @@ Context recall is not measured: it is too soon on 10 simulated documents, and it
 
 Every case in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được" is in the [test report](docs/mission2/test_report.md), generated from the committed run and never edited by hand.
 The cases themselves, each with why it is tested, are in [`data/test_cases.yaml`](data/test_cases.yaml).
+
+## The 3 mandatory questions
+
+[Bản nháp do Claude viết từ các tài liệu được dẫn; Hiệp viết lại bằng lời của mình trước khi nộp.]
+
+### Câu 1
+
+> Phần quan trọng nhất bạn chọn để hiện thực hóa trong MVP là gì? Vì sao nếu phần này hoạt động, bạn tin rằng hướng giải quyết của mình là khả thi?
+
+Chúng tôi chọn chứng minh rằng luật cố định, không dùng AI, xác định được phạm vi văn bản của người hỏi trước khi AI chạy, và AI chỉ trả lời trong phạm vi đó, có trích nguồn, hoặc nói không tìm thấy.
+Phạm vi là các văn bản đang có hiệu lực vào ngày hỏi, áp dụng cho đơn vị của người hỏi và người hỏi được xem, bỏ đi những quy định đã được một quy định khác khai báo "dùng thay".
+
+Nếu phạm vi đúng, bản cũ, quy định của đơn vị khác hay văn bản bị hạn chế không thể lọt vào câu trả lời, vì AI không bao giờ thấy chúng.
+Ba câu hỏi khó nhất của đề, bản nào, đơn vị nào và ai được xem, trở thành phép tra thông tin của văn bản, cho cùng kết quả mỗi lần và kiểm được mà không cần AI.
+Phần còn lại là bài toán ngôn ngữ: AI trích một văn bản hợp lệ trong phạm vi nhưng không trả lời câu hỏi, hoặc nói sai nội dung.
+Đó là giả định rủi ro nhất của thiết kế Mission 1, và bộ kiểm thử đo đúng điều đó trên mô hình thật.
+Vì vậy hướng giải quyết khả thi nếu cả hai điều cùng đúng: luật đúng ở mọi ca kiểm thử, và AI, trong một phạm vi đúng, trả lời có nguồn kiểm chứng được hoặc từ chối.
+Lần chạy cuối cho thấy cả hai điều đúng trên 14 ca tốt và khó (xem [Test results](#test-results)).
+
+### Câu 2
+
+> So với kế hoạch ở Mission 1, bạn đã thay đổi quyết định hoặc thiết kế nào? Điều gì trong quá trình làm khiến bạn thay đổi?
+
+Thiết kế cốt lõi không đổi: luật chạy trước AI, AI chỉ chọn và trích điều khoản, và ba loại thẻ trả lời, mâu thuẫn, từ chối được làm như Mission 1 mô tả.
+Phần luật và bộ kiểm thử của nó được merge ngày 13/10/2026 ([PR #25](https://github.com/Park-Hip/next-gen-2026/pull/25)), trước phần tìm kiếm ([PR #28](https://github.com/Park-Hip/next-gen-2026/pull/28)), đúng thứ tự Mission 1 đã hứa.
+Những gì thay đổi nằm xung quanh:
+
+| Kế hoạch Mission 1 | v1 | Điều khiến chúng tôi thay đổi | Chi tiết |
+|---|---|---|---|
+| Lọc quyền xem và phạm vi áp dụng trước, rồi mới áp dụng "dùng thay" | Quyền xem được kiểm sau cùng: một quy định thay thế mà người hỏi không được xem vẫn thay quy định cũ, và người hỏi nhận thẻ từ chối | Khi kiểm một bản mới bị hạn chế quyền xem, quy định Tập đoàn cũ quay lại với Minh, kèm một thẻ mâu thuẫn sai | [Quyết định](docs/decisions/0010-access-never-decides-precedence.md) |
+| Từ chối câu trả lời dẫn một đoạn không được tìm thấy | Thêm: mỗi ý phải trích nguyên văn điều khoản, và luật từ chối cả câu trả lời nếu đoạn trích không có trong đoạn được dẫn | Nghiên cứu về câu trả lời có căn cứ: dẫn đúng mã đoạn chưa chứng minh ý đó nói đúng điều đoạn văn nói | [Quyết định](docs/decisions/0003-gemini-38-flash-enum-citations-quote-check.md) |
+| Thẻ trả lời hiện câu do AI viết | Thẻ hiện nguyên văn đoạn trích đã được luật kiểm | Đọc lần chạy thật đầu tiên: một câu bỏ mất điều kiện "chính thức" có trong đoạn trích, và không luật nào kiểm câu đó | [Quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md) |
+| Một mô hình AI có sẵn | `gemini-3.5-flash-lite`, mức suy nghĩ trung bình | Lựa chọn đầu, `gemini-3.8-flash`, báo lỗi quá tải và chỉ cho 20 yêu cầu một ngày ở gói miễn phí, không đủ cho một lần đánh giá | [Quyết định](docs/decisions/0008-gemini-35-flash-lite-at-medium.md) |
+| Nút "Báo sai" trên thẻ trả lời, và trang cho chủ sở hữu xem báo sai và mâu thuẫn | Không làm | Hiệp đánh giá nó ít giá trị cho Mission 2, và máy chủ miễn phí mất tệp mỗi lần khởi động lại | [Quyết định](docs/decisions/0004-render-free-singapore-no-bao-sai.md) |
+| Thẻ mâu thuẫn báo rằng mâu thuẫn đã được ghi nhận cho HR | Không ghi nhận, nên thẻ không nói vậy | Cắt cùng trang cho chủ sở hữu, cùng lý do (Hiệp, 14/10/2026) | [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) |
+| Mỗi ca hỏi theo 3 cách diễn đạt, chạy nhiều lần, một lần sai là trượt | Mỗi ca hỏi một lần, theo cách diễn đạt chính; các cách khác vẫn nằm trong tệp kiểm thử | Giới hạn tốc độ của gói miễn phí Gemini, dùng chung với demo | [Quyết định](docs/decisions/0006-own-harness-one-run-main-wording.md) |
+| Theo dõi context recall | Không đo | Quá sớm với 10 văn bản giả lập; xem lại khi có văn bản thật | [Quyết định](docs/decisions/0007-defer-context-recall.md) |
+| 10 ca kiểm thử | 18 | Đề yêu cầu có ca làm tốt, ca khó và ca thất bại; ba lỗi tìm thấy khi thử hệ thống thật trở thành ca hạn chế | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
+
+Mọi lời hứa của tài liệu Mission 1 và những gì đã làm: [`docs/mission2/mission1_promises.md`](docs/mission2/mission1_promises.md).
+
+### Câu 3
+
+> Trường hợp nào hiện khiến hệ thống dễ trả lời sai hoặc sử dụng sai tri thức nhất? Bạn phát hiện và kiểm soát rủi ro đó như thế nào?
+
+**Dễ dùng sai tri thức nhất: chủ sở hữu khai báo sai thông tin của văn bản ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)).**
+Luật chỉ bảo đảm đúng bản, đúng đơn vị và đúng quyền xem khi thông tin khai báo đúng, và v1 chưa kiểm thông tin đó.
+Nếu quy chế nghỉ phép PayCo bị gắn sai chủ đề, cặp mâu thuẫn của Hà biến mất và Hà có thể nhận thẻ trả lời "13 ngày" thay vì thẻ mâu thuẫn.
+Nếu một văn bản sửa một điều khoản lại được khai báo "bổ sung", điều khoản cũ vẫn ở trong phạm vi mà không có mâu thuẫn, nên câu trả lời có thể trích "14 ngày" cũ.
+"0 rò rỉ" cũng chỉ đúng với cùng điều kiện đó: khai báo sai quyền xem thì lần nào cũng rò rỉ.
+Cách phát hiện: sửa một bản sao của dữ liệu giả lập và in phạm vi mà luật tạo ra, không cần mô hình.
+Cách kiểm soát hiện nay: chủ sở hữu tự khai báo mọi quan hệ, và khi chưa khai báo, thẻ mâu thuẫn trích cả hai bên và đưa người hỏi tới HR thay vì tự chọn.
+Còn thiếu: một bước kiểm tra khi chủ sở hữu ban hành văn bản, và cách để nhân sự và chủ sở hữu báo câu trả lời sai; cả hai được để lại sau, trong [`docs/scope.md`](docs/scope.md).
+
+**Dễ trả lời sai nhất: một điều khoản có thật trong phạm vi nhưng không trả lời câu hỏi.**
+Luật chứng minh được mỗi đoạn trích có nguyên văn trong đoạn được dẫn, nhưng không chứng minh được nó trả lời câu hỏi; đây là giả định rủi ro nhất của thiết kế Mission 1.
+Ví dụ ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53), ca kiểm thử 18): hỏi Minh được nghỉ bao nhiêu ngày từ năm sau, mô hình trích điều khoản năm nay, 14 ngày, dù bản 3 cho 15 ngày từ 01/01/2027.
+Đoạn trích đúng và văn bản đang có hiệu lực, nên không luật nào thấy nó trả lời một câu hỏi khác.
+Cách kiểm soát hiện nay: thẻ trả lời chỉ hiện đoạn trích đã kiểm cùng văn bản, Điều và ngày hiệu lực, nên nhân sự thấy chính xác câu trả lời dựa trên gì; và khi đánh giá, mỗi câu trả lời phải chứa đúng ý chính mong đợi, và Hiệp đọc từng câu trả lời so với câu hỏi.
+
+**Cách chúng tôi phát hiện và kiểm soát rủi ro, một ví dụ ([#47](https://github.com/Park-Hip/next-gen-2026/issues/47)).**
+Đọc lần chạy thật đầu tiên, ca 5 trích "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.", nhưng thẻ lại hiện câu mô hình viết "Bạn được nghỉ phép năm 12 ngày mỗi năm.", mất điều kiện "chính thức".
+Không luật nào kiểm câu đó: khi thử không cần mạng, một ý chỉ trích đúng một chữ "ngày" kèm câu bịa "30 ngày" vẫn ra thẻ trả lời với dòng nguồn thật.
+Cách sửa là luật cố định: thẻ giờ hiện đoạn trích đã kiểm thay cho mọi câu mô hình viết ([quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md)), và một bài kiểm thử giữ điều đó.
 
 ## Try it
 
@@ -109,7 +173,6 @@ What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/sc
 
 | To see | Read |
 |---|---|
-| The answers to the 3 mandatory questions of the brief | [`docs/mission2/answers.md`](docs/mission2/answers.md) |
 | How v1 covers each point the brief asks the MVP to show | [`docs/architecture.md`](docs/architecture.md#what-the-brief-asks-the-mvp-to-show) |
 | How one question is answered, step by step, and which part decides what | [`docs/architecture.md`](docs/architecture.md) |
 | Every test case: expectation, actual result, pass or fail, lesson | [`docs/mission2/test_report.md`](docs/mission2/test_report.md) |
