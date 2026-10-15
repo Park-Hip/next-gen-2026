@@ -53,8 +53,6 @@ The cases themselves, each with why it is tested, are in [`data/test_cases.yaml`
 
 ## The 3 mandatory questions
 
-[Bản nháp do Claude viết từ các tài liệu được dẫn; Hiệp viết lại bằng lời của mình trước khi nộp.]
-
 ### Câu 1. Phần quan trọng nhất và vì sao nó chứng minh tính khả thi
 
 > Phần quan trọng nhất bạn chọn để hiện thực hóa trong MVP là gì? Vì sao nếu phần này hoạt động, bạn tin rằng hướng giải quyết của mình là khả thi?
