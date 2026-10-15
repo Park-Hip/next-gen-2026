@@ -82,7 +82,8 @@ flowchart TB
 
     subgraph after[" "]
         direction LR
-        q(["Câu hỏi"]) --> ai["`**AI, chỉ trong phạm vi đó**
+        q(["Câu hỏi"]) --> ai["`**AI, chỉ trong**
+        **phạm vi đó**
         trích nguyên văn
         hoặc từ chối`"]
         ai --> check["`**Luật, không AI**
