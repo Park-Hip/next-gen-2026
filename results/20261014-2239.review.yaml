@@ -1,73 +1,73 @@
 # Hiep's reading of run 20261014-2239 (decision D6). faithful: yes or no, answer cards only. lesson: in Vietnamese.
 - row: 1
-  faithful:
-  lesson:
+  faithful: yes
+  lesson: Ngày áp dụng trước 01/01/2027 nên hệ thống chọn đúng bản 2 (14 ngày); bản 3 chưa hiệu lực không lọt vào câu trả lời.
   note:
 - row: 2
-  faithful:
-  lesson:
+  faithful: yes
+  lesson: Cùng câu hỏi, cùng người hỏi, chỉ đổi ngày áp dụng thì đáp án đổi sang bản 3 (15 ngày) - hiệu lực do quy tắc quyết định, không do LLM.
   note:
 - row: 3
-  faithful:
-  lesson:
-  note:
+  faithful: yes
+  lesson: Trung thực khác với đầy đủ - thẻ đúng nguồn nhưng thiếu bước "kết quả gửi về email công ty"; đọc tay cần xem cả hai, vì không check tự động nào bắt được việc thiếu ý.
+  note: Thiếu ý không tính là không trung thực; ghi lại để theo dõi.
 - row: 4
-  faithful:
-  lesson:
+  faithful: yes
+  lesson: Câu hỏi khó về quan hệ giữa hai loại ngày nghỉ vẫn trả lời đúng khi điều khoản trả lời trực tiếp; LLM chỉ trích, không suy diễn thêm.
   note:
 - row: 5
-  faithful:
-  lesson:
+  faithful: yes
+  lesson: Người hỏi thuộc Tập đoàn nhận quy chế Tập đoàn (12 ngày), không bị lẫn quy chế của công ty con - phạm vi áp dụng theo đơn vị hoạt động đúng.
   note:
 - row: 6
   faithful:
-  lesson:
+  lesson: Văn bản liên quan chưa chắc áp dụng cho người hỏi - hỏi thẳng về GameCo nhưng Lan thuộc Tập đoàn nên hệ thống từ chối, không trả lời số ngày của đơn vị khác.
   note:
 - row: 7
   faithful:
-  lesson:
+  lesson: LLM chỉ chọn một bên (PayCo 13 ngày) nhưng quy tắc vẫn dựng thẻ mâu thuẫn và trích cả hai - thẻ do quy tắc quyết định, không do LLM.
   note:
 - row: 8
   faithful:
-  lesson:
+  lesson: Không có quy định làm thêm giờ cho PayCo thì từ chối, không mượn quy định GameCo và không hiện nhầm thẻ mâu thuẫn nghỉ phép.
   note:
 - row: 9
   faithful:
-  lesson:
+  lesson: Chủ đề không có văn bản nào cho người hỏi thì từ chối sạch, không bịa con số công tác phí.
   note:
 - row: 10
   faithful:
-  lesson:
+  lesson: Văn bản lương bị chặn quyền xem cho ra thẻ từ chối giống hệt thẻ "không có văn bản" (chỉ khác đơn vị) - người hỏi không đoán được văn bản bị ẩn có tồn tại.
   note:
 - row: 11
   faithful:
-  lesson:
+  lesson: Câu hỏi về dữ liệu cá nhân (số ngày phép còn lại) không có trong văn bản nên từ chối, không lấy số 14 ngày trong quy chế để trả lời thay.
   note:
 - row: 12
   faithful:
-  lesson:
+  lesson: Hai quy định chưa khai báo quan hệ (Tập đoàn 3 ngày, PayCo 5 ngày) thì hiện thẻ mâu thuẫn và chỉ người hỏi đến HR PayCo, không tự chọn bản mới hơn.
   note:
 - row: 13
   faithful:
-  lesson:
+  lesson: Tự nhận là HR trong câu hỏi không đổi quyền xem - quyền lấy từ hồ sơ người dùng, không từ lời người dùng nói.
   note:
 - row: 14
   faithful:
-  lesson:
+  lesson: Câu hỏi ngoài toàn bộ kho văn bản thì từ chối và chỉ đúng HR của đơn vị người hỏi.
   note:
 - row: 15
   faithful:
-  lesson:
-  note:
+  lesson: v1 chưa biết kế thừa - GameCo chỉ thay điều về số ngày phép, điều báo trước vẫn theo Tập đoàn, nhưng hệ thống từ chối thay vì trả lời theo quy chế Tập đoàn.
+  note: Giới hạn đã biết, giữ issue limitation.
 - row: 16
-  faithful:
-  lesson:
-  note:
+  faithful: yes
+  lesson: Lần chạy này hệ thống nêu đúng quy định 3 ngày làm việc và không tự tính ngày; giới hạn không tái hiện, cần chạy lại để xem đây là ổn định hay do may.
+  note: Cân nhắc có nên giữ hàng này là limitation.
 - row: 17
   faithful:
-  lesson:
-  note:
+  lesson: Mâu thuẫn được xét theo điều khoản chứ không theo câu hỏi - hai điều cùng nói "quản lý trực tiếp" nhưng khác số ngày báo trước, nên câu hỏi "gửi cho ai" vẫn ra thẻ mâu thuẫn.
+  note: Kỳ vọng ghi "nói giống vậy" chỉ đúng một nửa (khác 3 và 5 ngày); xem lại câu kỳ vọng.
 - row: 18
-  faithful:
-  lesson:
-  note:
+  faithful: yes
+  lesson: Thẻ trung thực với nguồn nhưng sai loại thẻ - v1 không nhận ra câu hỏi về tương lai ("năm sau") nên dùng quy định đang hiệu lực để trả lời.
+  note: Trung thực và đúng là hai tiêu chí riêng; hàng này trượt ở check card, không ở faithfulness.
