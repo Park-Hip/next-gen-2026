@@ -4,7 +4,7 @@ An AI assistant that gives each Appota employee the rule that applies to them: f
 NextGen AI Talent 2026, Bài test B, Mission 2.
 All company data in this repository is simulated ("giả lập"); no real Appota data is used.
 
-**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](VIDEO_URL)** [Hiep: add the video link] · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](docs/mission2/test_report.md)**
+**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](https://www.youtube.com/watch?v=p8_6wCrepgg)** · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](docs/mission2/test_report.md)**
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
 
