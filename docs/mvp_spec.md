@@ -83,7 +83,7 @@ What the system receives as input, and the form it comes in.
 
 | Input | Constraint |
 |---|---|
-| Documents | Markdown files in Vietnamese; each clause starts on its own line with "Điều 1", "Điều 2" and so on |
+| Documents | HR policies and procedures only; other kinds of documents, such as legal texts, contracts or technical guides, are not supported. Markdown files in Vietnamese; each clause starts on its own line with "Điều 1", "Điều 2" and so on |
 | Information about each document | Set by its owner when publishing: issuing unit, version, effective date, units it applies to, who may read it, subject, and its relations to other units' documents [to decide: the exact list] |
 | Organisation | A fixed tree of units: the Group, member companies, departments and teams |
 | Employees | Simulated accounts, each with one unit and a set of roles; a user signs in as one of them |
