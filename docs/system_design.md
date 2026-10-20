@@ -11,7 +11,7 @@ All Appota data in this project is simulated ("giả lập").
 | [1. Scope](#1-scope) | What this design covers, and where the requirements are |
 | [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee, document owner, evaluator; then the components |
 | [3. Main flows](#3-main-flows) | The same workflows as sequences, plus the effective date, restart and failures |
-| [4. Data model](#4-data-model) | Entities, the information an owner sets, the checks when publishing, the life of a version |
+| [4. Documents and versions](#4-documents-and-versions) | The terms, the information an owner sets, the checks when publishing, the life of a version |
 | [5. Scope rules](#5-scope-rules) | The rules that decide which documents an asker may use |
 | [6. Search, answer and checks](#6-search-answer-and-checks) | Chunking, search, the model call, the checks and the cards |
 | [7. Owner side](#7-owner-side) | The owner console, declaring relations, the impact preview, correcting mistakes |
@@ -296,7 +296,7 @@ sequenceDiagram
     participant X as Chunker and index
     participant D as Registry
 
-    O->>K: new document, or new version of a series
+    O->>K: new document, or new version of a document
     K->>S: who is signed in?
     S-->>K: owner of unit U
     O->>K: text, dates, applies to, may read, topic, relations
@@ -319,7 +319,7 @@ sequenceDiagram
 
 ### 3.3 An owner checks the state of the unit's documents
 
-The owner console lists every series of the owner's unit with each version and its state today: draft, published but not yet in force, in force, replaced, or ended.
+The owner console lists every document of the owner's unit with each version and its state today: draft, published but not yet in force, in force, replaced, or ended.
 The state comes from the same rule function that decides validity for employees, so the console cannot disagree with what employees are told (proposed).
 In v1, the "Dữ liệu giả lập" page computes these states in `services/guide.py`, separately from the rules.
 
@@ -352,36 +352,18 @@ A restart must keep every published document and its history (S4, Owner scenario
 | Indexing fails during a publish | Nothing is saved; the owner retries (proposed: index first, then save) | New |
 | The registry is unreachable | Error page for questions and publishing; never an answer from stale data (proposed) | New |
 
-## 4. Data model
+## 4. Documents and versions
 
-### 4.1 Entities
+### 4.1 Terms
 
-```mermaid
-erDiagram
-    UNIT ||--o{ UNIT : "parent of"
-    UNIT ||--o{ ACCOUNT : "employs"
-    UNIT |o--o{ ACCOUNT : "owned by"
-    UNIT ||--o{ SERIES : "issues"
-    SERIES ||--|{ VERSION : "has"
-    VERSION ||--|{ CHUNK : "split into"
-    VERSION }o--o| SERIES : "replaces (dùng thay)"
-    VERSION }o--o{ SERIES : "adds to (bổ sung)"
-    VERSION ||--|{ PUBLISH_EVENT : "recorded by"
-    ACCOUNT ||--o{ PUBLISH_EVENT : "performs"
-    ACCOUNT ||--o{ TRACE : "asks"
-    TRACE }o--o{ CHUNK : "retrieved and cited"
-```
+| Term | Meaning |
+|---|---|
+| Document | One policy across all its editions, issued by one unit, such as "Quy chế nghỉ phép GameCo", which has versions 1 to 3 and a draft of version 4 in the simulated data; the owner works with documents. In the data it is the `series` field. |
+| Version | One edition of a document, with its own text, dates, `applies_to` and `access`; what v1 calls a document. |
+| Clause | One "Điều" of a version, or one line of a version without "Điều"; it is what search finds and what a card quotes. In the code it is a chunk. |
+| Relation | A version declares that it is used instead of ("dùng thay") or adds to ("bổ sung") another document. |
 
-| Entity | What it is | Status |
-|---|---|---|
-| Unit | A node of the fixed org tree, with an optional HR contact; a unit without one uses the nearest unit above | Built |
-| Account | A simulated person: name, unit, roles, and the unit they own if they are an owner | Changed: v1 personas have no owned unit and no sign-in |
-| Series | One document across its versions, issued by one unit | Built, as the `series` field |
-| Version | One edition of a series with its metadata and text; what v1 calls a document | Built |
-| Relation | "Dùng thay" or "bổ sung" from a version to another series | Built, as fields of a version |
-| Chunk | One "Điều" of a version, or one line of a document without "Điều" | Built |
-| Publish event | Who published or saved which version, and when | New |
-| Trace | The record of one question (section 10) | New |
+Units and accounts are in section 8.1, what is stored in section 9.1, and the trace of a question in section 10.1.
 
 ### 4.2 The information an owner sets for each document
 
@@ -390,8 +372,8 @@ The list below is v1's metadata plus the fields publishing needs; it is a propos
 
 | Field | Meaning | Set by | v1 |
 |---|---|---|---|
-| `id` | The version's identifier | The system, from the series and a version number (proposed) | Typed by hand |
-| `series` | The document across versions | The system: a new series, or the series the owner chose to add a version to | Typed by hand |
+| `id` | The version's identifier | The system, from the document and a version number (proposed) | Typed by hand |
+| `series` | The document the version belongs to | The system: a new document, or the document the owner chose to add a version to | Typed by hand |
 | `title` | The title shown on the card | Owner | Same |
 | `issuer` | The unit that issues the document | The system: the owner's unit (proposed) | Not a field; `owner` holds the HR contact's name |
 | `topic` | One subject from a fixed list, used only to find conflict pairs | Owner, from the list **[to decide: who maintains the list]** | Same, free text |
@@ -400,8 +382,8 @@ The list below is v1's metadata plus the fields publishing needs; it is a propos
 | `effective_to` | The last day, only when the rule really ends | Owner, optional | Same |
 | `applies_to` | The unit it applies to, with every unit below it | Owner, within the owner's unit | Same |
 | `access` | Who may read it: all staff, one unit, or some roles; never who it is for (ADR 0010) | Owner | Same |
-| `overrides` | The series it is used instead of, for the units it applies to ("dùng thay") | Owner | Same |
-| `complements` | The series it adds to without contradicting them ("bổ sung") | Owner | Same |
+| `overrides` | The documents it is used instead of, for the units it applies to ("dùng thay") | Owner | Same |
+| `complements` | The documents it adds to without contradicting them ("bổ sung") | Owner | Same |
 | `published_by`, `published_at` | Who published it, and when | The system | New |
 | Body | Markdown text, each clause on its own line starting with "Điều n." | Owner | Same |
 
@@ -413,20 +395,20 @@ The list below is v1's metadata plus the fields publishing needs; it is a propos
 |---|---|
 | `status` is `draft` or `published`; `access` has a known form | Built |
 | `effective_to` is not before `effective_from` | Built |
-| No two published versions of a series start on the same day | Built |
-| `overrides` does not name its own series, and no chain of overrides forms a cycle | Built |
-| `overrides` and `complements` name series that exist | Built |
+| No two published versions of a document start on the same day | Built |
+| `overrides` does not name its own document, and no chain of overrides forms a cycle | Built |
+| `overrides` and `complements` name documents that exist | Built |
 | The body does not mix "Điều" lines with plain lines, and repeats no "Điều" number | Built |
 | The issuing unit is the owner's unit, and `applies_to` is that unit or a unit below it (H5) | New |
 | The roles and units in `access` exist | New |
 | A published version may not start before today **[to decide]**; otherwise a publish rewrites what employees were told in the past | New |
-| `overrides` may name only a series of a unit above the issuing unit **[to decide]** | New |
+| `overrides` may name only a document of a unit above the issuing unit **[to decide]** | New |
 
 **Warnings** are shown in the impact preview, and the owner decides:
 
 - A new conflict pair: a document on the same topic applies to some of the same units and no relation is declared, so those employees will get the conflict card.
 - A new version that fewer people may read than the version it replaces: by ADR 0010, the employees who lose access get a refusal, not the older rule.
-- A version that replaces another series takes away every clause of that series for the units it applies to ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)).
+- A version that replaces another document takes away every clause of that document for the units it applies to ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)).
 
 ### 4.4 The life of a version
 
@@ -442,7 +424,7 @@ stateDiagram-v2
 ```
 
 Only "draft" and "published" are stored.
-"Published but not yet in force", "in force", "replaced" and "ended" are computed from the dates of the series' versions and the date asked, so no job has to change them on the day.
+"Published but not yet in force", "in force", "replaced" and "ended" are computed from the dates of the document's versions and the date asked, so no job has to change them on the day.
 How a mistake in a published version is corrected is open (section 7.5).
 
 ## 5. Scope rules
@@ -450,11 +432,11 @@ How a mistake in a published version is corrected is open (section 7.5).
 The rules are built and tested; [`architecture.md`](architecture.md#who-decides-what) gives each rule, its code and what happens when it goes wrong.
 In short, for one account and one date:
 
-1. Keep, per series, the published version in force on that date.
+1. Keep, per document, the published version in force on that date.
 2. Keep the versions that apply to the asker's unit or a unit above it.
-3. Drop the series that a kept version declares it is used instead of.
+3. Drop the documents that a kept version declares it is used instead of.
 4. Keep what the asker may read; access comes last, so it never decides precedence (ADR 0010).
-5. Mark as conflict pairs the kept documents on the same topic with no declared relation.
+5. Mark as conflict pairs the kept versions on the same topic with no declared relation.
 
 The full design changes the rules' inputs, not the rules:
 
@@ -528,14 +510,14 @@ Whether an owner also sees the documents of units below their unit is open (sect
 
 | Page | Shows or does | Requirement |
 |---|---|---|
-| The unit's documents | Each series with its versions, each version's state today, its dates, who it applies to, who may read it and its relations | H4 |
+| The unit's documents | Each document with its versions, each version's state today, its dates, who it applies to, who may read it and its relations | H4 |
 | One version | The full text, its metadata and its publish events | H4, S4 |
 | Publish | The form of section 7.3, then the impact preview, then confirm | H1, H2 |
 | Drafts | Saved drafts, which employees never see | H1 |
 
 ### 7.3 Declaring relations (H2)
 
-The owner should not have to know other units' series ids.
+The owner should not have to know other units' document ids.
 Proposed: when the owner picks a topic and the units the document applies to, the form lists the documents of other units on the same topic that also apply to some of those units, and for each one the owner chooses:
 
 - **Dùng thay**: this document replaces it for the units it applies to.
@@ -757,7 +739,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD4 | The information an owner sets for each document | Section 4.2 | No | 4.2 |
 | SD5 | Who maintains the list of topics | Owners; one central owner; a fixed list in the data | No | 4.2 |
 | SD6 | Whether a published version may start before today | Allow; refuse | No | 4.3 |
-| SD7 | Which series `overrides` may name | Any; only a series of a unit above | No | 4.3 |
+| SD7 | Which documents `overrides` may name | Any; only a document of a unit above | No | 4.3 |
 | SD8 | How a mistake in a published version is corrected | Section 7.5 a-c | No | 7.5 |
 | SD9 | Whether an owner also sees and publishes for units below their unit | Own unit only; own unit and below | No | 7.1 |
 | SD10 | Whether the card links to the full cited clause | Link; quote only | No | 6.5 |
@@ -776,7 +758,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | Change | Lands in | Stays |
 |---|---|---|
 | A person in two units (kiêm nhiệm) | Accounts hold several units; the scope rules run once per unit, or the user picks the unit they ask for | Search, the answerer, the checks |
-| A company replaces one clause of a Group policy ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | Relations point at chunks instead of series; the scope rules drop chunks instead of documents | Search, the answerer, the cards |
+| A company replaces one clause of a Group policy ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | Relations point at clauses instead of documents; the scope rules drop clauses instead of whole documents | Search, the answerer, the cards |
 | Employment type or seniority decides applicability | A new field on versions and accounts, and one more rule in the scope rules | Everything after the scope |
 | Questions about another period ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | The user picks the period, never the AI, and the scope rules run on that date | The rules themselves |
 | DOCX or PDF documents | A parser in the publish service that produces the same chunks | Everything after chunking |
