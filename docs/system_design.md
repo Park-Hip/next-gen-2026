@@ -10,7 +10,7 @@ All Appota data in this project is simulated ("giả lập").
 |---|---|
 | [1. Scope](#1-scope) | What this design covers, and where the requirements are |
 | [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee and document owner |
-| [3. Main flows](#3-main-flows) | The same workflows as sequences, plus the effective date, restart and failures |
+| [3. Main flows](#3-main-flows) | The same workflows as sequences of calls between components |
 | [4. Documents and versions](#4-documents-and-versions) | The terms, the information an owner sets, the checks when publishing, the life of a version |
 | [5. Scope rules](#5-scope-rules) | The rules that decide which documents an asker may use |
 | [6. Search, answer and checks](#6-search-answer-and-checks) | Chunking, search, the model call, the checks and the cards |
@@ -19,13 +19,13 @@ All Appota data in this project is simulated ("giả lập").
 | [9. Storage and persistence](#9-storage-and-persistence) | What is stored, where, and how it survives a restart |
 | [10. Traceability and observability](#10-traceability-and-observability) | The record of each answer, logs, explaining a wrong answer |
 | [11. Security and privacy](#11-security-and-privacy) | How nothing outside the asker's rights gets out, and the new surfaces |
-| [12. Failure modes and limitations](#12-failure-modes-and-limitations) | What can still go wrong, and where this design stands on each known limitation |
-| [13. Deployment and operations](#13-deployment-and-operations) | Host, process, models, limits, secrets, configuration |
+| [12. Failure modes and limitations](#12-failure-modes-and-limitations) | What can still go wrong, where this design stands on each known limitation, and the errors the user sees |
+| [13. Deployment and operations](#13-deployment-and-operations) | Host, process, models, limits, secrets, configuration, start-up and restart |
 | [14. Evaluation](#14-evaluation) | How each metric of the spec is measured |
 | [15. Decisions](#15-decisions) | The ADRs this design relies on, and the decisions it needs |
 | [16. Change readiness](#16-change-readiness) | Where a likely change lands, and what stays |
 | [17. Open questions](#17-open-questions) | What is still open |
-| [Appendix A](#appendix-a-requirements-traceability) | Each requirement, the components and flows that meet it, and its test |
+| [Appendix A](#appendix-a-requirements-traceability) | Each requirement, the components and sections that meet it, and its test |
 
 ## 1. Scope
 
@@ -120,7 +120,7 @@ flowchart TD
 - The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
 - The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
-- Conflicts come only from declared metadata, so a content conflict that the owner side missed gives an answer card (section 12).
+- Conflicts come only from declared metadata, so a content conflict that the owner side missed gives an answer card (section 12.1).
 - The cited clause opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 
@@ -172,8 +172,8 @@ flowchart TD
 
 - An owner may publish only for the unit they own, with `applies_to` that unit or a unit below it (H5).
 - The impact preview uses the same scope rules as the employee's workflow, so it shows what employees will actually get.
-- The new version is embedded before it is saved, so the registry never names a chunk the index does not have (proposed).
-- Nothing runs on the effective date: which version is in force is computed for each question (section 3.4).
+- The new version is embedded before it is saved, so the registry never names a chunk the index does not have (proposed; section 12.2).
+- Nothing runs on the effective date: which version is in force is computed for each question (section 4.4).
 
 ## 3. Main flows
 
@@ -210,8 +210,6 @@ sequenceDiagram
 ```
 
 - The question first enters at search; everything before that is the same for every question the same asker asks on the same date.
-- The date is today in Vietnam in production; the demo and the evaluation set it on purpose to show a version change (section 8.4).
-- The internal order of the rules and checks is described in [`architecture.md`](architecture.md#the-7-steps).
 
 ### 3.2 An owner publishes a document or a new version
 
@@ -243,43 +241,7 @@ sequenceDiagram
 ```
 
 - Errors block publishing; warnings are shown and the owner decides (section 7.4).
-- The new version is indexed before it is saved, so the registry never names a chunk that the index does not have (proposed; section 3.6).
 - Saving a draft runs the same checks except the impact preview, and never reaches employees.
-
-### 3.3 An owner checks the state of the unit's documents
-
-The owner console lists every document of the owner's unit with each version and its state today: draft, published but not yet in force, in force, replaced, or ended.
-The state comes from the same rule function that decides validity for employees, so the console cannot disagree with what employees are told (proposed).
-In v1, the "Dữ liệu giả lập" page computes these states in `services/guide.py`, separately from the rules.
-
-### 3.4 An effective date arrives
-
-Nothing runs on that day.
-Which version is in force is computed for every question from the date, and the version was indexed when it was published, so the new rule reaches employees from its effective date and not before (H3).
-The demo's answer cache is keyed by the scope's chunk ids, so a scope that changes with the date never reuses an old answer.
-
-### 3.5 Start-up and restart
-
-1. Load `config.yaml` through `core/config.py`.
-2. Connect to the registry; if it is empty, load the simulated documents of `data/documents/` into it once (proposed).
-3. Load the directory from `data/org.yaml` and the accounts file.
-4. Build or load the search index **[to decide]**: v1 embeds every chunk at start-up; a persistent store could keep the vectors (section 9).
-5. Load the committed evaluation run for the test-case page.
-
-Any invalid data stops the start-up, so the deploy fails its health check instead of serving wrong answers, as in v1.
-A restart must keep every published document and its history (S4, Owner scenarios).
-
-### 3.6 When something fails
-
-| Failure | What happens | Status |
-|---|---|---|
-| The LLM or the embedder fails after retries, or its rate limit is reached | The page shows "Hệ thống tạm thời không trả lời được..." and no card; the trace records the error | Built (trace New) |
-| Search returns a chunk outside the scope | `ScopeLeakError`; no card | Built |
-| A chunk of the scope is missing from the index | Search raises an error naming the chunk; no card | Built |
-| The model's output is malformed, cites nothing, cites outside what was retrieved, or quotes text not in the cited chunk | Refusal card | Built |
-| A publish fails validation | Nothing is saved; the console shows the errors | New |
-| Indexing fails during a publish | Nothing is saved; the owner retries (proposed: index first, then save) | New |
-| The registry is unreachable | Error page for questions and publishing; never an answer from stale data (proposed) | New |
 
 ## 4. Documents and versions
 
@@ -354,6 +316,7 @@ stateDiagram-v2
 
 Only "draft" and "published" are stored.
 "Published but not yet in force", "in force", "replaced" and "ended" are computed from the dates of the document's versions and the date asked, so no job has to change them on the day.
+The version was indexed when it was published, so the new rule reaches employees from its effective date and not before (H3).
 How a mistake in a published version is corrected is open (section 7.5).
 
 ## 5. Scope rules
@@ -412,7 +375,7 @@ The full design changes the rules' inputs, not the rules:
 - The sentence is not checked at run time, by rules or by a second model call (SD14).
   The quote under each sentence shows the employee the clause itself, and the evaluation reads each sentence against its quote (section 14).
   A check on the sentence is added only if the evaluation shows that sentences mislead (section 16).
-- Conflicts are not detected at question time: they come only from declared metadata, and a content conflict that the owner side missed gives an answer card (section 12).
+- Conflicts are not detected at question time: they come only from declared metadata, and a content conflict that the owner side missed gives an answer card (section 12.1).
 
 ### 6.5 Reading the cited part (E7)
 
@@ -422,7 +385,7 @@ Proposed **[to decide]**: the answer card links to the full cited "Điều" of t
 
 ### 6.6 The demo cache
 
-An in-process cache of the last 256 replies, keyed by the account, the scope's chunk ids and the question; the checks still run on every hit, and the evaluation never uses it.
+An in-process cache of the last 256 replies, keyed by the account, the scope's chunk ids and the question, so a scope that changes with the date never reuses an old answer; the checks still run on every hit, and the evaluation never uses it.
 In the full design the key uses the account id instead of the persona id.
 
 ## 7. Owner side
@@ -443,6 +406,9 @@ Whether an owner also sees the documents of units below their unit is open (sect
 | One version | The full text, its metadata and its publish events | H4, S4 |
 | Publish | The form of section 7.3, then the impact preview, then confirm | H1, H2 |
 | Drafts | Saved drafts, which employees never see | H1 |
+
+Each version's state comes from the same rule function that decides validity for employees, so the console cannot disagree with what employees are told (proposed).
+In v1, the "Dữ liệu giả lập" page computes these states in `services/guide.py`, separately from the rules.
 
 ### 7.3 Declaring relations (H2)
 
@@ -597,6 +563,8 @@ Tests already check that no restricted chunk reaches any asker's scope for every
 
 ## 12. Failure modes and limitations
 
+### 12.1 Failures that look like right answers
+
 The failures that look like right answers matter most, because the employee cannot tell them from a right answer; the safe ones send the employee to HR.
 
 | Failure | Looks like | Caught by | In this design |
@@ -613,7 +581,23 @@ The failures that look like right answers matter most, because the employee cann
 
 Each of the five issues stays open with the `limitation` label until it is fixed; the undetected content conflict needs its own `limitation` issue, to open.
 
+### 12.2 Errors the user sees
+
+These failures stop the answer or the publish and say so, so nobody acts on a wrong answer.
+
+| Failure | What happens | Status |
+|---|---|---|
+| The LLM or the embedder fails after retries, or its rate limit is reached | The page shows "Hệ thống tạm thời không trả lời được..." and no card; the trace records the error | Built (trace New) |
+| Search returns a chunk outside the scope | `ScopeLeakError`; no card | Built |
+| A chunk of the scope is missing from the index | Search raises an error naming the chunk; no card | Built |
+| The model's output is malformed, cites nothing, cites outside what was retrieved, or quotes text not in the cited chunk | Refusal card | Built |
+| A publish fails validation | Nothing is saved; the console shows the errors | New |
+| Indexing fails during a publish | Nothing is saved; the owner retries (proposed: index first, then save) | New |
+| The registry is unreachable | Error page for questions and publishing; never an answer from stale data (proposed) | New |
+
 ## 13. Deployment and operations
+
+### 13.1 What runs where
 
 | Area | Today | Source |
 |---|---|---|
@@ -626,6 +610,17 @@ Each of the five issues stays open with the `limitation` label until it is fixed
 
 The full design adds a session secret and, depending on section 9.2, a database URL, both from the environment.
 New `config.yaml` keys are added by the change whose code first reads them.
+
+### 13.2 Start-up and restart
+
+1. Load `config.yaml` through `core/config.py`.
+2. Connect to the registry; if it is empty, load the simulated documents of `data/documents/` into it once (proposed).
+3. Load the directory from `data/org.yaml` and the accounts file.
+4. Build or load the search index **[to decide]**: v1 embeds every chunk at start-up; a persistent store could keep the vectors (section 9).
+5. Load the committed evaluation run for the test-case page.
+
+Any invalid data stops the start-up, so the deploy fails its health check instead of serving wrong answers, as in v1.
+A restart must keep every published document and its history (S4, Owner scenarios).
 
 ## 14. Evaluation
 
@@ -666,7 +661,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | # | Decision | Options | Needs research | Section |
 |---|---|---|---|---|
 | SD1 | Where published documents and traces are stored, and on which host | Section 9.2 a-d | Yes | 9.2 |
-| SD2 | Whether embeddings are stored or recomputed at start-up | Store; recompute | With SD1 | 3.5, 9.2 |
+| SD2 | Whether embeddings are stored or recomputed at start-up | Store; recompute | With SD1 | 9.2, 13.2 |
 | SD3 | How a user signs in | Section 8.2 a-c | No | 8.2 |
 | SD4 | The information an owner sets for each document | Section 4.2 | No | 4.2 |
 | SD5 | Who maintains the list of topics | Owners; one central owner; a fixed list in the data | No | 4.2 |
@@ -711,11 +706,11 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 
 ## Appendix A. Requirements traceability
 
-| Req | Components | Flow | Status | Tested by |
+| Req | Components | Section | Status | Tested by |
 |---|---|---|---|---|
 | E1 | Ask page, hybrid search, answerer | 3.1 | Changed (6.3, 6.4) | Readability |
 | E2 | Scope rules, directory | 3.1 | Built | Right sources and right kind |
-| E3 | Scope rules, registry | 3.1, 3.4 | Built | Right sources and right kind |
+| E3 | Scope rules, registry | 3.1, 4.4 | Built | Right sources and right kind |
 | E4 | Scope rules, hybrid search, answer checks, card text | 3.1 | Built; new surfaces in 11.2 | Leaks |
 | E5 | Scope rules, answer checks | 3.1 | Built | Right sources and right kind |
 | E6 | Answer checks, card text, directory | 3.1 | Built | Right sources and right kind; Unsafe answers |
@@ -723,11 +718,11 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | E8 | Sign-in and session, directory | 3.1 | New | Leaks |
 | H1 | Owner console, publish service, registry | 3.2 | New | Owner scenarios |
 | H2 | Owner console, publish service | 3.2, 7.3 | New | Owner scenarios |
-| H3 | Registry, search index, scope rules | 3.4 | Changed (index updated on publish) | Owner scenarios |
-| H4 | Owner console, scope rules | 3.3 | New | Owner scenarios |
+| H3 | Registry, search index, scope rules | 3.2, 4.4 | Changed (index updated on publish) | Owner scenarios |
+| H4 | Owner console, scope rules | 7.2 | New | Owner scenarios |
 | H5 | Sign-in and session, publish service | 3.2 | New | Owner scenarios |
 | S1 | Answerer, answer checks | 3.1 | Changed (6.4) | Faithfulness |
-| S2 | Answer checks, card text | 3.1, 3.6 | Built | Unsafe answers; Over-caution |
+| S2 | Answer checks, card text | 3.1, 12.2 | Built | Unsafe answers; Over-caution |
 | S3 | Trace recorder, trace store | 3.1 | New | Traceable answers |
-| S4 | Registry and its store | 3.2, 3.5 | Changed (9.2) | Owner scenarios |
+| S4 | Registry and its store | 3.2, 13.2 | Changed (9.2) | Owner scenarios |
 | S5 | Pages | All | Built | Run through the web page |
