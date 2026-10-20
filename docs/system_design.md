@@ -84,29 +84,27 @@ config:
 ---
 flowchart TD
     employee([Employee])
-    signin[/"Signs in as a simulated account (New)"/]
-    session["Session: unit and roles come from the account, never from the question (New)"]
-    question[/"Types a question on the ask page (Changed)"/]
-    scope["Scope rules: for the unit, roles and date, the versions in force, applying to the unit, not replaced, readable; and the conflict pairs. The question is not read"]
-    search{{"Hybrid search, inside the scope only"}}
-    answerer{{"Answerer: for each point, a sentence in plain Vietnamese, the clause it rests on quoted word for word, and the cited chunks; or nothing. Never chooses between clauses that disagree (Changed)"}}
-    structure["Structure check: every citation is a retrieved chunk and every quote is in the chunk it cites"]
-    verified{"Structure check passes?"}
-    anchors["Anchor check, per point: every number and date of the sentence is in its quote (New)"]
+    signin[/"Signs in (New)"/]
+    session["Session: unit, roles (New)"]
+    question[/"Asks a question (Changed)"/]
+    scope["Scope rules: in force, applies, not replaced, readable; conflict pairs"]
+    search{{"Hybrid search in the scope"}}
+    answerer{{"Answerer: sentence, quote, chunks (Changed)"}}
+    verified{"Quotes valid?"}
     conflict{"Cites a conflict pair?"}
-    refusal[/"Refusal card: nothing usable was found, ask HR"/]
-    conflictcard[/"Conflict card: one quote per side, the system does not choose, ask HR"/]
-    answercard[/"Answer card: per point, the sentence on top and the verified quote under it, or the quote alone if the anchor check failed; then the document, Điều and effective date (Changed)"/]
-    clause[/"Opens the cited clause, checked against the scope again (New)"/]
-    trace["Trace recorder: who, when, scope, passages, reply, card (New)"]
+    refusal[/"Refusal card"/]
+    conflictcard[/"Conflict card"/]
+    answercard[/"Answer card: sentence, quote, source (Changed)"/]
+    clause[/"Opens the cited clause (New)"/]
+    trace["Trace recorder (New)"]
     directory[("Directory (Changed)")]
     registry[("Document registry (Changed)")]
     index[("Search index (Changed)")]
     traces[("Trace store (New)")]
 
-    employee --> signin --> session --> question --> scope --> search --> answerer --> structure --> verified
+    employee --> signin --> session --> question --> scope --> search --> answerer --> verified
     verified -- no --> refusal
-    verified -- yes --> anchors --> conflict
+    verified -- yes --> conflict
     conflict -- yes --> conflictcard
     conflict -- no --> answercard
     answercard --> clause
@@ -119,9 +117,13 @@ flowchart TD
     trace -.- traces
 ```
 
-- The question is read only from search onwards; the scope rules give the same scope for every question the same asker asks on the same date.
-- The answer card shows a sentence the model wrote only above the quote it was checked against; the conflict and refusal cards keep their fixed wording (section 6.4).
-- Conflicts come only from declared metadata, and no model output changes which card is shown; a content conflict that the owner side missed gives an answer card (section 12).
+- The unit and roles come from the account, never from the question.
+- The scope rules never read the question, so every question the same asker asks on the same date gets the same scope.
+- The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
+- The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
+- The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
+- Conflicts come only from declared metadata, so a content conflict that the owner side missed gives an answer card (section 12).
+- The cited clause opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 
 ### 2.3 Document owner: publishing and checking documents
@@ -229,14 +231,14 @@ flowchart TD
 | Scope rules | The documents the asker may use on the date: in force, applying to the asker's unit, not replaced, readable by the asker; and the conflict pairs | Rules | E2-E5 | **Built** | `services/scope.py` |
 | Hybrid search | Ranks only the asker's chunks by BM25 and embeddings, fused by RRF, and raises an error on any chunk outside the scope | AI ranks, rules guard | E1, E4 | **Built** | `services/retrieval/` |
 | Answerer | One LLM call that, for each point, writes a sentence in plain Vietnamese, cites only retrieved chunk ids and quotes the clause word for word; or returns nothing | AI | E1, S1 | **Changed**: v1 returns only the quote and the chunks; the sentence and the prompt rules of section 6.3 are new | `services/answering/`, `integrations/gemini.py` |
-| Answer checks and card | Verifies every citation and quote, checks the numbers and dates of each sentence against its quote, picks the answer, conflict or refusal card, and fills in its wording | Rules | S1, S2, E5, E6, E7 | **Changed**: the anchor check and the answer card layout are new (section 6.4) | `services/citations.py`, `services/card_text.py` |
+| Answer checks and card | Verifies every citation and quote, picks the answer, conflict or refusal card, and fills in its wording | Rules | S1, S2, E5, E6, E7 | **Changed**: the answer card shows the model's sentence above each quote (section 6.4) | `services/citations.py`, `services/card_text.py` |
 | Trace recorder | One record per question: who, when, scope, retrieved passages, raw model reply, checks, card | Rules | S3 | **New**: v1 has JSON log lines on standard output and the evaluation's JSONL files | `evaluation/run.py` (record shape) |
 | Evaluation harness | Runs the test questions through the ask function and scores them; runs the owner scenarios | Rules, plus Hiep's reading | Spec 6 | **Built** for test questions; **New** for owner scenarios | `evaluation/`, `tests/` |
 
 ### 2.6 What stays and what is added
 
 The answering half of the system is built and stays as it is: the scope rules, search, the answerer and the answer checks, with the guarantees described in [`architecture.md`](architecture.md).
-The one change inside it is the answer card: the model writes a sentence above each verified quote, and a new rule checks the sentence's numbers and dates (section 6.4).
+The one change inside it is the answer card: the model writes a sentence above each verified quote (section 6.4).
 The design adds three things around it:
 
 1. **Who is asking comes from a signed-in account.** The rules already need only a unit and roles, so only the source of the principal changes.
@@ -273,7 +275,6 @@ sequenceDiagram
     A->>G: chunks, asker's unit, question
     G-->>A: points: sentence, quote and cited chunk ids
     A->>C: retrieved chunks, points
-    Note over C: structure check, then<br/>anchor check per point
     C-->>P: answer, conflict or refusal card
     P->>T: the record of this question
     P-->>E: the card
@@ -347,7 +348,6 @@ A restart must keep every published document and its history (S4, Owner scenario
 | Search returns a chunk outside the scope | `ScopeLeakError`; no card | Built |
 | A chunk of the scope is missing from the index | Search raises an error naming the chunk; no card | Built |
 | The model's output is malformed, cites nothing, cites outside what was retrieved, or quotes text not in the cited chunk | Refusal card | Built |
-| A sentence states a number or date that is not in its quote | That point shows its quote alone, as v1 does | New |
 | A publish fails validation | Nothing is saved; the console shows the errors | New |
 | Indexing fails during a publish | Nothing is saved; the owner retries (proposed: index first, then save) | New |
 | The registry is unreachable | Error page for questions and publishing; never an answer from stale data (proposed) | New |
@@ -493,16 +493,14 @@ The full design changes the rules' inputs, not the rules:
 
 ### 6.4 The checks and the card
 
-- Structure check: the whole answer is refused if the output is malformed, has no points, has a point with no citation, cites a chunk that was not retrieved, or quotes text that is not in a chunk it cites, after Unicode and whitespace folding.
-- New, anchor check: for each point, every number and date in the sentence must appear in its quote, after the same folding.
-  A point that fails shows its quote alone, as v1 does, so a failed check costs readability and never shows a wrong number.
+- The whole answer is refused if the output is malformed, has no points, has a point with no citation, cites a chunk that was not retrieved, or quotes text that is not in a chunk it cites, after Unicode and whitespace folding.
 - If a cited document is in a conflict pair, the card is the conflict card, quoting one clause per side chosen without reading meaning (ADR 0005); the model's sentences are not shown on it.
 - Changed: otherwise the card is the answer card; for each point, the model's sentence on top and the verified quote under it in quotation marks, then the source lines (SD14, decided by Hiep on 20/10/2026).
 - Every card starts with who the asker is asking as, and the answer card names the document, the "Điều", the effective date and the HR contact (E7).
 - "Not allowed" and "not found" give the same refusal text (E4).
-- No second model call checks the sentences (SD14).
-  The anchor check does not catch a dropped condition, a fact added without a number, or a sentence applied to the wrong people; the quote under each sentence shows the employee the clause itself, and the evaluation measures how often sentences drop conditions (section 14).
-  A second call is added only if that measurement shows that sentences mislead (section 16).
+- The sentence is not checked at run time, by rules or by a second model call (SD14).
+  The quote under each sentence shows the employee the clause itself, and the evaluation reads each sentence against its quote (section 14).
+  A check on the sentence is added only if the evaluation shows that sentences mislead (section 16).
 - Conflicts are not detected at question time: they come only from declared metadata, and a content conflict that the owner side missed gives an answer card (section 12).
 
 ### 6.5 Reading the cited part (E7)
@@ -641,7 +639,7 @@ Two questions follow from the choice:
 Proposed: the page writes one record per question in the same shape the evaluation already writes in `results/*.jsonl`, so the same scoring and reading tools work on both.
 The evaluation record today holds the run id, the asker, the date, the question, the status and error, the commit, the model, thinking level, embedding model and top k, the scope's documents, conflict pairs and chunks, the retrieved chunks and their text, the raw model reply, the points, the card and the latency.
 The page's record adds a trace id, the account id instead of the persona, and whether the cache answered.
-Both records add, for each point, its sentence and the result of its anchor check.
+Both records add each point's sentence.
 
 Open **[to decide]**:
 
@@ -679,7 +677,7 @@ Tests already check that no restricted chunk reaches any asker's scope for every
 | The impact preview | Showing another unit's restricted document | The preview shows only what the owner may read (section 7.4) |
 | The data and test-case pages | Showing restricted titles to employees | Visibility to decide (section 8.3) |
 | The session cookie | A forged account | Signed with a secret from the environment |
-| Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its sentence is checked only for numbers and dates; at worst it gives a refusal, or a misleading sentence above a real quote |
+| Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its sentence is not checked; at worst it gives a refusal, or a misleading sentence above a real quote |
 
 ### 11.3 Secrets and data
 
@@ -693,7 +691,7 @@ The failures that look like right answers matter most, because the employee cann
 | Failure | Looks like | Caught by | In this design |
 |---|---|---|---|
 | The model quotes a real clause in scope that does not answer the question | A right answer | Hiep's reading in the evaluation; the employee reads the quote and its source | Unchanged |
-| The sentence drops a condition of its quote, adds a fact with no number in it, or applies the clause to the wrong people | A right answer | The quote under the sentence; Hiep's reading; the sentence checks of section 14 | New with the sentence; a second model call stays possible (section 16) |
+| The sentence changes a number, drops a condition of its quote, adds a fact, or applies the clause to the wrong people | A right answer | The quote under the sentence; Hiep's Faithfulness reading (section 14) | New with the sentence; a check on the sentence stays possible (section 16) |
 | Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides, never a conflict card | The evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | New limitation; the publish-time scan is SD15 |
 | An owner sets wrong metadata, such as a wrong topic or a wrong relation ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) | A right answer | Nothing in v1 | Partly mitigated by the relation list and the impact preview (sections 7.3, 7.4) |
 | A question about another period gets the rule in force on the date asked ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | A right answer | The evaluation | Unchanged; see section 16 |
@@ -727,8 +725,7 @@ How each metric of spec section 6.2 is measured:
 | Right sources and right kind | Each test question's scope and card compared with its expected documents and kind; gate "Rules correct in every case" | Built |
 | Leaks | Gate "Leaks", plus the exhaustive scope test of section 11.1 | Built |
 | Unsafe answers | Gates on the card and on the raw model reply, confirmed by hand (ADR 0006) | Built |
-| Faithfulness | Hiep reads every answer, each sentence against its quote, in a review file next to the run | Changed: v1 cards have quotes only |
-| Sentence checks | A hand-labelled set of sentence-quote pairs from the simulated clauses: for each clause, one faithful sentence and wrong ones that change a number, drop a condition, add a fact, flip the meaning or apply it to the wrong people; measures what the anchor check catches and how often the model's sentences drop conditions | New |
+| Faithfulness | Hiep reads every answer, each sentence against its quote, in a review file next to the run, and names the error of an unfaithful sentence: a changed number, a dropped condition, an added fact, a flipped meaning, or the wrong people | Changed: v1 cards have quotes only |
 | Over-caution | At most 10% of the questions that expect an answer (`eval.over_cautious_max_share`); rechecked after the prompt change of section 6.3 | Built |
 | Readability | Read by a person, on the answer card's sentences; the criterion is open in the spec | **[to decide]** |
 | Source shown | Each answer card names the document, the part, the version and its date, and the part can be opened | Changed: the card already names them; opening the part is section 6.5; whether this is checked automatically today is to be checked |
@@ -767,7 +764,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 8.3, 8.4 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named | Section 17 | No | 17 |
-| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; its numbers and dates checked by rules, with no second model call; no conflict detection at question time | Possibly; needs the ADR that supersedes ADR 0009 | 6.3, 6.4 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | Possibly; needs the ADR that supersedes ADR 0009 | 6.3, 6.4 |
 | SD15 | Whether a content conflict scan runs when an owner publishes | To discuss with the owner workflow | Yes | 12 |
 | SD16 | Whether owners get a list of answers that cite documents with no declared relation between them | To discuss with the owner workflow | No | 12 |
 
@@ -787,7 +784,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | Real single sign-on | The sign-in component only | The rules need only unit and roles |
 | Many more documents | The index moves to a persistent vector store | The rules, the answerer, the checks |
 | Another model | `config.yaml` and a new ADR | Everything else |
-| A second model call that checks each sentence against its quote, if the sentence checks show that sentences mislead | The answer checks only, with a new ADR | The scope rules, search, the answerer, the cards |
+| A check on each sentence at run time, by rules or by a second model call, if the Faithfulness reading shows that sentences mislead | The answer checks only, with a new ADR | The scope rules, search, the answerer, the cards |
 | "Báo sai" and the owners' records | A new record type in the registry's store and a page in the owner console | The answering half |
 
 ## 17. Open questions
@@ -815,7 +812,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | H3 | Registry, search index, scope rules | 3.4 | Changed (index updated on publish) | Owner scenarios |
 | H4 | Owner console, scope rules | 3.3 | New | Owner scenarios |
 | H5 | Sign-in and session, publish service | 3.2 | New | Owner scenarios |
-| S1 | Answerer, answer checks | 3.1 | Changed (6.4) | Faithfulness; Sentence checks |
+| S1 | Answerer, answer checks | 3.1 | Changed (6.4) | Faithfulness |
 | S2 | Answer checks, card text | 3.1, 3.6 | Built | Unsafe answers; Over-caution |
 | S3 | Trace recorder, trace store | 3.1 | New | Traceable answers |
 | S4 | Registry and its store | 3.2, 3.5 | Changed (9.2) | Owner scenarios |
