@@ -9,7 +9,7 @@ All Appota data in this project is simulated ("giả lập").
 | Section | What it covers |
 |---|---|
 | [1. Scope](#1-scope) | What this design covers, and where the requirements are |
-| [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee, document owner, evaluator |
+| [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee and document owner |
 | [3. Main flows](#3-main-flows) | The same workflows as sequences, plus the effective date, restart and failures |
 | [4. Documents and versions](#4-documents-and-versions) | The terms, the information an owner sets, the checks when publishing, the life of a version |
 | [5. Scope rules](#5-scope-rules) | The rules that decide which documents an asker may use |
@@ -51,9 +51,8 @@ This document never gives the reasons for a decision on Hiep's behalf.
 
 ## 2. High-level design
 
-The system has three workflows, one per kind of user.
+The system has two workflows, one per kind of user.
 The employee's and the owner's workflows meet only in the document registry and the search index: the owner's workflow writes them, and the employee's workflow only reads them.
-The evaluator's workflow runs the employee's workflow unchanged, so the evaluation tests what employees get.
 
 ### 2.1 How to read the diagrams
 
@@ -66,7 +65,6 @@ The diagrams use shapes, not colour, to show what each step is.
 | Rectangle | A step done by deterministic rules or plain code, with no AI |
 | Hexagon | A step that calls an AI model |
 | Diamond | A decision taken by rules |
-| Rectangle with double sides | Another workflow, run as one step |
 | Cylinder | A store; the same store can be drawn twice to keep lines short |
 
 A solid arrow leads to the next step; a dotted line joins a step to a store it reads or writes.
@@ -176,44 +174,6 @@ flowchart TD
 - The impact preview uses the same scope rules as the employee's workflow, so it shows what employees will actually get.
 - The new version is embedded before it is saved, so the registry never names a chunk the index does not have (proposed).
 - Nothing runs on the effective date: which version is in force is computed for each question (section 3.4).
-
-### 2.4 Evaluator: testing the system
-
-```mermaid
----
-config:
-  htmlLabels: false
-  flowchart:
-    htmlLabels: false
-    wrappingWidth: 260
----
-flowchart TD
-    evaluator([Evaluator: Hiep, judges])
-    harness["Evaluation harness: asks each test question once, as its simulated employee, on its date, with no cache"]
-    employee[["The employee workflow, from the scope rules to the card"]]
-    record["Records the scope, passages, raw reply and card of each question"]
-    score["Scoring: right sources and kind, leaks, unsafe answers, over-caution"]
-    review[/"Hiep reads every answer: faithfulness and readability"/]
-    report[/"Test report and gates: expected, actual, pass or fail, lesson"/]
-    scenarios["Owner scenarios on fake models: publish, ask before and on the effective date, publish for another unit, restart (New)"]
-    result[/"Pass or fail for each scenario, in python -m pytest (New)"/]
-    pages[/"Data and test-case pages: read-only, call no model"/]
-    cases[("Test cases")]
-    runs[("Run records")]
-    registry[("Document registry (Changed)")]
-
-    evaluator --> harness --> employee --> record --> score --> review --> report
-    evaluator --> scenarios --> result
-    evaluator --> pages
-    harness -.- cases
-    record -.- runs
-    pages -.- runs
-    pages -.- registry
-```
-
-- The evaluator is Hiep when building, and the judges when looking at the demo.
-- Test questions go through the employee's workflow with no cache.
-- Owner scenarios need no model to decide pass or fail, because the scope rules decide which documents an answer may use.
 
 ## 3. Main flows
 
@@ -668,6 +628,9 @@ The full design adds a session secret and, depending on section 9.2, a database 
 New `config.yaml` keys are added by the change whose code first reads them.
 
 ## 14. Evaluation
+
+The evaluator is Hiep when building, and the judges when looking at the demo.
+Test questions go through the employee's workflow unchanged and with no cache, so the evaluation tests what employees get.
 
 How each metric of spec section 6.2 is measured:
 
