@@ -16,58 +16,43 @@ What the AI can still get wrong is choosing which clause in the scope answers th
 
 ## The 7 steps
 
+The diagram uses the shapes of [`system_design.md`](system_design.md#21-how-to-read-the-diagrams): a hexagon calls an AI model, a rectangle or a diamond is a rule, a parallelogram is what the asker enters or sees, and a cylinder is a store.
+
 ```mermaid
 ---
 config:
   htmlLabels: false
   flowchart:
     htmlLabels: false
-    wrappingWidth: 400
+    wrappingWidth: 260
 ---
-flowchart TB
-    subgraph before[" "]
-        direction LR
-        inputs(["Documents<br/>with metadata,<br/>the as-of date,<br/>the asker's unit<br/>and roles"])
-        subgraph rules1["Rules only: no AI, the question is not read"]
-            direction LR
-            s1["1. Keep each policy's<br/>version in force<br/>on the as-of date"]
-            s2["2. Keep what<br/>applies to the<br/>asker's unit"]
-            s3["3. Apply declared<br/>replacements, then keep<br/>what the asker may read"]
-            s4["4. Mark conflict pairs:<br/>same topic, no<br/>declared relation"]
-            s1 --> s2 --> s3 --> s4
-        end
-        inputs --> rules1
-    end
+flowchart TD
+    employee([Employee])
+    context[/"Picks a persona, which gives the unit and roles, and an as-of date"/]
+    question[/"Asks a question"/]
+    s1["1. Keeps each policy's version in force on the as-of date"]
+    s2["2. Keeps what applies to the asker's unit"]
+    s3["3. Applies declared replacements, then keeps what the asker may read"]
+    s4["4. Marks conflict pairs: same topic, no declared relation"]
+    s5{{"5. Hybrid search in the scope, BM25 and embeddings: top 5 chunks"}}
+    s6{{"6. The LLM cites chunks and quotes each clause word for word"}}
+    valid{"7. Citations and quotes valid?"}
+    conflict{"7. Cites a conflict pair?"}
+    refusal[/"Refusal card"/]
+    conflictcard[/"Conflict card"/]
+    answercard[/"Answer card: the verified quotes, no AI text"/]
+    documents[("Documents with metadata")]
+    index[("Search index")]
 
-    subgraph after[" "]
-        direction LR
-        question(["The<br/>question"])
-        subgraph ai["AI, inside the scope only"]
-            direction LR
-            s5["5. Hybrid<br/>search, BM25<br/>and embeddings:<br/>top 5 chunks"]
-            s6["6. The LLM<br/>cites chunks,<br/>quotes clauses<br/>word for word"]
-            s5 --> s6
-        end
-        subgraph rules2["Rules again: no AI"]
-            direction LR
-            s7["7. Check<br/>every citation<br/>and quote,<br/>pick the card"]
-            cards["Answer,<br/>conflict or<br/>refusal card:<br/>no AI text"]
-            s7 --> cards
-        end
-        question --> ai --> rules2
-    end
-
-    before -- "the asker's scope and conflict pairs" --> after
-
-    classDef rule fill:#e8f5e9,stroke:#2e7d32,color:#1b1b1b
-    classDef llm fill:#fff3e0,stroke:#ef6c00,color:#1b1b1b
-    class s1,s2,s3,s4,s7,cards rule
-    class s5,s6 llm
-    style rules1 fill:transparent,stroke:#2e7d32
-    style rules2 fill:transparent,stroke:#2e7d32
-    style ai fill:transparent,stroke:#ef6c00
-    style before fill:transparent,stroke:transparent
-    style after fill:transparent,stroke:transparent
+    employee --> context --> s1 --> s2 --> s3 --> s4 -- scope, conflict pairs --> s5
+    employee --> question --> s5
+    s5 --> s6 --> valid
+    valid -- no --> refusal
+    valid -- yes --> conflict
+    conflict -- yes --> conflictcard
+    conflict -- no --> answercard
+    s1 -.- documents
+    s5 -.- index
 ```
 
 The question enters only at step 5.
