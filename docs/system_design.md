@@ -9,7 +9,7 @@ All Appota data in this project is simulated ("giả lập").
 | Section | What it covers |
 |---|---|
 | [1. Scope](#1-scope) | What this design covers, and where the requirements are |
-| [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee, document owner, evaluator; then the components |
+| [2. High-level design](#2-high-level-design) | One flowchart per workflow: employee, document owner, evaluator |
 | [3. Main flows](#3-main-flows) | The same workflows as sequences, plus the effective date, restart and failures |
 | [4. Documents and versions](#4-documents-and-versions) | The terms, the information an owner sets, the checks when publishing, the life of a version |
 | [5. Scope rules](#5-scope-rules) | The rules that decide which documents an asker may use |
@@ -215,38 +215,6 @@ flowchart TD
 - Test questions go through the employee's workflow with no cache.
 - Owner scenarios need no model to decide pass or fail, because the scope rules decide which documents an answer may use.
 
-### 2.5 Components
-
-| Component | Responsibility | Decided by | Requirements | Status | v1 code |
-|---|---|---|---|---|---|
-| Ask page | The question form, the three cards, and the cited clause | Rules render fixed or verified text | E1, E7, S5 | **Changed**: the asker comes from the session instead of the persona picker; the cited clause can be opened (section 6.5) | `api/page.py`, `api/templates/` |
-| Owner console | The unit's documents with their state today, the publish form, drafts | Rules | H1-H4 | **New** | - |
-| Data and test-case pages | Read-only views of the simulated data and of the committed evaluation run, calling no model | Rules | Evaluation | **Built**; visibility to decide (section 8.3) | `api/page.py`, `services/guide.py` |
-| Sign-in and session | Turns a signed-in simulated account into the principal: unit, roles, owned unit | Rules | E8, H5 | **New**: v1 has a persona picker | - |
-| Directory | The org tree, each unit's HR contact, the accounts | Data | E2, E6, E8 | **Changed**: accounts gain the unit they own | `data/org.yaml`, `data/personas.yaml`, `integrations/data_files.py` |
-| Document registry | Every version of every document with its metadata, relations and publish events; only appended to | Data | H1, H2, S4 | **Changed**: files in the repository become a persistent store (section 9) | `data/documents/`, `integrations/data_files.py` |
-| Publish service | Checks the owner may publish for the unit, validates the document, shows its impact, saves it and indexes it | Rules | H1, H2, H3, H5 | **New**; the load checks of v1 are its starting point | `integrations/data_files.py` (checks only) |
-| Chunker | One chunk per "Điều", or per line for a document without "Điều" | Rules | E7 | **Built** | `services/chunking.py` |
-| Search index | Every chunk of every version, with its embedding and its BM25 tokens | Data | E1 | **Changed**: built at start-up in v1; also updated on publish | `services/retrieval/index.py` |
-| Scope rules | The documents the asker may use on the date: in force, applying to the asker's unit, not replaced, readable by the asker; and the conflict pairs | Rules | E2-E5 | **Built** | `services/scope.py` |
-| Hybrid search | Ranks only the asker's chunks by BM25 and embeddings, fused by RRF, and raises an error on any chunk outside the scope | AI ranks, rules guard | E1, E4 | **Built** | `services/retrieval/` |
-| Answerer | One LLM call that, for each point, writes a sentence in plain Vietnamese, cites only retrieved chunk ids and quotes the clause word for word; or returns nothing | AI | E1, S1 | **Changed**: v1 returns only the quote and the chunks; the sentence and the prompt rules of section 6.3 are new | `services/answering/`, `integrations/gemini.py` |
-| Answer checks and card | Verifies every citation and quote, picks the answer, conflict or refusal card, and fills in its wording | Rules | S1, S2, E5, E6, E7 | **Changed**: the answer card shows the model's sentence above each quote (section 6.4) | `services/citations.py`, `services/card_text.py` |
-| Trace recorder | One record per question: who, when, scope, retrieved passages, raw model reply, checks, card | Rules | S3 | **New**: v1 has JSON log lines on standard output and the evaluation's JSONL files | `evaluation/run.py` (record shape) |
-| Evaluation harness | Runs the test questions through the ask function and scores them; runs the owner scenarios | Rules, plus Hiep's reading | Spec 6 | **Built** for test questions; **New** for owner scenarios | `evaluation/`, `tests/` |
-
-### 2.6 What stays and what is added
-
-The answering half of the system is built and stays as it is: the scope rules, search, the answerer and the answer checks, with the guarantees described in [`architecture.md`](architecture.md).
-The one change inside it is the answer card: the model writes a sentence above each verified quote (section 6.4).
-The design adds three things around it:
-
-1. **Who is asking comes from a signed-in account.** The rules already need only a unit and roles, so only the source of the principal changes.
-2. **Owners publish through the system instead of editing files.** Publishing writes to a persistent registry and to the search index; the scope rules read the registry instead of `data/documents/`.
-3. **Every answer leaves a record.** The page writes the same kind of record the evaluation already writes.
-
-The answering half never writes and the publishing half never answers, so they meet only in the registry and the index.
-
 ## 3. Main flows
 
 ### 3.1 An employee asks a question
@@ -259,7 +227,8 @@ sequenceDiagram
     participant R as Scope rules
     participant H as Hybrid search
     participant A as Answerer
-    participant G as Gemini
+    participant M as Embedder
+    participant L as LLM
     participant C as Answer checks
     participant T as Trace recorder
 
@@ -270,10 +239,10 @@ sequenceDiagram
     Note over R: reads the registry and the directory,<br/>never the question
     R-->>P: the asker's scope and conflict pairs
     P->>H: question, scope
-    H->>G: embed the question
+    H->>M: embed the question
     H-->>A: top chunks, all inside the scope
-    A->>G: chunks, asker's unit, question
-    G-->>A: points: sentence, quote and cited chunk ids
+    A->>L: chunks, asker's unit, question
+    L-->>A: points: sentence, quote and cited chunk ids
     A->>C: retrieved chunks, points
     C-->>P: answer, conflict or refusal card
     P->>T: the record of this question
@@ -344,7 +313,7 @@ A restart must keep every published document and its history (S4, Owner scenario
 
 | Failure | What happens | Status |
 |---|---|---|
-| Gemini fails after retries, or the rate limit is reached | The page shows "Hệ thống tạm thời không trả lời được..." and no card; the trace records the error | Built (trace New) |
+| The LLM or the embedder fails after retries, or its rate limit is reached | The page shows "Hệ thống tạm thời không trả lời được..." and no card; the trace records the error | Built (trace New) |
 | Search returns a chunk outside the scope | `ScopeLeakError`; no card | Built |
 | A chunk of the scope is missing from the index | Search raises an error naming the chunk; no card | Built |
 | The model's output is malformed, cites nothing, cites outside what was retrieved, or quotes text not in the cited chunk | Refusal card | Built |
