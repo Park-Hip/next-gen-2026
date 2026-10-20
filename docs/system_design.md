@@ -63,7 +63,7 @@ When two goals conflict, the higher one wins.
 |---|---|---|
 | P1 | **Rules before AI.** Which documents the asker may use is decided from document metadata, the asker's account and the date, before the question is read | Mission 1 design; [`architecture.md`](architecture.md) |
 | P2 | **The AI only handles language.** It ranks passages and picks and quotes the clauses that answer; it never decides access, validity, applicability, precedence or the card | AGENTS.md product rules |
-| P3 | **No AI text on a card.** The answer card shows the quote that the rules verified; the conflict and refusal cards use fixed wording | ADR 0009 |
+| P3 | **No AI text on a card.** The answer card shows the quote that the rules verified; the conflict and refusal cards use fixed wording. **[to decide]**: E1 asks for an answer "in plain Vietnamese that answers it directly", which a quote does not always give; changing this needs a new ADR that supersedes ADR 0009 (SD14) | ADR 0009 |
 | P4 | **Access never decides precedence.** A document the asker may not read still replaces its series | ADR 0010 |
 | P5 | **The system never chooses between undeclared policies.** Only a relation an owner declared resolves two policies on the same topic | Mission 1 design; E5, H2 |
 | P6 | **Fail closed.** A failed check gives a refusal or an error page, never a card | S2 |
@@ -716,6 +716,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 10.3, 10.4 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 12.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named | Section 19 | No | 19 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | Keep ADR 0009; a worded answer shown with its verified quote | Possibly | 2.2, 8.4 |
 
 ## 18. Change readiness
 
@@ -741,7 +742,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 - The criterion for Readability (spec section 6.2).
 - The spec's Users table says the HR contact "receives the questions of their unit's employees that the system cannot answer", but no requirement covers it: E6 only names who to ask.
   Either a requirement is added, with a way to forward questions, or the row is changed to say the HR contact is named (SD13).
-- Decisions SD1-SD12 of section 17.2.
+- Decisions SD1-SD12 and SD14 of section 17.2.
 
 ## Appendix A. Requirements traceability
 
