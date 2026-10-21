@@ -3,13 +3,17 @@
 No FastAPI and no LLM here: the page and the templates render these lines.
 Each answer point shows the model's sentence above the quote that step 7 checked (ADR 0011).
 The conflict and refusal cards keep fixed wording and show no model text.
+A document that leaves the asker's scope later gets the end of its window on the source line and a
+"Sắp thay đổi" notice under it, from the rules only (ADR 0012).
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
+from datetime import date
+
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card, CardLine
 from appota_kb.models.document import Chunk, Document
 from appota_kb.models.org import Persona
-from appota_kb.models.scope import Scope
+from appota_kb.models.scope import Change, Scope
 from appota_kb.services.citations import conflict_quotes, fold
 
 REFUSAL_TEXT = (
@@ -27,21 +31,58 @@ def intro(persona: Persona) -> str:
     return f"Bạn đang hỏi với tư cách: nhân sự {persona.company}, {persona.unit}."
 
 
-def _dmy(doc: Document) -> str:
-    return doc.effective_from.strftime("%d/%m/%Y")
+NOTICE_LABEL = "Sắp thay đổi: "
 
 
-def _source_line(doc: Document, doc_chunks: tuple[Chunk, ...], hr: str) -> str:
+def dmy(day: date) -> str:
+    return day.strftime("%d/%m/%Y")
+
+
+def _window(doc: Document, change: Change | None) -> str:
+    """"từ 01/01/2026", plus " đến hết 31/12/2026" when the document leaves this asker's scope later."""
+    text = f"từ {dmy(doc.effective_from)}"
+    if change is not None:
+        text += f" đến hết {dmy(change.last_day)}"
+    return text
+
+
+def change_text(doc: Document, change: Change, hr: str) -> str:
+    """What happens after the last day, without the label. Names only documents in the asker's scope,
+    so a successor the asker may not read gives the same text as no successor (R10, ADR 0015)."""
+    day = dmy(change.next_day)
+    if not change.successors:
+        return (
+            f"quy định này hết hiệu lực với bạn sau {dmy(change.last_day)}. "
+            f"Vui lòng hỏi {hr} về quy định áp dụng từ {day}."
+        )
+    versions = " và ".join(s.title for s in change.successors if s.series == doc.series)
+    others = " và ".join(s.title for s in change.successors if s.series != doc.series)
+    parts = []
+    if versions:
+        parts.append(f"{versions} áp dụng từ {day}")
+    if others:
+        parts.append(f"từ {day}, {others} dùng thay quy định này")
+    return "; ".join(parts) + "."
+
+
+def _notice_lines(doc: Document, scope: Scope, hr: str) -> tuple[CardLine, ...]:
+    change = scope.change_for(doc.id)
+    if change is None:
+        return ()
+    return (CardLine("notice", NOTICE_LABEL + change_text(doc, change, hr)),)
+
+
+def _source_line(doc: Document, doc_chunks: tuple[Chunk, ...], scope: Scope, hr: str) -> str:
     line = f"Nguồn: {doc.title}"
     labels = [c.label for c in doc_chunks if c.label]
     if labels:
         line += ", " + ", ".join(labels)
-    return f"{line}, hiệu lực từ {_dmy(doc)}. Hỏi thêm: {hr}."
+    return f"{line}, hiệu lực {_window(doc, scope.change_for(doc.id))}. Hỏi thêm: {hr}."
 
 
-def _quote_line(doc: Document, chunk: Chunk) -> str:
+def _quote_line(doc: Document, chunk: Chunk, scope: Scope) -> str:
     label = f", {chunk.label}" if chunk.label else ""
-    return f'{doc.applies_to}{label} (từ {_dmy(doc)}): "{chunk.text}"'
+    return f'{doc.applies_to}{label} ({_window(doc, scope.change_for(doc.id))}): "{chunk.text}"'
 
 
 def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]]:
@@ -65,7 +106,8 @@ def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[Ca
         lines.append(CardLine("quote", f'"{fold(point.quote)}"'))
         cited = tuple(by_id[cid] for cid in dict.fromkeys(point.chunks))
         for doc_id, doc_chunks in _group_cited(cited):
-            lines.append(CardLine("source", _source_line(docs[doc_id], doc_chunks, card.hr)))
+            lines.append(CardLine("source", _source_line(docs[doc_id], doc_chunks, scope, card.hr)))
+            lines.extend(_notice_lines(docs[doc_id], scope, card.hr))
     return tuple(lines)
 
 
@@ -74,7 +116,8 @@ def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[Car
     for (a, b), (left, right) in zip(card.conflicts, quotes):
         for doc, doc_chunks in ((a, left), (b, right)):
             for chunk in doc_chunks:
-                lines.append(CardLine("quote", _quote_line(doc, chunk)))
+                lines.append(CardLine("quote", _quote_line(doc, chunk, scope)))
+            lines.extend(_notice_lines(doc, scope, card.hr))
     lines.append(CardLine("plain", f"Vui lòng hỏi {card.hr}."))
     if recorded:
         owners: list[str] = []

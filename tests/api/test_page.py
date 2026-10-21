@@ -93,14 +93,16 @@ def test_answer_card_row_1(documents):
     # The model's sentence, then its verified quote, then the source line (ADR 0011).
     assert card.index(claim) < card.index(f'"{quote}"') < card.index("Nguồn:")
     assert "14 ngày" in card
-    assert "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo." in card
+    assert (
+        "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo."
+        " Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."
+    ) in card
     assert "Báo sai" not in page
     assert f"<q>{LEAVE_QUESTION}</q>" in page
     assert "Ngày áp dụng 07/10/2026" in page
 
 
 def test_conflict_card_row_7(documents):
-    quote = chunk_text(documents, "LEAVE-GROUP-v1#1")
     reply = reply_citing(
         "LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1",
         quote_from={
@@ -278,6 +280,8 @@ def test_page_never_shows_forbidden_title(documents, cases):
             continue  # the page always runs on the real data
         for question in row["questions"]:
             _, page = _ask(client, row["persona"], str(row["as_of"]), question)
+            # A notice may name the next version, which is outside the scope today (ADR 0012).
+            page = re.sub(r'<p class="change-notice">.*?</p>', "", page, flags=re.S)
             for doc_id in row["forbidden_by_rules"]:
                 assert titles[doc_id] not in page, (row["id"], question, doc_id)
 
@@ -456,3 +460,35 @@ def test_try_links_answer_on_the_main_page(documents):
     assert "nhân sự GameCo, Studio" in pages[1]
     assert "nhân sự Tập đoàn, Nhân sự Tập đoàn" in pages[5]
     assert pages[1] != pages[5]
+
+
+def test_answer_card_row_18_shows_the_window_and_the_notice(documents, cases):
+    row = next(c for c in cases if c["id"] == 18)
+    quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    claim = "Theo Quy chế nghỉ phép GameCo (bản 2), 14 ngày chỉ áp dụng đến hết 31/12/2026."
+    reply = reply_citing(
+        "LEAVE-GAMECO-v2#2",
+        quote_from={"LEAVE-GAMECO-v2#2": quote},
+        claim_from={"LEAVE-GAMECO-v2#2": claim},
+    )
+    client, _ = _client(documents, reply=reply)
+    response, page = _ask(client, row["persona"], str(row["as_of"]), row["questions"][0])
+    assert response.status_code == 200
+    card = _card_text(page)
+    source = "hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo."
+    notice = "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."
+    assert card.index(claim) < card.index(f'"{quote}"') < card.index(source) < card.index(notice)
+    assert '<p class="change-notice"><strong>Sắp thay đổi:</strong>' in page
+    for text in row["must_show"]:
+        assert text in card
+    assert "15 ngày" not in card
+
+
+def test_answer_card_on_the_day_of_the_change_has_no_notice(documents):
+    quote = chunk_text(documents, "LEAVE-GAMECO-v3#2")
+    reply = reply_citing("LEAVE-GAMECO-v3#2", quote_from={"LEAVE-GAMECO-v3#2": quote})
+    client, _ = _client(documents, reply=reply)
+    _, page = _ask(client, "minh", "2027-01-01", LEAVE_QUESTION)
+    card = _card_text(page)
+    assert "hiệu lực từ 01/01/2027. Hỏi thêm: HR GameCo." in card
+    assert "Sắp thay đổi" not in page and "đến hết" not in card

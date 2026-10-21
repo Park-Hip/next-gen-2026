@@ -1,4 +1,7 @@
 """The prompt: system instruction, chunks in hit order, the asker, the question last."""
+from dataclasses import replace
+from datetime import date
+
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from builders import RETRIEVAL, minh_scope
@@ -61,3 +64,48 @@ def test_prompt_keeps_the_output_contract():
     text = SYSTEM_INSTRUCTION
     assert '"claim"' in text and '"quote"' in text and '"chunks"' in text
     assert 'return {"points": []}' in text
+
+
+# The as-of date and each chunk's validity window (ADR 0012).
+
+def _user_turn(personas, documents, as_of, question="Phép năm của tôi là bao nhiêu ngày?"):
+    s = minh_scope(personas, documents, as_of)
+    hits = retrieve(build_index(documents, SyllableEmbeddings()), s, question, RETRIEVAL)
+    return build_messages(hits, s, question)[1].content, s
+
+
+def test_prompt_gives_the_as_of_date_and_each_chunks_window(personas, documents):
+    user, _ = _user_turn(personas, documents, date(2026, 12, 15))
+    assert "<as_of>15/12/2026</as_of>" in user
+    chunk_lines = [line for line in user.splitlines() if line.startswith("<chunk ")]
+    v2 = next(line for line in chunk_lines if 'id="LEAVE-GAMECO-v2#' in line)
+    assert 'valid_from="01/01/2026"' in v2
+    assert 'valid_to="31/12/2026"' in v2
+    assert 'change="Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."' in v2
+    # A document with no change has a start and nothing else.
+    ot = next(line for line in chunk_lines if 'id="OT-GAMECO-v1#' in line)
+    assert 'valid_from="' in ot
+    assert "valid_to" not in ot and "change=" not in ot
+
+
+def test_prompt_after_the_change_has_no_window_end(personas, documents):
+    user, _ = _user_turn(personas, documents, date(2027, 1, 1))
+    assert "<as_of>01/01/2027</as_of>" in user
+    assert "valid_to" not in user and "change=" not in user
+
+
+def test_prompt_never_names_a_restricted_successor(personas, documents):
+    edited = [replace(d, access="roles:hr_gameco") if d.id == "LEAVE-GAMECO-v3" else d for d in documents]
+    user, _ = _user_turn(personas, edited, date(2026, 12, 15))
+    v3 = next(d for d in documents if d.id == "LEAVE-GAMECO-v3")
+    assert v3.title not in user and "bản 3" not in user
+    assert 'valid_to="31/12/2026"' in user
+    assert "quy định này hết hiệu lực với bạn sau 31/12/2026" in user
+
+
+def test_prompt_rule_for_a_time_outside_the_window():
+    text = SYSTEM_INSTRUCTION
+    assert "only between its valid_from and valid_to" in text
+    assert "say in the sentence until when the clause applies" in text
+    assert "never present the clause as the rule for that time" in text
+    assert "Never compute a date" in text

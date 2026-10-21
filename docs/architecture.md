@@ -12,6 +12,7 @@ First, deterministic rules build the asker's scope from document metadata, the a
 Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer, writes one plain sentence per clause and quotes each clause, and rules check every citation and quote before choosing which of three cards to show.
 So a wrong version, another unit's rule or a restricted document cannot reach an answer, because the AI never sees them.
 The answer card shows the model's sentence above the quote the rules verified, then the source line (ADR 0011); the conflict and refusal cards show fixed wording and no model text.
+When a cited document leaves the asker's scope on a later date, the source line ends with "đến hết <ngày>" and a "Sắp thay đổi" notice follows it, from the rules alone (ADR 0012).
 What the AI can still get wrong is choosing which clause in the scope answers the question, and writing a sentence that drops a condition or adds a fact; the test report and Hiep's reading measure both.
 
 ## The 7 steps
@@ -68,15 +69,16 @@ The AI only works with language: it ranks chunks, picks the clauses that answer,
 | Decision | Decided by | How | Code | If it goes wrong |
 |---|---|---|---|---|
 | Which version is in force (validity) | Rules, step 1 | Per series, the published version with the latest `effective_from` not after the as-of date; a draft or a future version never counts | `in_force` in `services/scope.py` | Deterministic and tested; wrong metadata gives a wrong version, so the owner must keep it right |
+| When the version stops applying to the asker, and what replaces it | Rules (ADR 0012) | The scope is run again on each later date where a published document starts or on the day after one ends; the first date a document leaves it is its last day plus one, and the successors are the next version of its series or a policy that declares "dùng thay" over it, if the asker may read them | `_changes` in `services/scope.py` | Deterministic and tested; a successor the asker may not read is never named, and gives the same notice as no successor |
 | Who may read it (access) | Rules, last, after step 3 (ADR 0010) | `access` against the asker's roles or unit; never decides which policy applies | `allowed` in `services/scope.py` | As above |
 | Whether it applies to the asker (applicability) | Rules, step 2 | `applies_to` is the asker's unit or a unit above it | `applies` in `services/scope.py` | As above |
 | Which policy wins (precedence) | Rules, step 3 | Only an `overrides` ("dùng thay") the owner declared; there is no default "lower unit wins" | `scope` in `services/scope.py` | An undeclared pair is not resolved, it becomes a conflict pair |
 | Which policies conflict | Rules, step 4 | Same `topic`, both kept, neither lists the other in `complements` ("bổ sung") | `scope` in `services/scope.py` | The rules never decide a conflict; the card sends the asker to HR |
 | Which chunks are relevant | Search, step 5: BM25 plus `gemini-embedding-001` (ADRs 0001, 0002) | Ranks only the scope's chunks; anything outside the scope raises an error | `services/retrieval/search.py` | A missed chunk means the LLM finds nothing, so the asker gets a refusal: safe, but over-cautious |
-| Which clauses answer the question | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks and the asker's unit; may cite only retrieved ids, writes one plain sentence per clause, and quotes each clause word for word, or returns no points | `services/answering/` | See "What the rules cannot catch" below |
+| Which clauses answer the question | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks, the asker's unit, the as-of date and each chunk's validity window and change (ADR 0012); may cite only retrieved ids, writes one plain sentence per clause, and quotes each clause word for word, or returns no points | `services/answering/` | See "What the rules cannot catch" below |
 | Whether the answer is shown, and which card | Rules, step 7 (ADR 0003) | Refuses the whole answer if any point has no citation, cites a chunk that was not retrieved, or its quote is not in the cited chunk; a cited document in a conflict pair gives the conflict card | `card_for_answer` and `pick_card` in `services/citations.py` | Deterministic and tested |
 | The answer card's sentence | LLM, step 6 | One plain Vietnamese sentence per point, naming the document; not checked at run time (ADR 0011); Hiep reads every sentence against its quote | `services/answering/`, `services/card_text.py` | A wrong sentence can mislead; the verified quote under it and the Faithfulness reading are the controls |
-| The card kind, the verified quote, the source line, and the conflict and refusal text | Rules | The card kind comes from step 7 citations; the answer card shows the quote step 7 verified and the source line; the conflict card quotes one clause per side, chosen without reading meaning (ADRs 0003, 0005, 0011) | `services/card_text.py` | Deterministic and tested |
+| The card kind, the verified quote, the source line and its notice, and the conflict and refusal text | Rules | The card kind comes from step 7 citations; the answer card shows the quote step 7 verified, the source line with the end of the validity window and the "Sắp thay đổi" notice (ADR 0012); the conflict card quotes one clause per side, chosen without reading meaning (ADRs 0003, 0005, 0011) | `services/card_text.py` | Deterministic and tested |
 
 If Gemini fails after retries, the page shows an error, never a card.
 
@@ -170,6 +172,8 @@ Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 
 > Theo Quy chế nghỉ phép GameCo (bản 2), nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.
 > "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.
+
+Since #83 (ADR 0012) this source line ends "hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo." and a line "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027." follows it; the run above was made before that change.
 
 **Lan: answer card.**
 Her scope has two chunks; the LLM cited `LEAVE-GROUP-v1#1`.

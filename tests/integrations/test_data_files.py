@@ -187,7 +187,7 @@ def test_cases_well_formed(cases, documents, personas):
             if "remove" in edit:
                 assert edit["remove"] in body.splitlines(), f"{tag}: data_edit line not found"
             for key in (edit.get("set") or {}):
-                assert key in ("topic", "complements"), f"{tag}: data_edit cannot set {key}"
+                assert key in ("topic", "complements", "effective_to"), f"{tag}: data_edit cannot set {key}"
 
 
 def test_cases_key_facts(cases):

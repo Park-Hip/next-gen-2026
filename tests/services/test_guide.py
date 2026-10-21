@@ -173,3 +173,12 @@ def test_data_edit_note_describes_set_fields(cases, personas, documents):
     assert "bỏ khai báo bổ sung" in views[20].data_edit_note
     assert views[19].limitation_issue == "#74"
     assert views[20].limitation_issue is None
+
+
+def test_data_edit_note_describes_an_end_date(cases, personas, documents):
+    _, rest = case_views(cases, personas, documents)
+    view = next(c for c in rest if c.id == 21)
+    assert "đặt ngày hết hiệu lực 31/12/2026" in view.data_edit_note
+    assert "Quy định công tác phí GameCo" in view.data_edit_note
+    assert view.limitation_issue is None
+    assert next(c for c in rest if c.id == 18).limitation_issue is None

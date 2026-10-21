@@ -1,4 +1,6 @@
 """with_edit: the data_edit of a test case row."""
+from datetime import date
+
 import pytest
 
 from appota_kb.evaluation.data_edit import with_edit
@@ -7,7 +9,7 @@ from appota_kb.services.chunking import chunks
 
 def test_with_edit_removes_the_line(documents):
     v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    line = next(l for l in v2.body.splitlines() if l.startswith("Điều 3."))
+    line = next(ln for ln in v2.body.splitlines() if ln.startswith("Điều 3."))
     edited = with_edit(documents, {"document": "LEAVE-GAMECO-v2", "remove": line})
     new_v2 = next(d for d in edited if d.id == "LEAVE-GAMECO-v2")
     assert line not in new_v2.body.splitlines()
@@ -37,7 +39,7 @@ def test_with_edit_sets_topic_and_complements(documents):
 
 def test_with_edit_removes_a_line_and_sets_metadata(documents):
     v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    line = next(l for l in v2.body.splitlines() if l.startswith("Điều 3."))
+    line = next(ln for ln in v2.body.splitlines() if ln.startswith("Điều 3."))
     edited = with_edit(
         documents,
         {"document": "LEAVE-GAMECO-v2", "remove": line, "set": {"complements": []}},
@@ -70,3 +72,26 @@ def test_with_edit_needs_remove_or_set(documents):
 def test_with_edit_rejects_an_unknown_document(documents):
     with pytest.raises(ValueError, match="not a loaded document"):
         with_edit(documents, {"document": "NOPE", "set": {"topic": "x"}})
+
+
+def test_with_edit_sets_effective_to(documents):
+    edited = with_edit(documents, {"document": "TRAVEL-GAMECO-v1", "set": {"effective_to": date(2026, 12, 31)}})
+    travel = next(d for d in edited if d.id == "TRAVEL-GAMECO-v1")
+    assert travel.effective_to == date(2026, 12, 31)
+    assert travel.effective_from == date(2026, 1, 1)
+    assert [d.id for d in edited] == [d.id for d in documents]
+
+
+@pytest.mark.parametrize("value, message", [
+    ("2026-12-31", "effective_to must be a date"),
+    (None, "effective_to must be a date"),
+    (date(2025, 12, 31), "before effective_from"),
+])
+def test_with_edit_rejects_a_bad_effective_to(documents, value, message):
+    with pytest.raises(ValueError, match=message):
+        with_edit(documents, {"document": "TRAVEL-GAMECO-v1", "set": {"effective_to": value}})
+
+
+def test_with_edit_accepts_effective_to_on_the_start_day(documents):
+    edited = with_edit(documents, {"document": "TRAVEL-GAMECO-v1", "set": {"effective_to": date(2026, 1, 1)}})
+    assert next(d for d in edited if d.id == "TRAVEL-GAMECO-v1").effective_to == date(2026, 1, 1)
