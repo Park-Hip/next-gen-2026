@@ -1,4 +1,5 @@
-# Simulated askers (giả lập). They stand in for the HR system, which gives v1 the same two fields: unit and roles.
+# Simulated accounts (giả lập). They stand in for the HR system, which gives v1 the same two fields: unit and roles.
+# giam_khao is the judge's account (ADR 0016): it is not an employee and has no scope of its own; it may ask as any employee account.
 - id: minh
   name: Minh
   unit: Studio
@@ -11,3 +12,11 @@
   name: Hà
   unit: Kế toán
   roles: [employee]
+- id: hoa
+  name: Hoa
+  unit: Nhân sự GameCo
+  roles: [employee, hr_gameco]
+- id: giam_khao
+  name: Giám khảo
+  unit: Tập đoàn
+  roles: [evaluator]

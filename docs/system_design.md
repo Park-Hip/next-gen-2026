@@ -476,18 +476,22 @@ Whatever is chosen, the record of what was published and when is never deleted (
 
 ### 8.1 Accounts
 
-A simulated account has an id, a name, a unit, a set of roles, and optionally the unit it owns.
-Accounts replace `data/personas.yaml`; Minh, Lan and Hà remain as employees, and one owner account is added per unit that issues documents (proposed).
+A simulated account has an id, a name, a unit and a set of roles; owner accounts add the unit they own (proposed).
+v1 keeps the accounts in `data/personas.yaml`: Minh, Lan, Hà and Hoa (HR GameCo, role `hr_gameco`) are employees, and `Giám khảo` (role `evaluator`) is the judge, who is not an employee.
+One owner account per unit that issues documents is proposed for the owner console.
 
-### 8.2 Sign-in **[to decide]**
+### 8.2 Sign-in
+
+**Decided by Hiep, 21/10/2026 (ADR 0016):** the user picks an account and types a password shared by every simulated account; the shared password is published in the README, because the accounts and data are simulated.
 
 | Option | How | Status |
 |---|---|---|
-| a) Pick an account (proposed) | A sign-in page lists the simulated accounts; the user picks one, and the server keeps the account id in a signed session cookie | New |
-| b) Password | Each simulated account has a password | New |
+| a) Pick an account | A sign-in page lists the simulated accounts; the user picks one, and the server keeps the account id in a signed session cookie | Not chosen: no password at all |
+| b) Password | A password is typed with the account | **Chosen**, as one demo password shared by every account, read from `DEMO_PASSWORD`; the cookie holds only the account id and is signed with `SESSION_SECRET` |
 | c) Single sign-on | The company's real sign-in | Deferred ([`scope.md`](scope.md#simplified)) |
 
 In a and b the server reads the unit and roles from the account, never from the request or the question, which is what E8 requires.
+A `persona` in the URL or the form is ignored for an employee.
 
 ### 8.3 Who may do what
 
@@ -495,17 +499,17 @@ Every check runs on the server for every request; hiding a button is not a check
 
 | Action | Employee | Owner of unit U | Evaluator |
 |---|---|---|---|
-| Ask a question | Yes | Yes, as an employee of their own unit | Through the evaluation harness |
+| Ask a question | Yes | Yes, as an employee of their own unit | Yes, as any employee account it chooses on the ask page, and through the evaluation harness |
 | Open a cited clause | Only a chunk in their scope on that date | Same | Same |
 | See unit U's documents and their state | No | Yes | **[to decide]** |
 | Publish or save a draft for U | No | Yes | No |
-| See the "Dữ liệu giả lập" page | **[to decide]** | **[to decide]** | Yes |
-| See the "Tình huống kiểm thử" page | **[to decide]** | **[to decide]** | Yes |
-| Pick the as-of date | **[to decide]** | **[to decide]** | **[to decide]** |
+| See the "Dữ liệu giả lập" page | No (404) | No (404) | Yes |
+| See the "Tình huống kiểm thử" page | No (404) | No (404) | Yes |
+| Pick the as-of date | Yes, labelled as a demo control | Yes, labelled as a demo control | Yes, labelled as a demo control |
 
-In production the date is always today in Vietnam; v1 lets the user pick it so that judges can see a version change without waiting for it.
+In production the date is always today in Vietnam; v1 lets the user pick it so that judges can see a version change without waiting for it, and says so next to the picker.
 The "Dữ liệu giả lập" page lists every document with its title, including restricted ones such as "Khung bậc lương GameCo".
-That is right for judges looking at simulated data, but in a product where employees sign in it would break E4, which forbids even showing a document's title.
+That is right for judges looking at simulated data, but it would break E4, which forbids even showing a document's title, so only the judge account opens it; every other account gets a 404 (ADR 0016).
 
 ## 9. Storage and persistence
 
@@ -601,8 +605,8 @@ Tests already check that no restricted chunk reaches any asker's scope for every
 | The cited-clause link | Opening a chunk id of another document | The server checks the chunk is in the asker's scope for that date (section 6.5) |
 | The owner console | Reading or publishing for another unit | Server-side check of the owned unit on every request (section 8.3) |
 | The impact preview | Showing another unit's restricted document | The preview shows only what the owner may read (section 7.3) |
-| The data and test-case pages | Showing restricted titles to employees | Visibility to decide (section 8.3) |
-| The session cookie | A forged account | Signed with a secret from the environment |
+| The data and test-case pages | Showing restricted titles to employees | Only the judge account opens them; any other account gets a 404 (section 8.3) |
+| The session cookie | A forged account | Signed with `SESSION_SECRET` from the environment; it holds only the account id, and a tampered or wrongly signed cookie is treated as signed out |
 | Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its sentence is not checked; at worst it gives a refusal, or a misleading sentence above a real quote |
 
 ## 12. Failure modes and limitations
@@ -708,7 +712,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 |---|---|---|---|---|
 | SD1 | Where published documents and traces are stored, and on which host | Section 9.2 a-d | Yes | 9.2 |
 | SD2 | Whether embeddings are stored or recomputed at start-up | Store; recompute | With SD1 | 9.2, 13.2 |
-| SD3 | How a user signs in | Section 8.2 a-c | No | 8.2 |
+| SD3 | How a user signs in | Section 8.2 a-c | **Decided by Hiep, 21/10/2026**: pick an account and type one shared demo password, published in the README; ADR 0016 | 8.2 |
 | SD4 | The information an owner sets for each document | Section 4.2 | No | 4.2 |
 | SD5 | Who maintains the list of topics | Owners; one central owner; a fixed list in the data | No | 4.2 |
 | SD6 | Whether a published version may start before today | Allow; refuse | No | 4.3 |
@@ -716,7 +720,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD8 | How a mistake in a published version is corrected | Section 7.4 a-c | No | 7.4 |
 | SD9 | Whether an owner also sees and publishes for units below their unit | Own unit only; own unit and below | No | 7 |
 | SD10 | Whether the card links to the full cited clause | Link; quote only | No | 6.5 |
-| SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 8.3 |
+| SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | **Decided by Hiep, 21/10/2026**: the evaluator account only, others get a 404; the date picker stays, labelled as a demo control; ADR 0016 | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |
 | SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | ADR 0011 | 6.3, 6.4 |

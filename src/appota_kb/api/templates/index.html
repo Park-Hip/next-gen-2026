@@ -2,21 +2,22 @@
 {% from "_macros.html" import persona_label %}
 {% block title %}Hỏi{% endblock %}
 {% block content %}
-<p class="guide-banner">Lần đầu dùng? Xem <a href="/data">dữ liệu</a> và <a href="/cases">tình huống mẫu</a>.</p>
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 <form class="panel" method="get" action="/">
-  <div class="row">
+  <div class="row{% if not is_judge %} row-single{% endif %}">
+    {% if is_judge %}
     <div class="field">
-      <label for="persona">Người hỏi</label>
+      <label for="persona">Hỏi với tư cách</label>
       <select id="persona" name="persona" required>
-        <option value="" disabled{% if persona_id not in personas|map(attribute='id')|list %} selected{% endif %}>Chọn một nhân sự giả lập</option>
-        {% for p in personas %}
+        <option value="" disabled{% if persona_id not in employees|map(attribute='id')|list %} selected{% endif %}>Chọn một tài khoản nhân sự giả lập</option>
+        {% for p in employees %}
         <option value="{{ p.id }}"{% if p.id == persona_id %} selected{% endif %}>{{ persona_label(p) }}</option>
         {% endfor %}
       </select>
     </div>
+    {% endif %}
     <div class="field">
-      <label for="as_of">Ngày áp dụng</label>
+      <label for="as_of">Ngày áp dụng (demo)</label>
       <input id="as_of" name="as_of" type="date" value="{{ as_of or today }}" required>
     </div>
   </div>
@@ -27,7 +28,8 @@
       <button type="submit">Hỏi</button>
     </div>
   </div>
-  <p class="hint">Hệ thống chỉ dùng các văn bản người hỏi được xem, đang có hiệu lực vào ngày đã chọn và áp dụng cho đơn vị của họ.</p>
+  <p class="hint">Hệ thống chỉ dùng các văn bản tài khoản này được xem, đang có hiệu lực vào ngày đã chọn và áp dụng cho đơn vị của tài khoản.
+  Ngày áp dụng là điều khiển của bản demo, để xem các phiên bản khác nhau; sản phẩm thật luôn dùng ngày hôm nay.</p>
 </form>
 {% if card %}
 <section class="result" aria-live="polite">

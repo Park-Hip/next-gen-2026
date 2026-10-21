@@ -12,3 +12,7 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false   # set only in the Render Dashboard
+      - key: SESSION_SECRET
+        generateValue: true   # signs the session cookie (ADR 0016)
+      - key: DEMO_PASSWORD
+        sync: false   # the password shared by the simulated accounts; set by hand in the Render Dashboard (ADR 0016)
