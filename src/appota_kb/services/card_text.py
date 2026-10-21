@@ -3,6 +3,7 @@
 No FastAPI and no LLM here: the page and the templates render these lines.
 Each answer point shows the model's sentence above the quote that step 7 checked (ADR 0011).
 The conflict and refusal cards keep fixed wording and show no model text.
+A refusal's wording is picked from the card's reason by a fixed mapping, never from model text (ADR 0017).
 A document that leaves the asker's scope later gets the end of its window on the source line and a
 "Sắp thay đổi" notice under it, from the rules only (ADR 0012).
 A source line and a conflict quote carry the ids of the chunks they cite, so the page can link them to the
@@ -18,10 +19,27 @@ from appota_kb.models.org import Persona
 from appota_kb.models.scope import Change, Scope
 from appota_kb.services.citations import conflict_quotes, fold
 
+# Text 1: no points. The same for "not allowed" and "not found", and it reveals nothing (R10).
 REFUSAL_TEXT = (
     "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.\n"
     "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ {hr}."
 )
+# Text 2: the model answered and step 7 could not verify the answer. It never says that a rule exists.
+REFUSAL_TEXT_NOT_VERIFIED = (
+    "Hệ thống không đối chiếu được câu trả lời với nguyên văn quy định nên không đưa ra câu trả lời.\n"
+    "Bạn có thể hỏi lại hoặc liên hệ {hr}."
+)
+# Text 3: the model's output could not be read.
+REFUSAL_TEXT_ERROR = (
+    "Hệ thống gặp lỗi khi tạo câu trả lời.\n"
+    "Vui lòng thử lại; nếu vẫn lỗi, liên hệ {hr}."
+)
+# Any other reason, including None and one added later, reads text 1, the text that reveals nothing.
+REFUSAL_TEXT_BY_REASON = {
+    "quote_mismatch": REFUSAL_TEXT_NOT_VERIFIED,
+    "outside_retrieved": REFUSAL_TEXT_NOT_VERIFIED,
+    "malformed": REFUSAL_TEXT_ERROR,
+}
 
 CONFLICT_HEADLINE = (
     "Có {n} quy định cùng áp dụng cho bạn nhưng chưa được khai báo quy định nào được dùng thay quy định nào. "
@@ -139,7 +157,7 @@ def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[Car
 
 
 def refusal_text(card: Card) -> str:
-    return REFUSAL_TEXT.format(hr=card.hr)
+    return REFUSAL_TEXT_BY_REASON.get(card.reason, REFUSAL_TEXT).format(hr=card.hr)
 
 
 def refusal_card(card: Card, scope: Scope) -> tuple[CardLine, ...]:

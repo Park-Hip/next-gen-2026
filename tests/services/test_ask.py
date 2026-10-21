@@ -210,3 +210,41 @@ def test_the_same_chunks_on_two_dates_make_two_calls(personas, documents):
     assert ask(second, "q", answerer, cache).cache_hit is False
     assert ask(second, "q", answerer, cache).cache_hit is True
     assert answerer.calls == 2
+
+
+def _refused_replies(documents):
+    chunk = _chunk(documents, "LEAVE-GAMECO-v2#2")
+    point = Point(claim="x", quote="câu không có trong tài liệu", chunks=(chunk.id,))
+    return {
+        "malformed": Reply(retrieved=(chunk.id,), points=None, raw="not json"),
+        "quote_mismatch": Reply(retrieved=(chunk.id,), points=(point,), raw="{}"),
+        "outside_retrieved": Reply(
+            retrieved=(chunk.id,), points=(Point(claim="x", quote=chunk.text, chunks=("OT-GAMECO-v1#1",)),), raw="{}"
+        ),
+    }
+
+
+@pytest.mark.parametrize("reason", ["malformed", "quote_mismatch", "outside_retrieved"])
+def test_a_reply_refused_for_a_model_fault_is_not_cached(personas, documents, reason):
+    s = scope(personas["minh"], AS_OF, documents)
+    answerer = CountingAnswerer(_refused_replies(documents)[reason])
+    cache = ReplyCache(2)
+    first = ask(s, "q", answerer, cache)
+    second = ask(s, "q", answerer, cache)
+    assert first.card.reason == second.card.reason == reason
+    assert (first.cache_hit, second.cache_hit) == (False, False)
+    assert answerer.calls == 2
+
+
+def test_a_no_points_refusal_and_a_conflict_stay_cached(personas, documents):
+    g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
+    conflict = Reply(
+        retrieved=(g1.id,), points=(Point(claim="x", quote=g1.text, chunks=(g1.id,)),), raw="{}"
+    )
+    for name, reply in (("ha", conflict), ("minh", Reply(retrieved=(), points=(), raw=""))):
+        s = scope(personas[name], AS_OF, documents)
+        answerer = CountingAnswerer(reply)
+        cache = ReplyCache(2)
+        ask(s, "q", answerer, cache)
+        assert ask(s, "q", answerer, cache).cache_hit is True
+        assert answerer.calls == 1

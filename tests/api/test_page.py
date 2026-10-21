@@ -402,19 +402,95 @@ def test_refusal_row_8_ha(documents):
     assert "Mâu thuẫn" not in card
 
 
+NOT_FOUND = "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn."
+NOT_VERIFIED = "Hệ thống không đối chiếu được câu trả lời với nguyên văn quy định nên không đưa ra câu trả lời."
+SYSTEM_ERROR = "Hệ thống gặp lỗi khi tạo câu trả lời."
+
+
 def test_invented_citation_is_refused(documents):
-    reply = json.dumps({"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]})
+    reply = json.dumps({"points": [{"claim": "c", "chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]})
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
-    assert "Hệ thống không tìm thấy quy định phù hợp" in _card_text(page)
+    card = _card_text(page)
+    assert NOT_VERIFIED in card
+    assert NOT_FOUND not in card
+    assert "SAL-BAND" not in card and "lương" not in card.lower()
 
 
-def test_malformed_output_is_refused(documents):
+def test_malformed_output_is_refused_as_a_system_error(documents):
     client, _ = _client(documents, reply="not json at all")
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
-    assert "Hệ thống không tìm thấy quy định phù hợp" in _card_text(page)
+    card = _card_text(page)
+    assert card.startswith("Từ chối")
+    assert SYSTEM_ERROR in card
+    assert "Vui lòng thử lại; nếu vẫn lỗi, liên hệ HR GameCo." in card
+    assert NOT_FOUND not in card
+
+
+def test_p6_the_four_replies_give_three_texts(documents):
+    """Probe P6 of gaps.md: Minh, 07/10/2026, the leave question; each reply the model may give."""
+    c2 = chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    replies = {
+        "no points": (no_points(), NOT_FOUND),
+        "malformed": ("not json at all", SYSTEM_ERROR),
+        "quote not in its chunk": (
+            reply_citing(
+                "LEAVE-GAMECO-v2#2",
+                quote_from={"LEAVE-GAMECO-v2#2": "Nhân sự GameCo được nghỉ phép năm 30 ngày."},
+                claim_from={"LEAVE-GAMECO-v2#2": "MODEL TEXT MUST NOT APPEAR"},
+            ),
+            NOT_VERIFIED,
+        ),
+        "cites a chunk that was not retrieved": (
+            reply_citing(
+                "OT-GAMECO-v1#1",
+                quote_from={"OT-GAMECO-v1#1": c2},
+                claim_from={"OT-GAMECO-v1#1": "MODEL TEXT MUST NOT APPEAR"},
+            ),
+            NOT_VERIFIED,
+        ),
+    }
+    texts = set()
+    for name, (reply, lead) in replies.items():
+        client, _ = _client(documents, reply=reply)
+        response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+        card = _card_text(page)
+        assert response.status_code == 200, name
+        assert card.startswith("Từ chối Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."), name
+        assert lead in card, name
+        assert "HR GameCo" in card, name
+        assert "MODEL TEXT MUST NOT APPEAR" not in page, name
+        assert "30 ngày" not in card and c2 not in card, name
+        texts.add(card)
+    assert len(texts) == 3
+
+
+def test_no_points_refusal_text_is_unchanged(documents):
+    client, _ = _client(documents, reply=no_points())
+    _, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+    assert _card_text(page) == (
+        "Từ chối Bạn đang hỏi với tư cách: nhân sự GameCo, Studio. "
+        f"{NOT_FOUND} "
+        "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo."
+    )
+
+
+@pytest.mark.parametrize("reply", ["not json at all", json.dumps({"points": [{"claim": "c", "chunks": ["OT-GAMECO-v1#1"], "quote": "x"}]})])
+def test_a_refused_model_fault_is_asked_again(documents, reply):
+    # "Thử lại" or "hỏi lại" on the page must reach the model, not replay the cached failure.
+    client, chat = _client(documents, reply=reply)
+    _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+    _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+    assert chat.call_count == 2
+
+
+def test_a_no_points_refusal_is_cached(documents):
+    client, chat = _client(documents, reply=no_points())
+    _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+    _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
+    assert chat.call_count == 1
 
 
 def test_unavailable_is_503_without_card_and_not_cached(documents):

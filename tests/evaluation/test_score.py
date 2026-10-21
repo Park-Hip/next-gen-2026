@@ -442,3 +442,51 @@ def test_faithful_of_normalises_yaml_booleans():
     assert faithful_of({"faithful": "no"}) == "no"
     assert faithful_of({"faithful": ""}) is None
     assert faithful_of({"faithful": None}) is None
+
+
+def _refusal_score(personas, cases, rid, reason, lines):
+    """A refusal row's score; `lines` hold {hr}, filled with the row's persona's HR contact."""
+    row = row_by_id(cases, rid)
+    hr = personas[row["persona"]].hr
+    record = _refusal_record(rid)
+    record["persona"] = row["persona"]
+    record["card"]["reason"] = reason
+    record["card"]["lines"] = ["intro", *(line.format(hr=hr) for line in lines)]
+    return _row_score(row, record, over_cautious=True)
+
+
+NOT_FOUND_LINES = [
+    "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.",
+    "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ {hr}.",
+]
+NOT_VERIFIED_LINES = [
+    "Hệ thống không đối chiếu được câu trả lời với nguyên văn quy định nên không đưa ra câu trả lời.",
+    "Bạn có thể hỏi lại hoặc liên hệ {hr}.",
+]
+
+
+def test_refusals_are_compared_within_each_reason(personas, cases):
+    # Texts 2 and 3 differ from text 1 on purpose; only refusals with the same reason must match (R10).
+    scores = [
+        _refusal_score(personas, cases, 9, "no_points", NOT_FOUND_LINES),
+        _refusal_score(personas, cases, 10, "no_points", NOT_FOUND_LINES),
+        _refusal_score(personas, cases, 11, "quote_mismatch", NOT_VERIFIED_LINES),
+        _refusal_score(personas, cases, 13, "outside_retrieved", NOT_VERIFIED_LINES),
+    ]
+    assert refusals_identical(scores, personas) is True
+
+
+def test_two_no_points_refusals_that_differ_fail_the_gate(personas, cases):
+    scores = [
+        _refusal_score(personas, cases, 9, "no_points", NOT_FOUND_LINES),
+        _refusal_score(personas, cases, 10, "no_points", NOT_VERIFIED_LINES),
+    ]
+    assert refusals_identical(scores, personas) is False
+
+
+def test_two_refusals_of_one_model_fault_that_differ_fail_the_gate(personas, cases):
+    scores = [
+        _refusal_score(personas, cases, 9, "quote_mismatch", NOT_VERIFIED_LINES),
+        _refusal_score(personas, cases, 10, "quote_mismatch", NOT_FOUND_LINES),
+    ]
+    assert refusals_identical(scores, personas) is False

@@ -14,6 +14,10 @@ from appota_kb.services.card_text import render
 from appota_kb.services.citations import card_for_answer
 
 
+# Step 7 refusals that come from the model's reply, not from the question: asking again may give another reply.
+MODEL_FAULTS = ("malformed", "quote_mismatch", "outside_retrieved")
+
+
 @dataclass(frozen=True)
 class Asked:
     reply: Reply
@@ -27,7 +31,9 @@ class ReplyCache:
 
     Keyed by persona id, the as-of date, the scope's chunk ids and the question, so a changed scope misses.
     The date is in the key because the prompt carries it: the same chunks on two dates need two replies (ADR 0012).
-    Step 7 still runs on every hit, and a failed call is never stored.
+    Step 7 still runs on every hit.
+    A failed call is never stored, and neither is a reply that step 7 refused for a model fault (ADR 0017),
+    so asking again reaches the model.
     """
 
     def __init__(self, size: int):
@@ -64,9 +70,9 @@ def ask(
     cache_hit = reply is not None
     if reply is None:
         reply = answerer(scope, question)
-        if cache is not None:
-            cache.put(scope, question, reply)
     card = card_for_answer(scope, reply.retrieved, reply.points, reply.disagreement)
+    if cache is not None and not cache_hit and card.reason not in MODEL_FAULTS:
+        cache.put(scope, question, reply)
     by_id = {c.id: c for c in scope.chunks}
     lines = render(card, scope, reply.points, tuple(by_id[cid] for cid in reply.retrieved))
     return Asked(reply=reply, card=card, lines=lines, cache_hit=cache_hit)

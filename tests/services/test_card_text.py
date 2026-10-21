@@ -2,10 +2,20 @@
 from dataclasses import replace
 from datetime import date
 
+import pytest
+
 from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card, CardLine
-from appota_kb.services.card_text import ANSWER_NOTE, REFUSAL_TEXT, change_text, refusal_text, render
+from appota_kb.services.card_text import (
+    ANSWER_NOTE,
+    REFUSAL_TEXT,
+    REFUSAL_TEXT_ERROR,
+    REFUSAL_TEXT_NOT_VERIFIED,
+    change_text,
+    refusal_text,
+    render,
+)
 from appota_kb.services.chunking import chunks
 from appota_kb.services.citations import pick_card
 from appota_kb.services.scope import scope
@@ -177,6 +187,53 @@ def test_refusal_text(personas, documents, cases):
             assert d.id not in text and d.title not in text
         for bad in row10["must_not_contain"]:
             assert bad not in text
+
+
+REASON_TEXTS = {
+    "no_points": REFUSAL_TEXT,
+    "quote_mismatch": REFUSAL_TEXT_NOT_VERIFIED,
+    "outside_retrieved": REFUSAL_TEXT_NOT_VERIFIED,
+    "malformed": REFUSAL_TEXT_ERROR,
+    # No reason, or a reason added later, falls back to the text that reveals nothing (R10).
+    None: REFUSAL_TEXT,
+    "a_reason_added_later": REFUSAL_TEXT,
+}
+
+
+@pytest.mark.parametrize("reason", REASON_TEXTS)
+def test_refusal_text_follows_the_reason(personas, reason):
+    card = Card("refusal", personas["minh"].hr, (), (), reason=reason)
+    assert refusal_text(card) == REASON_TEXTS[reason].format(hr="HR GameCo")
+
+
+def test_the_three_refusal_texts_are_distinct_and_fixed():
+    texts = {REFUSAL_TEXT, REFUSAL_TEXT_NOT_VERIFIED, REFUSAL_TEXT_ERROR}
+    assert len(texts) == 3
+    for text in texts:
+        assert "{hr}" in text
+        assert text.format(hr="X").count("X") == 1
+    assert REFUSAL_TEXT_NOT_VERIFIED.splitlines() == [
+        "Hệ thống không đối chiếu được câu trả lời với nguyên văn quy định nên không đưa ra câu trả lời.",
+        "Bạn có thể hỏi lại hoặc liên hệ {hr}.",
+    ]
+    assert REFUSAL_TEXT_ERROR.splitlines() == [
+        "Hệ thống gặp lỗi khi tạo câu trả lời.",
+        "Vui lòng thử lại; nếu vẫn lỗi, liên hệ {hr}.",
+    ]
+
+
+@pytest.mark.parametrize("reason", REASON_TEXTS)
+def test_no_refusal_names_a_document_or_quotes_a_chunk(personas, documents, reason):
+    for persona in personas.values():
+        s = scope(persona, date(2026, 10, 7), documents)
+        lines = render(Card("refusal", persona.hr, (), (), reason=reason), s, None, ())
+        text = " ".join(line.text for line in lines[1:])
+        assert persona.hr in text
+        for d in documents:
+            assert d.id not in text and d.title not in text
+        for chunk in s.chunks:
+            assert chunk.text not in text
+        assert [line.kind for line in lines] == ["who", "lead", "plain"]
 
 
 # The window end and the notices (ADR 0012).
