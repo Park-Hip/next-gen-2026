@@ -5,6 +5,9 @@ request; the route checks the query, builds the scope and hands the question to 
 build_app takes the answerer so the tests can inject one on offline fakes.
 /data and /cases are read-only views of data/ and the committed run, open to the judge account
 only: they call no model.
+/source opens the cited version of a document for the signed-in asker, from the rules only: it calls no
+model and shows a chunk only when the asker's scope on that date holds it (#77).
+Every unknown path and every refused source gives the same 404 page.
 """
 from datetime import date, datetime, timedelta, timezone
 import hmac
@@ -30,6 +33,7 @@ from appota_kb.services.answering.answerer import AnswerUnavailable
 from appota_kb.services.ask import ReplyCache, ask
 from appota_kb.services.guide import case_views, format_date, org_tree, persona_views, series_views
 from appota_kb.services.scope import scope as build_scope
+from appota_kb.services.source_view import anchor_of, source_view
 
 logger = logging.getLogger(__name__)
 
@@ -196,8 +200,38 @@ def build_app(
             )
         )
         context["as_of"] = parsed.isoformat()
-        context["card"] = {"kind": asked.card.kind, "lines": asked.lines}
+        # The judge's links carry the account asked as; an employee's never do, and the server would ignore it.
+        link_as = asked_as.id if is_judge(account) else None
+        links = tuple(source_href(line.chunks, parsed, link_as) if line.chunks else "" for line in asked.lines)
+        context["card"] = {"kind": asked.card.kind, "lines": asked.lines, "links": links}
         return _render(request, "index.html", context, 200)
+
+    @app.get("/source", response_class=HTMLResponse)
+    def source(
+        request: Request,
+        chunk: list[str] = Query(default=[]),
+        as_of: str = Query(default=""),
+        persona: str = Query(default=""),
+    ):
+        account = signed_in(request)
+        if account is None:
+            return to_sign_in(request)
+        # Who is asking is decided as on "/": an employee is always themselves, only the judge picks.
+        asked_as = employees.get(persona.strip()) if is_judge(account) else account
+        view = None
+        if asked_as is not None:
+            try:
+                parsed = date.fromisoformat(as_of.strip())
+            except ValueError:
+                parsed = None
+            if parsed is not None:
+                view = source_view(build_scope(asked_as, parsed, documents), chunk)
+        if view is None:
+            # One page for a bad date, a bad account, an unknown id and an id outside the scope.
+            return _render(request, "not_found.html", identity(account), 404)
+        back = {"as_of": view.as_of.isoformat(), **({"persona": asked_as.id} if is_judge(account) else {})}
+        context = {**identity(account, asked_as), "active": "ask", "view": view, "back": "/?" + urlencode(back)}
+        return _render(request, "source.html", context, 200)
 
     @app.get("/data", response_class=HTMLResponse)
     def data(request: Request):
@@ -230,7 +264,21 @@ def build_app(
         }
         return _render(request, "cases.html", context, 200)
 
+    @app.exception_handler(404)
+    async def not_found(request: Request, exc: Exception):
+        account = signed_in(request)
+        return _render(request, "not_found.html", identity(account) if account else {}, 404)
+
     return app
+
+
+def source_href(chunks: tuple[str, ...], as_of: date, asked_as_id: str | None) -> str:
+    """The link of a card line to the version it cites: the chunk ids, the card's date and, for the judge, the
+    account asked as. The `#` of a chunk id is percent-encoded; the fragment scrolls to the first chunk."""
+    query = [("chunk", cid) for cid in chunks] + [("as_of", as_of.isoformat())]
+    if asked_as_id is not None:
+        query.append(("persona", asked_as_id))
+    return "/source?" + urlencode(query) + "#" + anchor_of(chunks[0])
 
 
 def _local_path(value: str) -> str:

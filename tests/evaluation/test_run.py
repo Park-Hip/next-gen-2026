@@ -35,8 +35,8 @@ def test_ask_row_1_ok(personas, documents, cases):
     # The answer text is the model's sentence, and the card puts it above the verified quote.
     claim = f"Theo tài liệu, {quote}"
     assert record["card"]["answer_text"] == claim
-    assert record["card"]["lines"][1] == {"kind": "claim", "text": claim}
-    assert record["card"]["lines"][2] == {"kind": "quote", "text": f'"{quote}"'}
+    assert record["card"]["lines"][2] == {"kind": "claim", "text": claim}
+    assert record["card"]["lines"][3] == {"kind": "quote", "text": f'"{quote}"'}
     assert record["points"] == [{"claim": claim, "quote": quote, "chunks": ["LEAVE-GAMECO-v2#2"]}]
     assert record["retrieved_text"]["LEAVE-GAMECO-v2#2"] == quote
     assert record["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]

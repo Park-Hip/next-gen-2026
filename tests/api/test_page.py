@@ -82,6 +82,7 @@ def _names(page):
 def _card_text(page):
     """The visible text of the card, tags removed and whitespace collapsed."""
     article = re.search(r"<article.*?</article>", page, re.S).group(0)
+    article = re.sub(r"</?a(?: [^>]*)?>", "", article)  # a link sits inside a sentence
     return " ".join(re.sub(r"<[^>]+>", " ", article).split())
 
 
@@ -358,8 +359,14 @@ def test_conflict_card_row_7(documents):
     card = _card_text(page)
     assert card.startswith("Mâu thuẫn Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.")
     assert "Hệ thống không tự chọn." in card
-    assert 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."' in card
-    assert 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."' in card
+    assert (
+        'Quy chế nghỉ phép Tập đoàn, Điều 1 (từ 01/01/2024, áp dụng cho Tập đoàn): '
+        '"Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'
+    ) in card
+    assert (
+        'Quy chế nghỉ phép PayCo, Điều 1 (từ 01/01/2025, áp dụng cho PayCo): '
+        '"Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'
+    ) in card
     assert card.endswith("Vui lòng hỏi HR PayCo.")
     assert "MODEL TEXT MUST NOT APPEAR" not in page
     assert "Đã ghi nhận" not in page

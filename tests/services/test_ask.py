@@ -116,10 +116,10 @@ def test_ask_shows_the_claim_above_the_verified_quote(personas, documents):
     reply = Reply(retrieved=("LEAVE-GAMECO-v2#2",), points=(point,), raw="{}")
     asked = ask(s, "q", CountingAnswerer(reply))
     assert asked.card.kind == "answer"
-    assert [line.kind for line in asked.lines[:4]] == ["who", "claim", "quote", "source"]
-    assert asked.lines[1].text == "Theo quy chế GameCo, bạn được nghỉ 14 ngày."
-    assert asked.lines[2].text == '"ngày"'
-    assert asked.lines[3].text.startswith("Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2")
+    assert [line.kind for line in asked.lines[:5]] == ["who", "note", "claim", "quote", "source"]
+    assert asked.lines[2].text == "Theo quy chế GameCo, bạn được nghỉ 14 ngày."
+    assert asked.lines[3].text == '"ngày"'
+    assert asked.lines[4].text.startswith("Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2")
     assert not hasattr(point, "text")
 
 
@@ -135,8 +135,8 @@ def test_ask_does_not_check_the_claim(personas, documents):
     reply = Reply(retrieved=("LEAVE-GAMECO-v2#2",), points=(point,), raw="{}")
     asked = ask(s, "q", CountingAnswerer(reply))
     assert asked.card.kind == "answer"
-    assert asked.lines[1].text == "Bạn được nghỉ 30 ngày mỗi năm."
-    assert asked.lines[2].text == '"ngày"'
+    assert asked.lines[2].text == "Bạn được nghỉ 30 ngày mỗi năm."
+    assert asked.lines[3].text == '"ngày"'
 
 
 def test_ask_claim_never_changes_the_card_kind(personas, documents):

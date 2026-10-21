@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ view.title }}{% endblock %}
+{% block content %}
+<article class="panel source-page">
+  <p class="who">Bạn đang xem với tư cách: {{ view.asker }}. Ngày áp dụng {{ "%02d/%02d/%d"|format(view.as_of.day, view.as_of.month, view.as_of.year) }}.</p>
+  <h2>{{ view.title }}</h2>
+  <dl class="facts">
+    <div><dt>Hiệu lực</dt><dd>{{ view.window }}</dd></div>
+    <div><dt>Áp dụng cho</dt><dd>{{ view.applies_to }}</dd></div>
+    <div><dt>Hỏi thêm</dt><dd>{{ view.hr }}</dd></div>
+  </dl>
+  {% if view.notice %}
+  {% set parts = view.notice.partition(': ') %}
+  <p class="change-notice"><strong>{{ parts[0] }}:</strong> {{ parts[2] }}</p>
+  {% endif %}
+  <ol class="version" aria-label="Toàn văn phiên bản này">
+    {% for c in view.chunks %}
+    <li class="chunk{% if c.cited %} cited{% endif %}" id="{{ c.anchor }}">
+      {% if c.cited %}<span class="badge badge-ok">Đoạn được trích</span><br>{% endif %}
+      {% if c.label %}<span class="label">{{ c.label }}.</span> {% endif %}{{ c.text }}
+    </li>
+    {% endfor %}
+  </ol>
+  <p><a href="{{ back }}">Về trang Hỏi</a></p>
+</article>
+{% endblock %}
