@@ -79,7 +79,7 @@ def _actual(score: RowScore) -> str:
     text = f"{label}: {detail}" if detail else label
     failed = failures(score)
     if failed:
-        text += ". Không đạt ở: " + ", ".join(failed)
+        text = text.rstrip(".") + ". Không đạt ở: " + ", ".join(failed)
     return text
 
 

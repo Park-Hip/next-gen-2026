@@ -7,11 +7,11 @@ from fakes import no_points, reply_citing
 from appota_kb.core.paths import ROOT
 from appota_kb.evaluation.committed import report_run_path
 import appota_kb.evaluation.report as report_mod
-from appota_kb.evaluation.report import REPORT_REL, _write_lf, build_report
+from appota_kb.evaluation.report import REPORT_REL, _actual, _write_lf, build_report
 from appota_kb.evaluation.report import main as report_main
 from appota_kb.evaluation.review import load_reviews
 from appota_kb.evaluation.run import run
-from appota_kb.evaluation.score import load_run, score_all
+from appota_kb.evaluation.score import RowScore, load_run, score_all
 
 
 def test_report_on_full_fake_run(cases, personas, documents, tmp_path, monkeypatch):
@@ -58,6 +58,22 @@ def test_write_lf_uses_lf_line_endings(tmp_path):
     path = tmp_path / "r.review.md"
     _write_lf(path, "đạt\nlỗi\n")
     assert path.read_bytes() == "đạt\nlỗi\n".encode("utf-8")
+
+
+def test_actual_does_not_double_the_period():
+    score = RowScore(
+        row={"id": 1},
+        record={"card": {"kind": "answer", "answer_text": "Một câu."}},
+        errors=(),
+        checks={},
+        rules_wrong=True,
+        leak=False,
+        unsafe=False,
+        over_cautious=False,
+        raw_unsafe=False,
+        caught_by_step7=False,
+    )
+    assert _actual(score) == "Trả lời: Một câu. Không đạt ở: rules"
 
 
 def test_report_incomplete_writes_nothing(cases, personas, documents, tmp_path, monkeypatch):

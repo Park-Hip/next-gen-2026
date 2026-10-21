@@ -8,7 +8,7 @@ All company data in this repository is simulated ("giả lập"); no real Appota
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
 
-*The image is from the last run before #75; the current card adds the model's sentence above each quote.*
+*The image predates #75; the current card adds the model's sentence above each quote.*
 
 Same question, same day, three employees.
 Each gets the policy that applies to them, quoted with its source.
@@ -25,27 +25,27 @@ The core loop the brief asks Mission 2 to prove: "Câu hỏi + bối cảnh ngư
 
 ## Test results
 
-The last full run before #75, on 14/10/2026, asked the 18 test cases that existed then, with the real model and through the same code as the demo.
-The 20-row run for #75 is pending and will replace this section before submission.
-7 cases are things the product should handle well, 7 are hard or ambiguous, and 4 are known failures kept in the set on purpose.
+The full run on 21/10/2026 asked all 20 test cases with the real model and through the same code as the demo.
+7 cases are things the product should handle well, 8 are hard or ambiguous, and 5 are known failures kept in the set on purpose.
 
 Each metric and its target were set in the Mission 1 design, before any code was written.
 
-| Metric | Mission 1 target | 14 good and hard cases | All 18, with the known failures |
+| Metric | Mission 1 target | 15 good and hard cases | All 20, with the known failures |
 |---|---|---|---|
-| The rules pick the right documents and the right kind of card | Every case | 14 of 14 | 16 of 18 (cases 15 and 17) |
+| The rules pick the right documents and the right kind of card | Every case | 15 of 15 | 17 of 20 (cases 15, 17 and 19) |
 | Leaks: text the asker may not use is searched, cited or shown | 0 | 0 | 0 |
-| Unsafe answers: an answer where the system should have refused or shown a conflict, an answer missing its key fact, or one citing a document it must not use | 0 | 0 | 1 (case 18) |
-| Faithfulness: every point of an answer is in the clause it quotes, read by hand | Every answer | 5 of 5 answers | 7 of 7 answers |
+| Unsafe answers: an answer where the system should have refused or shown a conflict, an answer missing its key fact, or one citing a document it must not use | 0 | 0 | 2 (cases 18 and 19) |
+| Faithfulness: every point of an answer is in the clause it quotes, read by hand | Every answer | Pending Hiep's reading (6 answer cards) | Pending Hiep's reading (9 answer cards) |
 | Over-cautious: a refusal or a conflict where an answer was expected | At most 10% of cases | 0 | 2 (cases 15 and 17) |
 | Context recall: the clause that answers is among those given to the AI | Tracked only | Not measured | Not measured |
 
-All targets are met on the 14 good and hard cases.
-The 4 known failures are outside the targets on purpose: cases 15, 17 and 18 failed as expected, and case 16 was answered correctly in this run although it was refused in an earlier try.
-Case 18 is the one unsafe answer of the run: asked about next year, it answered with this year's 14 days (see [Known limitations](#known-limitations)).
+All gates except Hiep's Faithfulness reading are met on the 15 good and hard cases; that reading is pending.
+The 5 known failures are outside the targets on purpose: cases 15, 17, 18 and 19 failed as expected, and case 16 was answered correctly in this run although it was refused in an earlier try.
+Cases 18 and 19 are the two unsafe answers of the full run: case 18 answered next year with this year's 14 days, and case 19 answered one side of an undeclared conflict (see [Known limitations](#known-limitations)).
+The 15 gated cases have no unsafe answer.
 
-With 0 unsafe answers in 14 cases, the true rate of unsafe answers is below about 19% with 95% confidence.
-On a small simulated set, meeting the first four targets is the bar for letting real employees try it, not proof that it is safe.
+With 0 unsafe answers in 15 cases, the true rate of unsafe answers is below 18.1% with 95% confidence.
+On a small simulated set, meeting all the targets is the bar for letting real employees try it, not proof that it is safe.
 
 Two things changed from the Mission 1 plan.
 Each case was asked once, not several times with one bad run failing the case, because of the rate limit of the free tier of the Gemini API.
@@ -100,13 +100,13 @@ flowchart TB
     style after fill:transparent,stroke:transparent
 ```
 
-| Nếu điều này đúng | thì | Lần chạy cuối, 14 ca tốt và khó |
+| Nếu điều này đúng | thì | Lần chạy 21/10/2026, 15 ca tốt và khó |
 |---|---|---|
-| Luật đúng ở mọi ca | Bản cũ, quy định của đơn vị khác và văn bản bị hạn chế không bao giờ tới được AI; ba câu khó nhất của đề, bản nào, đơn vị nào, ai được xem, thành phép tra cứu kiểm được không cần AI | Luật đúng 14/14, 0 rò rỉ |
+| Luật đúng ở mọi ca | Bản cũ, quy định của đơn vị khác và văn bản bị hạn chế không bao giờ tới được AI; ba câu khó nhất của đề, bản nào, đơn vị nào, ai được xem, thành phép tra cứu kiểm được không cần AI | Luật đúng 15/15, 0 rò rỉ |
 | AI, trong phạm vi đúng, trích nguồn hoặc từ chối | Phần còn lại chỉ là bài toán ngôn ngữ, giả định rủi ro nhất của thiết kế Mission 1 | 0 câu trả lời nguy hiểm, 0 từ chối nhầm |
 
 Cả hai đúng thì hướng đi khả thi.
-Mission 1 đã đặt ra: chỉ một câu trả lời nguy hiểm là đủ bác bỏ giả định; ca 18, một hạn chế đã biết, là phản ví dụ như vậy (xem Câu 3).
+Mission 1 đã đặt ra: chỉ một câu trả lời nguy hiểm là đủ bác bỏ giả định; ca 18 và 19, hai hạn chế đã biết, là phản ví dụ như vậy (xem Câu 3).
 
 ### Câu 2. Những gì đã thay đổi so với Mission 1
 
@@ -176,14 +176,14 @@ flowchart TB
 | Hậu quả | Rủi ro | Do ai | Phát hiện | Kiểm soát hiện nay | Đã thấy ở |
 |---|---|---|---|---|---|
 | Sai mà trông như đúng | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ hiện câu mô hình viết ở trên, đoạn trích đã kiểm ở dưới, cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
-| Sai mà trông như đúng | **Câu mô hình viết thêm ý, bỏ điều kiện hoặc đổi số** | AI | Hiệp đọc từng câu với đoạn trích ngay dưới nó và gọi tên lỗi | Đoạn trích đã kiểm nằm ngay dưới câu; thẻ mâu thuẫn và thẻ từ chối không hiện câu của mô hình (ADR 0011) | Chưa có ở lần chạy 14/10; hàng 19 kiểm tra hai giá trị cùng một thẻ trả lời khi metadata không khai báo quan hệ ([#74](https://github.com/Park-Hip/next-gen-2026/issues/74)) |
+| Sai mà trông như đúng | **Câu mô hình viết thêm ý, bỏ điều kiện hoặc đổi số** | AI | Hiệp đọc từng câu với đoạn trích ngay dưới nó và gọi tên lỗi | Đoạn trích đã kiểm nằm ngay dưới câu; thẻ mâu thuẫn và thẻ từ chối không hiện câu của mô hình (ADR 0011) | Hàng 19: hai giá trị 12 và 13 ngày cùng một thẻ trả lời khi metadata không khai báo quan hệ ([#74](https://github.com/Park-Hip/next-gen-2026/issues/74)) |
 | Sai mà trông như đúng | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
 | An toàn | Từ chối dù đã tìm thấy điều khoản trả lời | AI | Ca kiểm thử và thử tay | Mục tiêu tối đa 10% từ chối nhầm | Ca 16, lúc có lúc không ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) |
 | An toàn | Thẻ mâu thuẫn dù hai văn bản nói giống nhau | Thiết kế | Thử tay | Thẻ trích cả hai bên và chuyển HR | Ca 17 ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) |
 | An toàn | Công ty sửa một điều khoản làm mất cả quy định Tập đoàn | Thiết kế | Ca kiểm thử | Từ chối và chuyển HR | Ca 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
 
 **Rò rỉ không nằm trong bảng vì có hai lớp chặn:** luật lọc văn bản trước khi tìm kiếm, và bước tìm kiếm báo lỗi nếu trả về đoạn nào ngoài phạm vi.
-Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi câu hỏi, rồi thêm 7 biến đổi dữ liệu bẫy, và không đoạn nào ngoài phạm vi lọt ra; lần chạy cuối trước #75 có 0 rò rỉ trong 18 ca.
+Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi câu hỏi, rồi thêm 7 biến đổi dữ liệu bẫy, và không đoạn nào ngoài phạm vi lọt ra; lần chạy 21/10/2026 có 0 rò rỉ trong 20 ca.
 
 **Một rủi ro được phát hiện và kiểm soát ra sao ([#47](https://github.com/Park-Hip/next-gen-2026/issues/47), [#75](https://github.com/Park-Hip/next-gen-2026/issues/75)):**
 
@@ -207,7 +207,7 @@ Each link below fills in the form and asks the question:
 
 Two more pages call no AI model.
 "Dữ liệu giả lập" shows the simulated organisation, the employees and every document with its status today.
-"Tình huống kiểm thử" lists every test case with its expectation, its result in the last run before #75 and a link that asks it again.
+"Tình huống kiểm thử" lists every test case with its expectation, its result in the 21/10/2026 run and a link that asks it again.
 
 ## How it works
 
@@ -271,7 +271,7 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 - [#24](https://github.com/Park-Hip/next-gen-2026/issues/24): a company that changes only one clause of a Group policy cannot say so; declaring its policy "dùng thay" drops the whole Group policy, so the employee loses the Group clauses the company kept (test case 15).
 - [#52](https://github.com/Park-Hip/next-gen-2026/issues/52): conflicts are flagged per document, not per question, so when both policies say the same thing on the point asked, the employee still gets the conflict card (test case 17).
 - [#53](https://github.com/Park-Hip/next-gen-2026/issues/53): a question about another period, such as next year, is answered with the rule in force on the chosen date (test case 18: "14 ngày" for next year, where the new version gives 15).
-- [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the last run before #75).
+- [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the 21/10/2026 run).
 - [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets, such as a wrong topic, gives a normal-looking answer, and nothing in v1 detects it; the rules are only as right as that information.
 - [#74](https://github.com/Park-Hip/next-gen-2026/issues/74): when two documents give different values but their information declares no relation, the rule does not see a conflict, so both values can appear on one answer card; naming the document in each sentence is the only aid (test case 19).
 

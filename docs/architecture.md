@@ -161,21 +161,22 @@ Minh's search runs on 11 chunks, Lan's on 2 and Hà's on 4.
 
 ### Steps 5-7: the cards
 
-From the last committed run before #75, [`20261014-2239`](../results/20261014-2239.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
-The 20-row run for #75 is pending and will replace this example.
+From the 21/10/2026 run, [`20261021-1032`](../results/20261021-1032.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
 
 **Minh: answer card.**
-Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the quote.
+Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the model's sentence above the quote.
 
 > Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.
+> Theo Quy chế nghỉ phép GameCo (bản 2), nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.
 > "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.
 
 **Lan: answer card.**
 Her scope has two chunks; the LLM cited `LEAVE-GROUP-v1#1`.
-The quote keeps the condition "chính thức", which the rules do not check; the employee reads it on the card.
+The sentence and the quote both keep the condition "chính thức"; step 7 checks the quote, not the sentence, so the employee reads both on the card.
 
 > Bạn đang hỏi với tư cách: nhân sự Tập đoàn, Nhân sự Tập đoàn.
+> Theo Quy chế nghỉ phép Tập đoàn, nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.
 > "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép Tập đoàn, Điều 1, hiệu lực từ 01/01/2024. Hỏi thêm: HR Tập đoàn.
 

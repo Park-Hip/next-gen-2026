@@ -8,7 +8,7 @@ Sections 1-5 list the gaps.
 Which ones Mission 3 closes is step 2 of the checklist, and every priority there is Hiep's; the decisions taken so far are in [How Mission 3 fixes the gaps](#how-mission-3-fixes-the-gaps).
 
 "M2" is the code of tag `mission2` (`b6ca78d`).
-The baseline is the Mission 2 run [`results/20261014-2239.jsonl`](../../results/20261014-2239.jsonl); its rows are in the [test report](../mission2/test_report.md), and "row N" below is row N of [`data/test_cases.yaml`](../../data/test_cases.yaml) in that run.
+The baseline is the Mission 2 run [`results/20261021-1032.jsonl`](../../results/20261021-1032.jsonl); its rows are in the [test report](../mission2/test_report.md), and "row N" below is row N of [`data/test_cases.yaml`](../../data/test_cases.yaml) in that run.
 The run was made at commit `c3120ff`; between it and `b6ca78d` only the page banner and the report code changed (checklist step 0).
 
 ## How to read it
@@ -131,7 +131,7 @@ In row 12 the model cited only the PayCo clause, and the card still quoted Đi�
 | ID | Gap | Evidence | Kind |
 |---|---|---|---|
 | G4.1 | An answer where the system should have refused: the quote check proves that the clause exists, not that it answers the question asked | Row 18, the same failure as G1.1 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | Failed row; limitation |
-| G4.2 | A question that needs a clause applied to a case can be refused, although the clause that answers it was retrieved first | [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): refused in a probe on 14/10/2026, answered as row 16 in the final run; each was asked once, so how often it happens is not known | Limitation |
+| G4.2 | A question that needs a clause applied to a case can be refused, although the clause that answers it was retrieved first | [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): refused in a probe on 14/10/2026, answered as row 16 in the 21/10/2026 run; each was asked once, so how often it happens is not known | Limitation |
 | G4.3 | There is nothing between an answer and a refusal, and the refusal never says why: every reason gives "Hệ thống không tìm thấy quy định phù hợp", even when a clause was found but its quote failed the check | P6: no points, malformed output, a quote that is not in its chunk and a citation outside the retrieved chunks all give the same three lines; one text is on purpose for "not allowed" and "not found" (promise R10), but the other reasons are inside the asker's scope | Probe |
 | G4.4 | An answer can rest on a condition the system cannot check: the clause says who it covers, and the asker's profile does not say whether that includes them | Row 5: Lan gets "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."; the profile has only a unit and roles, so whether the asker is "chính thức" is left to them to read; ADR 0009, Consequences: "the rules still do not decide it"; employment type is under Deferred in [`scope.md`](../scope.md) | Passed row; on purpose |
 | G4.5 | A faithful answer can leave out part of what was asked, and nothing tells the asker that it is incomplete | Row 3: "Tôi xin nghỉ phép ở đâu, ai duyệt?" is answered with two lines of the procedure, not the third, "Kết quả phê duyệt được gửi về email công ty của nhân sự.", which search returned; the row passes on its key facts, and its lesson in the test report says "không check tự động nào bắt được việc thiếu ý" | Passed row |
@@ -161,7 +161,7 @@ Three open proposals already touch these requirements; this page does not decide
 
 | Proposal | Serves | Gaps it targets | State on 21/10/2026 |
 |---|---|---|---|
-| [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Implemented in #75; full run and review pending |
+| [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Implemented in #75; run `20261021-1032` passes the gates, Hiep's review pending |
 | [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan posted; decisions awaited |
 | [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1 | No plan yet |
 
