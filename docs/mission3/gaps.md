@@ -171,7 +171,7 @@ Three open proposals already touch these requirements; this page does not decide
 
 ## How Mission 3 fixes the gaps
 
-Hiep's decisions so far; all five sections are decided, except G4.1 in section 4 (step 2 of the checklist).
+Hiep's decisions so far; all five sections are decided (step 2 of the checklist).
 The fixes below are planned, not built: none of them has passed a run yet.
 
 ### 1. Versions and effective dates
@@ -240,17 +240,17 @@ What stays a limitation after these changes:
 
 ### 4. Refusing when the basis is not enough
 
-Decided by Hiep on 21/10/2026, except G4.1.
+Decided by Hiep on 21/10/2026; G4.3 and the prompt rule of G4.5 are built in [#96](https://github.com/Park-Hip/next-gen-2026/issues/96), after #83.
 The principle behind the changes: refuse only when nothing can be verified; when a verified answer covers part of the question, show it and say what it does not cover; the model may add a caveat, but it never gets past a check.
 What step 7 refuses does not change; what changes is what a refusal says, and what an answer says about the part of the question it does not cover.
 
 | Gap | Decision | How | Where | How it is checked |
 |---|---|---|---|---|
-| G4.1 | Not handled separately (AI proposal; Hiep has not ruled on it) | The time case, row 18, is fixed by G1.1; for other questions, nothing checks that a verified quote answers the question asked, and the model's own refusal is the only guard | #83 for row 18; [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) | Row 18, as in G1.1 |
+| G4.1 | Fixed for questions about another period; otherwise a limitation | The time case, row 18, is fixed by G1.1; for other questions, nothing checks that a verified quote answers the question asked, and the model's own refusal is the only guard | #83 for row 18; [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) | Row 18, as in G1.1 |
 | G4.2 | Measure before changing anything | The prompt is not loosened; row 16 is run once on the Mission 3 code, and what to do next is decided from that result | [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), which stays open meanwhile | Row 16 in the next full evaluation run |
-| G4.3 | Fix the card text: three refusal texts, chosen by rules from the refusal reason | "Không tìm thấy" for no points: the current text, unchanged, so "not allowed" and "not found" still read the same (promise R10); "không kiểm chứng được" for a quote that is not in its chunk or a citation outside the retrieved chunks, since the model did give an answer and "không tìm thấy quy định" can be read as "there is no rule"; "lỗi hệ thống" for malformed output, since the system failed rather than found nothing; texts 2 and 3 are decided only from the asker's scope and the model's reply, so they reveal nothing outside the scope, and they name no document; the wording is drafted in the issue's plan and is Hiep's to settle | [#96](https://github.com/Park-Hip/next-gen-2026/issues/96), after #83; an ADR, reasons awaited from Hiep | P6 becomes a pytest: each reason gives its own text; all 7 refusals of the run are "no points", so no current row changes |
+| G4.3 | Fix the card text: three refusal texts, chosen by rules from the refusal reason | "Không tìm thấy" for no points: the current text, unchanged, so "not allowed" and "not found" still read the same (promise R10); "không kiểm chứng được" for a quote that is not in its chunk or a citation outside the retrieved chunks, since the model did give an answer and "không tìm thấy quy định" can be read as "there is no rule"; "lỗi hệ thống" for malformed output, since the system failed rather than found nothing; texts 2 and 3 are decided only from the asker's scope and the model's reply, so they reveal nothing outside the scope, and they name no document; the wording is drafted in the issue's plan and is Hiep's to settle | #96; an ADR, reasons awaited from Hiep | P6 becomes a pytest: each reason gives its own text; all 7 refusals of the run are "no points", so no current row changes |
 | G4.4 | Keep as it is, on purpose | The sentence above the quote keeps the condition (row 5: "nhân sự chính thức"), the quote under it shows it word for word, and the line of G5.4 tells the reader that the quote is the checked text; employment type stays under Deferred in [`scope.md`](../scope.md) | - | Row 5 as regression; Hiep reads its sentence |
-| G4.5 | Say it in the sentence, and let the reader open the rest | The prompt tells the model to say so when the quote does not answer every part of the question, or when the question asks for a value no clause states, such as a date to compute; G5.1 lets the reader open the cited document and see the lines the answer left out | The prompt rule: in #83 or in its own issue, awaiting Hiep; the opened page in #77 | Hiep reads rows 3 and 16 in the next full run: row 16's sentence says that the system does not compute the date; row 3's source opens the procedure with its third line |
+| G4.5 | Say it in the sentence, and let the reader open the rest | The prompt tells the model to say so when the quote does not answer every part of the question, or when the question asks for a value no clause states, such as a date to compute; G5.1 lets the reader open the cited document and see the lines the answer left out | The prompt rule in #96; the opened page in #77 | Hiep reads rows 3 and 16 in the next full run: row 16's sentence says that the system does not compute the date; row 3's source opens the procedure with its third line |
 
 What stays a limitation after these changes:
 
