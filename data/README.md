@@ -8,7 +8,7 @@ Every unit, person, document and number here is simulated.
 | `documents/<id>.md` | The 10 documents: YAML front matter with the metadata, then the text, one "Điều" per line (the procedure document has plain steps, on purpose) |
 | `org.yaml` | The org tree; `hr` is the contact the cards name |
 | `personas.yaml` | The simulated accounts: Minh, Lan, Hà and Hoa (HR GameCo, role `hr_gameco`) are employees, with a unit and roles, the two fields the HR system would give; `Giám khảo` (role `evaluator`) is the judge account, not an employee (ADR 0016) |
-| `test_cases.yaml` | The 20 test cases: rows 1-10 of the Mission 1 test matrix, rows 11-15 from issue #10, rows 16-19 kept as known limitations, and row 20 for #75; each has its `purpose` (why it is tested, shown to the judges), its wordings of the question, the card, the expected answer, the documents it must and must not cite, the strings the card must show, and the `key_facts` an answer must state (fields explained at the top of the file) |
+| `test_cases.yaml` | The 22 test cases: rows 1-10 of the Mission 1 test matrix, rows 11-15 from issue #10, rows 16-19 found by probing v1 (16 and 17 are still known limitations; 18 and 19 were fixed and became hard cases), row 20 for #75, row 21 for #83 and row 22 for #101 (the grant to Hoa); each has its `purpose` (why it is tested, shown to the judges), its wordings of the question, the card, the expected answer, the documents it must and must not cite, the strings the card must show, and the `key_facts` an answer must state (fields explained at the top of the file) |
 
 Metadata fields, as read by the rules:
 
