@@ -285,6 +285,8 @@ One limit of the conflict check is a decision, not an open defect:
 
 - The model can add a conflict, never remove one ([ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)): if the model does not notice that two documents disagree, or the clause of one side is not retrieved, the employee gets an answer card citing one side (limitation [#74](https://github.com/Park-Hip/next-gen-2026/issues/74), closed by #87 once test case 19 passes in the shared run).
 
+Two limits of the refusal texts and the caveat are decisions too ([ADR 0017](docs/decisions/0017-a-refusal-says-why-and-an-answer-says-what-it-does-not-cover.md)): the texts for a reply that could not be verified and for output that could not be read are shown only by pytest, because no test row produces them; and the caveat a faithful answer adds about what it does not cover is a sentence the model writes, so no rule checks it and only a reader of the answers catches a wrong or missing one.
+
 v1 also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
 

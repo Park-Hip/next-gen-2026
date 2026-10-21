@@ -55,7 +55,7 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 | C1 | Every card shows "Bạn đang hỏi với tư cách" with unit and department | Phần 2 | All three cards | Built |
 | C2 | Answer card: the answer, source title and version, Điều, effective date, "Hỏi thêm: HR <unit>", button "Báo sai" | Phần 2 | Row 1 in the demo | Changed (ADRs 0004, 0011): built without the "Báo sai" button; each point shows the model's plain sentence, then the quote step 7 verified, word for word, then the source line |
 | C3 | Conflict card: neutral headline, both clauses quoted word for word with Điều and effective date, no LLM text, "Vui lòng hỏi HR <unit>", and "Đã ghi nhận để HR ... xác nhận" | Phần 2, Câu 3 | Row 7 in the demo; the conflict is recorded for the owners | Built, except the line "Đã ghi nhận để HR ... xác nhận": the conflict records file was cut (#15), because records would be lost on every restart of the free host (ADR 0004) |
-| C4 | Refusal card: "Hệ thống không tìm thấy quy định phù hợp...", "Hệ thống chỉ trả lời các quy định áp dụng cho bạn", contact HR of the asker's unit | Phần 2 | Rows 6, 9, 10 | Built |
+| C4 | Refusal card: "Hệ thống không tìm thấy quy định phù hợp...", "Hệ thống chỉ trả lời các quy định áp dụng cho bạn", contact HR of the asker's unit; for a reply step 7 cannot verify or output that cannot be read, a text that says so instead (ADR 0017) | Phần 2 | Rows 6, 9, 10; the other two texts by pytest | Built; the wording for `quote_mismatch`, `outside_retrieved` and `malformed` is ADR 0017's |
 
 ## 5. People
 

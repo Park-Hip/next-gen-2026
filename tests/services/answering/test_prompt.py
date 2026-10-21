@@ -119,3 +119,15 @@ def test_prompt_rule_for_a_time_outside_the_window():
     assert "say in the sentence until when the clause applies" in text
     assert "never present the clause as the rule for that time" in text
     assert "Never compute a date" in text
+
+
+def test_prompt_rule_for_what_the_quotes_do_not_cover():
+    # Issue #96: a caveat in the sentence, never a check; the strict-grounding clause stays.
+    text = SYSTEM_INSTRUCTION
+    assert "If the quotes do not answer every part of the question, say in the sentence which part they do not answer." in text
+    assert "say in the sentence that the system does not compute that value" in text
+    # Row 11 stays a refusal: the own-record rule is in charge of it.
+    assert "This does not apply to a value about the employee's own record: for that, return an empty list as above." in text
+    assert "If no clause states the answer, you must return an empty list of points." in text
+    assert "If the question asks for a value about the employee's own record that no clause states" in text
+    assert "Never compute a date, an amount or another value." in text

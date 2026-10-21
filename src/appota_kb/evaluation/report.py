@@ -270,7 +270,7 @@ def _threshold(gate: Gate, allowed: int) -> str:
     if gate.reported:
         return "reported, not a gate"
     if gate.name == "Rules correct in every case":
-        return "0, refusals identical"
+        return "0, refusals identical per reason"
     if gate.name == "Over-cautious":
         return f"at most {allowed}"
     if gate.name == "Faithfulness (Hiep's reading)":

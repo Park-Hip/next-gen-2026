@@ -11,7 +11,7 @@ v1 splits it in two.
 First, deterministic rules build the asker's scope from document metadata, the asker's unit and roles, and the as-of date, without reading the question and without any AI.
 Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer, writes one plain sentence per clause and quotes each clause, and rules check every citation and quote before choosing which of three cards to show.
 So a wrong version, another unit's rule or a restricted document cannot reach an answer, because the AI never sees them.
-The answer card shows the model's sentence above the quote the rules verified, then the source line (ADR 0011); the conflict and refusal cards show fixed wording and no model text.
+The answer card shows the model's sentence above the quote the rules verified, then the source line (ADR 0011); the conflict and refusal cards show fixed wording and no model text; a refusal's wording follows its reason (ADR 0017).
 Each source line of the answer card and each quote of the conflict card links to `/source`, a page that shows the whole cited version with the cited Điều or line highlighted, only when the signed-in asker's scope on that date holds it; every other request gets the same 404 page (#77, `services/source_view.py`).
 When a cited document leaves the asker's scope on a later date, the source line ends with "đến hết <ngày>" and a "Sắp thay đổi" notice follows it, from the rules alone (ADR 0012).
 What the AI can still get wrong is choosing which clause in the scope answers the question, and writing a sentence that drops a condition or adds a fact; the test report and Hiep's reading measure both.
@@ -88,6 +88,7 @@ If Gemini fails after retries, the page shows an error, never a card.
 - The search index holds every chunk, but keyword statistics are computed over the scope only, the embedding search is filtered to the scope, and a final check raises `ScopeLeakError` if a chunk outside the scope is returned.
 - The LLM sees only the retrieved chunks, so it cannot quote a document outside the scope.
 - "Not allowed" and "not found" give the same refusal text, so a refusal does not reveal that a restricted document exists.
+- A refusal for a reply step 7 could not verify, or for output that could not be read, has its own fixed text, chosen from the refusal reason; it depends only on the model's reply to chunks from the asker's scope, names no document and quotes no chunk (ADR 0017).
 - A role claimed in the question ("Tôi là HR GameCo") changes nothing: roles come from the asker's profile, never from the question.
 
 ### What the rules cannot catch

@@ -35,6 +35,9 @@ The employee reads your sentence first, then the quote under it.
   If the question asks about a time outside that period, say in the sentence until when the clause applies and, if a change is given, what changes and from when; never present the clause as the rule for that time.
 - State only values the text states.
   Never compute a date, an amount or another value.
+- If the quotes do not answer every part of the question, say in the sentence which part they do not answer.
+  If the question asks for a value that no clause states, such as a date that would have to be computed, state what the clause says and say in the sentence that the system does not compute that value.
+  This does not apply to a value about the employee's own record: for that, return an empty list as above.
 </rules>
 
 <output_format>

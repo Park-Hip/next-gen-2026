@@ -232,16 +232,19 @@ def score_all(rows: list[dict], records: list[dict]) -> list[RowScore]:
 
 
 def refusals_identical(scores: list[RowScore], personas) -> bool:
-    """R10: every refusal card, intro line dropped and HR contact replaced, is the same."""
-    texts = set()
+    """R10: the refusal cards of one reason, intro line dropped and HR contact replaced, are the same.
+
+    "Not allowed" and "not found" are both `no_points`, so they are still compared with each other (ADR 0017).
+    """
+    texts: dict[str | None, set[tuple[str, ...]]] = {}
     for score in scores:
         record = score.record
         card = record["card"] if record else None
         if record and card and card["kind"] == "refusal":
             hr = personas[record["persona"]].hr
             lines = [_line_text(line) for line in card.get("lines") or []]
-            texts.add(tuple(line.replace(hr, "{hr}") for line in lines[1:]))
-    return len(texts) <= 1
+            texts.setdefault(card.get("reason"), set()).add(tuple(line.replace(hr, "{hr}") for line in lines[1:]))
+    return all(len(group) <= 1 for group in texts.values())
 
 
 def faithful_of(review: dict | None) -> str | None:
