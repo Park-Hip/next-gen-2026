@@ -21,6 +21,7 @@ Two separate uses of AI: the tools that built the project, and the models inside
 | Pi, a terminal coding agent, calling Claude through the claude-bridge extension | Claude Opus 5.5 | Plans, implementation plan comments, research orchestration and source checking, ADR drafts from Hiep's answers, code, reviews, these documents |
 | Claude Code (CLI), and Pi as above | Claude Sonnet 5.5 | Building some issues from their approved plans |
 | Pi, through the ModelScope provider | DeepSeek V4 Pro | Building some issues from their approved plans |
+| opencode (CLI), built-in opencode provider | DeepSeek V4.1 Flash (free), max reasoning | Building some issues from their approved plans |
 | Pi, as `researcher` subagents | Agnes 2.5 Flash, at max reasoning | Web search lanes for the four technical research questions; Claude then opened every source itself |
 | Lavish | None | Hiep's review notes, written directly on the draft plan |
 | GitHub Actions | None | Runs the test suite on every PR |
@@ -61,6 +62,6 @@ The rules for every AI agent working on the repository are in [`AGENTS.md`](../A
 ## The evidence log
 
 Every AI session that changed the project has one line in the evidence log: date and time, tool and model, the task, Hiep's decision and how the result was checked.
-`scripts/ai_sessions.py` lists the recorded sessions of Pi and Claude Code, so the log can be checked against them.
+`scripts/ai_sessions.py` lists the recorded sessions of Pi, Claude Code and opencode, in the main checkout and in every worktree, so the log can be checked against them.
 The Mission 2 log is published as a snapshot in [`evidence_log.md`](evidence_log.md), in Vietnamese, refreshed from Hiep's local working copy before submission.
 The Mission 1 evidence log, as submitted, is in [`docs/mission1/submitted/`](mission1/submitted/).
