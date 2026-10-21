@@ -28,7 +28,7 @@ REPORT_REL = Path("docs") / "mission2" / "test_report.md"
 REPORT_PATH = ROOT / REPORT_REL
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
-LIMITATION_ISSUES = {15: "#24", 16: "#51", 17: "#52", 19: "#74"}
+LIMITATION_ISSUES = {15: "#24", 16: "#51", 17: "#52"}
 
 
 def _cell(text) -> str:
@@ -74,6 +74,8 @@ def _actual(score: RowScore) -> str:
     elif kind == "conflict":
         pairs = [" và ".join(pair) for pair in card.get("conflicts", []) or []]
         detail = "mâu thuẫn giữa " + "; ".join(pairs)
+        if card.get("reason"):
+            detail += f" ({card['reason']})"
     else:
         detail = card.get("reason") or ""
     text = f"{label}: {detail}" if detail else label

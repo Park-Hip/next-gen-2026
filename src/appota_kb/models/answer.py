@@ -19,3 +19,5 @@ class Reply:
     retrieved: tuple[str, ...]          # chunk ids, best first
     points: tuple[Point, ...] | None    # None: the output was not valid JSON of the contract
     raw: str                            # the model's text, for the log
+    # The two chunk ids the model says disagree (ADR 0014); step 7 checks it, so it may be wrong or longer.
+    disagreement: tuple[str, ...] = ()

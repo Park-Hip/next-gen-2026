@@ -3,6 +3,7 @@ from datetime import date
 
 import pytest
 
+from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.models.answer import Point, Reply
 from appota_kb.services.answering.answerer import AnswerUnavailable
 from appota_kb.services.ask import ReplyCache, ask
@@ -167,6 +168,35 @@ def test_ask_refusal_hides_the_claim(personas, documents):
     assert asked.card.kind == "refusal"
     assert asked.card.reason == "quote_mismatch"
     assert all("MODEL TEXT MUST NOT APPEAR" not in line.text for line in asked.lines)
+
+
+def _wrong_topic(documents):
+    return with_edit(documents, {"document": "LEAVE-PAYCO-v1", "set": {"topic": "nghi_phep_nam"}})
+
+
+def _both_leave_points(documents):
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    points = tuple(
+        Point(claim=f"Theo {cid}.", quote=_chunk(documents, cid).text, chunks=(cid,)) for cid in ids
+    )
+    return ids, points
+
+
+def test_ask_shows_the_conflict_card_for_a_valid_flag(personas, documents):
+    docs = _wrong_topic(documents)
+    s = scope(personas["ha"], AS_OF, docs)
+    ids, points = _both_leave_points(docs)
+    flagged = Reply(retrieved=ids, points=points, raw="{}", disagreement=ids)
+    unflagged = Reply(retrieved=ids, points=points, raw="{}")
+    assert ask(s, "q", CountingAnswerer(unflagged)).card.kind == "answer"
+    asked = ask(s, "q", CountingAnswerer(flagged))
+    assert asked.card.kind == "conflict" and asked.card.reason == "model_flagged"
+    quotes = [line.text for line in asked.lines if line.kind == "quote"]
+    assert len(quotes) == 2
+    assert "12 ngày" in quotes[0] and "13 ngày" in quotes[1]
+    assert asked.lines[1].text.startswith("Có 2 quy định")
+    assert asked.lines[-1].text == "Vui lòng hỏi HR PayCo."
+    assert all("Theo LEAVE" not in line.text for line in asked.lines)
 
 
 def test_the_same_chunks_on_two_dates_make_two_calls(personas, documents):

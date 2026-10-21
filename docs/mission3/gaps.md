@@ -34,9 +34,9 @@ Where a probe needs a model reply, the reply is scripted, so the probe shows wha
 | [2. Kiểm soát quyền truy cập theo bối cảnh người dùng](#2-access-by-the-askers-context) | Rules build the asker's scope from their unit and roles before any search, checking access last; nothing outside the scope reaches search or the model | Rows 5, 6, 10 and 13 pass; 0 leaks in the 14 gated rows and none in the 4 limitation rows; the leak test over every asker, boundary date and test question | G2.1-G2.4 |
 | [3. Xử lý thông tin mâu thuẫn giữa nhiều nguồn/cấp tổ chức](#3-conflicting-sources-and-levels) | Precedence comes only from relations an owner declared; two policies on one topic with no declared relation form a conflict pair, and an answer citing either one gives the conflict card, which quotes both sides and does not choose | Rows 1, 3, 7 and 12 pass | G3.1-G3.7 |
 | [4. Từ chối hoặc thể hiện rõ khi chưa đủ căn cứ](#4-refusing-when-the-basis-is-not-enough) | The model may return nothing; rules refuse the whole answer on any citation or quote they cannot verify, and the refusal card names the asker's HR contact | Rows 6, 8, 9, 10, 11, 13 and 14 refuse; 0 unsafe and 0 over-cautious in the 14 gated rows | G4.1-G4.5 |
-| [5. Cho người dùng kiểm chứng tài liệu được sử dụng](#5-letting-the-user-check-the-documents-used) | The answer card shows the verified quote word for word, and names the document, the Điều and the start date | 7 of 7 answers read by Hiep against their quotes, all faithful | G5.1-G5.3 |
+| [5. Cho người dùng kiểm chứng tài liệu được sử dụng](#5-letting-the-user-check-the-documents-used) | The answer card shows the model's sentence above the verified quote, and names the document, the Điều and the start date | The 9 answer cards of the run name their source; in the Mission 2 run `20261014-2239`, Hiep read all 7 answers against their quotes and marked them faithful | G5.1-G5.4 |
 
-The 6 open limitation issues all appear below: [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) (G3.1), [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) (G1.3, G2.3, G3.3), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51) (G4.2), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) (G3.2), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) (G1.1, G4.1) and [#74](https://github.com/Park-Hip/next-gen-2026/issues/74) (G3.3).
+The 6 open limitation issues all appear below: [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) (G3.1), [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) (G1.3, G2.3, G3.3, G3.6), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51) (G4.2), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) (G3.2), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) (G1.1, G4.1) and [#74](https://github.com/Park-Hip/next-gen-2026/issues/74) (G3.3).
 `scope.md` and the README list the first 5; #74 was opened on 20/10/2026, after Mission 2 was submitted.
 
 ## 1. Versions and effective dates
@@ -73,7 +73,7 @@ The same asker and the same question get 14 days on 07/10/2026 and 15 days on 01
   There is no field to type a unit, and a role claimed in the question changes nothing.
 - Access and applicability are separate rules: `access` says who may read a document (`all_staff`, `roles:...` or `unit:...`), and `applies_to` says which units must follow it.
 - Access is checked last, so whether the asker may read a document never decides which policy replaces which (ADR 0010).
-  It can still hide one side of a conflict pair (G3.6).
+  It can still hide one side of a conflict pair, an owner error that is applied as written (G3.6).
 - Search runs only on the chunks of the asker's scope and raises `ScopeLeakError` on any other chunk; the model sees only what search returned.
 - "Not allowed" and "not found" give the same refusal text, so a refusal does not reveal that a restricted document exists.
 
@@ -112,7 +112,7 @@ In row 12 the model cited only the PayCo clause, and the card still quoted Đi�
 | G3.3 | A disagreement that the metadata hides gives no conflict card: with a wrong or different topic, or a wrong "bổ sung", the pair is never formed, so a reply citing one side gives an answer card | [#74](https://github.com/Park-Hip/next-gen-2026/issues/74): with `LEAVE-PAYCO-v1` tagged `nghi_phep_nam`, Hà's scope has no conflict pair, and a reply citing the PayCo clause gives an answer card "13 ngày" (rules only); [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) example 1; no test row yet | Limitation |
 | G3.4 | No simulated document is issued below company level, so no row shows a department rule that adds to or replaces a company rule | P5: every document applies to the Group (level 1) or a company (level 2), while Minh and Hà sit at level 3; the rules themselves handle a lower level: `test_applies` in `tests/services/test_scope.py` applies a Studio document to a Studio asker, and in P9 a Kế toán policy enters Hà's scope and forms a pair with each of the other two | Probe; test |
 | G3.5 | The owners never learn of a conflict: the card sends the employee to HR, and nothing is recorded for the two owners to settle it | Rows 7 and 12 end with "Vui lòng hỏi HR PayCo." and record nothing; ADR 0004 chose a records file, and the file was cut when [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) was closed as not planned on 14/10/2026 (promise C3 in [`mission1_promises.md`](../mission2/mission1_promises.md)) | Passed row; on purpose |
-| G3.6 | Access can hide a conflict: when one side of an undeclared pair is a document the asker may not read, the pair disappears and a reply citing the other side gives an answer card | P8: with `LEAVE-PAYCO-v1` readable only by `hr_payco`, Hà's scope keeps only the Group policy, and a reply citing its Điều 1 gives an answer card (12 days) instead of the conflict card, although the PayCo policy (13 days) applies to Hà; ADR 0010, Consequences: "a restricted document inside an undeclared conflict pair still makes the pair disappear"; `test_hiding_one_document_removes_only_that_document` asserts that the pair goes; no restricted document in the data is in a pair, so no row shows it | Probe; test; on purpose |
+| G3.6 | Access can hide a conflict: when one side of an undeclared pair is a document the asker may not read, the pair disappears and a reply citing the other side gives an answer card | P8: with `LEAVE-PAYCO-v1` readable only by `hr_payco`, Hà's scope keeps only the Group policy, and a reply citing its Điều 1 gives an answer card (12 days) instead of the conflict card, although the PayCo policy (13 days) applies to Hà; ADR 0010, Consequences: "a restricted document inside an undeclared conflict pair still makes the pair disappear"; `test_hiding_one_document_removes_only_that_document` asserts that the pair goes; no restricted document in the data is in a pair, so no row shows it; the metadata is the owner's error (Hiep, 21/10/2026) | Probe; test; limitation; on purpose |
 | G3.7 | A conflict among three or more documents is not worded for: the headline always says "hai quy định", and a document in two pairs is quoted twice | P9: with a third leave policy for Kế toán added in memory (15 days), Hà's scope has three pairs, and a reply citing PayCo Điều 1 gives a card headed "Có hai quy định cùng áp dụng cho bạn" that quotes the Group, PayCo, Kế toán and PayCo again; ADR 0005, "Would change if": "A case appears with three or more documents in one conflict" | Probe |
 
 ## 4. Refusing when the basis is not enough
@@ -148,13 +148,16 @@ In row 12 the model cited only the PayCo clause, and the card still quoted Đi�
 - The conflict card quotes each side, as described in section 3 (ADR 0005).
 - Every card starts with the identity the question was asked under ("Bạn đang hỏi với tư cách: ..."), and the page shows the question and the as-of date above it.
 
-**Evidence that it works:** the 7 answer cards of the run (rows 1-5, 16 and 18) each name their source, and Hiep read all 7 against their quotes and marked them faithful.
+**Evidence that it works:** the 9 answer cards of the run (rows 1-5, 16 and 18-20) each name their source.
+In the Mission 2 run [`20261014-2239`](../../results/20261014-2239.review.yaml), before #75 added the model's sentence, Hiep read all 7 answer cards (rows 1-5, 16 and 18) against their quotes and marked them faithful.
+His reading of the baseline run [`20261021-1032`](../../results/20261021-1032.review.yaml), the first with the sentence, is pending: no row is marked yet.
 
 | ID | Gap | Evidence | Kind |
 |---|---|---|---|
 | G5.1 | The employee cannot open the cited Điều or the document, so they see only the quoted sentences, not the rest of the clause or the lines around it | P3: the source line is plain text, and the card has no link; in row 3 the line the answer left out (G4.5) is in the cited document, but the employee cannot reach it from the card; proposal [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) | Probe; passed row |
 | G5.2 | For a document without "Điều" numbering, the source line names no part of it | Row 3: "Nguồn: Hướng dẫn đăng ký nghỉ phép trên hệ thống HR GameCo, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo." | Passed row |
 | G5.3 | The conflict card names each side by its unit, not by its document or version | Row 7: "Tập đoàn, Điều 1 (từ 01/01/2024): ..." and "PayCo, Điều 1 (từ 01/01/2025): ..."; row 12 the same with Điều 2; no title such as "Quy chế nghỉ phép PayCo" | Passed row |
+| G5.4 | The model's sentence above each quote is not checked, and the card does not tell the reader which part was checked | [ADR 0011](../decisions/0011-answer-card-shows-the-models-sentence-above-the-verified-quote.md): "Step 7 does not read `claim`", and "A claim can add a fact, drop a condition or flip a meaning; no rule catches that at run time"; the sentence is shown in bold, above the quote, with no label; in the run, all 10 sentences closely restate their quotes, so no failure has been seen | On purpose |
 
 ## Changes already proposed
 
@@ -163,12 +166,12 @@ Three open proposals already touch these requirements; this page does not decide
 | Proposal | Serves | Gaps it targets | State on 21/10/2026 |
 |---|---|---|---|
 | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Implemented in #75; run `20261021-1032` passes the gates, Hiep's review pending |
-| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan decided by Hiep on 21/10/2026; not started |
-| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1 | No plan yet |
+| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Merged in PR #94 on 21/10/2026; the evaluation row for the HR GameCo account (decision 11) waits for the next full run; ADR 0016, reasons awaited from Hiep |
+| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1; with Hiep's decisions of 21/10/2026, also G5.2-G5.4 | Decided by Hiep on 21/10/2026; not started |
 
 ## How Mission 3 fixes the gaps
 
-Hiep's decisions so far; sections 1, 2 and 3 are decided, and sections 4 and 5 are still open (step 2 of the checklist).
+Hiep's decisions so far; sections 1, 2, 3 and 5 are decided, and section 4 is still open (step 2 of the checklist).
 The fixes below are planned, not built: none of them has passed a run yet.
 
 ### 1. Versions and effective dates
@@ -197,7 +200,7 @@ The rules that build the asker's scope do not change; what changes is who decide
 
 | Gap | Decision | How | Where | How it is checked |
 |---|---|---|---|---|
-| G2.1 | Fix it: the server decides who is asking | The visitor signs in by picking a simulated account and typing a shared demo password, read from the environment and never written in the repository; the session keeps only the account id, and the unit and roles are read again from `data/personas.yaml` on every request; for an employee, a `persona` in the URL or the question changes nothing; the judge account may ask as any employee account it chooses, a choice the server honours only for the `evaluator` role | #76; ADR 0016, reasons awaited from Hiep | P1 becomes a pytest: signed in as Minh, `?persona=lan` still answers as Minh; a tampered cookie and a wrong password give no session; rows 5, 6, 10 and 13 as regression |
+| G2.1 | Fix it: the server decides who is asking | The visitor signs in by picking a simulated account and typing a shared demo password, read from the environment and published in the README, since the accounts and data are simulated; the session keeps only the account id, and the unit and roles are read again from `data/personas.yaml` on every request; for an employee, a `persona` in the URL or the question changes nothing; the judge account may ask as any employee account it chooses, a choice the server honours only for the `evaluator` role | #76; ADR 0016, reasons awaited from Hiep | P1 becomes a pytest: signed in as Minh, `?persona=lan` still answers as Minh; a tampered cookie and a wrong password give no session; rows 5, 6, 10 and 13 as regression |
 | G2.2 | Fix it: only the judge account sees `/data` and `/cases` | Every other account gets a 404, so no restricted title reaches a page an employee can open | #76 decision 3 | P2 becomes a pytest |
 | G2.3 | Keep as a limitation, on purpose | Access values are the owner's responsibility; a misspelt role or unit already hides the document from everyone, and only a valid but too wide value leaks; the future fix is a check when an owner publishes, which warns when a version is wider than the one before it or when its text looks restricted but is open to all staff, and needs the owners' page (ADR 0004); a model judging at question time whether a chunk looks confidential was rejected, because access would then depend on the model | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) | A pytest that `roles:hr_gamco` and `unit:Studoi` hide the document from every account |
 | G2.4 | Add the evidence | A simulated HR GameCo account with the `hr_gameco` role, in a new unit "Nhân sự GameCo" under GameCo; row 21 asks row 10's question as this account and expects the answer card citing `SAL-BAND-GAMECO`, while Minh is still refused | #76 decision 11 | Row 21 in the full evaluation run shared with #75, #83 and #87 |
@@ -211,17 +214,18 @@ What stays a limitation after these changes:
 ### 3. Conflicting sources and levels
 
 Decided by Hiep on 21/10/2026.
+Built in [#87](https://github.com/Park-Hip/next-gen-2026/issues/87) for G3.3 and G3.7, checked by pytest; the shared full run decides whether row 19 passes, and the ADR reasons are still awaited from Hiep.
 The principle behind the changes: any doubt about which rule applies sends the asker to HR, never to one side.
 
 | Gap | Decision | How | Where | How it is checked |
 |---|---|---|---|---|
 | G3.1 | An owner rule, no code | A company that changes one clause of a Group policy publishes a complete policy of its own that keeps the Group clauses and declares "dùng thay" | [ADR 0013](../decisions/0013-owners-change-a-document-only-by-a-full-new-version.md) | No new test; row 15 stays a limitation, its data breaks the owner rule |
 | G3.2 | Keep as a limitation, on purpose | Removing a conflict card on the model's word that both sides agree would turn a wrong reading into a wrong answer given with confidence; today the asker is sent to HR, the safe direction; the publish check below is the future fix | [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) | Row 17 stays a strict xfail |
-| G3.3 | Now: the model flags a disagreement, the rules decide the card; later: a check when the owner publishes | The model's reply may name two cited chunks from two documents in the asker's scope that give different answers; step 7 accepts the flag only if both were retrieved, both quotes pass and the documents differ, then shows the conflict card for them, even across a declared "bổ sung"; the model can add a conflict card, never remove one | [#87](https://github.com/Park-Hip/next-gen-2026/issues/87); [ADR 0014](../decisions/0014-the-model-may-add-a-conflict-never-remove-one.md), reasons awaited from Hiep | Row 19 is a limitation row: the current rules give an answer card, and #87's flag would give the conflict card with 12 and 13 days; rows 3 and 20 watch for false alarms; pytest for each flag that must be ignored |
+| G3.3 | Now: the model flags a disagreement, the rules decide the card; later: a check when the owner publishes | The model's reply may name two cited chunks from two documents in the asker's scope that give different answers; step 7 accepts the flag only if both were retrieved, both quotes pass and the documents differ, then shows the conflict card for them, even across a declared "bổ sung"; the model can add a conflict card, never remove one | [#87](https://github.com/Park-Hip/next-gen-2026/issues/87); [ADR 0014](../decisions/0014-the-model-may-add-a-conflict-never-remove-one.md), reasons awaited from Hiep | Row 19 is a hard row with `conflict_from: model`: the rules alone give an answer card, and the flag gives the conflict card with 12 and 13 days; rows 3 and 20 watch for false alarms; pytest for each flag that must be ignored (`tests/services/test_citations.py`) |
 | G3.4 | Optional | A pytest with a Studio document added in memory, if time remains | - | - |
 | G3.5 | Defer, with the owner side | Telling owners of a conflict needs the owners' page, cut by ADR 0004 | - | - |
-| G3.6 | Fix it with rules | Conflict pairs are formed before the access filter; a cited document paired with a document the asker may not read gives the refusal card, which names nothing; the hidden document is still dropped before chunking and retrieval | #87; [ADR 0015](../decisions/0015-a-hidden-side-of-a-conflict-gives-the-refusal.md), reasons awaited from Hiep | P8 becomes a pytest; `test_hiding_one_document_removes_only_that_document` changes its expected result |
-| G3.7 | Fix the card text | The headline is worded by the number of documents, and each document is quoted once | #87 | P9 becomes a pytest |
+| G3.6 | An owner rule, no code | A document that applies to a unit must be readable by everyone in that unit, and a document meant only for a role must not share a topic with a policy that applies to everyone; a fix would refuse valid data, because v1 has no field for applicability by role, so a wrong `access` is applied as written, like G2.3 | [ADR 0015](../decisions/0015-a-document-that-applies-to-a-unit-must-be-readable-by-it.md); [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) | Probe P8; `test_p8_a_hidden_partner_is_applied_as_written` records the accepted answer card; `test_hiding_one_document_removes_only_that_document` keeps its original expectation |
+| G3.7 | Fix the card text | The headline is worded by the number of documents, and each document is quoted once | #87 | P9 is a pytest (`test_conflict_card_headline_counts_documents_and_quotes_each_once`) |
 
 The future fix for G3.2, G3.3 and G3.5 is Hiep's idea of a check when an owner publishes: each clause of the new document is searched against the knowledge base, an LLM compares it with the similar clauses found, and the owner sees any contradiction or agreement and settles it by declaring a relation or changing the text.
 It catches a conflict before any employee sees it, and a person with authority settles it, so the rules at question time stay deterministic.
@@ -231,8 +235,26 @@ What stays a limitation after these changes:
 
 - A disagreement the model does not notice, or whose other side is not retrieved, still gives the answer card.
 - Two sides of a pair that agree on the point asked still give the conflict card (G3.2).
-- With G3.6, every question that cites the readable side of a pair with a hidden document is refused, even one the hidden document does not touch.
+- A wrong `access` that hides one side of a pair gives an answer card with the readable side (G3.6), like any wrong `access` (G2.3).
 - Owners are not told of conflicts (G3.5).
+
+### 5. Letting the user check the documents used
+
+Decided by Hiep on 21/10/2026; all of it is built in [#77](https://github.com/Park-Hip/next-gen-2026/issues/77), after #76 (merged), #83 and #87, since #83 and #87 also change the cards.
+The rules that build the scope and check the quotes do not change; what changes is what the reader can open and what the card tells them.
+
+| Gap | Decision | How | Where | How it is checked |
+|---|---|---|---|---|
+| G5.1 | Fix it: each source opens the cited version | Each source line of the answer card and each quote of the conflict card links to a page for the version that was cited: its title, validity window, who it applies to and HR contact, then its whole text with the cited Điều or line highlighted; the link carries only the chunk id and the as-of date, plus the chosen account for the judge; the server rebuilds the scope of the signed-in account on that date and shows the page only if the document is in it, otherwise the same 404 as for an id that does not exist; the page calls no model | #77 decisions 1b, 2a and 3 | P3 becomes a pytest; the same 404 for a restricted, replaced, future, draft and unknown chunk; a sweep over every account, boundary date and chunk, mirroring the scope tests; the page calls neither the model nor the embedder |
+| G5.2 | Fix it through G5.1, with no new label | The opened page highlights the cited line, so the source line still names no part of a document without "Điều"; a made-up label such as "đoạn 2" would not be found in the document | #77 | Row 3's source opens the procedure with its two cited lines highlighted |
+| G5.3 | Fix the card text | Each quote of the conflict card names its document's title, then the Điều, the date and the unit, and links like the answer card | #77 | Row 7's card names "Quy chế nghỉ phép Tập đoàn" and "Quy chế nghỉ phép PayCo" |
+| G5.4 | Tell the reader; the sentence stays unchecked | One fixed line on every answer card, under the asker line: "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."; a rule that every number of the sentence must be in its quote was rejected: it would refuse correct sentences that give the dates #83 adds, and it would not catch a dropped condition; a run-time check of the sentence stays under Deferred in [`scope.md`](../scope.md) | #77 | The line is on every answer card and on no conflict or refusal card; Hiep reads every sentence of the next full run |
+
+What stays a limitation after these changes:
+
+- The model's sentence is still not checked at run time; a misleading sentence is caught only by a reader who compares it with the quote under it, or by Hiep's reading of a run.
+- The refusal card offers nothing to check, on purpose: it names no document (promise R10).
+- The opened page shows the simulated document as the knowledge base holds it, not an original in an HR system.
 
 ## Appendix: the probes
 

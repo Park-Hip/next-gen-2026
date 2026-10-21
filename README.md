@@ -42,6 +42,7 @@ Each metric and its target were set in the Mission 1 design, before any code was
 All gates except Hiep's Faithfulness reading are met on the 15 good and hard cases; that reading is pending.
 The 5 known failures are outside the targets on purpose: cases 15, 17, 18 and 19 failed as expected, and case 16 was answered correctly in this run although it was refused in an earlier try.
 Cases 18 and 19 are the two unsafe answers of the full run: case 18 answered next year with this year's 14 days, and case 19 answered one side of an undeclared conflict (see [Known limitations](#known-limitations)).
+Since issue #87, case 19 is a hard case that expects a conflict card found through the model's flag ([ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)); the numbers above come from the run before that change and are replaced by the next full run.
 The 15 gated cases have no unsafe answer.
 
 With 0 unsafe answers in 15 cases, the true rate of unsafe answers is below 18.1% with 95% confidence.
@@ -176,8 +177,8 @@ flowchart TB
 | Hậu quả | Rủi ro | Do ai | Phát hiện | Kiểm soát hiện nay | Đã thấy ở |
 |---|---|---|---|---|---|
 | Sai mà trông như đúng | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ hiện câu mô hình viết ở trên, đoạn trích đã kiểm ở dưới, cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
-| Sai mà trông như đúng | **Câu mô hình viết thêm ý, bỏ điều kiện hoặc đổi số** | AI | Hiệp đọc từng câu với đoạn trích ngay dưới nó và gọi tên lỗi | Đoạn trích đã kiểm nằm ngay dưới câu; thẻ mâu thuẫn và thẻ từ chối không hiện câu của mô hình (ADR 0011) | Hàng 19: hai giá trị 12 và 13 ngày cùng một thẻ trả lời khi metadata không khai báo quan hệ ([#74](https://github.com/Park-Hip/next-gen-2026/issues/74)) |
-| Sai mà trông như đúng | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
+| Sai mà trông như đúng | **Câu mô hình viết thêm ý, bỏ điều kiện hoặc đổi số** | AI | Hiệp đọc từng câu với đoạn trích ngay dưới nó và gọi tên lỗi | Đoạn trích đã kiểm nằm ngay dưới câu; thẻ mâu thuẫn và thẻ từ chối không hiện câu của mô hình (ADR 0011) | Hàng 19 trong lần chạy 21/10/2026: hai giá trị 12 và 13 ngày cùng một thẻ trả lời khi metadata không khai báo quan hệ ([#74](https://github.com/Park-Hip/next-gen-2026/issues/74)); từ [#87](https://github.com/Park-Hip/next-gen-2026/issues/87) mô hình báo hai điều khoản khác nhau và luật kiểm tra rồi mới thêm cặp mâu thuẫn (ADR 0014) |
+| Sai mà trông như đúng | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Sai chủ đề: hàng 19 ([#87](https://github.com/Park-Hip/next-gen-2026/issues/87)); các trường hợp khác chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
 | An toàn | Từ chối dù đã tìm thấy điều khoản trả lời | AI | Ca kiểm thử và thử tay | Mục tiêu tối đa 10% từ chối nhầm | Ca 16, lúc có lúc không ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) |
 | An toàn | Thẻ mâu thuẫn dù hai văn bản nói giống nhau | Thiết kế | Thử tay | Thẻ trích cả hai bên và chuyển HR | Ca 17 ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) |
 | An toàn | Công ty sửa một điều khoản làm mất cả quy định Tập đoàn | Thiết kế | Ca kiểm thử | Từ chối và chuyển HR | Ca 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
@@ -195,10 +196,16 @@ Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi
 
 ## Try it
 
-Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/), pick an employee (Minh, Lan or Hà) and a date, and ask a question in Vietnamese.
+Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/), sign in as a simulated account, and ask a question in Vietnamese.
+Every simulated account uses the same demo password, **`[chờ Hiệp]`**.
+It is published on purpose: the accounts and every document are simulated ("giả lập"), and it only decides who is asking; no other password or key is in this repository.
+The accounts are Minh, Lan, Hà and Hoa (HR GameCo, who may read the salary band), and **Giám khảo**, the judge account.
+Only Giám khảo opens the two guide pages below, and only Giám khảo can ask as another account, by choosing it on the ask page.
 It runs on a free host that sleeps after 15 idle minutes, so the first page can take about a minute to load.
 
-Each link below fills in the form and asks the question:
+Each link below fills in the form and asks the question.
+Sign in as **Giám khảo** first, because the link names the account to ask as and the server honours that only for the judge; for an employee account the name in the link is ignored and the card is for the account signed in.
+Signed out, a link goes through the sign-in page and comes back to the question.
 
 1. **Same question, three employees**: "Phép năm của tôi là bao nhiêu ngày?" as [Minh](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=minh&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F), [Lan](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=lan&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F) and [Hà](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=ha&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F), the cards in the image above.
 2. **A new version**: the same question as [Minh on 01/01/2027](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=minh&as_of=2027-01-01&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F) gets 15 days instead of 14, from the version that comes into force that day.
@@ -272,10 +279,13 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 - [#52](https://github.com/Park-Hip/next-gen-2026/issues/52): conflicts are flagged per document, not per question, so when both policies say the same thing on the point asked, the employee still gets the conflict card (test case 17).
 - [#53](https://github.com/Park-Hip/next-gen-2026/issues/53): a question about another period, such as next year, is answered with the rule in force on the chosen date (test case 18: "14 ngày" for next year, where the new version gives 15).
 - [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the 21/10/2026 run).
-- [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets, such as a wrong topic, gives a normal-looking answer, and nothing in v1 detects it; the rules are only as right as that information.
-- [#74](https://github.com/Park-Hip/next-gen-2026/issues/74): when two documents give different values but their information declares no relation, the rule does not see a conflict, so both values can appear on one answer card; naming the document in each sentence is the only aid (test case 19).
+- [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets gives a normal-looking answer unless the model's flag catches it; a wrong topic or a wrong "bổ sung" can be caught when the two clauses disagree (test case 19), a wrong "dùng thay" or "access" cannot; the rules are only as right as that information.
 
-v1 also simplifies on purpose: there is no login, so the asker is picked from three simulated employees, and each test case was asked once.
+One limit of the conflict check is a decision, not an open defect:
+
+- The model can add a conflict, never remove one ([ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)): if the model does not notice that two documents disagree, or the clause of one side is not retrieved, the employee gets an answer card citing one side (limitation [#74](https://github.com/Park-Hip/next-gen-2026/issues/74), closed by #87 once test case 19 passes in the shared run).
+
+v1 also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
 
 ## Documentation

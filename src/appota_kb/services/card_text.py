@@ -22,7 +22,7 @@ REFUSAL_TEXT = (
 )
 
 CONFLICT_HEADLINE = (
-    "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. "
+    "Có {n} quy định cùng áp dụng cho bạn nhưng chưa được khai báo quy định nào được dùng thay quy định nào. "
     "Hệ thống không tự chọn."
 )
 
@@ -48,7 +48,7 @@ def _window(doc: Document, change: Change | None) -> str:
 
 def change_text(doc: Document, change: Change, hr: str) -> str:
     """What happens after the last day, without the label. Names only documents in the asker's scope,
-    so a successor the asker may not read gives the same text as no successor (R10, ADR 0015)."""
+    so a successor the asker may not read gives the same text as no successor (R10, ADR 0010)."""
     day = dmy(change.next_day)
     if not change.successors:
         return (
@@ -112,12 +112,12 @@ def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[Ca
 
 
 def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[CardLine, ...]:
-    lines = [CardLine("who", intro(scope.persona)), CardLine("lead", CONFLICT_HEADLINE)]
-    for (a, b), (left, right) in zip(card.conflicts, quotes):
-        for doc, doc_chunks in ((a, left), (b, right)):
-            for chunk in doc_chunks:
-                lines.append(CardLine("quote", _quote_line(doc, chunk, scope)))
-            lines.extend(_notice_lines(doc, scope, card.hr))
+    headline = CONFLICT_HEADLINE.format(n=len(quotes))
+    lines = [CardLine("who", intro(scope.persona)), CardLine("lead", headline)]
+    for doc, doc_chunks in quotes:
+        for chunk in doc_chunks:
+            lines.append(CardLine("quote", _quote_line(doc, chunk, scope)))
+        lines.extend(_notice_lines(doc, scope, card.hr))
     lines.append(CardLine("plain", f"Vui lòng hỏi {card.hr}."))
     if recorded:
         owners: list[str] = []

@@ -52,6 +52,12 @@ def personas(org):
 
 
 @pytest.fixture(scope="session")
+def employees(personas):
+    """The accounts that ask as themselves; the judge account (role evaluator) is not an employee."""
+    return {pid: p for pid, p in personas.items() if "employee" in p.roles}
+
+
+@pytest.fixture(scope="session")
 def cases():
     return load_test_cases()
 

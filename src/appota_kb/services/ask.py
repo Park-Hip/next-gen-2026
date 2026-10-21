@@ -66,7 +66,7 @@ def ask(
         reply = answerer(scope, question)
         if cache is not None:
             cache.put(scope, question, reply)
-    card = card_for_answer(scope, reply.retrieved, reply.points)
+    card = card_for_answer(scope, reply.retrieved, reply.points, reply.disagreement)
     by_id = {c.id: c for c in scope.chunks}
     lines = render(card, scope, reply.points, tuple(by_id[cid] for cid in reply.retrieved))
     return Asked(reply=reply, card=card, lines=lines, cache_hit=cache_hit)

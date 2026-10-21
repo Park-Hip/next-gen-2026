@@ -24,8 +24,8 @@ def _status(documents, doc_id, day):
     return document_status(doc, documents, day)
 
 
-def test_org_tree_follows_org_yaml(org, personas):
-    (root,) = org_tree(org, personas)
+def test_org_tree_follows_org_yaml(org, employees):
+    (root,) = org_tree(org, employees)
     assert root.name == "Tập đoàn"
     assert root.level == 1
     assert [c.name for c in root.children] == ["Nhân sự Tập đoàn", "GameCo", "PayCo"]
@@ -44,6 +44,11 @@ def test_org_tree_follows_org_yaml(org, personas):
     assert by_name["Studio"].personas == ("Minh",)
     assert by_name["Nhân sự Tập đoàn"].personas == ("Lan",)
     assert by_name["Kế toán"].personas == ("Hà",)
+    assert by_name["Nhân sự GameCo"].personas == ("Hoa",)
+    assert by_name["Nhân sự GameCo"].level == 3
+    assert [c.name for c in by_name["GameCo"].children] == ["Studio", "Nhân sự GameCo"]
+    # The judge account is not an employee, so no unit lists it.
+    assert not any("Giám khảo" in u.personas for u in by_name.values())
 
 
 def test_document_status_on_known_dates(documents):
@@ -79,7 +84,7 @@ def test_access_and_applies_labels(documents, org):
     assert access_label(by_id["LEAVE-GAMECO-v2"]) == "Mọi nhân sự"
     assert access_label(by_id["SAL-BAND-GAMECO"]) == "Chỉ vai trò: hr_gameco"
     assert access_label(replace(by_id["LEAVE-GAMECO-v2"], access="unit:Kế toán")) == "Chỉ nhân sự thuộc Kế toán"
-    assert applies_label(by_id["LEAVE-GAMECO-v2"], org) == "GameCo và đơn vị bên dưới: Studio"
+    assert applies_label(by_id["LEAVE-GAMECO-v2"], org) == "GameCo và đơn vị bên dưới: Studio, Nhân sự GameCo"
     assert applies_label(replace(by_id["LEAVE-GAMECO-v2"], applies_to="Kế toán"), org) == "Kế toán"
 
 
@@ -101,11 +106,15 @@ def test_series_views(documents, org):
     assert proc.relations == ("Bổ sung: LEAVE-GAMECO",)
 
 
-def test_persona_scope_matches_rules(personas, documents):
-    views = {v.persona.id: v for v in persona_views(personas, documents, DAY)}
+def test_persona_scope_matches_rules(employees, documents):
+    views = {v.persona.id: v for v in persona_views(employees, documents, DAY)}
+    assert set(views) == set(employees)
     for persona_id, view in views.items():
-        scoped = scope(personas[persona_id], DAY, documents)
+        scoped = scope(employees[persona_id], DAY, documents)
         assert view.scope_titles == tuple(d.title for d in scoped.documents)
+    assert "Khung bậc lương GameCo" in views["hoa"].scope_titles
+    assert "Khung bậc lương GameCo" not in views["minh"].scope_titles
+    assert views["hoa"].roles == "employee, hr_gameco"
     assert views["minh"].path == "Tập đoàn > GameCo > Studio"
     assert views["lan"].roles == "employee, hr_group"
     assert views["ha"].conflicts == ("Quy chế nghỉ phép Tập đoàn và Quy chế nghỉ phép PayCo",)
@@ -171,7 +180,8 @@ def test_data_edit_note_describes_set_fields(cases, personas, documents):
     views = {c.id: c for c in rest}
     assert 'đổi chủ đề thành "nghi_phep_nam"' in views[19].data_edit_note
     assert "bỏ khai báo bổ sung" in views[20].data_edit_note
-    assert views[19].limitation_issue == "#74"
+    assert views[19].limitation_issue is None
+    assert views[19].kind_label == "Khó"
     assert views[20].limitation_issue is None
 
 

@@ -69,11 +69,15 @@ class FakeGemini(ChatGoogleGenerativeAI):
 
 
 def reply_citing(
-    *ids: str, quote_from: dict[str, str], claim_from: dict[str, str] | None = None
+    *ids: str,
+    quote_from: dict[str, str],
+    claim_from: dict[str, str] | None = None,
+    disagreement: tuple[str, ...] = (),
 ) -> str:
-    """JSON {points: [...]}: one point per id, quoting quote_from[id] word for word.
+    """JSON {points: [...], disagreement: [...]}: one point per id, quoting quote_from[id] word for word.
 
     The claim defaults to a plain sentence built from the quote; tests that check wording pass claim_from.
+    `disagreement` is the model's flag, empty unless a test sets it.
     """
     claims = claim_from or {}
     return json.dumps(
@@ -85,14 +89,15 @@ def reply_citing(
                     "chunks": [cid],
                 }
                 for cid in ids
-            ]
+            ],
+            "disagreement": list(disagreement),
         },
         ensure_ascii=False,
     )
 
 
 def no_points() -> str:
-    return json.dumps({"points": []})
+    return json.dumps({"points": [], "disagreement": []})
 
 
 def _question_of(messages) -> str:

@@ -148,6 +148,16 @@ def test_personas(personas):
     assert personas["ha"].unit == "Kế toán"
     assert personas["ha"].company == "PayCo"
     assert personas["ha"].roles == ("employee",)
+    assert personas["hoa"].name == "Hoa"
+    assert personas["hoa"].unit == "Nhân sự GameCo"
+    assert personas["hoa"].company == "GameCo"
+    assert personas["hoa"].roles == ("employee", "hr_gameco")
+    assert personas["hoa"].hr == "HR GameCo"
+    # The judge account is not an employee and cannot be mistaken for one.
+    assert personas["giam_khao"].name == "Giám khảo"
+    assert personas["giam_khao"].roles == ("evaluator",)
+    assert "employee" not in personas["giam_khao"].roles
+    assert [pid for pid, p in personas.items() if "evaluator" in p.roles] == ["giam_khao"]
 
 
 def test_cases_well_formed(cases, documents, personas):
@@ -161,6 +171,9 @@ def test_cases_well_formed(cases, documents, personas):
         if "rules_card" in c:
             assert c["kind"] == "limitation", tag
             assert c["rules_card"] in ("answer", "conflict", "refusal"), tag
+        if "conflict_from" in c:
+            assert c["conflict_from"] == "model", tag
+            assert c["card"] == "conflict" and "rules_card" not in c and "data_edit" in c, tag
         assert c["persona"] in personas, tag
         assert c["as_of"], tag
         assert c["questions"] and all(isinstance(q, str) and q for q in c["questions"]), tag

@@ -4,7 +4,7 @@
 {% macro unit_item(u) %}
 <li>
   <strong>{{ u.name }}</strong>
-  <span class="unit-meta">Cấp {{ u.level }}{% if u.hr %}; đầu mối HR: {{ u.hr }}{% endif %}{% if u.personas %}; nhân sự giả lập: {{ u.personas|join(", ") }}{% endif %}</span>
+  <span class="unit-meta">Cấp {{ u.level }}{% if u.hr %}; đầu mối HR: {{ u.hr }}{% endif %}{% if u.personas %}; tài khoản giả lập: {{ u.personas|join(", ") }}{% endif %}</span>
   {% if u.children %}
   <ul>
     {% for child in u.children %}{{ unit_item(child) }}{% endfor %}
@@ -14,10 +14,10 @@
 {% endmacro %}
 {% block content %}
 <h2 class="page-title">Dữ liệu giả lập</h2>
-<p class="lede">Công ty giả lập gồm các đơn vị, ba nhân sự hỏi và mười văn bản.
-Trạng thái văn bản và phạm vi của từng người được tính cho hôm nay ({{ today_text }}, giờ Việt Nam), cùng ngày mặc định với trang "Hỏi".</p>
+<p class="lede">Công ty giả lập gồm các đơn vị, {{ persona_views|length }} tài khoản nhân sự và {{ document_count }} văn bản.
+Trạng thái văn bản và phạm vi của từng tài khoản được tính cho hôm nay ({{ today_text }}, giờ Việt Nam), cùng ngày mặc định với trang "Hỏi".</p>
 <p class="organiser" role="note"><strong>Góc nhìn ban tổ chức:</strong> trang này liệt kê toàn bộ dữ liệu giả lập, kể cả văn bản bị giới hạn quyền xem, để giám khảo đối chiếu.
-Sản phẩm thật không có trang này cho nhân viên: trên trang "Hỏi", mỗi người chỉ nhận câu trả lời từ văn bản trong phạm vi của mình.</p>
+Chỉ tài khoản Giám khảo mở được trang này; sản phẩm thật không có trang này cho nhân viên: trên trang "Hỏi", mỗi người chỉ nhận câu trả lời từ văn bản trong phạm vi của mình.</p>
 
 <h2 class="section">Cơ cấu tổ chức</h2>
 <section class="panel guide-panel" aria-label="Cơ cấu tổ chức">
@@ -26,8 +26,8 @@ Sản phẩm thật không có trang này cho nhân viên: trên trang "Hỏi", 
   </ul>
 </section>
 
-<h2 class="section">Người hỏi</h2>
-<p class="lede muted">Mỗi người chỉ có hai thông tin từ hệ thống nhân sự: đơn vị và vai trò.</p>
+<h2 class="section">Tài khoản nhân sự giả lập</h2>
+<p class="lede muted">Mỗi tài khoản chỉ có hai thông tin từ hệ thống nhân sự: đơn vị và vai trò.</p>
 {% for v in persona_views %}
 <section class="panel guide-panel" id="persona-{{ v.persona.id }}">
   <h3>{{ persona_label(v.persona) }}</h3>
@@ -36,7 +36,7 @@ Sản phẩm thật không có trang này cho nhân viên: trên trang "Hỏi", 
     <div><dt>Vai trò</dt><dd><code>{{ v.roles }}</code></dd></div>
     <div><dt>Liên hệ HR</dt><dd>{{ v.persona.hr }}</dd></div>
     <div>
-      <dt>Phạm vi ngày {{ today_text }}: các văn bản quy tắc để lại cho người này</dt>
+      <dt>Phạm vi ngày {{ today_text }}: các văn bản quy tắc để lại cho tài khoản này</dt>
       <dd>
         {% if v.scope_titles %}
         <ul>
@@ -61,7 +61,7 @@ Sản phẩm thật không có trang này cho nhân viên: trên trang "Hỏi", 
 
 <h2 class="section">Văn bản</h2>
 <p class="lede muted">Mỗi chính sách có thể có nhiều bản.
-Văn bản "Khung bậc lương GameCo" chỉ vai trò <code>hr_gameco</code> được xem, nên không người hỏi nào ở trên đọc được.</p>
+Văn bản "Khung bậc lương GameCo" chỉ vai trò <code>hr_gameco</code> được xem, nên chỉ tài khoản có vai trò này đọc được; các tài khoản khác bị từ chối như chưa từng có văn bản đó.</p>
 {% for series, versions in series %}
 <h3 class="series">Chính sách <code>{{ series }}</code></h3>
 {% for d in versions %}

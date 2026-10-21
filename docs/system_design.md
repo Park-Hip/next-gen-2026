@@ -119,7 +119,7 @@ flowchart TD
 - The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
 - The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
-- Conflicts come only from declared metadata, so a content conflict that the owner side missed gives an answer card (section 12.1).
+- Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a content conflict the model does not notice still gives an answer card (section 12.1).
 - The cited clause opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 
@@ -391,8 +391,9 @@ Changed: the prompt adds these rules.
 4. Do not return no points only because clauses disagree.
 5. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
 6. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
+7. When two clauses from different documents give different answers, list the ids of those two chunks in `disagreement` (ADR 0014); both must also be cited by a point.
 
-The prompt never says which documents form a conflict pair: the rules decide the card, so the model gains nothing from knowing.
+The prompt never says which documents form a conflict pair: the rules decide the card, and the flag is only an input that step 7 checks.
 
 ### 6.4 The checks and the card
 
@@ -401,7 +402,7 @@ The rules pick the card from the citations, never from the model's words, in thi
 | Card | When | Shows |
 |---|---|---|
 | Refusal | The output is malformed, has no points, has a point with no citation, cites a chunk that was not retrieved, or quotes text that is not in a chunk it cites, after Unicode and whitespace folding | Fixed text that sends the employee to HR; "not allowed" and "not found" read the same (E4) |
-| Conflict | A cited document is in a conflict pair | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's sentences |
+| Conflict | A cited document is in a conflict pair, or the model's `disagreement` names two chunks that pass step 7's checks (ADR 0014) | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's sentences |
 | Answer | Otherwise | Changed: for each point, the model's sentence on top and the verified quote under it in quotation marks; then the document, the "Điều", the effective date and the HR contact (E7; SD14, decided by Hiep on 20/10/2026) |
 
 Every card starts with who the asker is asking as.
@@ -476,18 +477,22 @@ Whatever is chosen, the record of what was published and when is never deleted (
 
 ### 8.1 Accounts
 
-A simulated account has an id, a name, a unit, a set of roles, and optionally the unit it owns.
-Accounts replace `data/personas.yaml`; Minh, Lan and Hà remain as employees, and one owner account is added per unit that issues documents (proposed).
+A simulated account has an id, a name, a unit and a set of roles; owner accounts add the unit they own (proposed).
+v1 keeps the accounts in `data/personas.yaml`: Minh, Lan, Hà and Hoa (HR GameCo, role `hr_gameco`) are employees, and `Giám khảo` (role `evaluator`) is the judge, who is not an employee.
+One owner account per unit that issues documents is proposed for the owner console.
 
-### 8.2 Sign-in **[to decide]**
+### 8.2 Sign-in
+
+**Decided by Hiep, 21/10/2026 (ADR 0016):** the user picks an account and types a password shared by every simulated account; the shared password is published in the README, because the accounts and data are simulated.
 
 | Option | How | Status |
 |---|---|---|
-| a) Pick an account (proposed) | A sign-in page lists the simulated accounts; the user picks one, and the server keeps the account id in a signed session cookie | New |
-| b) Password | Each simulated account has a password | New |
+| a) Pick an account | A sign-in page lists the simulated accounts; the user picks one, and the server keeps the account id in a signed session cookie | Not chosen: no password at all |
+| b) Password | A password is typed with the account | **Chosen**, as one demo password shared by every account, read from `DEMO_PASSWORD`; the cookie holds only the account id and is signed with `SESSION_SECRET` |
 | c) Single sign-on | The company's real sign-in | Deferred ([`scope.md`](scope.md#simplified)) |
 
 In a and b the server reads the unit and roles from the account, never from the request or the question, which is what E8 requires.
+A `persona` in the URL or the form is ignored for an employee.
 
 ### 8.3 Who may do what
 
@@ -495,17 +500,17 @@ Every check runs on the server for every request; hiding a button is not a check
 
 | Action | Employee | Owner of unit U | Evaluator |
 |---|---|---|---|
-| Ask a question | Yes | Yes, as an employee of their own unit | Through the evaluation harness |
+| Ask a question | Yes | Yes, as an employee of their own unit | Yes, as any employee account it chooses on the ask page, and through the evaluation harness |
 | Open a cited clause | Only a chunk in their scope on that date | Same | Same |
 | See unit U's documents and their state | No | Yes | **[to decide]** |
 | Publish or save a draft for U | No | Yes | No |
-| See the "Dữ liệu giả lập" page | **[to decide]** | **[to decide]** | Yes |
-| See the "Tình huống kiểm thử" page | **[to decide]** | **[to decide]** | Yes |
-| Pick the as-of date | **[to decide]** | **[to decide]** | **[to decide]** |
+| See the "Dữ liệu giả lập" page | No (404) | No (404) | Yes |
+| See the "Tình huống kiểm thử" page | No (404) | No (404) | Yes |
+| Pick the as-of date | Yes, labelled as a demo control | Yes, labelled as a demo control | Yes, labelled as a demo control |
 
-In production the date is always today in Vietnam; v1 lets the user pick it so that judges can see a version change without waiting for it.
+In production the date is always today in Vietnam; v1 lets the user pick it so that judges can see a version change without waiting for it, and says so next to the picker.
 The "Dữ liệu giả lập" page lists every document with its title, including restricted ones such as "Khung bậc lương GameCo".
-That is right for judges looking at simulated data, but in a product where employees sign in it would break E4, which forbids even showing a document's title.
+That is right for judges looking at simulated data, but it would break E4, which forbids even showing a document's title, so only the judge account opens it; every other account gets a 404 (ADR 0016).
 
 ## 9. Storage and persistence
 
@@ -601,8 +606,8 @@ Tests already check that no restricted chunk reaches any asker's scope for every
 | The cited-clause link | Opening a chunk id of another document | The server checks the chunk is in the asker's scope for that date (section 6.5) |
 | The owner console | Reading or publishing for another unit | Server-side check of the owned unit on every request (section 8.3) |
 | The impact preview | Showing another unit's restricted document | The preview shows only what the owner may read (section 7.3) |
-| The data and test-case pages | Showing restricted titles to employees | Visibility to decide (section 8.3) |
-| The session cookie | A forged account | Signed with a secret from the environment |
+| The data and test-case pages | Showing restricted titles to employees | Only the judge account opens them; any other account gets a 404 (section 8.3) |
+| The session cookie | A forged account | Signed with `SESSION_SECRET` from the environment; it holds only the account id, and a tampered or wrongly signed cookie is treated as signed out |
 | Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its sentence is not checked; at worst it gives a refusal, or a misleading sentence above a real quote |
 
 ## 12. Failure modes and limitations
@@ -615,7 +620,7 @@ The failures that look like right answers matter most, because the employee cann
 |---|---|---|---|
 | The model quotes a real clause in scope that does not answer the question | A right answer | Hiep's reading in the evaluation; the employee reads the quote and its source | Unchanged |
 | The sentence changes a number, drops a condition of its quote, adds a fact, or applies the clause to the wrong people | A right answer | The quote under the sentence; Hiep's Faithfulness reading (section 14) | New with the sentence; a check on the sentence stays possible (section 16) |
-| Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides, never a conflict card | The evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | New limitation; the publish-time scan is SD15 |
+| Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides | The model's flag, when it notices both sides (ADR 0014); the evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | Mitigated at question time; a miss stays a limitation; the publish-time scan is SD15 |
 | An owner sets wrong metadata, such as a wrong topic or a wrong relation ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) | A right answer | Nothing in v1 | Partly mitigated by the relation list and the impact preview (sections 7.2, 7.3) |
 | A question about another period gets the rule in force on the date asked ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | A right answer | The evaluation | Unchanged; see section 16 |
 | A company replaces only one clause of a Group policy, and the whole Group policy drops out ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | A refusal | The evaluation | A warning in the impact preview (section 4.3); clause-level relations stay deferred |
@@ -708,7 +713,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 |---|---|---|---|---|
 | SD1 | Where published documents and traces are stored, and on which host | Section 9.2 a-d | Yes | 9.2 |
 | SD2 | Whether embeddings are stored or recomputed at start-up | Store; recompute | With SD1 | 9.2, 13.2 |
-| SD3 | How a user signs in | Section 8.2 a-c | No | 8.2 |
+| SD3 | How a user signs in | Section 8.2 a-c | **Decided by Hiep, 21/10/2026**: pick an account and type one shared demo password, published in the README; ADR 0016 | 8.2 |
 | SD4 | The information an owner sets for each document | Section 4.2 | No | 4.2 |
 | SD5 | Who maintains the list of topics | Owners; one central owner; a fixed list in the data | No | 4.2 |
 | SD6 | Whether a published version may start before today | Allow; refuse | No | 4.3 |
@@ -716,10 +721,10 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD8 | How a mistake in a published version is corrected | Section 7.4 a-c | No | 7.4 |
 | SD9 | Whether an owner also sees and publishes for units below their unit | Own unit only; own unit and below | No | 7 |
 | SD10 | Whether the card links to the full cited clause | Link; quote only | No | 6.5 |
-| SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 8.3 |
+| SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | **Decided by Hiep, 21/10/2026**: the evaluator account only, others get a 404; the date picker stays, labelled as a demo control; ADR 0016 | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |
-| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | ADR 0011 | 6.3, 6.4 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time, **changed by ADR 0014**: the model may flag a disagreement, step 7 checks it | ADR 0011, ADR 0014 | 6.3, 6.4 |
 | SD15 | Whether a content conflict scan runs when an owner publishes | To discuss with the owner workflow | Yes | 12 |
 | SD16 | Whether owners get a list of answers that cite documents with no declared relation between them | To discuss with the owner workflow | No | 12 |
 | SD17 | The criterion for Readability (spec section 6.2) | - | No | 14 |

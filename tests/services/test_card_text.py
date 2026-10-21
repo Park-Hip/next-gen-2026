@@ -2,6 +2,7 @@
 from dataclasses import replace
 from datetime import date
 
+from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card, CardLine
 from appota_kb.services.card_text import REFUSAL_TEXT, change_text, refusal_text, render
@@ -87,12 +88,45 @@ def test_conflict_card_wording(personas, documents):
     lines = render(card, s, (marker,), (g1, p1))
     assert lines == (
         CardLine("who", "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán."),
-        CardLine("lead", "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. Hệ thống không tự chọn."),
+        CardLine("lead", "Có 2 quy định cùng áp dụng cho bạn nhưng chưa được khai báo quy định nào được dùng thay quy định nào. Hệ thống không tự chọn."),
         CardLine("quote", 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'),
         CardLine("quote", 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'),
         CardLine("plain", "Vui lòng hỏi HR PayCo."),
     )
     assert all("MODEL" not in line.text for line in lines)
+
+
+def test_conflict_card_headline_counts_documents_and_quotes_each_once(personas, documents):
+    """P9: a third leave policy for Kế toán makes three pairs, and the card says 3 and quotes three documents."""
+    payco = _doc(documents, "LEAVE-PAYCO-v1")
+    accounting = replace(
+        payco, id="LEAVE-KETOAN-v1", series="LEAVE-KETOAN", title="Quy chế nghỉ phép Kế toán",
+        applies_to="Kế toán", body="Điều 1. Nhân sự Kế toán được nghỉ phép năm 14 ngày mỗi năm.\n",
+    )
+    docs = [*documents, accounting]
+    s = scope(personas["ha"], date(2026, 10, 7), docs)
+    assert len(s.conflicts) == 3
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-KETOAN-v1#1", "LEAVE-PAYCO-v1#1")
+    retrieved = tuple(_chunk(docs, cid) for cid in ids)
+    card = pick_card(s, ids, list(ids))
+    lines = render(card, s, None, retrieved)
+    assert lines[1].text.startswith("Có 3 quy định cùng áp dụng cho bạn")
+    quotes = [line.text for line in lines if line.kind == "quote"]
+    assert len(quotes) == 3
+    assert [q.split(",")[0] for q in quotes] == ["Tập đoàn", "Kế toán", "PayCo"]
+    assert [line.kind for line in lines] == ["who", "lead", "quote", "quote", "quote", "plain"]
+
+
+def test_model_flagged_conflict_card_uses_the_same_headline(personas, documents):
+    docs = with_edit(documents, {"document": "LEAVE-PAYCO-v1", "set": {"topic": "nghi_phep_nam"}})
+    s = scope(personas["ha"], date(2026, 10, 7), docs)
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    retrieved = tuple(_chunk(docs, cid) for cid in ids)
+    group, payco = (_doc(docs, "LEAVE-GROUP-v1"), _doc(docs, "LEAVE-PAYCO-v1"))
+    card = Card("conflict", s.persona.hr, retrieved, ((group, payco),), reason="model_flagged")
+    declared = render(Card("conflict", s.persona.hr, retrieved, ((group, payco),)), s, None, retrieved)
+    assert render(card, s, None, retrieved) == declared
+    assert declared[1].text.startswith("Có 2 quy định")
 
 
 def test_refusal_card_wording(personas, documents):
@@ -180,7 +214,7 @@ def test_notice_for_an_end_date_with_no_successor(personas, documents):
 
 
 def test_a_hidden_successor_gives_the_text_of_no_successor(personas, documents):
-    """R10, ADR 0015: the notice must not reveal that a restricted document exists."""
+    """R10, ADR 0010: the notice must not reveal that a restricted document exists."""
     ended = lambda d: replace(d, effective_to=date(2026, 12, 31)) if d.id == "LEAVE-GAMECO-v2" else d  # noqa: E731
     hidden = lambda d: replace(d, access="roles:hr_gameco") if d.id == "LEAVE-GAMECO-v3" else ended(d)  # noqa: E731
     _, none_s = _edited_scope(personas, [d for d in documents if d.id != "LEAVE-GAMECO-v3"], ended)
@@ -219,7 +253,7 @@ def test_conflict_card_shows_the_window_and_each_sides_notice(personas, document
         "Sắp thay đổi: quy định này hết hiệu lực với bạn sau 31/12/2026. "
         "Vui lòng hỏi HR PayCo về quy định áp dụng từ 01/01/2027."
     )
-    assert lines[1].text.startswith("Có hai quy định cùng áp dụng")
+    assert lines[1].text.startswith("Có 2 quy định cùng áp dụng")
 
 
 def test_refusal_card_has_no_window_and_no_notice(personas, documents):

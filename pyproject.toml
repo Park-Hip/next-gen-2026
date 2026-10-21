@@ -14,6 +14,7 @@ dependencies = [
     "python-dotenv==1.1.1",
     "langchain-google-genai==4.4.1",
     "numpy==2.5.4",
+    "itsdangerous==2.2.0",
 ]
 
 [dependency-groups]

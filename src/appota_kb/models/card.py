@@ -25,4 +25,6 @@ class Card:
     hr: str
     cited: tuple[Chunk, ...]
     conflicts: tuple[tuple[Document, Document], ...]
-    reason: str | None = None  # refusals only, for the log and #14; never shown (R10)
+    # For the log and #14; never shown (R10). A refusal's cause, or "model_flagged" on a conflict card
+    # whose pair the rules did not declare (ADR 0014).
+    reason: str | None = None

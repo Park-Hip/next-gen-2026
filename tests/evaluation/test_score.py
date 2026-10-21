@@ -251,30 +251,55 @@ def test_score_conflict_must_cite_and_must_show_both_sides(personas, documents, 
     assert bad.checks["must_show"] is False
 
 
-def test_score_row19_answer_shows_both_undeclared_values(personas, documents, cases):
-    # #74: the metadata edit hides the conflict, so v1 shows an answer card. Both values
-    # must still be visible, and must_cite must work on an answer card too.
+ROW19_LINES = [
+    {"kind": "quote", "text": 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'},
+    {"kind": "quote", "text": 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'},
+]
+ROW19_CITED = ["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"]
+
+
+def test_score_row19_conflict_from_the_models_flag_passes(personas, documents, cases):
+    # ADR 0014: the edit hides the pair from the rules, so the pair on the card can only come from the flag.
+    row = row_by_id(cases, 19)
+    assert row["conflict_from"] == "model" and row["kind"] == "hard"
+    scope = _scope_for(row, personas, documents)
+    assert scope.conflicts == ()
+    card = _make_card(
+        "conflict", cited=ROW19_CITED, conflicts=[["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]],
+        lines=ROW19_LINES, reason="model_flagged",
+    )
+    score = score_row(row, [_make_record(row, scope, card=card, retrieved=ROW19_CITED)])
+    assert score.checks["scope"] is True
+    assert score.checks["card"] is True
+    assert score.checks["conflict_pair"] is True
+    assert score.checks["must_cite"] is True
+    assert score.checks["must_show"] is True
+    assert not (score.rules_wrong or score.leak or score.unsafe or score.over_cautious)
+    assert verdicts([score], {})[19] == "Đạt"
+
+
+def test_score_row19_without_the_flag_fails(personas, documents, cases):
+    # No flag: the answer card shows both values, but the card is wrong for the row and counts as unsafe.
     row = row_by_id(cases, 19)
     scope = _scope_for(row, personas, documents)
     card = _make_card(
-        "answer",
-        cited=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
-        answer_text="Theo Tập đoàn, 12 ngày. Theo PayCo, 13 ngày.",
-        lines=[
-            {"kind": "claim", "text": "Theo quy chế Tập đoàn, bạn được nghỉ 12 ngày."},
-            {"kind": "quote", "text": '"Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'},
-            {"kind": "claim", "text": "Theo quy chế PayCo, bạn được nghỉ 13 ngày."},
-            {"kind": "quote", "text": '"Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'},
-        ],
+        "answer", cited=ROW19_CITED, answer_text="Theo Tập đoàn, 12 ngày. Theo PayCo, 13 ngày.", lines=ROW19_LINES,
     )
-    score = score_row(row, [_make_record(
-        row, scope, card=card,
-        retrieved=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
-    )])
-    assert score.checks["must_cite"] is True
-    assert score.checks["must_show"] is True
-    assert score.checks["card"] is False  # the known limitation: the ideal card is conflict
-    assert score.rules_wrong is True
+    score = score_row(row, [_make_record(row, scope, card=card, retrieved=ROW19_CITED)])
+    assert score.checks["card"] is False
+    assert score.unsafe is True
+    assert verdicts([score], {})[19] == "Chưa đạt"
+
+
+def test_score_conflict_from_model_fails_when_the_rules_formed_the_pair(personas, documents, cases):
+    # If the rules already formed the pair, the row no longer tests the flag: the scope check fails.
+    row = row_by_id(cases, 19)
+    scope = _scope_for(row, personas, documents)
+    card = _make_card("conflict", cited=ROW19_CITED, conflicts=[["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]], lines=ROW19_LINES)
+    record = _make_record(row, scope, card=card, retrieved=ROW19_CITED)
+    record["scope_conflicts"] = [["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]]
+    score = score_row(row, [record])
+    assert score.checks["scope"] is False and score.rules_wrong is True
 
 
 def test_score_key_facts(personas, documents, cases):
@@ -382,7 +407,7 @@ def test_gates_exclude_limitation_row(cases, personas):
     settings = Eval(over_cautious_max_share=0.10, confidence=0.95)
     scores = [_row_score(c, _refusal_record(c["id"])) for c in cases]
     g = gates(scores, {}, settings, personas)
-    assert all(gate.n == 17 for gate in g if gate.unit == "rows")
+    assert all(gate.n == 18 for gate in g if gate.unit == "rows")
 
 
 def test_verdict_answer_card_needs_reading(personas, documents, cases):
