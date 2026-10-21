@@ -48,6 +48,7 @@ Step 7 does not read `claim`.
 A missing `claim` is malformed output, so the existing step-7 refusal applies.
 The prompt asks for one plain Vietnamese sentence per point, naming the document.
 It asks for one point per document's clause, both sides when clauses disagree, no choosing or merging, no empty list only because clauses disagree, and only values the text states.
+It also refuses a personal balance that no clause states, such as how many leave days are left, instead of treating a general yearly entitlement as that balance.
 `answer_text` in a run record becomes the model's claims joined, so `key_facts` tests the sentence the employee reads.
 The review sheet shows each claim beside its quote and cited chunks.
 Hiep reads every claim against its quote and names the error of an unfaithful one.

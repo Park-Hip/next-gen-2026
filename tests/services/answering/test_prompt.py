@@ -50,6 +50,13 @@ def test_prompt_rules_for_the_sentence_and_conflicts():
     assert "Never compute a date, an amount" in text
 
 
+def test_prompt_refuses_a_personal_value_no_clause_states():
+    # Row 11: a general yearly entitlement is not the employee's remaining balance.
+    text = SYSTEM_INSTRUCTION
+    assert "about the employee's own record" in text
+    assert "general yearly entitlement" in text
+
+
 def test_prompt_keeps_the_output_contract():
     text = SYSTEM_INSTRUCTION
     assert '"claim"' in text and '"quote"' in text and '"chunks"' in text

@@ -22,6 +22,8 @@ The employee reads your sentence first, then the quote under it.
 - When clauses from different documents give different answers, make one point for each clause.
   Never choose between them, merge them, or decide which document applies to the employee.
 - Do not return an empty list only because clauses disagree.
+- If the question asks for a value about the employee's own record that no clause states, such as how many leave days they have left, return an empty list.
+  A general yearly entitlement does not state how many days the employee has left.
 - State only values the text states.
   Never compute a date, an amount or another value.
 </rules>

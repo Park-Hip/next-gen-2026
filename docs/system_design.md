@@ -390,6 +390,7 @@ Changed: the prompt adds these rules.
 3. When clauses from different documents give different answers, make one point for each, and do not choose between them, merge them or decide which one applies.
 4. Do not return no points only because clauses disagree.
 5. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
+6. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
 
 The prompt never says which documents form a conflict pair: the rules decide the card, so the model gains nothing from knowing.
 
