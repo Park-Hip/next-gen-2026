@@ -4,8 +4,8 @@ Step 1 of the [Mission 3 checklist](checklist.md): for each requirement of the [
 Claude draft, 21/10/2026, for Hiep to check.
 All data is simulated ("giả lập").
 
-This page lists gaps only.
-Which ones Mission 3 closes is step 2 of the checklist, and every priority there is Hiep's.
+Sections 1-5 list the gaps.
+Which ones Mission 3 closes is step 2 of the checklist, and every priority there is Hiep's; the decisions taken so far are in [How Mission 3 fixes the gaps](#how-mission-3-fixes-the-gaps).
 
 "M2" is the code of tag `mission2` (`b6ca78d`).
 The baseline is the Mission 2 run [`results/20261014-2239.jsonl`](../../results/20261014-2239.jsonl); its rows are in the [test report](../mission2/test_report.md), and "row N" below is row N of [`data/test_cases.yaml`](../../data/test_cases.yaml) in that run.
@@ -164,6 +164,30 @@ Three open proposals already touch these requirements; this page does not decide
 | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Plan approved by Hiep on 20/10/2026; in progress, not merged |
 | [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan posted; decisions awaited |
 | [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1 | No plan yet |
+
+## How Mission 3 fixes the gaps
+
+Hiep's decisions so far; only section 1 is decided, and sections 2-5 are still open (step 2 of the checklist).
+The fixes below are planned, not built: none of them has passed a run yet.
+
+### 1. Versions and effective dates
+
+Decided by Hiep on 21/10/2026.
+
+| Gap | Decision | How | Where | How it is checked |
+|---|---|---|---|---|
+| G1.1 | Fix it through the prompt | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) puts the model's sentence above its verified quote; [#83](https://github.com/Park-Hip/next-gen-2026/issues/83) gives the prompt the as-of date, each chunk's validity window and the G1.2 notices, and tells the model to say so when the question is about a time outside a chunk's window; the model never sees a future version's content, so the system tells the asker that version 3 applies from 01/01/2027 but does not answer "15 ngày" | #75, then #83; ADR 0012, reasons awaited from Hiep | Row 18 keeps its id; its expected card changes from refusal to an answer card with the notice; it is run once (Hiep's decision), and Hiep reads the sentence: a sentence that gives 14 days as next year's number fails the row |
+| G1.2 | Fix it with rules | The source line gives the end of the validity window ("hiệu lực từ 01/01/2026 đến hết 31/12/2026"); for each cited document, a notice gives the first future date it leaves the asker's scope and what replaces it: the next version of its policy, nothing when it ends with no successor, or another policy that declares "dùng thay" over it; the date comes from running `scope()` for the asker on each future date where a published document starts or ends, so precedence, applicability and access follow the same rules as today; a successor the asker may not read is never named; notices appear on the answer and conflict cards whenever a later version is published, with no time window and no config key | #83; ADR 0012 | pytest with in-memory edits (an end date with no successor, a future "dùng thay" by another policy, a restricted successor, a draft that is never named); row 1 gains the notice and row 2 on 01/01/2027 has none; one new edge row with an end date through `data_edit set: effective_to`; `data/` is unchanged |
+| G1.3 | An owner rule, no code | An owner changes a document only by publishing a full new version, a copy of the version in force with the clause changed; the rule also covers G3.1, where a company changes one clause of a Group policy | [ADR 0013](../decisions/0013-owners-change-a-document-only-by-a-full-new-version.md), `data/README.md` | No new test: rows 1 and 2 already show a new version replacing the old one, and row 1 a complete company policy replacing the Group policy |
+| G1.4 | Not handled in this section | The as-of date comes from the request; it is decision 4 of [#76](https://github.com/Park-Hip/next-gen-2026/issues/76), with requirement 2 | #76 | - |
+| G1.5 | Not built (AI proposal; Hiep has not ruled on it) | Once the card shows the start and end of the validity window, the dates identify the version without a version field | - | - |
+
+What stays a limitation after these changes:
+
+- The sentence is not checked at run time, so the model can still present the current value as next year's; the window and the notice are always on the card under it.
+- The system never answers with a future version's content.
+- Only the next change of each cited document is shown; a later change inside the period the question asks about is not.
+- The owner rule of ADR 0013 cannot be enforced from the metadata, so an owner who breaks it still gives [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) example 2 and row 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)); both issues stay open.
 
 ## Appendix: the probes
 
