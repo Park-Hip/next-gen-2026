@@ -1,12 +1,14 @@
 # Tri thức nội bộ Appota
 
-An AI assistant that gives each Appota employee the rule that applies to them: for their unit, within their access rights, in the version in force today, quoted word for word from its source.
+An AI assistant that gives each Appota employee the rule that applies to them: for their unit, within their access rights, in the version in force today, answered in plain Vietnamese and quoted word for word from its source.
 NextGen AI Talent 2026, Bài test B, Mission 2.
 All company data in this repository is simulated ("giả lập"); no real Appota data is used.
 
 **[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](https://www.youtube.com/watch?v=p8_6wCrepgg)** · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](docs/mission2/test_report.md)**
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
+
+*The image is from the last run before #75; the current card adds the model's sentence above each quote.*
 
 Same question, same day, three employees.
 Each gets the policy that applies to them, quoted with its source.
@@ -23,7 +25,8 @@ The core loop the brief asks Mission 2 to prove: "Câu hỏi + bối cảnh ngư
 
 ## Test results
 
-The final evaluation run, on 14/10/2026, asked all 18 test cases once, with the real model and through the same code as the demo.
+The last full run before #75, on 14/10/2026, asked the 18 test cases that existed then, with the real model and through the same code as the demo.
+The 20-row run for #75 is pending and will replace this section before submission.
 7 cases are things the product should handle well, 7 are hard or ambiguous, and 4 are known failures kept in the set on purpose.
 
 Each metric and its target were set in the Mission 1 design, before any code was written.
@@ -115,12 +118,12 @@ Mission 1 đã đặt ra: chỉ một câu trả lời nguy hiểm là đủ bá
 | Điều khiến thay đổi | Mission 1 → v1 | Chi tiết |
 |---|---|---|
 | Một ca kiểm thử | ~~Lọc quyền xem trước "dùng thay"~~ → **kiểm quyền xem sau cùng**: một bản mới bị hạn chế đã làm quy định Tập đoàn cũ quay lại với Minh | [Quyết định](docs/decisions/0010-access-never-decides-precedence.md) |
-| Đọc lần chạy thật đầu tiên | ~~Thẻ hiện câu AI viết~~ → **thẻ hiện nguyên văn đoạn trích đã kiểm**: một câu AI viết đã bỏ mất điều kiện "chính thức" | [Quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md) |
+| Đọc lần chạy thật đầu tiên | ~~Thẻ hiện câu AI viết~~ → **thẻ hiện câu AI viết ở trên, đoạn trích đã kiểm ở dưới**: câu AI đầu tiên đã bỏ điều kiện "chính thức"; #75 đưa câu trở lại trên đoạn trích và Hiệp đọc từng câu | [Quyết định 0009](docs/decisions/0009-answer-card-shows-the-verified-quote.md), [quyết định 0011](docs/decisions/0011-answer-card-shows-the-models-sentence-above-the-verified-quote.md) |
 | Nghiên cứu | ~~Chỉ kiểm mã đoạn được dẫn~~ → **kiểm cả đoạn trích nguyên văn**: mã đúng chưa chứng minh ý đó nói đúng điều văn bản nói | [Quyết định](docs/decisions/0003-gemini-38-flash-enum-citations-quote-check.md) |
 | Gói miễn phí Gemini | ~~Mỗi ca 3 cách hỏi, chạy nhiều lần~~ → **mỗi ca hỏi một lần**, dùng chung giới hạn với demo | [Quyết định](docs/decisions/0006-own-harness-one-run-main-wording.md) |
 | Phạm vi Mission 2 | ~~Nút "Báo sai", trang cho chủ sở hữu, ghi nhận mâu thuẫn~~ → **không làm**: ít giá trị cho Mission 2, và máy chủ miễn phí mất tệp mỗi lần khởi động lại | [Quyết định](docs/decisions/0004-render-free-singapore-no-bao-sai.md), [#15](https://github.com/Park-Hip/next-gen-2026/issues/15) |
 | Phạm vi Mission 2 | ~~Theo dõi context recall~~ → **không đo**: quá sớm với 10 văn bản giả lập | [Quyết định](docs/decisions/0007-defer-context-recall.md) |
-| Đề Mission 2 | ~~10 ca kiểm thử~~ → **18 ca**: đề cần ca làm tốt, ca khó, ca thất bại; thêm 3 lỗi tìm thấy khi thử hệ thống thật | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
+| Đề Mission 2 | ~~10 ca kiểm thử~~ → **20 ca**: đề cần ca làm tốt, ca khó, ca thất bại; thêm 5 ca cho đề (11-15), 4 ca limitation (16-19) và 1 ca khó (20) | [#10](https://github.com/Park-Hip/next-gen-2026/issues/10), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53), [#74](https://github.com/Park-Hip/next-gen-2026/issues/74), [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) |
 
 Mọi lời hứa của Mission 1 và trạng thái của từng lời hứa: [`docs/mission2/mission1_promises.md`](docs/mission2/mission1_promises.md).
 
@@ -172,21 +175,23 @@ flowchart TB
 
 | Hậu quả | Rủi ro | Do ai | Phát hiện | Kiểm soát hiện nay | Đã thấy ở |
 |---|---|---|---|---|---|
-| Sai mà trông như đúng | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ chỉ hiện đoạn trích đã kiểm cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
+| Sai mà trông như đúng | **Trích đúng câu nhưng không trả lời câu hỏi** | AI | Mỗi câu trả lời phải chứa ý chính mong đợi; Hiệp đọc từng câu trả lời | Thẻ hiện câu mô hình viết ở trên, đoạn trích đã kiểm ở dưới, cùng văn bản, Điều và ngày hiệu lực, để nhân sự thấy câu trả lời dựa trên gì | Ca 18: hỏi năm sau, trả lời 14 ngày của năm nay thay vì 15 ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) |
+| Sai mà trông như đúng | **Câu mô hình viết thêm ý, bỏ điều kiện hoặc đổi số** | AI | Hiệp đọc từng câu với đoạn trích ngay dưới nó và gọi tên lỗi | Đoạn trích đã kiểm nằm ngay dưới câu; thẻ mâu thuẫn và thẻ từ chối không hiện câu của mô hình (ADR 0011) | Chưa có ở lần chạy 14/10; hàng 19 kiểm tra hai giá trị cùng một thẻ trả lời khi metadata không khai báo quan hệ ([#74](https://github.com/Park-Hip/next-gen-2026/issues/74)) |
 | Sai mà trông như đúng | **Chủ sở hữu khai báo sai thông tin văn bản**: sai chủ đề, sai "dùng thay" hay "bổ sung" | Chủ sở hữu | Sửa bản sao dữ liệu giả lập và in phạm vi mà luật tạo ra | Quan hệ chưa khai báo thì hiện thẻ mâu thuẫn, không tự chọn; kiểm tra lúc ban hành để lại sau | Chưa có ca kiểm thử ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) |
 | An toàn | Từ chối dù đã tìm thấy điều khoản trả lời | AI | Ca kiểm thử và thử tay | Mục tiêu tối đa 10% từ chối nhầm | Ca 16, lúc có lúc không ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) |
 | An toàn | Thẻ mâu thuẫn dù hai văn bản nói giống nhau | Thiết kế | Thử tay | Thẻ trích cả hai bên và chuyển HR | Ca 17 ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) |
 | An toàn | Công ty sửa một điều khoản làm mất cả quy định Tập đoàn | Thiết kế | Ca kiểm thử | Từ chối và chuyển HR | Ca 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
 
 **Rò rỉ không nằm trong bảng vì có hai lớp chặn:** luật lọc văn bản trước khi tìm kiếm, và bước tìm kiếm báo lỗi nếu trả về đoạn nào ngoài phạm vi.
-Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi câu hỏi, rồi thêm 7 biến đổi dữ liệu bẫy, và không đoạn nào ngoài phạm vi lọt ra; lần chạy cuối có 0 rò rỉ trong 18 ca.
+Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi câu hỏi, rồi thêm 7 biến đổi dữ liệu bẫy, và không đoạn nào ngoài phạm vi lọt ra; lần chạy cuối trước #75 có 0 rò rỉ trong 18 ca.
 
-**Một rủi ro được phát hiện và kiểm soát ra sao ([#47](https://github.com/Park-Hip/next-gen-2026/issues/47)):**
+**Một rủi ro được phát hiện và kiểm soát ra sao ([#47](https://github.com/Park-Hip/next-gen-2026/issues/47), [#75](https://github.com/Park-Hip/next-gen-2026/issues/75)):**
 
 1. **Phát hiện:** đọc lần chạy thật đầu tiên, ca 5 trích "Nhân sự **chính thức** của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.", nhưng thẻ hiện câu AI viết "Bạn được nghỉ phép năm 12 ngày mỗi năm."
 2. **Tái hiện:** không luật nào kiểm câu AI viết; một ý chỉ trích đúng chữ "ngày" kèm câu bịa "30 ngày" vẫn ra thẻ trả lời với dòng nguồn thật.
-3. **Sửa bằng luật:** thẻ hiện đoạn trích đã kiểm, không bao giờ hiện câu AI viết ([quyết định](docs/decisions/0009-answer-card-shows-the-verified-quote.md)).
-4. **Khóa lại:** bài kiểm thử `test_ask_never_shows_text_the_model_added` giữ điều đó.
+3. **Sửa bằng luật:** thẻ hiện đoạn trích đã kiểm, không hiện câu AI viết ([quyết định 0009](docs/decisions/0009-answer-card-shows-the-verified-quote.md)).
+4. **Đổi hướng:** đoạn trích không phải lúc nào cũng trả lời trực tiếp, nên #75 đưa câu của mô hình trở lại **trên** đoạn trích, không kiểm lúc chạy, và Hiệp đọc từng câu ([quyết định 0011](docs/decisions/0011-answer-card-shows-the-models-sentence-above-the-verified-quote.md)).
+   Bài kiểm thử giữ câu trên đoạn trích, giấu câu ở thẻ mâu thuẫn và thẻ từ chối, và chứng minh câu không đổi loại thẻ.
 
 ## Try it
 
@@ -202,7 +207,7 @@ Each link below fills in the form and asks the question:
 
 Two more pages call no AI model.
 "Dữ liệu giả lập" shows the simulated organisation, the employees and every document with its status today.
-"Tình huống kiểm thử" lists every test case with its expectation, its result in the final run and a link that asks it again.
+"Tình huống kiểm thử" lists every test case with its expectation, its result in the last run before #75 and a link that asks it again.
 
 ## How it works
 
@@ -253,9 +258,9 @@ flowchart TB
 ```
 
 A wrong version, another unit's rule or a document the asker may not read cannot reach the answer, because the AI never sees it.
-No card shows text the AI wrote: the answer card shows the clause itself, checked word for word against its source, and the conflict and refusal cards use fixed wording.
+No card decides anything from text the AI wrote: the answer card shows the AI's sentence above the clause itself, checked word for word against its source, and the conflict and refusal cards use fixed wording only (ADR 0011).
 When two policies apply and no owner has declared which one replaces the other, the rules do not choose: the card quotes both and sends the asker to HR.
-The AI is Google Gemini: `gemini-embedding-001` for search and `gemini-3.5-flash-lite` to pick and quote the clauses.
+The AI is Google Gemini: `gemini-embedding-001` for search and `gemini-3.5-flash-lite` to pick the clauses, write the sentence and quote each clause.
 
 The full design, with each decision, who makes it and the same question traced step by step for all three employees, is in [`docs/architecture.md`](docs/architecture.md).
 
@@ -266,8 +271,9 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 - [#24](https://github.com/Park-Hip/next-gen-2026/issues/24): a company that changes only one clause of a Group policy cannot say so; declaring its policy "dùng thay" drops the whole Group policy, so the employee loses the Group clauses the company kept (test case 15).
 - [#52](https://github.com/Park-Hip/next-gen-2026/issues/52): conflicts are flagged per document, not per question, so when both policies say the same thing on the point asked, the employee still gets the conflict card (test case 17).
 - [#53](https://github.com/Park-Hip/next-gen-2026/issues/53): a question about another period, such as next year, is answered with the rule in force on the chosen date (test case 18: "14 ngày" for next year, where the new version gives 15).
-- [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the final run).
+- [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the last run before #75).
 - [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets, such as a wrong topic, gives a normal-looking answer, and nothing in v1 detects it; the rules are only as right as that information.
+- [#74](https://github.com/Park-Hip/next-gen-2026/issues/74): when two documents give different values but their information declares no relation, the rule does not see a conflict, so both values can appear on one answer card; naming the document in each sentence is the only aid (test case 19).
 
 v1 also simplifies on purpose: there is no login, so the asker is picked from three simulated employees, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).

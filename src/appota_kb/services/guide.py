@@ -222,8 +222,21 @@ def _case_view(row: dict, personas: dict[str, Persona], documents: list[Document
     note = None
     if edit:
         title = next(d.title for d in documents if d.id == edit["document"])
+        changes = []
+        if edit.get("remove"):
+            changes.append(f'bỏ dòng "{edit["remove"]}"')
+        for key, value in (edit.get("set") or {}).items():
+            if key == "topic":
+                changes.append(f'đổi chủ đề thành "{value}"')
+            elif key == "complements":
+                if value:
+                    changes.append("khai báo bổ sung: " + ", ".join(value))
+                else:
+                    changes.append("bỏ khai báo bổ sung")
         note = (
-            f'Tình huống này chạy trên dữ liệu đã sửa: bỏ dòng "{edit["remove"]}" khỏi {title}. '
+            "Tình huống này chạy trên dữ liệu đã sửa: "
+            + " và ".join(changes)
+            + f" trong {title}. "
             'Trang "Ask" dùng dữ liệu gốc nên không thử trực tiếp được.'
         )
     wordings = tuple(

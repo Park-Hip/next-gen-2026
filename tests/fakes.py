@@ -68,12 +68,22 @@ class FakeGemini(ChatGoogleGenerativeAI):
         )
 
 
-def reply_citing(*ids: str, quote_from: dict[str, str]) -> str:
-    """JSON {points: [...]}: one point per id, quoting quote_from[id] word for word."""
+def reply_citing(
+    *ids: str, quote_from: dict[str, str], claim_from: dict[str, str] | None = None
+) -> str:
+    """JSON {points: [...]}: one point per id, quoting quote_from[id] word for word.
+
+    The claim defaults to a plain sentence built from the quote; tests that check wording pass claim_from.
+    """
+    claims = claim_from or {}
     return json.dumps(
         {
             "points": [
-                {"chunks": [cid], "quote": quote_from[cid]}
+                {
+                    "claim": claims.get(cid, f"Theo tài liệu, {quote_from[cid]}"),
+                    "quote": quote_from[cid],
+                    "chunks": [cid],
+                }
                 for cid in ids
             ]
         },

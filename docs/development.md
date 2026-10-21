@@ -14,7 +14,7 @@ uv run python -m appota_kb.evaluation.run
 uv run python -m appota_kb.evaluation.report results/<run_id>.jsonl
 ```
 
-One full run is 18 answer calls and 18 question embeddings, about 4% of the 500 answer calls a day the free tier of `gemini-3.5-flash-lite` allows.
+One full run is 20 answer calls and 20 question embeddings, about 4% of the 500 answer calls a day the free tier of `gemini-3.5-flash-lite` allows.
 
 ## See one asker's scope by hand
 
@@ -40,7 +40,7 @@ Every search also logs one JSON line (persona, as-of date, question, scope size,
 
 ## Check the grounded answer by hand
 
-Step 6 asks `gemini-3.5-flash-lite` (ADR 0008) for points citing retrieved chunk ids, and step 7 picks the card from those citations, never from the model's own words (ADR 0003).
+Step 6 asks `gemini-3.5-flash-lite` (ADR 0008) for points with a plain sentence, a quote and retrieved chunk ids; step 7 picks the card from the citations, never from the sentence (ADRs 0003, 0011).
 It needs a Gemini API key in the environment and the network; the tests do not (they use a fake model).
 
 ```bash
@@ -48,7 +48,7 @@ export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
 uv run python scripts/answer.py minh 2026-10-07 "Phép năm của tôi là bao nhiêu ngày?"
 ```
 
-It prints the retrieved ids, the raw model output, each point with its quote, and the card kind with its refusal reason.
+It prints the retrieved ids, the raw model output, each point with its sentence and quote, and the card kind with its refusal reason.
 Every answer also logs one JSON line (persona, as-of date, question, model, retrieved ids, points, raw output and latency) on the `appota_kb.services.answering.answerer` logger.
 
 ## Resume an evaluation run

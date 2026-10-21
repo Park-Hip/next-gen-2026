@@ -164,3 +164,12 @@ def test_data_edit_note_names_the_document_and_line(cases, personas, documents):
     assert view.kind_label == "Chưa xử lý tốt"
     assert view.as_of == "07/10/2026"
     assert next(c for c in rest if c.id == 2).data_edit_note is None
+
+
+def test_data_edit_note_describes_set_fields(cases, personas, documents):
+    _, rest = case_views(cases, personas, documents)
+    views = {c.id: c for c in rest}
+    assert 'đổi chủ đề thành "nghi_phep_nam"' in views[19].data_edit_note
+    assert "bỏ khai báo bổ sung" in views[20].data_edit_note
+    assert views[19].limitation_issue == "#74"
+    assert views[20].limitation_issue is None

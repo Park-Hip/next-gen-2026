@@ -219,6 +219,64 @@ def test_score_conflict_pair(personas, documents, cases):
     assert bad.checks["conflict_pair"] is False
 
 
+def test_score_conflict_must_cite_and_must_show_both_sides(personas, documents, cases):
+    row = row_by_id(cases, 7)
+    scope = _scope_for(row, personas, documents)
+    both = _make_card(
+        "conflict",
+        cited=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
+        conflicts=[["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]],
+        lines=['Tập đoàn: "Nhân sự chính thức của Tập đoàn được nghỉ 12 ngày."',
+               'PayCo: "Nhân sự PayCo được nghỉ 13 ngày."'],
+    )
+    good = score_row(row, [_make_record(
+        row, scope, card=both,
+        retrieved=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
+    )])
+    assert good.checks["conflict_pair"] is True
+    assert good.checks["must_cite"] is True
+    assert good.checks["must_show"] is True
+
+    one_side = _make_card(
+        "conflict",
+        cited=["LEAVE-GROUP-v1#1"],
+        conflicts=[["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]],
+        lines=['Tập đoàn: "Nhân sự chính thức của Tập đoàn được nghỉ 12 ngày."'],
+    )
+    bad = score_row(row, [_make_record(
+        row, scope, card=one_side,
+        retrieved=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
+    )])
+    assert bad.checks["must_cite"] is False
+    assert bad.checks["must_show"] is False
+
+
+def test_score_row19_answer_shows_both_undeclared_values(personas, documents, cases):
+    # #74: the metadata edit hides the conflict, so v1 shows an answer card. Both values
+    # must still be visible, and must_cite must work on an answer card too.
+    row = row_by_id(cases, 19)
+    scope = _scope_for(row, personas, documents)
+    card = _make_card(
+        "answer",
+        cited=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
+        answer_text="Theo Tập đoàn, 12 ngày. Theo PayCo, 13 ngày.",
+        lines=[
+            {"kind": "claim", "text": "Theo quy chế Tập đoàn, bạn được nghỉ 12 ngày."},
+            {"kind": "quote", "text": '"Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'},
+            {"kind": "claim", "text": "Theo quy chế PayCo, bạn được nghỉ 13 ngày."},
+            {"kind": "quote", "text": '"Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'},
+        ],
+    )
+    score = score_row(row, [_make_record(
+        row, scope, card=card,
+        retrieved=["LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"],
+    )])
+    assert score.checks["must_cite"] is True
+    assert score.checks["must_show"] is True
+    assert score.checks["card"] is False  # the known limitation: the ideal card is conflict
+    assert score.rules_wrong is True
+
+
 def test_score_key_facts(personas, documents, cases):
     row = row_by_id(cases, 1)
     scope = _scope_for(row, personas, documents)
@@ -324,7 +382,7 @@ def test_gates_exclude_limitation_row(cases, personas):
     settings = Eval(over_cautious_max_share=0.10, confidence=0.95)
     scores = [_row_score(c, _refusal_record(c["id"])) for c in cases]
     g = gates(scores, {}, settings, personas)
-    assert all(gate.n == 14 for gate in g if gate.unit == "rows")
+    assert all(gate.n == 15 for gate in g if gate.unit == "rows")
 
 
 def test_verdict_answer_card_needs_reading(personas, documents, cases):

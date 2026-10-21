@@ -1,13 +1,14 @@
 <article class="panel card card-conflict">
   <h2>Mâu thuẫn</h2>
-  <p class="who">{{ card.lines[0] }}</p>
-  <p class="lead">{{ card.lines[1] }}</p>
-  {# Quote lines end with the quoted clause; the rest ("Vui lòng hỏi", later "Đã ghi nhận") are plain. #}
-  {% for line in card.lines[2:] %}
-  {% if line.endswith('"') %}
-  <blockquote>{{ line }}</blockquote>
+  {% for line in card.lines %}
+  {% if line.kind == 'who' %}
+  <p class="who">{{ line.text }}</p>
+  {% elif line.kind == 'lead' %}
+  <p class="lead">{{ line.text }}</p>
+  {% elif line.kind == 'quote' %}
+  <blockquote>{{ line.text }}</blockquote>
   {% else %}
-  <p>{{ line }}</p>
+  <p>{{ line.text }}</p>
   {% endif %}
   {% endfor %}
 </article>

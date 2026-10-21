@@ -6,7 +6,13 @@ import pytest
 from builders import committed_fixture
 
 from appota_kb.core.paths import ROOT
-from appota_kb.evaluation.committed import NO_RESULT, PENDING, committed_run, report_run_path
+from appota_kb.evaluation.committed import (
+    NO_RESULT,
+    PENDING,
+    card_with_line_kinds,
+    committed_run,
+    report_run_path,
+)
 from appota_kb.evaluation.report import REPORT_REL
 from appota_kb.integrations.data_files import cases_sha256
 
@@ -20,6 +26,32 @@ def test_report_run_path():
 
 def test_committed_run_none_without_report(cases, tmp_path):
     assert committed_run(cases, root=tmp_path) is None
+
+
+def test_card_with_line_kinds_keeps_a_new_card():
+    card = {"kind": "answer", "lines": [{"kind": "claim", "text": "14 ngày"}]}
+    assert card_with_line_kinds(card) is card
+
+
+def test_card_with_line_kinds_normalises_an_old_run():
+    answer = card_with_line_kinds({
+        "kind": "answer",
+        "lines": ["Bạn đang hỏi...", '"Nhân sự GameCo được nghỉ 14 ngày."', "Nguồn: Quy chế GameCo."],
+    })
+    assert [line["kind"] for line in answer["lines"]] == ["who", "quote", "source"]
+
+    conflict = card_with_line_kinds({
+        "kind": "conflict",
+        "lines": ["Bạn đang hỏi...", "Hệ thống không tự chọn.", '"Tập đoàn: 12 ngày."',
+                  '"PayCo: 13 ngày."', "Vui lòng hỏi HR PayCo."],
+    })
+    assert [line["kind"] for line in conflict["lines"]] == ["who", "lead", "quote", "quote", "plain"]
+
+    refusal = card_with_line_kinds({
+        "kind": "refusal",
+        "lines": ["Bạn đang hỏi...", "Không tìm thấy.", "Vui lòng liên hệ HR GameCo."],
+    })
+    assert [line["kind"] for line in refusal["lines"]] == ["who", "lead", "plain"]
 
 
 def test_committed_run_matches_the_report(cases, documents, personas, tmp_path):
@@ -37,7 +69,11 @@ def test_committed_run_matches_the_report(cases, documents, personas, tmp_path):
     assert first.verdict == "Đạt"
     assert first.lesson == "Bài học hàng 1."
     assert first.card["kind"] == "answer"
-    assert first.card["lines"][1] == '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'
+    assert first.card["lines"][1]["kind"] == "claim"
+    assert first.card["lines"][2] == {
+        "kind": "quote",
+        "text": '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."',
+    }
     assert first.failures == ()
 
     # A refusal row that expects a refusal passes; a row that expects an answer fails.

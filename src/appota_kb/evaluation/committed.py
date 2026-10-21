@@ -34,6 +34,32 @@ class RowResult:
     lesson: str                  # Hiep's lesson, or "[chờ Hiệp]"
 
 
+def card_with_line_kinds(card: dict) -> dict:
+    """A card whose lines are {kind, text}, including cards saved before ADR 0011.
+
+    Old records stored flat strings: who, then a lead, then quotes or sources.
+    The fallback lets /cases keep showing a run made before the line kinds existed.
+    """
+    lines = card.get("lines") or []
+    if not lines or isinstance(lines[0], dict):
+        return card
+    kind = card.get("kind")
+    converted = []
+    for i, text in enumerate(lines):
+        if i == 0:
+            line_kind = "who"
+        elif kind == "conflict" and i > 1:
+            line_kind = "quote" if text.endswith('"') else "plain"
+        elif kind == "answer":
+            line_kind = "quote" if text.startswith('"') else "source"
+        elif kind == "refusal" and i > 1:
+            line_kind = "plain"
+        else:
+            line_kind = "lead"
+        converted.append({"kind": line_kind, "text": text})
+    return {**card, "lines": converted}
+
+
 @dataclass(frozen=True)
 class RunView:
     run_id: str
@@ -72,8 +98,9 @@ def committed_run(rows: list[dict], root: Path = ROOT) -> RunView | None:
     for score in scores:
         row_id = score.row["id"]
         record = score.record
+        card = record.get("card") if record else None
         result_rows[row_id] = RowResult(
-            card=record.get("card") if record else None,
+            card=card_with_line_kinds(card) if card else None,
             verdict=marks[row_id] or NO_RESULT,
             failures=tuple(failures(score)) if record else (),
             lesson=lesson_of(reviews.get(row_id)),

@@ -36,6 +36,7 @@ def test_answerer_row1_reply(personas, documents):
     point = reply.points[0]
     assert point.chunks == ("LEAVE-GAMECO-v2#2",)
     assert point.quote == quote
+    assert point.claim.startswith("Theo tài liệu,")
     assert not hasattr(point, "text")
 
 
@@ -43,7 +44,7 @@ def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=json.dumps(
-        {"points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]}
+        {"points": [{"claim": "Mức lương bậc 2.", "chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]}
     ))
     answerer = Answerer(index, chat, RETRIEVAL)
     reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
@@ -57,7 +58,8 @@ def test_answerer_malformed_output_gives_none(personas, documents):
     index = build_index(documents, SyllableEmbeddings())
     bad_outputs = [
         "not json at all",
-        json.dumps({"points": [{"chunks": ["LEAVE-GAMECO-v2#2"], "text": "x"}]}),  # missing quote
+        json.dumps({"points": [{"claim": "14 ngày", "chunks": ["LEAVE-GAMECO-v2#2"]}]}),  # missing quote
+        json.dumps({"points": [{"quote": "14 ngày", "chunks": ["LEAVE-GAMECO-v2#2"]}]}),  # missing claim
         json.dumps({"points": "nope"}),
     ]
     for bad in bad_outputs:
@@ -133,5 +135,6 @@ def test_answer_log_line(personas, documents, caplog):
     assert payload["model"] == "gemini-3.8-flash"
     assert set(payload["retrieved"]) <= s.chunk_ids
     assert payload["points"] and payload["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
+    assert payload["points"][0]["claim"].startswith("Theo tài liệu,")
     assert payload["raw"]
     assert isinstance(payload["latency_ms"], (int, float))

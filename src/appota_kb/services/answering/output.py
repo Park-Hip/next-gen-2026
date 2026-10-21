@@ -10,8 +10,9 @@ from appota_kb.models.answer import Point
 
 
 class _LoosePoint(BaseModel):
-    chunks: list[str]
+    claim: str
     quote: str
+    chunks: list[str]
 
 
 class _LooseAnswer(BaseModel):
@@ -19,7 +20,7 @@ class _LooseAnswer(BaseModel):
 
 
 def answer_schema(ids: tuple[str, ...]) -> dict:
-    """JSON schema of {points: [{chunks, quote}]} with chunks an enum of `ids`, min 1 item;
+    """JSON schema of {points: [{claim, quote, chunks}]} with chunks an enum of `ids`, min 1 item;
     `points` may be empty, which means "không tìm thấy".
 
     A Pydantic model is built per request so the enum is the retrieved set, then its
@@ -30,8 +31,9 @@ def answer_schema(ids: tuple[str, ...]) -> dict:
         raise ValueError("answer_schema needs at least one retrieved id")
     point = create_model(
         "Point",
-        chunks=(tuple[Literal[ids], ...], Field(min_length=1)),
+        claim=(str, ...),
         quote=(str, ...),
+        chunks=(tuple[Literal[ids], ...], Field(min_length=1)),
     )
     answer = create_model("Answer", points=(list[point], ...))
     schema = answer.model_json_schema()
@@ -66,5 +68,5 @@ def parse_points(parsed) -> tuple[Point, ...] | None:
     except ValidationError:
         return None
     return tuple(
-        Point(chunks=tuple(p.chunks), quote=p.quote) for p in loose.points
+        Point(claim=p.claim, quote=p.quote, chunks=tuple(p.chunks)) for p in loose.points
     )
