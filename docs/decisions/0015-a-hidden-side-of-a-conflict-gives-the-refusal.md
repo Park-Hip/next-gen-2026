@@ -27,7 +27,10 @@ The strongest alternative is option 3, which answers more questions.
 
 Conflict pairs are formed among the documents in force, applying to the asker and not replaced, before the access filter.
 If the model cites a document whose pair partner the asker may not read, the asker gets the refusal card.
+The scope carries only the ids of the readable partners (`hidden_partners`); the hidden document itself never enters the scope, so nothing after it can name or quote it.
 The hidden document is still dropped before chunking and retrieval, so its text never reaches the model or the card.
+The check runs before the conflict check, so a document paired with both a readable and a hidden document is refused.
+The refusal text is the same as "not found"; the card records `reason: "hidden_conflict"`, kept in the log and the results file only.
 
 ## Reasons
 
@@ -48,5 +51,5 @@ The hidden document is still dropped before chunking and retrieval, so its text 
 
 ## Evidence
 
-To come with #87: the P8 pytest, and a reader with `hr_payco` in PayCo who gets the conflict card.
+Built in #87 and checked by pytest: `test_p8_hidden_partner_refuses_ha` and `test_p8_a_reader_with_hr_payco_gets_the_conflict_card` in `tests/services/test_citations.py`, `test_hiding_one_document_removes_only_that_document` in `tests/services/test_scope.py`, and `test_hidden_conflict_partner_is_refused_without_a_trace` in `tests/api/test_page.py`, which checks that nothing on the page names the hidden document.
 Evidence log line of 21/10/2026.

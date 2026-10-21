@@ -144,7 +144,10 @@ def test_hidden_v3_does_not_bring_the_group_policy_back(personas, documents):
 
 
 def test_hiding_one_document_removes_only_that_document(personas, dates, documents):
-    """Access is the last filter: hiding a document takes it and its conflict pairs out, nothing else."""
+    """Access is the last filter: hiding a document takes it and its conflict pairs out, nothing else.
+
+    The readable partners of the hidden document are remembered by id (ADR 0015); the hidden document
+    itself is in neither the documents, the pairs nor the chunks."""
     def pairs(s):
         return [(a.id, b.id) for a, b in s.conflicts]
 
@@ -157,6 +160,48 @@ def test_hiding_one_document_removes_only_that_document(personas, dates, documen
                 where = (hidden.id, persona.id, day)
                 assert [d.id for d in part.documents] == [d.id for d in full.documents if d.id != hidden.id], where
                 assert pairs(part) == [p for p in pairs(full) if hidden.id not in p], where
+                assert not any(c.document_id == hidden.id for c in part.chunks), where
+                partners = sorted(
+                    (set(p) - {hidden.id}).pop() for p in pairs(full) if hidden.id in p
+                )
+                assert list(part.hidden_partners) == partners, where
+
+
+def test_no_hidden_partners_when_nothing_is_hidden(personas, dates, documents):
+    for persona in personas.values():
+        for day in dates:
+            assert scope(persona, day, documents).hidden_partners == (), (persona.id, day)
+
+
+def test_hidden_partner_of_the_ha_pair():
+    """P8 of docs/mission3/gaps.md: LEAVE-PAYCO-v1 readable only by hr_payco."""
+    group = make_doc(id="GROUP-v1", series="GROUP", topic="leave", applies_to="Tập đoàn")
+    payco = make_doc(id="PAYCO-v1", series="PAYCO", topic="leave", applies_to="PayCo", access="roles:hr_payco")
+    ha = make_persona(unit="Kế toán", company="PayCo", path=("Tập đoàn", "PayCo", "Kế toán"), hr="HR PayCo")
+    s = scope(ha, date(2026, 10, 7), [group, payco])
+    assert [d.id for d in s.documents] == ["GROUP-v1"]
+    assert s.conflicts == ()
+    assert s.hidden_partners == ("GROUP-v1",)
+    assert not {c.document_id for c in s.chunks} & {"PAYCO-v1"}
+    reader = make_persona(unit="Kế toán", company="PayCo", path=("Tập đoàn", "PayCo", "Kế toán"),
+                          roles=("employee", "hr_payco"), hr="HR PayCo")
+    s = scope(reader, date(2026, 10, 7), [group, payco])
+    assert [(a.id, b.id) for a, b in s.conflicts] == [("GROUP-v1", "PAYCO-v1")]
+    assert s.hidden_partners == ()
+
+
+def test_a_pair_of_two_hidden_documents_marks_nobody():
+    a = make_doc(id="A-v1", series="A", topic="leave", access="roles:nobody")
+    b = make_doc(id="B-v1", series="B", topic="leave", access="roles:nobody")
+    s = scope(make_persona(), date(2026, 10, 7), [a, b])
+    assert s.documents == () and s.conflicts == () and s.hidden_partners == ()
+
+
+def test_a_declared_complement_with_a_hidden_document_marks_nobody():
+    a = make_doc(id="A-v1", series="A", topic="leave")
+    b = make_doc(id="B-v1", series="B", topic="leave", access="roles:nobody", complements=("A",))
+    s = scope(make_persona(), date(2026, 10, 7), [a, b])
+    assert [d.id for d in s.documents] == ["A-v1"] and s.hidden_partners == ()
 
 
 @pytest.mark.parametrize("row", _case_params())
@@ -174,7 +219,9 @@ def test_case_row(personas, documents, row):
     cited_ids = []
     for doc_id in row.get("must_cite", []) + row.get("conflict_pair", [])[:1]:
         cited_ids += [c.id for c in chunks(next(d for d in docs if d.id == doc_id))]
-    assert pick_card(s, s.chunk_ids, cited_ids).kind == row.get("rules_card", row["card"])
+    # conflict_from: model rows are found by the model's flag, so the rules alone give the answer card.
+    expected = "answer" if row.get("conflict_from") == "model" else row.get("rules_card", row["card"])
+    assert pick_card(s, s.chunk_ids, cited_ids).kind == expected
 
 
 def test_leak_no_restricted_chunks(personas, dates, documents):

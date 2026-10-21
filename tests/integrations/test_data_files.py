@@ -161,6 +161,9 @@ def test_cases_well_formed(cases, documents, personas):
         if "rules_card" in c:
             assert c["kind"] == "limitation", tag
             assert c["rules_card"] in ("answer", "conflict", "refusal"), tag
+        if "conflict_from" in c:
+            assert c["conflict_from"] == "model", tag
+            assert c["card"] == "conflict" and "rules_card" not in c and "data_edit" in c, tag
         assert c["persona"] in personas, tag
         assert c["as_of"], tag
         assert c["questions"] and all(isinstance(q, str) and q for q in c["questions"]), tag

@@ -1,9 +1,10 @@
 """Steps 1-4: the documents in force, applying to the asker and not replaced, then the ones the asker may read.
 
 Deterministic rules decide access, validity, applicability and precedence; nothing here
-reads the question and nothing calls an LLM. Ported from adopted_rules.py, with one change
-(ADR 0010): access is the last filter, so a document the asker may not read still replaces
-its series and never brings the replaced one back.
+reads the question and nothing calls an LLM. Ported from adopted_rules.py, with two changes:
+access is the last filter for precedence (ADR 0010), so a document the asker may not read still
+replaces its series, and for conflict pairs (ADR 0015), so a hidden partner is remembered by
+its readable partner and never enters the scope.
 """
 from datetime import date
 from itertools import combinations
@@ -52,16 +53,24 @@ def scope(persona: Persona, as_of: date, documents: list[Document]) -> Scope:
     """Steps 1-4: documents in force, applying to the asker and not replaced, then those the asker
     may read, plus the conflict pairs. Never reads the question.
 
-    Order: validity, applicability, precedence, access (ADR 0010). Access never decides which
-    rule applies, so a restricted document that replaces a series leaves the asker with neither."""
+    Order: validity, applicability, precedence, conflict pairs, access (ADR 0010, ADR 0015). Access
+    never decides which rule applies, so a restricted document that replaces a series leaves the
+    asker with neither, and a restricted document in a pair is never named but its partner is marked."""
     current = [d for d in in_force(documents, as_of) if applies(d, persona)]
     beaten = {d.overrides for d in current if d.overrides is not None}
-    winners = sorted([d for d in current if d.series not in beaten and allowed(d, persona)], key=lambda d: d.id)
+    winners = sorted([d for d in current if d.series not in beaten], key=lambda d: d.id)
     pairs = []
+    hidden_partners: set[str] = set()
     for a, b in combinations(winners, 2):
-        if a.topic == b.topic and not declared(a, b):
-            pairs.append(tuple(sorted((a, b), key=lambda d: d.id)))
+        if a.topic != b.topic or declared(a, b):
+            continue
+        readable = [d for d in (a, b) if allowed(d, persona)]
+        if len(readable) == 2:
+            pairs.append((a, b))
+        elif len(readable) == 1:
+            hidden_partners.add(readable[0].id)
     conflicts = tuple(sorted(pairs, key=lambda p: (p[0].id, p[1].id)))
-    scoped = tuple(winners)
+    scoped = tuple(d for d in winners if allowed(d, persona))
     chunk_tuple = tuple(c for d in scoped for c in document_chunks(d))
-    return Scope(persona=persona, as_of=as_of, documents=scoped, conflicts=conflicts, chunks=chunk_tuple)
+    return Scope(persona=persona, as_of=as_of, documents=scoped, conflicts=conflicts, chunks=chunk_tuple,
+                 hidden_partners=tuple(sorted(hidden_partners)))

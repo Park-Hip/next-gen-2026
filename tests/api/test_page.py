@@ -3,6 +3,7 @@
 Each test injects an Answerer whose FakeGemini returns scripted replies, so the page
 runs retrieval, the real with_structured_output path and step 7 end to end, offline.
 """
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import html
 import json
@@ -19,13 +20,17 @@ from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
 from appota_kb.api.page import BUSY_MESSAGE, build_app
 from appota_kb.core.config import load_config
+from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.services.answering.answerer import Answerer
 from appota_kb.services.retrieval.index import build_index
 
 LEAVE_QUESTION = "Phép năm của tôi là bao nhiêu ngày?"
 
 
-def _client(documents, reply="", error=None):
+def _client(documents, reply="", error=None, monkeypatch=None):
+    """A page over a FakeGemini; with `monkeypatch`, the page reads `documents` instead of data/ (edited data)."""
+    if monkeypatch is not None:
+        monkeypatch.setattr("appota_kb.api.page.load_documents", lambda: documents)
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=reply, error=error)
     answerer = Answerer(index, chat, RETRIEVAL)
@@ -100,7 +105,6 @@ def test_answer_card_row_1(documents):
 
 
 def test_conflict_card_row_7(documents):
-    quote = chunk_text(documents, "LEAVE-GROUP-v1#1")
     reply = reply_citing(
         "LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1",
         quote_from={
@@ -456,3 +460,46 @@ def test_try_links_answer_on_the_main_page(documents):
     assert "nhân sự GameCo, Studio" in pages[1]
     assert "nhân sự Tập đoàn, Nhân sự Tập đoàn" in pages[5]
     assert pages[1] != pages[5]
+
+
+def test_flagged_conflict_card_on_the_wrong_topic_data(documents, monkeypatch):
+    """Row 19 on the page: the model cites both Điều 1 and flags them; the rules show the conflict card."""
+    docs = with_edit(documents, {"document": "LEAVE-PAYCO-v1", "set": {"topic": "nghi_phep_nam"}})
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    reply = reply_citing(
+        *ids,
+        quote_from={cid: chunk_text(docs, cid) for cid in ids},
+        claim_from={cid: "MODEL TEXT MUST NOT APPEAR" for cid in ids},
+        disagreement=ids,
+    )
+    client, _ = _client(docs, reply=reply, monkeypatch=monkeypatch)
+    # Without the flag the edited data gives the answer card; the flag alone makes it a conflict.
+    unflagged, _ = _client(docs, reply=reply_citing(*ids, quote_from={cid: chunk_text(docs, cid) for cid in ids}), monkeypatch=monkeypatch)
+    assert _card_text(_ask(unflagged, "ha", "2026-10-07", LEAVE_QUESTION)[1]).startswith("Trả lời")
+    response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
+    assert response.status_code == 200
+    card = _card_text(page)
+    assert card.startswith("Mâu thuẫn Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.")
+    assert "Có 2 quy định cùng áp dụng cho bạn" in card
+    assert "12 ngày" in card and "13 ngày" in card
+    assert card.endswith("Vui lòng hỏi HR PayCo.")
+    assert "MODEL TEXT MUST NOT APPEAR" not in page
+    assert "model_flagged" not in page
+
+
+def test_hidden_conflict_partner_is_refused_without_a_trace(documents, monkeypatch):
+    """P8 on the page: LEAVE-PAYCO-v1 readable only by hr_payco; Hà is refused and told nothing about it."""
+    docs = [replace(d, access="roles:hr_payco") if d.id == "LEAVE-PAYCO-v1" else d for d in documents]
+    quote = chunk_text(docs, "LEAVE-GROUP-v1#1")
+    reply = reply_citing("LEAVE-GROUP-v1#1", quote_from={"LEAVE-GROUP-v1#1": quote})
+    client, _ = _client(docs, reply=reply, monkeypatch=monkeypatch)
+    response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
+    assert response.status_code == 200
+    card = _card_text(page)
+    assert card.startswith("Từ chối")
+    assert "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn." in card
+    for secret in ("LEAVE-PAYCO-v1", "Quy chế nghỉ phép PayCo", "13 ngày", "12 ngày", "hidden_conflict", "Mâu thuẫn"):
+        assert secret not in page
+    not_found, _ = _client(docs, reply=no_points(), monkeypatch=monkeypatch)
+    _, other = _ask(not_found, "ha", "2026-10-07", LEAVE_QUESTION)
+    assert _card_text(other) == card

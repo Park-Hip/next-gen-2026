@@ -119,7 +119,7 @@ flowchart TD
 - The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
 - The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
-- Conflicts come only from declared metadata, so a content conflict that the owner side missed gives an answer card (section 12.1).
+- Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a pair with a document the asker may not read gives the refusal card (ADR 0015); a content conflict the model does not notice still gives an answer card (section 12.1).
 - The cited clause opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 
@@ -391,8 +391,9 @@ Changed: the prompt adds these rules.
 4. Do not return no points only because clauses disagree.
 5. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
 6. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
+7. When two clauses from different documents give different answers, list the ids of those two chunks in `disagreement` (ADR 0014); both must also be cited by a point.
 
-The prompt never says which documents form a conflict pair: the rules decide the card, so the model gains nothing from knowing.
+The prompt never says which documents form a conflict pair: the rules decide the card, and the flag is only an input that step 7 checks.
 
 ### 6.4 The checks and the card
 
@@ -401,7 +402,7 @@ The rules pick the card from the citations, never from the model's words, in thi
 | Card | When | Shows |
 |---|---|---|
 | Refusal | The output is malformed, has no points, has a point with no citation, cites a chunk that was not retrieved, or quotes text that is not in a chunk it cites, after Unicode and whitespace folding | Fixed text that sends the employee to HR; "not allowed" and "not found" read the same (E4) |
-| Conflict | A cited document is in a conflict pair | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's sentences |
+| Conflict | A cited document is in a conflict pair, or the model's `disagreement` names two chunks that pass step 7's checks (ADR 0014) | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's sentences |
 | Answer | Otherwise | Changed: for each point, the model's sentence on top and the verified quote under it in quotation marks; then the document, the "Điều", the effective date and the HR contact (E7; SD14, decided by Hiep on 20/10/2026) |
 
 Every card starts with who the asker is asking as.
@@ -615,7 +616,7 @@ The failures that look like right answers matter most, because the employee cann
 |---|---|---|---|
 | The model quotes a real clause in scope that does not answer the question | A right answer | Hiep's reading in the evaluation; the employee reads the quote and its source | Unchanged |
 | The sentence changes a number, drops a condition of its quote, adds a fact, or applies the clause to the wrong people | A right answer | The quote under the sentence; Hiep's Faithfulness reading (section 14) | New with the sentence; a check on the sentence stays possible (section 16) |
-| Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides, never a conflict card | The evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | New limitation; the publish-time scan is SD15 |
+| Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides | The model's flag, when it notices both sides (ADR 0014); the evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | Mitigated at question time; a miss stays a limitation; the publish-time scan is SD15 |
 | An owner sets wrong metadata, such as a wrong topic or a wrong relation ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) | A right answer | Nothing in v1 | Partly mitigated by the relation list and the impact preview (sections 7.2, 7.3) |
 | A question about another period gets the rule in force on the date asked ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | A right answer | The evaluation | Unchanged; see section 16 |
 | A company replaces only one clause of a Group policy, and the whole Group policy drops out ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | A refusal | The evaluation | A warning in the impact preview (section 4.3); clause-level relations stay deferred |
@@ -719,7 +720,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |
-| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | ADR 0011 | 6.3, 6.4 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time, **changed by ADR 0014**: the model may flag a disagreement, step 7 checks it | ADR 0011, ADR 0014 | 6.3, 6.4 |
 | SD15 | Whether a content conflict scan runs when an owner publishes | To discuss with the owner workflow | Yes | 12 |
 | SD16 | Whether owners get a list of answers that cite documents with no declared relation between them | To discuss with the owner workflow | No | 12 |
 | SD17 | The criterion for Readability (spec section 6.2) | - | No | 14 |

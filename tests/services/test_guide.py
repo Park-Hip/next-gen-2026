@@ -171,5 +171,6 @@ def test_data_edit_note_describes_set_fields(cases, personas, documents):
     views = {c.id: c for c in rest}
     assert 'đổi chủ đề thành "nghi_phep_nam"' in views[19].data_edit_note
     assert "bỏ khai báo bổ sung" in views[20].data_edit_note
-    assert views[19].limitation_issue == "#74"
+    assert views[19].limitation_issue is None
+    assert views[19].kind_label == "Khó"
     assert views[20].limitation_issue is None

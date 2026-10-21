@@ -1,7 +1,7 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
-# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-19 are failures
-# kept as limitation rows: rows 16-18 found by probing v1 on 14/10/2026 (issues #51, #52, #53), row 19 is #74;
-# row 20 is the hard case added with #75.
+# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
+# kept as limitation rows, found by probing v1 on 14/10/2026 (issues #51, #52, #53); row 19 was the limitation #74 and became
+# a hard case with #87 (ADR 0014); row 20 is the hard case added with #75.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
 # purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
@@ -16,6 +16,8 @@
 #   whitespace folding and casefolding (ADR 0006, decision 3 of the #14 plan); reviewed by Hiep.
 # must_show (answer and conflict rows): strings the card must show, so both sides of a conflict are visible.
 # rules_card (limitation rows, only when the ideal card differs): the card the deterministic rules currently pick.
+# conflict_from (conflict rows): "model" when the rules alone must not form the pair and the model's flag adds it
+#   (ADR 0014); the card must still show the pair.
 # Refusal rows cite nothing: any citation is a failure.
 # forbidden_by_rules: outside the asker's scope, so rules guarantee they are never retrieved or cited.
 # forbidden_for_llm: inside the scope, so they can be retrieved and only the LLM can avoid citing them.
@@ -331,13 +333,14 @@
   forbidden_by_rules: [LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2]
 - id: 19
-  kind: limitation
+  kind: hard
   purpose: >-
-    Hạn chế đã biết của v1, ghi ở issue #74; tình huống này được chờ là chưa đạt. Hà hỏi số ngày phép năm,
-    nhưng dữ liệu đã sửa đặt chủ đề của quy chế PayCo thành nghi_phep_nam, nên quy tắc không còn thấy hai quy
-    chế cùng chủ đề và không tạo cặp mâu thuẫn. Đúng ra Hà phải nhận thẻ mâu thuẫn như hàng 7, trích cả 12 ngày
-    của Tập đoàn và 13 ngày của PayCo. Hàng này kiểm tra yêu cầu tối thiểu của #75: dù thẻ là thẻ trả lời, cả hai
-    con số phải cùng hiện, không được chỉ hiện một bên.
+    Hà hỏi số ngày phép năm, nhưng dữ liệu đã sửa đặt chủ đề của quy chế PayCo thành nghi_phep_nam, nên quy tắc
+    không còn thấy hai quy chế cùng chủ đề và không tạo cặp mâu thuẫn; riêng quy tắc sẽ chỉ cho ra thẻ trả lời.
+    Hệ thống phải cho thẻ mâu thuẫn như hàng 7: mô hình trích cả Điều 1 của Tập đoàn (12 ngày) và của PayCo (13
+    ngày) rồi báo hai điều khoản này cho kết quả khác nhau, quy tắc kiểm tra lời báo (cả hai đoạn đã được tìm thấy
+    và được trích, câu trích đúng nguyên văn, hai văn bản khác nhau) rồi mới thêm cặp. Chỉ hiện một trong hai con
+    số, hoặc thẻ mâu thuẫn thiếu một bên, là sai.
   persona: ha
   as_of: 2026-10-07
   data_edit:
@@ -347,8 +350,8 @@
   questions:
     - Phép năm của tôi là bao nhiêu ngày?
   card: conflict
-  rules_card: answer
-  expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 1 (12 ngày) và PayCo Điều 1 (13 ngày), không tự chọn, mời hỏi HR PayCo; v1 chưa phát hiện được vì metadata bị sửa.
+  conflict_from: model
+  expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 1 (12 ngày) và PayCo Điều 1 (13 ngày), không tự chọn, mời hỏi HR PayCo; quy tắc không tạo cặp vì metadata bị sửa, cặp đến từ lời báo của mô hình đã được quy tắc kiểm tra.
   conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   must_cite: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   must_show: [12 ngày, 13 ngày]

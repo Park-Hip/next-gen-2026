@@ -1,4 +1,4 @@
-"""Ask one question through steps 5-7 and print the retrieved ids, the raw reply, the points and the card.
+"""Ask one question through steps 5-7 and print the retrieved ids, the raw reply, the points, the disagreement flag and the card.
 
 Run by hand: `uv run python scripts/answer.py <persona> <as_of> <question>` (needs GEMINI_API_KEY).
 """
@@ -47,5 +47,6 @@ if __name__ == "__main__":
         for point in reply.points:
             print(f"  claim={point.claim!r}")
             print(f"  chunks={list(point.chunks)} quote={point.quote!r}")
-    card = card_for_answer(scoped, reply.retrieved, reply.points)
+    print(f"disagreement: {list(reply.disagreement)}")
+    card = card_for_answer(scoped, reply.retrieved, reply.points, reply.disagreement)
     print(f"card: {card.kind} reason={card.reason!r}")

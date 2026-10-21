@@ -1,8 +1,9 @@
 """Same results as adopted_rules.py for the 10 Mission 1 documents and their traps.
 
-One deliberate departure, ADR 0010: adopted_rules.py filters access before `overrides`, the port does it
-after. No document here that declares `overrides` is restricted, so the results agree; the departure is
-tested in tests/services/test_scope.py.
+Two deliberate departures: adopted_rules.py filters access before `overrides` and before the conflict
+pairs, the port does both after (ADR 0010, ADR 0015). No document here that declares `overrides` or forms a
+pair is restricted, so the results agree; the departures are tested in tests/services/test_scope.py and
+tests/services/test_citations.py.
 """
 import importlib.util
 from pathlib import Path

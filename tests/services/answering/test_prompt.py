@@ -60,4 +60,14 @@ def test_prompt_refuses_a_personal_value_no_clause_states():
 def test_prompt_keeps_the_output_contract():
     text = SYSTEM_INSTRUCTION
     assert '"claim"' in text and '"quote"' in text and '"chunks"' in text
-    assert 'return {"points": []}' in text
+    assert 'return {"points": [], "disagreement": []}' in text
+    assert '"disagreement"' in text
+
+
+def test_prompt_asks_for_the_disagreement_flag():
+    # Issue #87, ADR 0014: one point per disagreeing clause, and the two ids in the flag.
+    text = SYSTEM_INSTRUCTION
+    assert 'put the ids of those two chunks in "disagreement"' in text
+    assert 'must also be cited by one of your points' in text
+    assert 'Otherwise "disagreement" is an empty list.' in text
+    assert "The system, not you, decides" in text

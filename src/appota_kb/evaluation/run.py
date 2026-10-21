@@ -91,6 +91,7 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
         "retrieved_text": None,
         "raw": None,
         "points": None,
+        "disagreement": None,
         "card": None,
         "latency_ms": None,
     }
@@ -125,6 +126,7 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
     record["points"] = None if reply.points is None else [
         {"claim": p.claim, "quote": p.quote, "chunks": list(p.chunks)} for p in reply.points
     ]
+    record["disagreement"] = list(reply.disagreement)
     claims = " ".join(p.claim for p in reply.points or ())
     record["card"] = {
         "kind": card.kind,

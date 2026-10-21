@@ -46,7 +46,6 @@ New out-of-scope product ideas are added here.
 | Legal rules and legal minimums (Bộ luật Lao động) | Adds a relation type and facts that must be verified, without a new kind of trap | The assistant must check a policy against the law |
 | A person in two units (kiêm nhiệm) | Not in the brief; needs a rule for choosing between companies | Real staff hold two positions |
 | Documents with more than one topic, such as a workplace rulebook covering leave and overtime | Each simulated document has one topic, used only to find conflict pairs | Real documents cover several topics |
-| An AI check that may add, never remove, a conflict warning when topics look mis-tagged | Only needed if owners often mis-tag topics | Owners mis-tag topics in practice |
 | A run-time check on the model's answer sentence, by rules or a second model call | The issue decides against it: a rule catches a number but not a dropped condition, and a second model adds another thing to trust; Hiep reads every sentence instead (ADR 0011) | The Faithfulness reading shows sentences that mislead often enough to need a check |
 
 ### Owners and workflow
@@ -87,7 +86,7 @@ New out-of-scope product ideas are added here.
 
 ## Known limitations
 
-Failures actually observed in v1, each with an open issue labelled `limitation`.
+Failures actually observed in v1, each with an open issue labelled `limitation`, except the two rows that cite an ADR: they are decisions with their cost, not open defects.
 This section lists only what the 21/10/2026 run, the tests or the demo showed.
 
 | Limitation | Seen in | Issue |
@@ -96,7 +95,8 @@ This section lists only what the 21/10/2026 run, the tests or the demo showed.
 | A question that needs a clause applied to a case ("nghỉ thứ Hai 19/10 thì hạn chót nộp đơn là ngày nào?") can be refused, although the clause that answers it was retrieved first; the strict-grounding instruction of ADR 0003 can make the model return no points | Refused in a probe on 14/10/2026; answered correctly as test row 16 in the 21/10/2026 run, so the behaviour varies between runs and its rate is not measured | [#51](https://github.com/Park-Hip/next-gen-2026/issues/51) |
 | Conflicts are per document, not per question: when both policies of a conflict pair say the same thing on the point asked, the asker still gets the conflict card instead of the answer | A probe on 14/10/2026, and test row 17 in the 21/10/2026 run (expected failure in the test suite) | [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) |
 | A question about another period ("từ năm sau tôi được nghỉ bao nhiêu ngày?") gets an answer card with the version in force on the as-of date, because the rules never read the question and the model is not given dates | A probe on 14/10/2026, and test row 18 in the 21/10/2026 run: an answer card "14 ngày" | [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) |
-| A mistake in an owner's metadata, such as a wrong topic or a separate amendment declared "bổ sung", gives a normal answer card, and nothing in v1 detects it: the rules are only as right as the metadata | Rules run on edited copies of the simulated data; no test row | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) |
-| Two documents can give different values while their metadata declares no relation; on an answer card both values can appear, and naming the document in each sentence is the only aid | Test row 19 in the 21/10/2026 run showed both 12 and 13 days on one answer card; the row stays an expected failure | [#74](https://github.com/Park-Hip/next-gen-2026/issues/74) |
+| A mistake in an owner's metadata gives a normal answer card unless the model's flag catches it (ADR 0014): a wrong topic or a wrong "bổ sung" is caught only when the two clauses disagree and the model notices; a wrong "dùng thay" or "access" is never caught, and the rules are only as right as the metadata | Rules run on edited copies of the simulated data; test row 19 for a wrong topic, no row for the rest | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) |
+| The model's flag only adds a conflict (ADR 0014): when two documents give different values and their metadata declares no relation, but the model does not notice, or the clause of one side is not retrieved, the asker gets an answer card citing one side | Test row 19 in the 21/10/2026 run showed 12 and 13 days on one answer card; since #87 the row expects the conflict card, and no run has shown a miss yet | ADR 0014 (limitation #74 closed by #87 once row 19 passes in the shared run) |
+| A document paired with a document the asker may not read refuses every question that cites the readable side, even one the hidden document does not touch (ADR 0015): the pair is per document, not per question | Probe P8 and `test_p8_hidden_partner_refuses_ha` in `tests/services/test_citations.py`; no document in the data is both restricted and in a pair | ADR 0015 |
 
 The results of every test row are in the [test report](mission2/test_report.md).

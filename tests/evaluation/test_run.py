@@ -44,6 +44,35 @@ def test_ask_row_1_ok(personas, documents, cases):
     assert record["scope_documents"]
 
 
+def test_ask_row_19_records_the_flag_and_the_model_flagged_card(personas, documents, cases):
+    # ADR 0014: the rules form no pair on the edited data; the pair on the card comes from the flag.
+    row = next(c for c in cases if c["id"] == 19)
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    replies = {
+        row["questions"][0]: reply_citing(
+            *ids, quote_from={cid: chunk_text(documents, cid) for cid in ids}, disagreement=ids,
+        )
+    }
+    record = ask_row(scripted_answerer(documents, replies), row, documents, personas, fake_meta())
+    assert record["status"] == "ok"
+    assert record["scope_conflicts"] == []
+    assert record["disagreement"] == list(ids)
+    card = record["card"]
+    assert card["kind"] == "conflict" and card["reason"] == "model_flagged"
+    assert card["conflicts"] == [["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]]
+    shown = " ".join(line["text"] for line in card["lines"])
+    assert "12 ngày" in shown and "13 ngày" in shown
+
+
+def test_ask_row_without_a_flag_records_an_empty_one(personas, documents, cases):
+    row = next(c for c in cases if c["id"] == 19)
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    replies = {row["questions"][0]: reply_citing(*ids, quote_from={cid: chunk_text(documents, cid) for cid in ids})}
+    record = ask_row(scripted_answerer(documents, replies), row, documents, personas, fake_meta())
+    assert record["disagreement"] == []
+    assert record["card"]["kind"] == "answer" and record["card"]["reason"] is None
+
+
 def test_ask_row_15_edited_scope(personas, documents, cases):
     row = next(c for c in cases if c["id"] == 15)
     record = ask_row(

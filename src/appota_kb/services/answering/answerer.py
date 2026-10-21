@@ -1,9 +1,9 @@
 """Step 6: one grounded Gemini call that returns points with citations, or nothing.
 
 The chat model sees only the retrieved chunks and the asker's unit, which the rules
-decided. Its output is one JSON object {points: [{claim, quote, chunks}]}; the card kind
-and the sources come from step 7 (services/citations.py), never from this text.
-The claim is shown above the verified quote (ADR 0011).
+decided. Its output is one JSON object {points: [{claim, quote, chunks}], disagreement: [id, id]};
+the card kind and the sources come from step 7 (services/citations.py), never from this text.
+The claim is shown above the verified quote (ADR 0011); the disagreement is a flag step 7 checks (ADR 0014).
 """
 import json
 import logging
@@ -14,7 +14,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from appota_kb.core.config import Retrieval
 from appota_kb.models.answer import Reply
 from appota_kb.models.scope import Scope
-from appota_kb.services.answering.output import answer_schema, parse_points, raw_text
+from appota_kb.services.answering.output import answer_schema, parse_disagreement, parse_points, raw_text
 from appota_kb.services.answering.prompt import build_messages
 from appota_kb.services.retrieval.index import Index
 from appota_kb.services.retrieval.search import ScopeLeakError, retrieve
@@ -44,7 +44,7 @@ class Answerer:
             raise AnswerUnavailable(f"retrieval failed: {exc}") from exc
 
         if not hits:
-            self._log(scope, question, (), (), "", started)
+            self._log(scope, question, (), (), (), "", started)
             return Reply(retrieved=(), points=(), raw="")
 
         ids = tuple(hit.chunk.id for hit in hits)
@@ -61,12 +61,14 @@ class Answerer:
         raw = raw_text(result.get("raw"))
         if result.get("parsing_error") is not None:
             points = None
+            disagreement = ()
         else:
             points = parse_points(result.get("parsed"))
-        self._log(scope, question, ids, points, raw, started)
-        return Reply(retrieved=ids, points=points, raw=raw)
+            disagreement = parse_disagreement(result.get("parsed"))
+        self._log(scope, question, ids, points, disagreement, raw, started)
+        return Reply(retrieved=ids, points=points, raw=raw, disagreement=disagreement)
 
-    def _log(self, scope: Scope, question: str, retrieved, points, raw: str, started) -> None:
+    def _log(self, scope: Scope, question: str, retrieved, points, disagreement, raw: str, started) -> None:
         latency_ms = round((time.perf_counter() - started) * 1000)
         logger.info(
             json.dumps(
@@ -80,6 +82,7 @@ class Answerer:
                         {"claim": p.claim, "quote": p.quote, "chunks": list(p.chunks)}
                         for p in points
                     ],
+                    "disagreement": list(disagreement),
                     "raw": raw,
                     "latency_ms": latency_ms,
                 },

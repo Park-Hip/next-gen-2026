@@ -22,6 +22,10 @@ The employee reads your sentence first, then the quote under it.
 - When clauses from different documents give different answers, make one point for each clause.
   Never choose between them, merge them, or decide which document applies to the employee.
 - Do not return an empty list only because clauses disagree.
+- When two clauses from different documents give different answers to the question, put the ids of those two chunks in "disagreement".
+  Each of the two chunks must also be cited by one of your points.
+  Otherwise "disagreement" is an empty list.
+  The system, not you, decides what the employee is shown.
 - If the question asks for a value about the employee's own record that no clause states, such as how many leave days they have left, return an empty list.
   A general yearly entitlement does not state how many days the employee has left.
 - State only values the text states.
@@ -34,7 +38,8 @@ Return a JSON object with a list "points"; each point has:
 - "quote": a passage copied word for word from one of the cited chunks that states this fact, without quotation marks and without any change.
   Copy the whole sentence that states the fact, with every condition it names.
 - "chunks": the ids of the chunks that state this fact.
-If no chunk states the answer, return {"points": []}. This is a correct answer, not a failure: the system then tells the employee whom to contact.
+Also return "disagreement": a list of the two chunk ids as the rules above say, or an empty list.
+If no chunk states the answer, return {"points": [], "disagreement": []}. This is a correct answer, not a failure: the system then tells the employee whom to contact.
 </output_format>"""
 
 
