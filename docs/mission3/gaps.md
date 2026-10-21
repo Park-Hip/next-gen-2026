@@ -34,7 +34,7 @@ Where a probe needs a model reply, the reply is scripted, so the probe shows wha
 | [2. Kiểm soát quyền truy cập theo bối cảnh người dùng](#2-access-by-the-askers-context) | Rules build the asker's scope from their unit and roles before any search, checking access last; nothing outside the scope reaches search or the model | Rows 5, 6, 10 and 13 pass; 0 leaks in the 14 gated rows and none in the 4 limitation rows; the leak test over every asker, boundary date and test question | G2.1-G2.4 |
 | [3. Xử lý thông tin mâu thuẫn giữa nhiều nguồn/cấp tổ chức](#3-conflicting-sources-and-levels) | Precedence comes only from relations an owner declared; two policies on one topic with no declared relation form a conflict pair, and an answer citing either one gives the conflict card, which quotes both sides and does not choose | Rows 1, 3, 7 and 12 pass | G3.1-G3.7 |
 | [4. Từ chối hoặc thể hiện rõ khi chưa đủ căn cứ](#4-refusing-when-the-basis-is-not-enough) | The model may return nothing; rules refuse the whole answer on any citation or quote they cannot verify, and the refusal card names the asker's HR contact | Rows 6, 8, 9, 10, 11, 13 and 14 refuse; 0 unsafe and 0 over-cautious in the 14 gated rows | G4.1-G4.5 |
-| [5. Cho người dùng kiểm chứng tài liệu được sử dụng](#5-letting-the-user-check-the-documents-used) | The answer card shows the verified quote word for word, and names the document, the Điều and the start date | 7 of 7 answers read by Hiep against their quotes, all faithful | G5.1-G5.3 |
+| [5. Cho người dùng kiểm chứng tài liệu được sử dụng](#5-letting-the-user-check-the-documents-used) | The answer card shows the model's sentence above the verified quote, and names the document, the Điều and the start date | The 9 answer cards of the run name their source; in the Mission 2 run `20261014-2239`, Hiep read all 7 answers against their quotes and marked them faithful | G5.1-G5.4 |
 
 The 6 open limitation issues all appear below: [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) (G3.1), [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) (G1.3, G2.3, G3.3), [#51](https://github.com/Park-Hip/next-gen-2026/issues/51) (G4.2), [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) (G3.2), [#53](https://github.com/Park-Hip/next-gen-2026/issues/53) (G1.1, G4.1) and [#74](https://github.com/Park-Hip/next-gen-2026/issues/74) (G3.3).
 `scope.md` and the README list the first 5; #74 was opened on 20/10/2026, after Mission 2 was submitted.
@@ -148,13 +148,16 @@ In row 12 the model cited only the PayCo clause, and the card still quoted Đi�
 - The conflict card quotes each side, as described in section 3 (ADR 0005).
 - Every card starts with the identity the question was asked under ("Bạn đang hỏi với tư cách: ..."), and the page shows the question and the as-of date above it.
 
-**Evidence that it works:** the 7 answer cards of the run (rows 1-5, 16 and 18) each name their source, and Hiep read all 7 against their quotes and marked them faithful.
+**Evidence that it works:** the 9 answer cards of the run (rows 1-5, 16 and 18-20) each name their source.
+In the Mission 2 run [`20261014-2239`](../../results/20261014-2239.review.yaml), before #75 added the model's sentence, Hiep read all 7 answer cards (rows 1-5, 16 and 18) against their quotes and marked them faithful.
+His reading of the baseline run [`20261021-1032`](../../results/20261021-1032.review.yaml), the first with the sentence, is pending: no row is marked yet.
 
 | ID | Gap | Evidence | Kind |
 |---|---|---|---|
 | G5.1 | The employee cannot open the cited Điều or the document, so they see only the quoted sentences, not the rest of the clause or the lines around it | P3: the source line is plain text, and the card has no link; in row 3 the line the answer left out (G4.5) is in the cited document, but the employee cannot reach it from the card; proposal [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) | Probe; passed row |
 | G5.2 | For a document without "Điều" numbering, the source line names no part of it | Row 3: "Nguồn: Hướng dẫn đăng ký nghỉ phép trên hệ thống HR GameCo, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo." | Passed row |
 | G5.3 | The conflict card names each side by its unit, not by its document or version | Row 7: "Tập đoàn, Điều 1 (từ 01/01/2024): ..." and "PayCo, Điều 1 (từ 01/01/2025): ..."; row 12 the same with Điều 2; no title such as "Quy chế nghỉ phép PayCo" | Passed row |
+| G5.4 | The model's sentence above each quote is not checked, and the card does not tell the reader which part was checked | [ADR 0011](../decisions/0011-answer-card-shows-the-models-sentence-above-the-verified-quote.md): "Step 7 does not read `claim`", and "A claim can add a fact, drop a condition or flip a meaning; no rule catches that at run time"; the sentence is shown in bold, above the quote, with no label; in the run, all 10 sentences closely restate their quotes, so no failure has been seen | On purpose |
 
 ## Changes already proposed
 
@@ -163,12 +166,12 @@ Three open proposals already touch these requirements; this page does not decide
 | Proposal | Serves | Gaps it targets | State on 21/10/2026 |
 |---|---|---|---|
 | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Implemented in #75; run `20261021-1032` passes the gates, Hiep's review pending |
-| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan decided by Hiep on 21/10/2026; not started |
-| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1 | No plan yet |
+| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Merged in PR #94 on 21/10/2026; the evaluation row for the HR GameCo account (decision 11) waits for the next full run; ADR 0016, reasons awaited from Hiep |
+| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1; with Hiep's decisions of 21/10/2026, also G5.2-G5.4 | Decided by Hiep on 21/10/2026; not started |
 
 ## How Mission 3 fixes the gaps
 
-Hiep's decisions so far; sections 1, 2 and 3 are decided, and sections 4 and 5 are still open (step 2 of the checklist).
+Hiep's decisions so far; sections 1, 2, 3 and 5 are decided, and section 4 is still open (step 2 of the checklist).
 The fixes below are planned, not built: none of them has passed a run yet.
 
 ### 1. Versions and effective dates
@@ -197,7 +200,7 @@ The rules that build the asker's scope do not change; what changes is who decide
 
 | Gap | Decision | How | Where | How it is checked |
 |---|---|---|---|---|
-| G2.1 | Fix it: the server decides who is asking | The visitor signs in by picking a simulated account and typing a shared demo password, read from the environment and never written in the repository; the session keeps only the account id, and the unit and roles are read again from `data/personas.yaml` on every request; for an employee, a `persona` in the URL or the question changes nothing; the judge account may ask as any employee account it chooses, a choice the server honours only for the `evaluator` role | #76; ADR 0016, reasons awaited from Hiep | P1 becomes a pytest: signed in as Minh, `?persona=lan` still answers as Minh; a tampered cookie and a wrong password give no session; rows 5, 6, 10 and 13 as regression |
+| G2.1 | Fix it: the server decides who is asking | The visitor signs in by picking a simulated account and typing a shared demo password, read from the environment and published in the README, since the accounts and data are simulated; the session keeps only the account id, and the unit and roles are read again from `data/personas.yaml` on every request; for an employee, a `persona` in the URL or the question changes nothing; the judge account may ask as any employee account it chooses, a choice the server honours only for the `evaluator` role | #76; ADR 0016, reasons awaited from Hiep | P1 becomes a pytest: signed in as Minh, `?persona=lan` still answers as Minh; a tampered cookie and a wrong password give no session; rows 5, 6, 10 and 13 as regression |
 | G2.2 | Fix it: only the judge account sees `/data` and `/cases` | Every other account gets a 404, so no restricted title reaches a page an employee can open | #76 decision 3 | P2 becomes a pytest |
 | G2.3 | Keep as a limitation, on purpose | Access values are the owner's responsibility; a misspelt role or unit already hides the document from everyone, and only a valid but too wide value leaks; the future fix is a check when an owner publishes, which warns when a version is wider than the one before it or when its text looks restricted but is open to all staff, and needs the owners' page (ADR 0004); a model judging at question time whether a chunk looks confidential was rejected, because access would then depend on the model | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) | A pytest that `roles:hr_gamco` and `unit:Studoi` hide the document from every account |
 | G2.4 | Add the evidence | A simulated HR GameCo account with the `hr_gameco` role, in a new unit "Nhân sự GameCo" under GameCo; row 21 asks row 10's question as this account and expects the answer card citing `SAL-BAND-GAMECO`, while Minh is still refused | #76 decision 11 | Row 21 in the full evaluation run shared with #75, #83 and #87 |
@@ -234,6 +237,24 @@ What stays a limitation after these changes:
 - Two sides of a pair that agree on the point asked still give the conflict card (G3.2).
 - With G3.6, every question that cites the readable side of a pair with a hidden document is refused, even one the hidden document does not touch.
 - Owners are not told of conflicts (G3.5).
+
+### 5. Letting the user check the documents used
+
+Decided by Hiep on 21/10/2026; all of it is built in [#77](https://github.com/Park-Hip/next-gen-2026/issues/77), after #76 (merged), #83 and #87, since #83 and #87 also change the cards.
+The rules that build the scope and check the quotes do not change; what changes is what the reader can open and what the card tells them.
+
+| Gap | Decision | How | Where | How it is checked |
+|---|---|---|---|---|
+| G5.1 | Fix it: each source opens the cited version | Each source line of the answer card and each quote of the conflict card links to a page for the version that was cited: its title, validity window, who it applies to and HR contact, then its whole text with the cited Điều or line highlighted; the link carries only the chunk id and the as-of date, plus the chosen account for the judge; the server rebuilds the scope of the signed-in account on that date and shows the page only if the document is in it, otherwise the same 404 as for an id that does not exist; the page calls no model | #77 decisions 1b, 2a and 3 | P3 becomes a pytest; the same 404 for a restricted, replaced, future, draft and unknown chunk; a sweep over every account, boundary date and chunk, mirroring the scope tests; the page calls neither the model nor the embedder |
+| G5.2 | Fix it through G5.1, with no new label | The opened page highlights the cited line, so the source line still names no part of a document without "Điều"; a made-up label such as "đoạn 2" would not be found in the document | #77 | Row 3's source opens the procedure with its two cited lines highlighted |
+| G5.3 | Fix the card text | Each quote of the conflict card names its document's title, then the Điều, the date and the unit, and links like the answer card | #77 | Row 7's card names "Quy chế nghỉ phép Tập đoàn" and "Quy chế nghỉ phép PayCo" |
+| G5.4 | Tell the reader; the sentence stays unchecked | One fixed line on every answer card, under the asker line: "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."; a rule that every number of the sentence must be in its quote was rejected: it would refuse correct sentences that give the dates #83 adds, and it would not catch a dropped condition; a run-time check of the sentence stays under Deferred in [`scope.md`](../scope.md) | #77 | The line is on every answer card and on no conflict or refusal card; Hiep reads every sentence of the next full run |
+
+What stays a limitation after these changes:
+
+- The model's sentence is still not checked at run time; a misleading sentence is caught only by a reader who compares it with the quote under it, or by Hiep's reading of a run.
+- The refusal card offers nothing to check, on purpose: it names no document (promise R10).
+- The opened page shows the simulated document as the knowledge base holds it, not an original in an HR system.
 
 ## Appendix: the probes
 

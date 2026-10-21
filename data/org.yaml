@@ -10,6 +10,8 @@
   hr: HR GameCo
 - name: Studio
   parent: GameCo
+- name: Nhân sự GameCo
+  parent: GameCo
 - name: PayCo
   parent: Tập đoàn
   hr: HR PayCo

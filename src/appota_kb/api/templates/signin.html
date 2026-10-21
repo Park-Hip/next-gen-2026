@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<h2 class="page-title">Đăng nhập tài khoản giả lập</h2>
+<p class="lede">Chọn một tài khoản giả lập rồi nhập mật khẩu dùng chung của bản demo.
+Đơn vị và vai trò của người hỏi lấy từ tài khoản, không từ những gì gõ trong câu hỏi hay trên đường dẫn.</p>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form class="panel signin" method="post" action="/signin">
+  <input type="hidden" name="next" value="{{ next }}">
+  <fieldset class="accounts">
+    <legend>Tài khoản giả lập</legend>
+    {% for a in accounts %}
+    <label class="account">
+      <input type="radio" name="account" value="{{ a.id }}"{% if a.id == account_id %} checked{% endif %} required>
+      <span>
+        <span class="account-name">{{ a.name }}</span>
+        <span class="account-meta">{{ a.unit }}{% if a.company not in a.unit %}, {{ a.company }}{% endif %} - vai trò <code>{{ a.roles|join(", ") }}</code></span>
+        {% if "evaluator" in a.roles %}<span class="account-meta">Xem dữ liệu giả lập và tình huống kiểm thử, và hỏi với tư cách mọi tài khoản nhân sự.</span>{% endif %}
+      </span>
+    </label>
+    {% endfor %}
+  </fieldset>
+  <div class="field">
+    <label for="password">Mật khẩu</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+  </div>
+  <button type="submit">Đăng nhập</button>
+  <p class="hint">Mọi tài khoản, đơn vị, văn bản và con số đều là giả lập.
+  Mật khẩu dùng chung được ghi trong README của dự án, vì đây là bản demo trên dữ liệu giả lập.</p>
+</form>
+{% endblock %}

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#051525">
+{% from "_macros.html" import persona_label %}
 <title>{% block title %}Hỏi{% endblock %} - Tri thức nội bộ Appota (giả lập)</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23008ee4'/%3E%3Cpath d='M16 7l8 18h-4.2l-1.6-3.8h-4.4L12.2 25H8z' fill='%23fff'/%3E%3C/svg%3E">
 <style>
@@ -49,6 +50,17 @@
   }
   .topbar h1 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; }
   .topbar p { margin: 2px 0 0; font-size: 13px; color: #b7c3d0; }
+  .session { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; padding-top: 0; padding-bottom: 12px; font-size: 14px; color: #b7c3d0; }
+  .session p { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  .session strong { color: #fff; }
+  .session-actions { display: flex; align-items: center; gap: 16px; }
+  .session-actions form { margin: 0; }
+  .session-actions a, .session-actions button {
+    height: auto; padding: 0; border-radius: 3px; background: none;
+    color: #fff; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px;
+  }
+  .session-actions a:hover, .session-actions button:hover { background: none; color: #b7e0fa; }
+  .session-actions a:focus-visible, .session-actions button:focus-visible { outline: 3px solid rgba(255, 255, 255, .6); outline-offset: 2px; box-shadow: none; }
   .tabs { display: flex; gap: 4px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
   .tabs a {
     flex: none; display: flex; align-items: center; min-height: 40px; padding: 0 14px;
@@ -100,6 +112,21 @@
   }
   button:hover { background: var(--brand-ink-hover); }
   .hint { margin: 0; font-size: 13px; color: var(--muted); }
+  @media (min-width: 520px) { .row-single { grid-template-columns: minmax(0, 240px); } }
+
+  fieldset.accounts { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 10px; }
+  fieldset.accounts legend { padding: 0; margin-bottom: 10px; font-size: 14px; font-weight: 600; color: var(--navy); }
+  .account {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; cursor: pointer;
+    background: var(--surface); border: 1px solid #c7d0da; border-radius: 8px; font-weight: 400;
+  }
+  .account:hover { border-color: var(--brand); }
+  .account:has(input:checked) { border-color: var(--brand); background: var(--brand-tint); }
+  .account:has(input:focus-visible) { box-shadow: 0 0 0 3px rgba(0, 142, 228, .25); }
+  .account input[type="radio"] { flex: none; width: 18px; height: 18px; margin: 3px 0 0; padding: 0; accent-color: var(--brand-ink); box-shadow: none; }
+  .account-name { display: block; font-weight: 700; color: var(--navy); }
+  .account-meta { display: block; font-size: 14px; color: var(--muted); }
+  form.signin button { justify-self: start; }
 
   .error {
     margin: 0 0 16px; padding: 12px 16px; border-radius: var(--radius);
@@ -213,6 +240,16 @@
       <p>Đúng quy định cho đúng người, đúng phiên bản đang hiệu lực</p>
     </div>
   </div>
+  {% if account %}
+  <div class="wrap session">
+    <p>{% if is_judge %}<strong>Giám khảo</strong>{% if asked_as %} - đang hỏi với tư cách <strong>{{ asked_as.name }}</strong>{% endif %}{% else %}Đang đăng nhập: <strong>{{ persona_label(account) }}</strong>{% endif %}</p>
+    <div class="session-actions">
+      <a href="/signin">Đổi tài khoản</a>
+      <form method="post" action="/signout"><button type="submit">Đăng xuất</button></form>
+    </div>
+  </div>
+  {% endif %}
+  {% if is_judge %}
   <div class="wrap">
     <nav class="tabs" aria-label="Các trang">
       <a href="/"{% if active == "ask" %} aria-current="page"{% endif %}>Hỏi</a>
@@ -220,6 +257,7 @@
       <a href="/cases"{% if active == "cases" %} aria-current="page"{% endif %}>Tình huống kiểm thử</a>
     </nav>
   </div>
+  {% endif %}
 </header>
 <div class="notice" role="note">
   <div class="wrap">

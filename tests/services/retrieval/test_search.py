@@ -117,13 +117,13 @@ def test_retrieve_changed_text_raises(personas, documents):
         retrieve(index, scoped, "Phép năm của tôi là bao nhiêu ngày?", make_settings())
 
 
-def test_no_chunk_outside_scope_ever_returned(personas, dates, documents, cases, mutations):
+def test_no_chunk_outside_scope_ever_returned(personas, employees, dates, documents, cases, mutations):
     settings = make_settings()
 
     # Every persona on every boundary date, against every question: nothing outside the
     # scope built by the rules is ever returned, and nothing outside allowed+applies.
     index = build_index(documents, SyllableEmbeddings())
-    for persona in personas.values():
+    for persona in employees.values():
         for as_of in dates:
             scoped = build_scope(persona, as_of, documents)
             for _, question in _questions(cases):
@@ -146,7 +146,7 @@ def test_no_chunk_outside_scope_ever_returned(personas, dates, documents, cases,
     # (forbidden_by_rules is an expectation of the unmutated rules).
     for _, mutated in mutations:
         index = build_index(mutated, SyllableEmbeddings())
-        for persona in personas.values():
+        for persona in employees.values():
             scoped = build_scope(persona, date(2026, 10, 7), mutated)
             for _, question in _questions(cases):
                 hits = retrieve(index, scoped, question, settings)

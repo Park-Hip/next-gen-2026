@@ -107,7 +107,7 @@ Each is an open issue labelled `limitation`; [`scope.md`](scope.md#known-limitat
 | The brief asks | How v1 does it | Test rows |
 |---|---|---|
 | Có dữ liệu giả lập ở nhiều cấp tổ chức | Group, two member companies and their units (diagram below); policies at Group and company level | 1, 5, 7 |
-| Hiểu được bối cảnh người hỏi | The asker's unit and roles, from a simulated persona picker that stands in for the HR system, and the as-of date | 1, 2, 5, 7 |
+| Hiểu được bối cảnh người hỏi | The asker's unit and roles, from the signed-in simulated account that stands in for the HR system (ADR 0016), and the as-of date | 1, 2, 5, 7 |
 | Không sử dụng/làm lộ thông tin ngoài quyền | Steps 1-4 build the scope before search; the search and the LLM never see anything outside it | 6, 10, 13 |
 | Câu trả lời có nguồn/căn cứ | Every point has a plain sentence, chunk ids and a quote; step 7 checks the citation and the quote; the card names the document, the Điều and the effective date | 1, 3, 4 |
 | Biết từ chối khi thiếu dữ liệu | The LLM may return no points; step 7 then shows the refusal card with the asker's HR contact | 8, 9, 11, 14 |
@@ -237,7 +237,7 @@ The tests use a fake embedder and a fake LLM, so they need no key and no network
 | A new unit or asker | `data/org.yaml`, `data/personas.yaml`; no code |
 | A new test case | `data/test_cases.yaml` |
 | A new kind of access rule | `allowed` in `services/scope.py` and the check in `integrations/data_files.py` |
-| Real identity instead of the persona picker | `load_personas` and the picker in `api/page.py`; the rules need only unit and roles |
+| Real identity instead of the simulated sign-in | `load_personas` and the session lookup in `api/page.py`; the rules need only unit and roles |
 | Another LLM or embedding model | `config.yaml`, with a new ADR, because ADRs 0002 and 0008 fix them |
 | Search tuning | `retrieval` in `config.yaml`, with a new ADR (ADR 0002) |
 | Card wording | `services/card_text.py` |
