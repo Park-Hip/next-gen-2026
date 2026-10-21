@@ -7,6 +7,9 @@
   <p class="lead">{{ line.text }}</p>
   {% elif line.kind == 'quote' %}
   <blockquote>{{ line.text }}</blockquote>
+  {% elif line.kind == 'notice' %}
+  {% set parts = line.text.partition(': ') %}
+  <p class="change-notice"><strong>{{ parts[0] }}:</strong> {{ parts[2] }}</p>
   {% else %}
   <p>{{ line.text }}</p>
   {% endif %}

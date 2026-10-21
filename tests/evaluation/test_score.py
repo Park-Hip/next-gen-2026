@@ -407,7 +407,7 @@ def test_gates_exclude_limitation_row(cases, personas):
     settings = Eval(over_cautious_max_share=0.10, confidence=0.95)
     scores = [_row_score(c, _refusal_record(c["id"])) for c in cases]
     g = gates(scores, {}, settings, personas)
-    assert all(gate.n == 16 for gate in g if gate.unit == "rows")
+    assert all(gate.n == 18 for gate in g if gate.unit == "rows")
 
 
 def test_verdict_answer_card_needs_reading(personas, documents, cases):
@@ -416,7 +416,13 @@ def test_verdict_answer_card_needs_reading(personas, documents, cases):
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     record = _make_record(
         row, scope,
-        card=_make_card("answer", cited=["LEAVE-GAMECO-v2#2"], answer_text="Bạn được nghỉ 14 ngày."),
+        card=_make_card(
+            "answer", cited=["LEAVE-GAMECO-v2#2"], answer_text="Bạn được nghỉ 14 ngày.",
+            lines=[
+                {"kind": "source", "text": "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026."},
+                {"kind": "notice", "text": "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."},
+            ],
+        ),
         retrieved=["LEAVE-GAMECO-v2#2"],
         points=[{"chunks": ["LEAVE-GAMECO-v2#2"], "quote": quote}],
     )

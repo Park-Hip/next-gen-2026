@@ -1,11 +1,12 @@
 """The data_edit of a test case row: a line removed and/or metadata fields set."""
 from dataclasses import replace
+from datetime import date
 
 from appota_kb.models.document import Document
 
 
 def _metadata_changes(doc_id: str, values: dict) -> dict:
-    """The allowed metadata changes: topic (a string) and complements (a list of series ids)."""
+    """The allowed metadata changes: topic (a string), complements (a list of series ids) and effective_to (a date)."""
     changes = {}
     for key, value in values.items():
         if key == "topic":
@@ -16,6 +17,10 @@ def _metadata_changes(doc_id: str, values: dict) -> dict:
             if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
                 raise ValueError(f"{doc_id}: data_edit complements must be a list of strings")
             changes["complements"] = tuple(value)
+        elif key == "effective_to":
+            if not isinstance(value, date):
+                raise ValueError(f"{doc_id}: data_edit effective_to must be a date")
+            changes["effective_to"] = value
         else:
             raise ValueError(f"{doc_id}: data_edit cannot set {key}")
     return changes
@@ -36,6 +41,8 @@ def with_edit(documents: list[Document], edit: dict) -> list[Document]:
             out.append(d)
             continue
         found = True
+        if "effective_to" in changes and (d.effective_from is None or changes["effective_to"] < d.effective_from):
+            raise ValueError(f"{doc_id}: data_edit effective_to is before effective_from")
         body = d.body
         if remove is not None:
             if remove not in body.splitlines():

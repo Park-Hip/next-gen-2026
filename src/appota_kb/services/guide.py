@@ -233,6 +233,8 @@ def _case_view(row: dict, personas: dict[str, Persona], documents: list[Document
                     changes.append("khai báo bổ sung: " + ", ".join(value))
                 else:
                     changes.append("bỏ khai báo bổ sung")
+            elif key == "effective_to":
+                changes.append(f"đặt ngày hết hiệu lực {format_date(value)}")
         note = (
             "Tình huống này chạy trên dữ liệu đã sửa: "
             + " và ".join(changes)

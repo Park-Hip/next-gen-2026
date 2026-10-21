@@ -252,3 +252,83 @@ def test_mutations(personas, documents, mutations):
 
     s = scope(personas["minh"], as_of, by_name["remove_complement_proc"])
     assert [(a.id, b.id) for a, b in s.conflicts] == [("LEAVE-GAMECO-v2", "LEAVE-PROC-GAMECO-v1")]
+
+
+def _changes(s):
+    return {c.document_id: (c.last_day, tuple(d.id for d in c.successors)) for c in s.changes}
+
+
+def test_next_change_of_minh(personas, documents):
+    """ADR 0012: v2 leaves Minh's scope after 31/12/2026 and v3 replaces it; nothing else changes."""
+    for day in (date(2026, 10, 7), date(2026, 12, 15), date(2026, 12, 31)):
+        s = scope(personas["minh"], day, documents)
+        assert _changes(s) == {"LEAVE-GAMECO-v2": (date(2026, 12, 31), ("LEAVE-GAMECO-v3",))}
+    assert scope(personas["minh"], date(2027, 1, 1), documents).changes == ()
+
+
+def test_next_change_of_the_other_askers(personas, documents):
+    assert scope(personas["ha"], date(2026, 10, 7), documents).changes == ()
+    assert scope(personas["lan"], date(2026, 10, 7), documents).changes == ()
+
+
+def test_change_for(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    change = s.change_for("LEAVE-GAMECO-v2")
+    assert change.next_day == date(2027, 1, 1)
+    assert s.change_for("OT-GAMECO-v1") is None
+
+
+def test_an_end_date_without_a_successor(personas, documents):
+    edited = [replace(d, effective_to=date(2026, 12, 31)) if d.id == "OT-GAMECO-v1" else d for d in documents]
+    s = scope(personas["minh"], date(2026, 10, 7), edited)
+    assert _changes(s)["OT-GAMECO-v1"] == (date(2026, 12, 31), ())
+    # The boundary: the last day is still in the scope and carries the change; the next day it is gone.
+    assert "OT-GAMECO-v1" in {d.id for d in scope(personas["minh"], date(2026, 12, 31), edited).documents}
+    assert "OT-GAMECO-v1" not in {d.id for d in scope(personas["minh"], date(2027, 1, 1), edited).documents}
+
+
+def test_a_change_on_the_as_of_date_is_not_a_change(personas, documents):
+    """v3 starts on 01/01/2027: asked that day it is in the scope, so nothing about it is upcoming."""
+    s = scope(personas["minh"], date(2027, 1, 1), documents)
+    assert "LEAVE-GAMECO-v3" in {d.id for d in s.documents}
+    assert s.change_for("LEAVE-GAMECO-v3") is None
+
+
+def test_a_future_dung_thay_by_another_policy():
+    group = make_doc(id="GROUP-v1", series="GROUP")
+    later = make_doc(id="CO-v1", series="CO", applies_to="GameCo", overrides="GROUP",
+                     effective_from=date(2026, 12, 1))
+    s = scope(make_persona(), date(2026, 10, 7), [group, later])
+    assert _changes(s) == {"GROUP-v1": (date(2026, 11, 30), ("CO-v1",))}
+
+
+def test_a_restricted_successor_is_never_named():
+    v2 = make_doc(id="CO-v2", series="CO")
+    v3 = make_doc(id="CO-v3", series="CO", access="roles:hr_gameco", effective_from=date(2027, 1, 1))
+    s = scope(make_persona(), date(2026, 10, 7), [v2, v3])
+    assert _changes(s) == {"CO-v2": (date(2026, 12, 31), ())}
+    hr = scope(make_persona(roles=("employee", "hr_gameco")), date(2026, 10, 7), [v2, v3])
+    assert _changes(hr) == {"CO-v2": (date(2026, 12, 31), ("CO-v3",))}
+
+
+def test_a_draft_is_never_a_successor():
+    v2 = make_doc(id="CO-v2", series="CO")
+    draft = make_doc(id="CO-v3", series="CO", status="draft", effective_from=date(2027, 1, 1))
+    assert scope(make_persona(), date(2026, 10, 7), [v2, draft]).changes == ()
+
+
+def test_the_group_policy_coming_back_is_not_a_successor():
+    group = make_doc(id="GROUP-v1", series="GROUP")
+    co = make_doc(id="CO-v2", series="CO", applies_to="GameCo", overrides="GROUP",
+                  effective_from=date(2026, 6, 1), effective_to=date(2026, 12, 31))
+    s = scope(make_persona(), date(2026, 10, 7), [group, co])
+    assert _changes(s) == {"CO-v2": (date(2026, 12, 31), ())}
+    assert [d.id for d in scope(make_persona(), date(2027, 1, 1), [group, co]).documents] == ["GROUP-v1"]
+
+
+def test_only_the_first_change_of_a_document_counts():
+    v1 = make_doc(id="CO-v1", series="CO")
+    v2 = make_doc(id="CO-v2", series="CO", effective_from=date(2027, 1, 1))
+    v3 = make_doc(id="CO-v3", series="CO", effective_from=date(2028, 1, 1))
+    s = scope(make_persona(), date(2026, 10, 7), [v1, v2, v3])
+    assert _changes(s) == {"CO-v1": (date(2026, 12, 31), ("CO-v2",))}

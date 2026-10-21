@@ -1,7 +1,7 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
 # Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
 # kept as limitation rows, found by probing v1 on 14/10/2026 (issues #51, #52, #53); row 19 was the limitation #74 and became
-# a hard case with #87 (ADR 0014); row 20 is the hard case added with #75.
+# a hard case with #87 (ADR 0014); row 20 is the hard case added with #75; row 18 became a hard case with #83 (ADR 0012), which also added row 21.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
 # purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
@@ -22,7 +22,8 @@
 # forbidden_by_rules: outside the asker's scope, so rules guarantee they are never retrieved or cited.
 # forbidden_for_llm: inside the scope, so they can be retrieved and only the LLM can avoid citing them.
 # must_not_contain: text the reply must never show.
-# data_edit (only when needed): the row runs on the data with one line removed and/or metadata fields set.
+# data_edit (only when needed): the row runs on the data with one line removed and/or metadata fields set
+#   (topic, complements, effective_to).
 - id: 1
   kind: good
   purpose: >-
@@ -31,7 +32,9 @@
     phải trả lời 14 ngày theo bản 2: bản 2 là bản đã ban hành mới nhất đang hiệu lực, áp dụng cho GameCo và mọi đơn
     vị bên dưới nên áp dụng cho Studio, và khai báo "dùng thay" quy chế Tập đoàn nên quy chế Tập đoàn bị loại khỏi
     phạm vi của Minh. Hàng này hỏi bằng ba cách nói khác nhau, kể cả văn nói, và cả ba phải cho cùng kết quả; trả
-    lời 12, 13, 15 hay 16 ngày, hoặc trích quy chế Tập đoàn, là sai.
+    lời 12, 13, 15 hay 16 ngày, hoặc trích quy chế Tập đoàn, là sai. Vì bản 3 đã ban hành và bắt đầu từ 01/01/2027,
+    dòng nguồn phải ghi bản 2 chỉ áp dụng cho Minh đến hết 31/12/2026, và có dòng "Sắp thay đổi" nêu bản 3 áp dụng
+    từ 01/01/2027; thiếu hai dòng này là sai.
   persona: minh
   as_of: 2026-10-07
   questions:
@@ -39,10 +42,11 @@
     - Năm nay tôi được nghỉ mấy ngày?
     - Em được off mấy ngày phép một năm?
   card: answer
-  expected_answer: Phép năm của bạn là 14 ngày mỗi năm, theo Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026.
+  expected_answer: Phép năm của bạn là 14 ngày mỗi năm, theo Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026; thẻ có dòng "Sắp thay đổi" nêu Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027.
   must_cite: [LEAVE-GAMECO-v2]
   may_cite: [LEAVE-PROC-GAMECO-v1]
   key_facts: [14 ngày]
+  must_show: [đến hết 31/12/2026, Sắp thay đổi]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-PAYCO-v1]
   forbidden_for_llm: []
 - id: 2
@@ -318,20 +322,25 @@
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
   forbidden_for_llm: []
 - id: 18
-  kind: limitation
+  kind: hard
   purpose: >-
-    Hạn chế đã biết của v1, ghi ở issue #53; tình huống này được chờ là chưa đạt. Minh hỏi ngày 15/12/2026 rằng từ
-    năm sau mình được nghỉ phép năm bao nhiêu ngày; từ 01/01/2027 quy chế GameCo bản 3 cho 15 ngày, nhưng v1 chỉ
-    dùng bản đang hiệu lực vào ngày hỏi (bản 2, 14 ngày) và không đọc câu hỏi để biết nó hỏi về thời điểm khác. Kết
-    quả an toàn là thẻ từ chối mời liên hệ HR GameCo; thẻ trả lời 14 ngày cho năm sau là sai.
+    Hạn chế #53 của v1 đã được sửa ở #83; hàng này giữ id cũ. Minh hỏi ngày 15/12/2026 rằng từ năm sau mình được
+    nghỉ phép năm bao nhiêu ngày. Từ 01/01/2027 quy chế GameCo bản 3 áp dụng, nhưng mô hình chỉ nhận các điều khoản
+    đang hiệu lực (bản 2, 14 ngày) và không bao giờ nhận nội dung bản 3, nên hệ thống không thể trả lời "15 ngày".
+    Quy tắc cho biết bản 2 chỉ áp dụng cho Minh đến hết 31/12/2026 và bản 3 thay thế từ 01/01/2027; thẻ trả lời
+    hiện điều đó ở dòng nguồn và dòng "Sắp thay đổi", còn câu của mô hình phải nói 14 ngày chỉ áp dụng đến hết
+    31/12/2026. Trả lời 14 ngày như số của năm sau là sai; Hiệp đọc câu trả lời để kiểm tra.
   persona: minh
   as_of: 2026-12-15
   questions:
     - Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày?
-  card: refusal
-  expected_answer: Thẻ từ chối - v1 chỉ trả lời quy định đang hiệu lực vào ngày áp dụng, không trả lời cho năm sau, mời liên hệ HR GameCo; không hiện thẻ trả lời 14 ngày.
+  card: answer
+  expected_answer: Quy chế nghỉ phép GameCo (bản 2) cho 14 ngày mỗi năm và chỉ áp dụng đến hết 31/12/2026; từ 01/01/2027 Quy chế nghỉ phép GameCo (bản 3) áp dụng. Câu trả lời không coi 14 ngày là số ngày của năm sau và không nêu số ngày của bản 3, vì hệ thống không đưa nội dung bản 3 cho mô hình.
+  must_cite: [LEAVE-GAMECO-v2]
+  key_facts: [14 ngày, 01/01/2027]
+  must_show: [đến hết 31/12/2026, Sắp thay đổi, 01/01/2027]
   forbidden_by_rules: [LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
-  forbidden_for_llm: [LEAVE-GAMECO-v2]
+  forbidden_for_llm: []
 - id: 19
   kind: hard
   purpose: >-
@@ -378,4 +387,27 @@
   must_cite: [OT-GAMECO-v1]
   key_facts: [không trừ]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT]
+  forbidden_for_llm: []
+- id: 21
+  kind: hard
+  purpose: >-
+    Minh hỏi mức hỗ trợ ăn uống khi đi công tác ngày 07/10/2026. Dữ liệu đã sửa đặt ngày hết hiệu lực của quy định
+    công tác phí GameCo là 31/12/2026 và không có văn bản nào thay thế nó cho Minh. Hệ thống phải trả lời 300.000
+    đồng mỗi ngày, kèm hạn "đến hết 31/12/2026" ở dòng nguồn và dòng "Sắp thay đổi" nói quy định hết hiệu lực với
+    Minh sau ngày đó và mời hỏi HR GameCo. Dòng này không được nêu văn bản thay thế vì không có văn bản nào, và
+    thiếu hạn hoặc dòng "Sắp thay đổi" là sai.
+  persona: minh
+  as_of: 2026-10-07
+  data_edit:
+    document: TRAVEL-GAMECO-v1
+    set:
+      effective_to: 2026-12-31
+  questions:
+    - Đi công tác được hỗ trợ ăn uống bao nhiêu một ngày?
+  card: answer
+  expected_answer: Nhân sự GameCo đi công tác trong nước được hỗ trợ ăn uống 300.000 đồng mỗi ngày, theo Quy định công tác phí GameCo, Điều 1, hiệu lực đến hết 31/12/2026; thẻ có dòng "Sắp thay đổi" nói quy định hết hiệu lực với bạn sau 31/12/2026 và mời hỏi HR GameCo về quy định áp dụng từ 01/01/2027.
+  must_cite: [TRAVEL-GAMECO-v1]
+  key_facts: ["300.000"]
+  must_show: [đến hết 31/12/2026, Sắp thay đổi, hết hiệu lực với bạn sau 31/12/2026]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: []

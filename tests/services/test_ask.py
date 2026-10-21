@@ -197,3 +197,16 @@ def test_ask_shows_the_conflict_card_for_a_valid_flag(personas, documents):
     assert asked.lines[1].text.startswith("Có 2 quy định")
     assert asked.lines[-1].text == "Vui lòng hỏi HR PayCo."
     assert all("Theo LEAVE" not in line.text for line in asked.lines)
+
+
+def test_the_same_chunks_on_two_dates_make_two_calls(personas, documents):
+    """The prompt carries the as-of date (ADR 0012), so a reply written for one date is not served for another."""
+    first = scope(personas["minh"], date(2026, 10, 7), documents)
+    second = scope(personas["minh"], date(2026, 12, 15), documents)
+    assert first.chunk_ids == second.chunk_ids
+    answerer = CountingAnswerer(_row1_reply(documents))
+    cache = ReplyCache(4)
+    ask(first, "q", answerer, cache)
+    assert ask(second, "q", answerer, cache).cache_hit is False
+    assert ask(second, "q", answerer, cache).cache_hit is True
+    assert answerer.calls == 2

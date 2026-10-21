@@ -25,7 +25,8 @@ class Asked:
 class ReplyCache:
     """Demo LRU of finished replies (decision 5 of the #13 plan).
 
-    Keyed by persona id, the scope's chunk ids and the question, so a changed scope misses.
+    Keyed by persona id, the as-of date, the scope's chunk ids and the question, so a changed scope misses.
+    The date is in the key because the prompt carries it: the same chunks on two dates need two replies (ADR 0012).
     Step 7 still runs on every hit, and a failed call is never stored.
     """
 
@@ -35,7 +36,7 @@ class ReplyCache:
 
     @staticmethod
     def _key(scope: Scope, question: str) -> tuple:
-        return (scope.persona.id, tuple(sorted(scope.chunk_ids)), question)
+        return (scope.persona.id, scope.as_of, tuple(sorted(scope.chunk_ids)), question)
 
     def get(self, scope: Scope, question: str) -> Reply | None:
         key = self._key(scope, question)
