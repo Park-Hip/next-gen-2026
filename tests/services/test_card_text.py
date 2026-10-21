@@ -5,7 +5,7 @@ from datetime import date
 from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.models.answer import Point
 from appota_kb.models.card import Card, CardLine
-from appota_kb.services.card_text import REFUSAL_TEXT, change_text, refusal_text, render
+from appota_kb.services.card_text import ANSWER_NOTE, REFUSAL_TEXT, change_text, refusal_text, render
 from appota_kb.services.chunking import chunks
 from appota_kb.services.citations import pick_card
 from appota_kb.services.scope import scope
@@ -33,9 +33,15 @@ def test_answer_card_wording(personas, documents):
     lines = render(card, s, (point,), (c2,))
     assert lines == (
         CardLine("who", "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."),
+        CardLine("note", ANSWER_NOTE),
         CardLine("claim", "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."),
         CardLine("quote", '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'),
-        CardLine("source", "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo."),
+        CardLine(
+            "source",
+            "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo.",
+            ("LEAVE-GAMECO-v2#2",),
+            "Quy chế nghỉ phép GameCo (bản 2), Điều 2",
+        ),
         CardLine("notice", "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."),
     )
 
@@ -64,12 +70,12 @@ def test_answer_card_gives_each_point_its_own_source_line(personas, documents):
     )
     lines = render(card, s, points, (g1, p1))
     assert [line.kind for line in lines] == [
-        "who", "claim", "quote", "source", "claim", "quote", "source"
+        "who", "note", "claim", "quote", "source", "claim", "quote", "source"
     ]
-    assert lines[1].text == "Theo quy chế Tập đoàn, 12 ngày."
-    assert lines[3].text.startswith("Nguồn: Quy chế nghỉ phép Tập đoàn")
-    assert lines[4].text == "Theo quy chế PayCo, 13 ngày."
-    assert lines[6].text.startswith("Nguồn: Quy chế nghỉ phép PayCo")
+    assert lines[2].text == "Theo quy chế Tập đoàn, 12 ngày."
+    assert lines[4].text.startswith("Nguồn: Quy chế nghỉ phép Tập đoàn")
+    assert lines[5].text == "Theo quy chế PayCo, 13 ngày."
+    assert lines[7].text.startswith("Nguồn: Quy chế nghỉ phép PayCo")
 
 
 def test_conflict_card_wording(personas, documents):
@@ -89,8 +95,18 @@ def test_conflict_card_wording(personas, documents):
     assert lines == (
         CardLine("who", "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán."),
         CardLine("lead", "Có 2 quy định cùng áp dụng cho bạn nhưng chưa được khai báo quy định nào được dùng thay quy định nào. Hệ thống không tự chọn."),
-        CardLine("quote", 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'),
-        CardLine("quote", 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'),
+        CardLine(
+            "quote",
+            'Quy chế nghỉ phép Tập đoàn, Điều 1 (từ 01/01/2024, áp dụng cho Tập đoàn): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."',
+            ("LEAVE-GROUP-v1#1",),
+            "Quy chế nghỉ phép Tập đoàn, Điều 1",
+        ),
+        CardLine(
+            "quote",
+            'Quy chế nghỉ phép PayCo, Điều 1 (từ 01/01/2025, áp dụng cho PayCo): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."',
+            ("LEAVE-PAYCO-v1#1",),
+            "Quy chế nghỉ phép PayCo, Điều 1",
+        ),
         CardLine("plain", "Vui lòng hỏi HR PayCo."),
     )
     assert all("MODEL" not in line.text for line in lines)
@@ -113,7 +129,9 @@ def test_conflict_card_headline_counts_documents_and_quotes_each_once(personas, 
     assert lines[1].text.startswith("Có 3 quy định cùng áp dụng cho bạn")
     quotes = [line.text for line in lines if line.kind == "quote"]
     assert len(quotes) == 3
-    assert [q.split(",")[0] for q in quotes] == ["Tập đoàn", "Kế toán", "PayCo"]
+    assert [q.split(",")[0] for q in quotes] == [
+        "Quy chế nghỉ phép Tập đoàn", "Quy chế nghỉ phép Kế toán", "Quy chế nghỉ phép PayCo"
+    ]
     assert [line.kind for line in lines] == ["who", "lead", "quote", "quote", "quote", "plain"]
 
 
@@ -179,14 +197,14 @@ def test_a_notice_follows_the_source_line_on_each_point(personas, documents):
     card = Card("answer", persona.hr, (c2,), ())
     point = Point(claim="Một câu.", quote=c2.text, chunks=(c2.id,))
     lines = render(card, s, (point, point), (c2,))
-    assert [line.kind for line in lines] == ["who", "claim", "quote", "source", "notice", "claim", "quote", "source", "notice"]
-    assert lines[3].text.endswith("hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo.")
+    assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source", "notice", "claim", "quote", "source", "notice"]
+    assert lines[4].text.endswith("hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo.")
 
 
 def test_no_window_end_and_no_notice_once_the_next_version_applies(personas, documents):
     lines = _row1_card(personas, documents, date(2027, 1, 1))
-    assert [line.kind for line in lines] == ["who", "claim", "quote", "source"]
-    assert lines[3].text == "Nguồn: Quy chế nghỉ phép GameCo (bản 3), Điều 2, hiệu lực từ 01/01/2027. Hỏi thêm: HR GameCo."
+    assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source"]
+    assert lines[4].text == "Nguồn: Quy chế nghỉ phép GameCo (bản 3), Điều 2, hiệu lực từ 01/01/2027. Hỏi thêm: HR GameCo."
 
 
 def test_a_document_with_no_change_shows_the_start_only(personas, documents):
@@ -194,8 +212,8 @@ def test_a_document_with_no_change_shows_the_start_only(personas, documents):
     s = scope(persona, date(2026, 10, 7), documents)
     c1 = _chunk(documents, "LEAVE-GROUP-v1#1")
     lines = render(Card("answer", persona.hr, (c1,), ()), s, (Point("Một câu.", c1.text, (c1.id,)),), (c1,))
-    assert [line.kind for line in lines] == ["who", "claim", "quote", "source"]
-    assert "đến hết" not in lines[3].text
+    assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source"]
+    assert "đến hết" not in lines[4].text
 
 
 def _edited_scope(personas, documents, edit, as_of=date(2026, 10, 7)):
@@ -247,8 +265,8 @@ def test_conflict_card_shows_the_window_and_each_sides_notice(personas, document
     card = Card("conflict", persona.hr, (g1,), ((group, payco),))
     lines = render(card, s, None, (g1, p1))
     assert [line.kind for line in lines] == ["who", "lead", "quote", "quote", "notice", "plain"]
-    assert lines[2].text.startswith("Tập đoàn, Điều 1 (từ 01/01/2024): ")
-    assert lines[3].text.startswith("PayCo, Điều 1 (từ 01/01/2025 đến hết 31/12/2026): ")
+    assert lines[2].text.startswith("Quy chế nghỉ phép Tập đoàn, Điều 1 (từ 01/01/2024, áp dụng cho Tập đoàn): ")
+    assert lines[3].text.startswith("Quy chế nghỉ phép PayCo, Điều 1 (từ 01/01/2025 đến hết 31/12/2026, áp dụng cho PayCo): ")
     assert lines[4].text == (
         "Sắp thay đổi: quy định này hết hiệu lực với bạn sau 31/12/2026. "
         "Vui lòng hỏi HR PayCo về quy định áp dụng từ 01/01/2027."

@@ -120,7 +120,7 @@ flowchart TD
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
 - The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
 - Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a content conflict the model does not notice still gives an answer card (section 12.1).
-- The cited clause opens only if it is in the asker's scope on that date (section 6.5).
+- Each source line of the answer card and each quote of the conflict card links to the cited version, which opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 
 ### 2.3 Document owner: publishing and checking documents
@@ -406,13 +406,19 @@ The rules pick the card from the citations, never from the model's words, in thi
 | Answer | Otherwise | Changed: for each point, the model's sentence on top and the verified quote under it in quotation marks; then the document, the "Điều", the effective date and the HR contact (E7; SD14, decided by Hiep on 20/10/2026) |
 
 Every card starts with who the asker is asking as.
+Every answer card then has one fixed line saying that the bold sentence is the system's paraphrase and the quoted text is the checked wording of the rule (#77, G5.4); the conflict and refusal cards show no model text and do not have it.
 The sentence is not checked at run time, by rules or by a second model call (SD14); the employee reads it above its quote, and the evaluation reads it against its quote (section 14).
 
 ### 6.5 Reading the cited part (E7)
 
 The spec asks that the employee "can read that part".
 v1 shows the quote, which can be only part of a clause.
-Proposed **[to decide]**: the answer card links to the full cited "Điều" of that version; the server checks that the chunk is in the asker's scope for that date before showing it, so the link cannot be used to read another document (section 11).
+Built in #77 (SD10, decided by Hiep on 21/10/2026): each source line of the answer card, and each quote of the conflict card, links to a page for the version that was cited.
+The page shows the whole version, with the cited "Điều" (or, for a document without "Điều", the cited line) highlighted and scrolled to, under its title, its validity window and the notice of a coming change, who it applies to and the HR contact.
+The link carries the chunk ids and the card's as-of date, plus the account asked as for the judge only; it never decides who an employee is.
+The server rebuilds the signed-in asker's scope on that date and opens the page only if every chunk is in it and all belong to one document.
+A chunk outside the scope, an unknown id, a bad date and an unknown path all give the same 404 page, so the link cannot be used to read another document or to learn that one exists (section 11).
+The page calls no model and no embedder.
 
 ### 6.6 The demo cache
 
@@ -720,7 +726,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD7 | Which documents `overrides` may name | Any; only a document of a unit above | No | 4.3 |
 | SD8 | How a mistake in a published version is corrected | Section 7.4 a-c | No | 7.4 |
 | SD9 | Whether an owner also sees and publishes for units below their unit | Own unit only; own unit and below | No | 7 |
-| SD10 | Whether the card links to the full cited clause | Link; quote only | No | 6.5 |
+| SD10 | Whether the card links to the full cited clause | Link; quote only | **Decided by Hiep, 21/10/2026** (#77): the link opens the whole cited version with the cited "Điều" or line highlighted, for the answer and the conflict card | 6.5 |
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | **Decided by Hiep, 21/10/2026**: the evaluator account only, others get a 404; the date picker stays, labelled as a demo control; ADR 0016 | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |

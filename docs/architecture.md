@@ -12,6 +12,7 @@ First, deterministic rules build the asker's scope from document metadata, the a
 Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer, writes one plain sentence per clause and quotes each clause, and rules check every citation and quote before choosing which of three cards to show.
 So a wrong version, another unit's rule or a restricted document cannot reach an answer, because the AI never sees them.
 The answer card shows the model's sentence above the quote the rules verified, then the source line (ADR 0011); the conflict and refusal cards show fixed wording and no model text.
+Each source line of the answer card and each quote of the conflict card links to `/source`, a page that shows the whole cited version with the cited Điều or line highlighted, only when the signed-in asker's scope on that date holds it; every other request gets the same 404 page (#77, `services/source_view.py`).
 When a cited document leaves the asker's scope on a later date, the source line ends with "đến hết <ngày>" and a "Sắp thay đổi" notice follows it, from the rules alone (ADR 0012).
 What the AI can still get wrong is choosing which clause in the scope answers the question, and writing a sentence that drops a condition or adds a fact; the test report and Hiep's reading measure both.
 

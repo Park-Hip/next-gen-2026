@@ -4,7 +4,7 @@ from typing import Literal
 
 from appota_kb.models.document import Chunk, Document
 
-LineKind = Literal["who", "claim", "lead", "quote", "source", "notice", "plain"]
+LineKind = Literal["who", "note", "claim", "lead", "quote", "source", "notice", "plain"]
 
 
 @dataclass(frozen=True)
@@ -13,10 +13,16 @@ class CardLine:
 
     The answer card has claim, quote and source lines per point (ADR 0011), and a notice line under the
     source line of a document that changes later (ADR 0012).
+    The answer card also has one fixed note line under the asker line (#77).
     The conflict card has lead, quote, notice and plain lines; the refusal card has lead and plain lines.
+
+    A source line or a conflict quote links to the version it cites: `chunks` holds the cited chunk ids and
+    `ref` the part of `text` that becomes the link. No URL is built here; the page builds it.
     """
     kind: LineKind
     text: str
+    chunks: tuple[str, ...] = ()
+    ref: str = ""
 
 
 @dataclass(frozen=True)

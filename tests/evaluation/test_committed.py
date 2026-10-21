@@ -69,8 +69,8 @@ def test_committed_run_matches_the_report(cases, documents, personas, tmp_path):
     assert first.verdict == "Đạt"
     assert first.lesson == "Bài học hàng 1."
     assert first.card["kind"] == "answer"
-    assert first.card["lines"][1]["kind"] == "claim"
-    assert first.card["lines"][2] == {
+    assert [line["kind"] for line in first.card["lines"][:3]] == ["who", "note", "claim"]
+    assert first.card["lines"][3] == {
         "kind": "quote",
         "text": '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."',
     }

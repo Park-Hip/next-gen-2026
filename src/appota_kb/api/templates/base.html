@@ -157,12 +157,24 @@
   .card .lead { font-weight: 700; color: var(--navy); font-size: 17px; line-height: 1.5; }
   .card .source { font-size: 14px; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
   .card .source + .source { margin-top: 6px; padding-top: 0; border-top: 0; }
+  .card .note { font-size: 13px; color: var(--muted); }
   .card .change-notice { font-size: 14px; color: var(--muted); margin-top: 6px; }
   .card .change-notice strong { color: var(--conflict-ink); font-weight: 700; }
   .card blockquote {
     margin: 10px 0 0; padding: 10px 14px; border-radius: 8px;
     background: var(--bg); border: 1px solid var(--line);
   }
+
+  .source-page { padding: 16px 20px 20px; display: grid; gap: 12px; overflow-wrap: anywhere; }
+  .source-page > * { min-width: 0; }
+  .source-page p { margin: 0; }
+  .source-page .who { font-style: italic; color: var(--muted); font-size: 14px; }
+  .source-page h2 { margin: 0; font-size: 20px; line-height: 1.35; color: var(--navy); }
+  ol.version { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .chunk { scroll-margin-top: 16px; padding: 10px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+  .chunk.cited { background: var(--answer-tint); border-color: var(--answer); border-left-width: 4px; padding-left: 11px; }
+  .chunk .badge { margin-bottom: 4px; background: var(--answer-ink); color: #fff; }
+  .chunk .label { font-weight: 700; color: var(--navy); }
 
   a { color: var(--brand-ink); }
   a:hover { color: var(--brand-ink-hover); }

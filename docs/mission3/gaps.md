@@ -167,7 +167,7 @@ Three open proposals already touch these requirements; this page does not decide
 |---|---|---|---|
 | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Implemented in #75; run `20261021-1032` passes the gates, Hiep's review pending |
 | [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Merged in PR #94 on 21/10/2026; the evaluation row for the HR GameCo account (decision 11) waits for the next full run; ADR 0016, reasons awaited from Hiep |
-| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1; with Hiep's decisions of 21/10/2026, also G5.2-G5.4 | Decided by Hiep on 21/10/2026; not started |
+| [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1; with Hiep's decisions of 21/10/2026, also G5.2-G5.4 | Decided by Hiep on 21/10/2026; built on branch `77-open-the-cited-version`, PR not yet merged |
 
 ## How Mission 3 fixes the gaps
 

@@ -2,3 +2,12 @@
 {% macro persona_label(p) -%}
 {{ p.name }} - {{ p.unit }}{% if p.company not in p.unit %}, {{ p.company }}{% endif %} (giả lập)
 {%- endmacro %}
+{# A card line's text, with its `ref` (the title and Điều) as the link to the cited version when the page gave one. #}
+{% macro linked(line, href) -%}
+{%- if href and line.ref -%}
+{%- set parts = line.text.partition(line.ref) -%}
+{{ parts[0] }}<a href="{{ href }}">{{ line.ref }}</a>{{ parts[2] }}
+{%- else -%}
+{{ line.text }}
+{%- endif -%}
+{%- endmacro %}

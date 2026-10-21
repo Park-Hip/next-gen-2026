@@ -1,12 +1,14 @@
+{% from "_macros.html" import linked %}
 <article class="panel card card-conflict">
   <h2>Mâu thuẫn</h2>
   {% for line in card.lines %}
+  {% set href = card.links[loop.index0] if card.links else '' %}
   {% if line.kind == 'who' %}
   <p class="who">{{ line.text }}</p>
   {% elif line.kind == 'lead' %}
   <p class="lead">{{ line.text }}</p>
   {% elif line.kind == 'quote' %}
-  <blockquote>{{ line.text }}</blockquote>
+  <blockquote>{{ linked(line, href) }}</blockquote>
   {% elif line.kind == 'notice' %}
   {% set parts = line.text.partition(': ') %}
   <p class="change-notice"><strong>{{ parts[0] }}:</strong> {{ parts[2] }}</p>

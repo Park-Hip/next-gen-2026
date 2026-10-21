@@ -5,6 +5,8 @@ Each answer point shows the model's sentence above the quote that step 7 checked
 The conflict and refusal cards keep fixed wording and show no model text.
 A document that leaves the asker's scope later gets the end of its window on the source line and a
 "Sắp thay đổi" notice under it, from the rules only (ADR 0012).
+A source line and a conflict quote carry the ids of the chunks they cite, so the page can link them to the
+cited version (#77); the conflict quote names its document's title.
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
 from datetime import date
@@ -33,12 +35,14 @@ def intro(persona: Persona) -> str:
 
 NOTICE_LABEL = "Sắp thay đổi: "
 
+ANSWER_NOTE = "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."
+
 
 def dmy(day: date) -> str:
     return day.strftime("%d/%m/%Y")
 
 
-def _window(doc: Document, change: Change | None) -> str:
+def validity_window(doc: Document, change: Change | None) -> str:
     """"từ 01/01/2026", plus " đến hết 31/12/2026" when the document leaves this asker's scope later."""
     text = f"từ {dmy(doc.effective_from)}"
     if change is not None:
@@ -72,17 +76,22 @@ def _notice_lines(doc: Document, scope: Scope, hr: str) -> tuple[CardLine, ...]:
     return (CardLine("notice", NOTICE_LABEL + change_text(doc, change, hr)),)
 
 
-def _source_line(doc: Document, doc_chunks: tuple[Chunk, ...], scope: Scope, hr: str) -> str:
-    line = f"Nguồn: {doc.title}"
-    labels = [c.label for c in doc_chunks if c.label]
-    if labels:
-        line += ", " + ", ".join(labels)
-    return f"{line}, hiệu lực {_window(doc, scope.change_for(doc.id))}. Hỏi thêm: {hr}."
+def _ref(doc: Document, labels: list[str]) -> str:
+    """"Quy chế nghỉ phép GameCo (bản 2), Điều 2": the title and the Điều, the part a line links from."""
+    return ", ".join([doc.title, *labels])
 
 
-def _quote_line(doc: Document, chunk: Chunk, scope: Scope) -> str:
-    label = f", {chunk.label}" if chunk.label else ""
-    return f'{doc.applies_to}{label} ({_window(doc, scope.change_for(doc.id))}): "{chunk.text}"'
+def _source_line(doc: Document, doc_chunks: tuple[Chunk, ...], scope: Scope, hr: str) -> CardLine:
+    ref = _ref(doc, [c.label for c in doc_chunks if c.label])
+    text = f"Nguồn: {ref}, hiệu lực {validity_window(doc, scope.change_for(doc.id))}. Hỏi thêm: {hr}."
+    return CardLine("source", text, tuple(c.id for c in doc_chunks), ref)
+
+
+def _quote_line(doc: Document, chunk: Chunk, scope: Scope) -> CardLine:
+    ref = _ref(doc, [chunk.label] if chunk.label else [])
+    window = validity_window(doc, scope.change_for(doc.id))
+    text = f'{ref} ({window}, áp dụng cho {doc.applies_to}): "{chunk.text}"'
+    return CardLine("quote", text, (chunk.id,), ref)
 
 
 def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]]:
@@ -100,13 +109,13 @@ def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[Ca
     """One claim, its folded quote and its source line(s) per point, in the model's order."""
     docs = {d.id: d for d in scope.documents}
     by_id = {c.id: c for c in scope.chunks}
-    lines = [CardLine("who", intro(scope.persona))]
+    lines = [CardLine("who", intro(scope.persona)), CardLine("note", ANSWER_NOTE)]
     for point in points:
         lines.append(CardLine("claim", point.claim))
         lines.append(CardLine("quote", f'"{fold(point.quote)}"'))
         cited = tuple(by_id[cid] for cid in dict.fromkeys(point.chunks))
         for doc_id, doc_chunks in _group_cited(cited):
-            lines.append(CardLine("source", _source_line(docs[doc_id], doc_chunks, scope, card.hr)))
+            lines.append(_source_line(docs[doc_id], doc_chunks, scope, card.hr))
             lines.extend(_notice_lines(docs[doc_id], scope, card.hr))
     return tuple(lines)
 
@@ -116,7 +125,7 @@ def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[Car
     lines = [CardLine("who", intro(scope.persona)), CardLine("lead", headline)]
     for doc, doc_chunks in quotes:
         for chunk in doc_chunks:
-            lines.append(CardLine("quote", _quote_line(doc, chunk, scope)))
+            lines.append(_quote_line(doc, chunk, scope))
         lines.extend(_notice_lines(doc, scope, card.hr))
     lines.append(CardLine("plain", f"Vui lòng hỏi {card.hr}."))
     if recorded:
