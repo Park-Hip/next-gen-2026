@@ -35,13 +35,18 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 ## 1. Understand the new requirement
 
 - [ ] The Change Request, once assigned, is copied word for word into `docs/competition/`, as the briefs were.
-- [ ] A gap table maps the Change Request and each of the 5 general requirements to what M2 does today, the evidence for it, and the open gap:
-  - [ ] Phân biệt phiên bản và thời điểm có hiệu lực của tài liệu.
-  - [ ] Kiểm soát quyền truy cập theo bối cảnh người dùng.
-  - [ ] Xử lý thông tin mâu thuẫn giữa nhiều nguồn/cấp tổ chức.
-  - [ ] Từ chối hoặc thể hiện rõ khi chưa đủ căn cứ.
-  - [ ] Cho người dùng kiểm chứng tài liệu được sử dụng.
+  - Open: not assigned as of 21/10/2026 (step 0).
+- [ ] A gap table maps the Change Request and each of the 5 general requirements to what M2 does today, the evidence for it, and the open gap: [`gaps.md`](gaps.md).
+  - Open for the Change Request only: its row says it is not assigned yet, and it gets its own section in `gaps.md` when it arrives.
+  - [x] Phân biệt phiên bản và thời điểm có hiệu lực của tài liệu: G1.1-G1.5.
+  - [x] Kiểm soát quyền truy cập theo bối cảnh người dùng: G2.1-G2.3.
+  - [x] Xử lý thông tin mâu thuẫn giữa nhiều nguồn/cấp tổ chức: G3.1-G3.7.
+  - [x] Từ chối hoặc thể hiện rõ khi chưa đủ căn cứ: G4.1-G4.5; G4.1 is G1.1 seen from this requirement.
+  - [x] Cho người dùng kiểm chứng tài liệu được sử dụng: G5.1-G5.3.
 - [ ] Each gap names its evidence from M2: a test row, a limitation issue (#24, #50, #51, #52, #53, #74) or a probe; no gap is claimed without one.
+  - Done for the 5 general requirements: every gap in `gaps.md` names a row of the baseline run, a limitation issue, a test or one of the probes P1-P9, and all 6 limitation issues appear.
+  - The probes use the test suite's fake models, so they make no Gemini call; the script and the result of each probe are in the appendix of `gaps.md`.
+  - Open until the Change Request's gaps are added the same way.
 
 ## 2. Choose
 

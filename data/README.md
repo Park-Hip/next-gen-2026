@@ -23,6 +23,11 @@ Metadata fields, as read by the rules:
 | `overrides` | "Dùng thay": one series this document is used instead of, for the units it applies to, whether or not the asker may read this document (ADR 0010); a series that overrides itself, or a cycle of overrides, fails the load |
 | `complements` | "Bổ sung": series this document adds to without contradicting them |
 
+Owners change a document only by publishing a full new version (ADR 0013).
+To change one clause, the owner copies the version in force, changes the clause and publishes the copy as the next version of the same `series`.
+A company that changes one clause of a Group policy publishes a complete policy of its own, with the Group clauses it keeps, and declares `overrides`.
+A separate amendment that holds only the changed clauses is never published; the rules cannot detect one, so this is a rule for owners.
+
 Source: `docs/mission1/redraft/artifacts.md` and `docs/mission1/redraft/checks/adopted_rules.py`.
 The tests in `tests/` check the files and run the rules on them.
 `data/` is now the source of truth; `artifacts.md` stays as the Mission 1 snapshot.
