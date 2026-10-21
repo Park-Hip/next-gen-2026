@@ -31,7 +31,7 @@ Where a probe needs a model reply, the reply is scripted, so the probe shows wha
 |---|---|---|---|
 | Change Request | Not assigned yet: the brief says "Chưa có Change Request được chỉ định cho bạn" | - | Open: when it arrives, it is copied into `docs/competition/` and gets its own section here, with the same columns |
 | [1. Phân biệt phiên bản và thời điểm có hiệu lực của tài liệu](#1-versions-and-effective-dates) | Rules keep the version in force on the as-of date, without reading the question; the answer card gives the document's title and start date | Rows 1 and 2 pass | G1.1-G1.5 |
-| [2. Kiểm soát quyền truy cập theo bối cảnh người dùng](#2-access-by-the-askers-context) | Rules build the asker's scope from their unit and roles before any search, checking access last; nothing outside the scope reaches search or the model | Rows 5, 6, 10 and 13 pass; 0 leaks in the 14 gated rows and none in the 4 limitation rows; the leak test over every asker, boundary date and test question | G2.1-G2.3 |
+| [2. Kiểm soát quyền truy cập theo bối cảnh người dùng](#2-access-by-the-askers-context) | Rules build the asker's scope from their unit and roles before any search, checking access last; nothing outside the scope reaches search or the model | Rows 5, 6, 10 and 13 pass; 0 leaks in the 14 gated rows and none in the 4 limitation rows; the leak test over every asker, boundary date and test question | G2.1-G2.4 |
 | [3. Xử lý thông tin mâu thuẫn giữa nhiều nguồn/cấp tổ chức](#3-conflicting-sources-and-levels) | Precedence comes only from relations an owner declared; two policies on one topic with no declared relation form a conflict pair, and an answer citing either one gives the conflict card, which quotes both sides and does not choose | Rows 1, 3, 7 and 12 pass | G3.1-G3.7 |
 | [4. Từ chối hoặc thể hiện rõ khi chưa đủ căn cứ](#4-refusing-when-the-basis-is-not-enough) | The model may return nothing; rules refuse the whole answer on any citation or quote they cannot verify, and the refusal card names the asker's HR contact | Rows 6, 8, 9, 10, 11, 13 and 14 refuse; 0 unsafe and 0 over-cautious in the 14 gated rows | G4.1-G4.5 |
 | [5. Cho người dùng kiểm chứng tài liệu được sử dụng](#5-letting-the-user-check-the-documents-used) | The answer card shows the verified quote word for word, and names the document, the Điều and the start date | 7 of 7 answers read by Hiep against their quotes, all faithful | G5.1-G5.3 |
@@ -86,6 +86,7 @@ The test report counts 0 leaks in the 14 gated rows, and none of the 4 limitatio
 | G2.1 | Who is asking comes from the request: the page reads `persona` from the URL, so anyone can ask as anyone and get that person's rules | P1: `GET /?persona=lan&...` with no cookie and no credential answers as Lan, "Bạn đang hỏi với tư cách: nhân sự Tập đoàn, Nhân sự Tập đoàn."; "Identity" is under Simplified in [`scope.md`](../scope.md); proposal [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) | Probe; on purpose |
 | G2.2 | The judges' page `/data` shows every visitor the title and the full text of a document only one role may read | P2: `/data` contains "Khung bậc lương GameCo" and "Bậc 3 có mức lương từ 18 đến 25 triệu đồng mỗi tháng", readable only by `hr_gameco`; `/cases` contains neither; the page is labelled "Góc nhìn ban tổ chức", and the file is public in the repository anyway, so this is the product's boundary, not a secret; [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) decision 3 | Probe |
 | G2.3 | A wrong `access` value is applied as written, so "0 leaks" holds only while the metadata is right | P7: with `access: all_staff` on `SAL-BAND-GAMECO`, Minh's scope gets both salary chunks; [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): "a wrong `access` leaks every time, deterministically" | Probe; limitation |
+| G2.4 | Access is only ever shown being refused, never granted: `SAL-BAND-GAMECO` is the only restricted document, and none of the simulated accounts holds `hr_gameco`, so no evaluation row and no page shows the same question getting a different result by role | `data/personas.yaml`: Minh `[employee]`, Lan `[employee, hr_group]`, Hà `[employee]`; the grant is tested only in pytest (`test_leak_hr_gameco_sees_salary`) | Missing evidence |
 
 ## 3. Conflicting sources and levels
 
@@ -162,12 +163,12 @@ Three open proposals already touch these requirements; this page does not decide
 | Proposal | Serves | Gaps it targets | State on 21/10/2026 |
 |---|---|---|---|
 | [#75](https://github.com/Park-Hip/next-gen-2026/issues/75) Answer card: the model's sentence above its verified quote | [Spec](../mvp_spec.md) E1: an answer in plain Vietnamese that answers the question directly | None of the gaps above; it adds a sentence the model writes, not checked at run time, to the card of requirement 5, and its prompt asks the model to quote both sides of a disagreement nobody declared (G3.3) | Plan approved by Hiep on 20/10/2026; in progress, not merged |
-| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan posted; decisions awaited |
+| [#76](https://github.com/Park-Hip/next-gen-2026/issues/76) Sign in as a simulated account | Requirement 2 | G2.1; G2.2 through its decision 3; it keeps G1.4 if decision 4 is a) | Plan decided by Hiep on 21/10/2026; not started |
 | [#77](https://github.com/Park-Hip/next-gen-2026/issues/77) Answer card: open the cited Điều | Requirement 5 | G5.1 | No plan yet |
 
 ## How Mission 3 fixes the gaps
 
-Hiep's decisions so far; sections 1 and 3 are decided, and sections 2, 4 and 5 are still open (step 2 of the checklist).
+Hiep's decisions so far; sections 1, 2 and 3 are decided, and sections 4 and 5 are still open (step 2 of the checklist).
 The fixes below are planned, not built: none of them has passed a run yet.
 
 ### 1. Versions and effective dates
@@ -188,6 +189,24 @@ What stays a limitation after these changes:
 - The system never answers with a future version's content.
 - Only the next change of each cited document is shown; a later change inside the period the question asks about is not.
 - The owner rule of ADR 0013 cannot be enforced from the metadata, so an owner who breaks it still gives [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) example 2 and row 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)); both issues stay open.
+
+### 2. Access by the asker's context
+
+Decided by Hiep on 21/10/2026; all of it is built in [#76](https://github.com/Park-Hip/next-gen-2026/issues/76), whose implementation plan records the details.
+The rules that build the asker's scope do not change; what changes is who decides the asker, and what the page and the tests show.
+
+| Gap | Decision | How | Where | How it is checked |
+|---|---|---|---|---|
+| G2.1 | Fix it: the server decides who is asking | The visitor signs in by picking a simulated account and typing a shared demo password, read from the environment and never written in the repository; the session keeps only the account id, and the unit and roles are read again from `data/personas.yaml` on every request; for an employee, a `persona` in the URL or the question changes nothing; the judge account may ask as any employee account it chooses, a choice the server honours only for the `evaluator` role | #76; ADR 0016, reasons awaited from Hiep | P1 becomes a pytest: signed in as Minh, `?persona=lan` still answers as Minh; a tampered cookie and a wrong password give no session; rows 5, 6, 10 and 13 as regression |
+| G2.2 | Fix it: only the judge account sees `/data` and `/cases` | Every other account gets a 404, so no restricted title reaches a page an employee can open | #76 decision 3 | P2 becomes a pytest |
+| G2.3 | Keep as a limitation, on purpose | Access values are the owner's responsibility; a misspelt role or unit already hides the document from everyone, and only a valid but too wide value leaks; the future fix is a check when an owner publishes, which warns when a version is wider than the one before it or when its text looks restricted but is open to all staff, and needs the owners' page (ADR 0004); a model judging at question time whether a chunk looks confidential was rejected, because access would then depend on the model | [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) | A pytest that `roles:hr_gamco` and `unit:Studoi` hide the document from every account |
+| G2.4 | Add the evidence | A simulated HR GameCo account with the `hr_gameco` role, in a new unit "Nhân sự GameCo" under GameCo; row 21 asks row 10's question as this account and expects the answer card citing `SAL-BAND-GAMECO`, while Minh is still refused | #76 decision 11 | Row 21 in the full evaluation run shared with #75, #83 and #87 |
+
+What stays a limitation after these changes:
+
+- There is no real authentication: the accounts are simulated and share one password, so whoever has the password can sign in as anyone, including the judge.
+- A wrong but valid `access` value still leaks, every time (G2.3).
+- Roles come from a file, not from an HR system.
 
 ### 3. Conflicting sources and levels
 
