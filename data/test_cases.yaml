@@ -1,7 +1,7 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
 # Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
 # kept as limitation rows, found by probing v1 on 14/10/2026 (issues #51, #52, #53); row 19 was the limitation #74 and became
-# a hard case with #87 (ADR 0014); row 20 is the hard case added with #75; row 18 became a hard case with #83 (ADR 0012), which also added row 21.
+# a hard case with #87 (ADR 0014); row 20 is the hard case added with #75; row 18 became a hard case with #83 (ADR 0012), which also added row 21; row 22 (#101) pairs with row 10: the HR GameCo account is granted the document Minh is refused.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
 # purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
@@ -411,3 +411,22 @@
   must_show: [đến hết 31/12/2026, Sắp thay đổi, hết hiệu lực với bạn sau 31/12/2026]
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: []
+- id: 22
+  kind: good
+  purpose: >-
+    Hoa làm ở Nhân sự GameCo, có vai trò hr_gameco, hỏi đúng câu của hàng 10 vào cùng ngày; đây là cặp với hàng 10
+    cho thấy cùng một câu hỏi cho kết quả khác nhau theo vai trò. Khung bậc lương GameCo chỉ người có vai trò
+    hr_gameco được xem, nên với Hoa văn bản này nằm trong phạm vi, được tìm thấy và được mô hình đọc, còn với Minh
+    ở hàng 10 nó bị loại trước khi tìm kiếm. Hệ thống phải trả lời bằng thẻ trả lời trích khung bậc lương và nêu
+    đúng số liệu giả lập của bậc 3; thẻ từ chối như của Minh là sai vì Hoa có quyền xem, còn trích văn bản nào khác
+    hay nêu con số không có trong văn bản cũng là sai.
+  persona: hoa
+  as_of: 2026-10-07
+  questions:
+    - Khung bậc lương của GameCo thế nào?
+  card: answer
+  expected_answer: Khung bậc lương GameCo gồm 5 bậc; bậc 3 có mức lương từ 18 đến 25 triệu đồng mỗi tháng (số liệu giả lập), theo Khung bậc lương GameCo, Điều 2.
+  must_cite: [SAL-BAND-GAMECO]
+  key_facts: [bậc 3, 18 đến 25 triệu]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-PAYCO-v1]
+  forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1, OT-GAMECO-v1, TRAVEL-GAMECO-v1]

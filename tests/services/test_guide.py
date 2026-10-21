@@ -123,11 +123,12 @@ def test_persona_scope_matches_rules(employees, documents):
 
 
 def test_same_question_groups(cases):
-    assert same_question_groups(cases) == [[1, 5, 7]]
+    # Rows 10 and 22 (#101) are the second group: Minh is refused the salary band that Hoa is granted.
+    assert same_question_groups(cases) == [[1, 5, 7], [10, 22]]
 
     other_day = [dict(r) for r in cases]
     other_day[4] = {**other_day[4], "as_of": date(2026, 10, 8)}
-    assert same_question_groups(other_day) == [[1, 7]]
+    assert same_question_groups(other_day) == [[1, 7], [10, 22]]
 
     # Row 15 shares row 12's question and date but has a data_edit, so it is never grouped.
     row_12, row_15 = (next(r for r in cases if r["id"] == i) for i in (12, 15))
@@ -137,8 +138,8 @@ def test_same_question_groups(cases):
 
 def test_case_views_order(cases, personas, documents):
     featured, rest = case_views(cases, personas, documents)
-    assert [c.id for c in featured] == [1, 5, 7]
-    assert [c.id for c in rest] == [row["id"] for row in cases if row["id"] not in (1, 5, 7)]
+    assert [c.id for c in featured] == [1, 5, 7, 10, 22]
+    assert [c.id for c in rest] == [row["id"] for row in cases if row["id"] not in (1, 5, 7, 10, 22)]
     assert sorted(c.id for c in featured + rest) == [r["id"] for r in cases]
 
 
