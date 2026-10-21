@@ -87,6 +87,8 @@ Hiep reads every claim against its quote and names the error of an unfaithful on
 ## Evidence
 
 - `tests/services/test_card_text.py`, `tests/services/test_ask.py`, `tests/services/answering/test_output.py`, `tests/services/answering/test_prompt.py`, `tests/services/answering/test_answerer.py`, `tests/services/test_citations.py`, `tests/api/test_page.py`, `tests/evaluation/test_score.py`, `tests/evaluation/test_review.py`, `tests/evaluation/test_run.py`, `tests/evaluation/test_data_edit.py`, `tests/evaluation/test_committed.py`.
+- Reference only: this update is not finished, so run `20261021-1032` and Hiep's reading of it do not count as the evaluation of ADR 0011.
+  They show how the first version behaves and are kept for comparison; the evaluation of the finished update is a later run.
 - The full evaluation run on `gemini-3.5-flash-lite`: `results/20261021-1032.jsonl`, 20 rows, 0 rules failures, 0 leaks, 0 unsafe answers and 0 over-cautious answers in the 15 gated rows; rows 18 and 19 are the two unsafe limitation rows, and row 11 refuses.
-- Hiep's review YAML and review sheet for that run: `results/20261021-1032.review.yaml` and `results/20261021-1032.review.md`; `faithful` and `lesson` are `[chờ Hiệp]`.
+- Hiep's review YAML and review sheet for that run: `results/20261021-1032.review.yaml` and `results/20261021-1032.review.md`; `faithful` and `lesson` are `[chờ Hiệp]`, and the reading is not finished.
 - Evidence log line of 21/10/2026.
