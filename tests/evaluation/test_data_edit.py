@@ -7,7 +7,7 @@ from appota_kb.services.chunking import chunks
 
 def test_with_edit_removes_the_line(documents):
     v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    line = next(l for l in v2.body.splitlines() if l.startswith("Điều 3."))
+    line = next(row for row in v2.body.splitlines() if row.startswith("Điều 3."))
     edited = with_edit(documents, {"document": "LEAVE-GAMECO-v2", "remove": line})
     new_v2 = next(d for d in edited if d.id == "LEAVE-GAMECO-v2")
     assert line not in new_v2.body.splitlines()
@@ -37,7 +37,7 @@ def test_with_edit_sets_topic_and_complements(documents):
 
 def test_with_edit_removes_a_line_and_sets_metadata(documents):
     v2 = next(d for d in documents if d.id == "LEAVE-GAMECO-v2")
-    line = next(l for l in v2.body.splitlines() if l.startswith("Điều 3."))
+    line = next(row for row in v2.body.splitlines() if row.startswith("Điều 3."))
     edited = with_edit(
         documents,
         {"document": "LEAVE-GAMECO-v2", "remove": line, "set": {"complements": []}},

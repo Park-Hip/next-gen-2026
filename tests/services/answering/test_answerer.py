@@ -40,6 +40,29 @@ def test_answerer_row1_reply(personas, documents):
     assert not hasattr(point, "text")
 
 
+def test_answerer_returns_the_disagreement_flag(personas, documents):
+    s = build_scope(personas["ha"], date(2026, 10, 7), documents)
+    index = build_index(documents, SyllableEmbeddings())
+    ids = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
+    chat = FakeGemini(reply=reply_citing(
+        *ids, quote_from={cid: chunk_text(documents, cid) for cid in ids}, disagreement=ids,
+    ))
+    reply = Answerer(index, chat, RETRIEVAL)(s, "Phép năm của tôi là bao nhiêu ngày?")
+    assert reply.disagreement == ids
+
+
+def test_answerer_missing_or_malformed_flag_keeps_the_points(personas, documents):
+    s = minh_scope(personas, documents)
+    index = build_index(documents, SyllableEmbeddings())
+    point = {"claim": "14 ngày", "quote": chunk_text(documents, "LEAVE-GAMECO-v2#2"), "chunks": ["LEAVE-GAMECO-v2#2"]}
+    for flag in ({}, {"disagreement": "nope"}, {"disagreement": [3]}, {"disagreement": None}):
+        chat = FakeGemini(reply=json.dumps({"points": [point], **flag}))
+        reply = Answerer(index, chat, RETRIEVAL)(s, "Phép năm của tôi là bao nhiêu ngày?")
+        assert reply.points is not None and len(reply.points) == 1, flag
+        assert reply.disagreement == (), flag
+        assert card_for_answer(s, reply.retrieved, reply.points, reply.disagreement).kind == "answer", flag
+
+
 def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
@@ -136,5 +159,6 @@ def test_answer_log_line(personas, documents, caplog):
     assert set(payload["retrieved"]) <= s.chunk_ids
     assert payload["points"] and payload["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
     assert payload["points"][0]["claim"].startswith("Theo tài liệu,")
+    assert payload["disagreement"] == []
     assert payload["raw"]
     assert isinstance(payload["latency_ms"], (int, float))

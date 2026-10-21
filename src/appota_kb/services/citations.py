@@ -17,10 +17,15 @@ def fold(text: str) -> str:
     return " ".join(unicodedata.normalize("NFC", text).split())
 
 
-def card_for_answer(scope: Scope, retrieved, points: tuple[Point, ...] | None) -> Card:
+def card_for_answer(
+    scope: Scope, retrieved, points: tuple[Point, ...] | None, disagreement: tuple[str, ...] = ()
+) -> Card:
     """Step 7 for a model reply: refuse on malformed output, no points, a point without
     chunks, a cited id outside `retrieved`, or a quote that is empty or not a substring
-    of any chunk the point cites (both sides folded); otherwise pick_card."""
+    of any chunk the point cites (both sides folded); otherwise pick_card.
+
+    The model's `disagreement` is read only after those refusals pass (ADR 0014): it can add a
+    conflict pair, never remove one and never change a refusal."""
     if not set(retrieved) <= scope.chunk_ids:
         raise ValueError("retrieved chunks outside the asker's scope")
     if points is None:
@@ -29,6 +34,7 @@ def card_for_answer(scope: Scope, retrieved, points: tuple[Point, ...] | None) -
         return Card("refusal", scope.persona.hr, (), (), reason="no_points")
     by_id = {c.id: c for c in scope.chunks}
     cited = []
+    quoted = set()  # chunks that hold the quote of a point citing them
     for point in points:
         if not point.chunks:
             return Card("refusal", scope.persona.hr, (), (), reason="outside_retrieved")
@@ -38,16 +44,39 @@ def card_for_answer(scope: Scope, retrieved, points: tuple[Point, ...] | None) -
         quote = fold(point.quote)
         if not quote:
             return Card("refusal", scope.persona.hr, (), (), reason="quote_mismatch")
-        if not any(quote in fold(by_id[cid].text) for cid in point.chunks):
+        holders = [cid for cid in point.chunks if quote in fold(by_id[cid].text)]
+        if not holders:
             return Card("refusal", scope.persona.hr, (), (), reason="quote_mismatch")
+        quoted.update(holders)
         cited.extend(point.chunks)
-    return pick_card(scope, retrieved, cited)
+    return pick_card(scope, retrieved, cited, flagged_pair(scope, retrieved, quoted, disagreement))
 
 
-def pick_card(scope: Scope, retrieved, cited) -> Card:
+def flagged_pair(scope: Scope, retrieved, quoted, disagreement) -> tuple[Document, Document] | None:
+    """The pair of documents the model's flag names, or None when any check fails (ADR 0014).
+
+    Exactly two different chunks, both retrieved, each holding the verbatim quote of a point that
+    cites it, from two different documents in the scope. Reads no meaning from any text.
+    """
+    if len(disagreement) != 2 or disagreement[0] == disagreement[1]:
+        return None
+    if any(cid not in retrieved or cid not in quoted for cid in disagreement):
+        return None
+    by_id = {c.id: c for c in scope.chunks}
+    docs = {d.id: d for d in scope.documents}
+    ids = {by_id[cid].document_id for cid in disagreement}
+    if len(ids) != 2:
+        return None
+    first, second = sorted(ids)
+    return docs[first], docs[second]
+
+
+def pick_card(scope: Scope, retrieved, cited, flagged: tuple[Document, Document] | None = None) -> Card:
     """Step 7: the card from the chunks the model cites, never from LLM text.
     No citation, or any citation outside what was retrieved, refuses the whole answer.
-    A cited document in a conflict pair shows every pair hit, with the cited chunks."""
+    A cited document in a conflict pair shows every pair hit, with the cited chunks.
+    A valid `flagged` pair is added to the hits (ADR 0014); the card then has reason "model_flagged"
+    if the declared pairs did not already hold it."""
     if not set(retrieved) <= scope.chunk_ids:
         raise ValueError("retrieved chunks outside the asker's scope")
     if not cited:
@@ -63,24 +92,29 @@ def pick_card(scope: Scope, retrieved, cited) -> Card:
             order.append(by_id[cid])
     cited_docs = {c.document_id for c in order}
     hits = tuple(p for p in scope.conflicts if p[0].id in cited_docs or p[1].id in cited_docs)
+    reason = None
+    if flagged is not None and not any(p[0].id == flagged[0].id and p[1].id == flagged[1].id for p in hits):
+        hits = tuple(sorted((*hits, flagged), key=lambda p: (p[0].id, p[1].id)))
+        reason = "model_flagged"
     if hits:
-        return Card("conflict", scope.persona.hr, tuple(order), hits)
+        return Card("conflict", scope.persona.hr, tuple(order), hits, reason=reason)
     return Card("answer", scope.persona.hr, tuple(order), ())
 
 
-def conflict_quotes(card: Card, retrieved: tuple[Chunk, ...]) -> tuple[tuple[tuple[Chunk, ...], tuple[Chunk, ...]], ...]:
-    """The chunks each of the two documents quotes on the conflict card (ADR 0005, decision 1).
+def conflict_quotes(card: Card, retrieved: tuple[Chunk, ...]) -> tuple[tuple[Document, tuple[Chunk, ...]], ...]:
+    """The chunks each document quotes on the conflict card (ADR 0005, decision 1; ADR 0014).
 
-    For each document in a pair: quote its cited chunks; if it cites none, its highest-ranked
-    retrieved chunk; if none was retrieved, all its chunks. Reads no meaning from any text.
-    Returns one entry per conflict pair, each entry a (left, right) tuple of quoted chunks.
+    Each document of the card's pairs appears once, in the order it first appears in the sorted
+    pairs. Its quotes are its cited chunks; if it cites none, its highest-ranked retrieved chunk;
+    if none was retrieved, all its chunks. Reads no meaning from any text.
     """
     if card.kind != "conflict":
         return ()
-    return tuple(
-        (_quotes_for(a, card.cited, retrieved), _quotes_for(b, card.cited, retrieved))
-        for a, b in card.conflicts
-    )
+    documents: dict[str, Document] = {}
+    for pair in card.conflicts:
+        for document in pair:
+            documents.setdefault(document.id, document)
+    return tuple((d, _quotes_for(d, card.cited, retrieved)) for d in documents.values())
 
 
 def _quotes_for(document: Document, cited: tuple[Chunk, ...], retrieved: tuple[Chunk, ...]) -> tuple[Chunk, ...]:

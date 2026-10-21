@@ -174,7 +174,9 @@ def test_case_row(personas, documents, row):
     cited_ids = []
     for doc_id in row.get("must_cite", []) + row.get("conflict_pair", [])[:1]:
         cited_ids += [c.id for c in chunks(next(d for d in docs if d.id == doc_id))]
-    assert pick_card(s, s.chunk_ids, cited_ids).kind == row.get("rules_card", row["card"])
+    # conflict_from: model rows are found by the model's flag, so the rules alone give the answer card.
+    expected = "answer" if row.get("conflict_from") == "model" else row.get("rules_card", row["card"])
+    assert pick_card(s, s.chunk_ids, cited_ids).kind == expected
 
 
 def test_leak_no_restricted_chunks(employees, dates, documents):

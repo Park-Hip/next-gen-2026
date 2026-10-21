@@ -76,6 +76,20 @@ def test_actual_does_not_double_the_period():
     assert _actual(score) == "Trả lời: Một câu. Không đạt ở: rules"
 
 
+def test_actual_shows_why_a_conflict_card_was_added():
+    def score(card):
+        return RowScore(
+            row={"id": 19}, record={"card": card}, errors=(), checks={}, rules_wrong=False, leak=False,
+            unsafe=False, over_cautious=False, raw_unsafe=False, caught_by_step7=False,
+        )
+
+    pair = [["LEAVE-GROUP-v1", "LEAVE-PAYCO-v1"]]
+    flagged = score({"kind": "conflict", "reason": "model_flagged", "conflicts": pair})
+    assert _actual(flagged) == "Mâu thuẫn: mâu thuẫn giữa LEAVE-GROUP-v1 và LEAVE-PAYCO-v1 (model_flagged)"
+    declared = score({"kind": "conflict", "reason": None, "conflicts": pair})
+    assert "model_flagged" not in _actual(declared)
+
+
 def test_report_incomplete_writes_nothing(cases, personas, documents, tmp_path, monkeypatch):
     monkeypatch.setattr(report_mod, "RESULTS", tmp_path)
     monkeypatch.setattr(report_mod, "REPORT_PATH", tmp_path / "test_report.md")

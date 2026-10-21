@@ -90,7 +90,9 @@ def _scope_ok(row: dict, record: dict) -> bool:
             return False
     pair = row.get("conflict_pair")
     if row["card"] == "conflict" and pair:
-        if tuple(sorted(pair)) not in scope_conflicts:
+        # conflict_from: model rows are found by the model's flag, so the rules alone must not form the pair.
+        formed_by_rules = tuple(sorted(pair)) in scope_conflicts
+        if formed_by_rules == (row.get("conflict_from") == "model"):
             return False
     if row["card"] == "answer":
         conflict_docs = {d for pair in scope_conflicts for d in pair}
