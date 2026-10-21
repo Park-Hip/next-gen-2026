@@ -74,7 +74,6 @@ def flagged_pair(scope: Scope, retrieved, quoted, disagreement) -> tuple[Documen
 def pick_card(scope: Scope, retrieved, cited, flagged: tuple[Document, Document] | None = None) -> Card:
     """Step 7: the card from the chunks the model cites, never from LLM text.
     No citation, or any citation outside what was retrieved, refuses the whole answer.
-    A cited document whose pair partner the asker may not read refuses it too (ADR 0015).
     A cited document in a conflict pair shows every pair hit, with the cited chunks.
     A valid `flagged` pair is added to the hits (ADR 0014); the card then has reason "model_flagged"
     if the declared pairs did not already hold it."""
@@ -92,8 +91,6 @@ def pick_card(scope: Scope, retrieved, cited, flagged: tuple[Document, Document]
             seen.add(cid)
             order.append(by_id[cid])
     cited_docs = {c.document_id for c in order}
-    if cited_docs & set(scope.hidden_partners):
-        return Card("refusal", scope.persona.hr, (), (), reason="hidden_conflict")
     hits = tuple(p for p in scope.conflicts if p[0].id in cited_docs or p[1].id in cited_docs)
     reason = None
     if flagged is not None and not any(p[0].id == flagged[0].id and p[1].id == flagged[1].id for p in hits):

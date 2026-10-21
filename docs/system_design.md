@@ -119,7 +119,7 @@ flowchart TD
 - The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
 - The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
-- Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a pair with a document the asker may not read gives the refusal card (ADR 0015); a content conflict the model does not notice still gives an answer card (section 12.1).
+- Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a content conflict the model does not notice still gives an answer card (section 12.1).
 - The cited clause opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
 

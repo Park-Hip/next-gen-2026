@@ -207,7 +207,7 @@ def test_card_for_answer_conflict_pair_document_retrieved_but_not_cited(cases, p
     assert [c.id for c in card.cited] == ["OT-GAMECO-v1#3"]
 
 
-# --- The model's flag (ADR 0014) and a hidden partner (ADR 0015); all data is simulated ("giả lập").
+# --- The model's flag (ADR 0014); all data is simulated ("giả lập").
 
 LEAVE_RETRIEVED = ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1")
 AS_OF = date(2026, 10, 7)
@@ -342,49 +342,19 @@ def _hr_payco_only(documents):
     return [replace(d, access="roles:hr_payco") if d.id == "LEAVE-PAYCO-v1" else d for d in documents]
 
 
-def test_p8_hidden_partner_refuses_ha(personas, documents):
-    """P8: LEAVE-PAYCO-v1 readable only by hr_payco, and still in a pair with the Group policy."""
+def test_p8_a_hidden_partner_is_applied_as_written(personas, documents):
+    """P8, accepted on purpose (gap G3.6): the pair is formed after the access filter.
+
+    With LEAVE-PAYCO-v1 readable only by hr_payco, Hà's scope keeps only the Group policy and the answer
+    card gives 12 days. The metadata is the owner's error; the owner rule is in ADR 0015."""
     docs = _hr_payco_only(documents)
     s = scope(personas["ha"], AS_OF, docs)
     assert [d.id for d in s.documents] == ["LEAVE-GROUP-v1"] and s.conflicts == ()
-    assert s.hidden_partners == ("LEAVE-GROUP-v1",)
-    group = (_point("LEAVE-GROUP-v1#1", docs),)
-    card = card_for_answer(s, ("LEAVE-GROUP-v1#1",), group)
-    assert card.kind == "refusal" and card.reason == "hidden_conflict"
-    assert card.cited == () and card.conflicts == ()
-    # A flag cannot turn the refusal into something else.
-    flag = ("LEAVE-GROUP-v1#1", "LEAVE-GROUP-v1#2")
-    assert card_for_answer(s, ("LEAVE-GROUP-v1#1",), group, flag).reason == "hidden_conflict"
-
-
-def test_p8_a_reader_with_hr_payco_gets_the_conflict_card(personas, documents):
-    docs = _hr_payco_only(documents)
+    card = card_for_answer(s, ("LEAVE-GROUP-v1#1",), (_point("LEAVE-GROUP-v1#1", docs),))
+    assert card.kind == "answer" and [c.id for c in card.cited] == ["LEAVE-GROUP-v1#1"]
     reader = replace(personas["ha"], roles=("employee", "hr_payco"))
-    s = scope(reader, AS_OF, docs)
-    assert s.hidden_partners == ()
-    card = card_for_answer(s, LEAVE_RETRIEVED, (_point("LEAVE-GROUP-v1#1", docs),))
-    assert card.kind == "conflict" and card.reason is None
-    assert _pairs(card) == [("LEAVE-GROUP-v1", "LEAVE-PAYCO-v1")]
-
-
-def test_hidden_check_comes_before_the_declared_pairs(personas, documents):
-    """A document paired with both a readable and a hidden document is refused."""
-    group = _doc(documents, "LEAVE-GROUP-v1")
-    payco = _doc(documents, "LEAVE-PAYCO-v1")
-    secret = replace(payco, id="LEAVE-SECRET-v1", series="LEAVE-SECRET", access="roles:hr_payco")
-    s = scope(personas["ha"], AS_OF, [group, payco, secret])
-    assert [(a.id, b.id) for a, b in s.conflicts] == [("LEAVE-GROUP-v1", "LEAVE-PAYCO-v1")]
-    assert s.hidden_partners == ("LEAVE-GROUP-v1", "LEAVE-PAYCO-v1")
-    for cid in ("LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1"):
-        card = pick_card(s, LEAVE_RETRIEVED, [cid])
-        assert card.kind == "refusal" and card.reason == "hidden_conflict"
-
-
-def test_a_question_citing_an_unpaired_document_is_not_refused(personas, documents):
-    docs = _hr_payco_only(documents)
-    minh = scope(personas["minh"], AS_OF, docs)
-    card = card_for_answer(minh, ("LEAVE-GAMECO-v2#2",), (_point("LEAVE-GAMECO-v2#2", docs),))
-    assert card.kind == "answer"
+    both = card_for_answer(scope(reader, AS_OF, docs), LEAVE_RETRIEVED, (_point("LEAVE-GROUP-v1#1", docs),))
+    assert both.kind == "conflict" and _pairs(both) == [("LEAVE-GROUP-v1", "LEAVE-PAYCO-v1")]
 
 
 def _doc(documents, doc_id):

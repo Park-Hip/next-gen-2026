@@ -1,5 +1,4 @@
 """services.ask: one question end to end, the same for the page and the harness, and the demo cache."""
-from dataclasses import replace
 from datetime import date
 
 import pytest
@@ -198,17 +197,3 @@ def test_ask_shows_the_conflict_card_for_a_valid_flag(personas, documents):
     assert asked.lines[1].text.startswith("Có 2 quy định")
     assert asked.lines[-1].text == "Vui lòng hỏi HR PayCo."
     assert all("Theo LEAVE" not in line.text for line in asked.lines)
-
-
-def test_ask_hides_a_conflict_with_a_document_the_asker_may_not_read(personas, documents):
-    docs = [replace(d, access="roles:hr_payco") if d.id == "LEAVE-PAYCO-v1" else d for d in documents]
-    s = scope(personas["ha"], AS_OF, docs)
-    group = _chunk(docs, "LEAVE-GROUP-v1#1")
-    point = Point(claim="Theo quy chế Tập đoàn, 12 ngày.", quote=group.text, chunks=(group.id,))
-    asked = ask(s, "q", CountingAnswerer(Reply(retrieved=(group.id,), points=(point,), raw="{}")))
-    assert asked.card.kind == "refusal" and asked.card.reason == "hidden_conflict"
-    not_found = ask(s, "q", CountingAnswerer(Reply(retrieved=(), points=(), raw="")))
-    assert asked.lines == not_found.lines
-    shown = "\n".join(line.text for line in asked.lines)
-    for secret in ("LEAVE-PAYCO-v1", "Quy chế nghỉ phép PayCo", "13 ngày", "12 ngày"):
-        assert secret not in shown

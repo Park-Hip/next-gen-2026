@@ -30,7 +30,7 @@ The strongest alternative is option 4, which keeps every card decided without th
 
 The model's reply carries a required field `disagreement`: a list of at most two retrieved chunk ids, empty when no clauses disagree.
 A missing or malformed field is read as an empty list, so a bad flag never refuses an answer that is otherwise valid.
-Step 7 reads the flag only after its refusals (malformed output, no points, a citation outside the retrieved chunks, a quote that fails the check) and after the hidden-partner check of ADR 0015.
+Step 7 reads the flag only after its refusals (malformed output, no points, a citation outside the retrieved chunks, a quote that fails the check).
 It accepts the flag only if there are exactly two different ids, both retrieved, each cited by a point whose quote is found in that chunk itself, and the two chunks come from two different documents in the asker's scope.
 A valid flag adds the pair of those two documents to the card's conflicts, even when they declare "bổ sung", and the card is the conflict card.
 A flag that fails a check is ignored, and nothing the model says can remove a conflict card or change a refusal.

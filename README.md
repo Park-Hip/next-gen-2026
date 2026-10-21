@@ -281,10 +281,9 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 - [#51](https://github.com/Park-Hip/next-gen-2026/issues/51): a question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in an earlier try, answered in the 21/10/2026 run).
 - [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets gives a normal-looking answer unless the model's flag catches it; a wrong topic or a wrong "bổ sung" can be caught when the two clauses disagree (test case 19), a wrong "dùng thay" or "access" cannot; the rules are only as right as that information.
 
-Two limits of the conflict check are decisions, not open defects:
+One limit of the conflict check is a decision, not an open defect:
 
 - The model can add a conflict, never remove one ([ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)): if the model does not notice that two documents disagree, or the clause of one side is not retrieved, the employee gets an answer card citing one side (limitation [#74](https://github.com/Park-Hip/next-gen-2026/issues/74), closed by #87 once test case 19 passes in the shared run).
-- A document paired with one the employee may not read refuses every question that cites the readable side, even one the hidden document does not touch ([ADR 0015](docs/decisions/0015-a-hidden-side-of-a-conflict-gives-the-refusal.md)).
 
 v1 also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).

@@ -13,9 +13,6 @@ class Scope:
     documents: tuple[Document, ...]
     conflicts: tuple[tuple[Document, Document], ...]
     chunks: tuple[Chunk, ...]
-    # Readable documents that form a conflict pair with a document the asker may not read (ADR 0015).
-    # Only ids: the hidden document itself never enters the scope.
-    hidden_partners: tuple[str, ...] = ()
 
     @property
     def chunk_ids(self) -> frozenset[str]:

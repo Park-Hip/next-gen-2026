@@ -4,7 +4,6 @@ Each test injects an Answerer whose FakeGemini returns scripted replies, so the 
 runs retrieval, the real with_structured_output path and step 7 end to end, offline.
 Every test signs in first: the server decides who is asking from the signed session (ADR 0016).
 """
-from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import html
 import json
@@ -848,24 +847,6 @@ def test_flagged_conflict_card_on_the_wrong_topic_data(documents, monkeypatch):
     assert card.endswith("Vui lòng hỏi HR PayCo.")
     assert "MODEL TEXT MUST NOT APPEAR" not in page
     assert "model_flagged" not in page
-
-
-def test_hidden_conflict_partner_is_refused_without_a_trace(documents, monkeypatch):
-    """P8 on the page: LEAVE-PAYCO-v1 readable only by hr_payco; Hà is refused and told nothing about it."""
-    docs = [replace(d, access="roles:hr_payco") if d.id == "LEAVE-PAYCO-v1" else d for d in documents]
-    quote = chunk_text(docs, "LEAVE-GROUP-v1#1")
-    reply = reply_citing("LEAVE-GROUP-v1#1", quote_from={"LEAVE-GROUP-v1#1": quote})
-    client, _ = _client(docs, reply=reply, monkeypatch=monkeypatch)
-    response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
-    assert response.status_code == 200
-    card = _card_text(page)
-    assert card.startswith("Từ chối")
-    assert "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn." in card
-    for secret in ("LEAVE-PAYCO-v1", "Quy chế nghỉ phép PayCo", "13 ngày", "12 ngày", "hidden_conflict", "Mâu thuẫn"):
-        assert secret not in page
-    not_found, _ = _client(docs, reply=no_points(), monkeypatch=monkeypatch)
-    _, other = _ask(not_found, "ha", "2026-10-07", LEAVE_QUESTION)
-    assert _card_text(other) == card
 
 
 def test_try_link_signed_out_goes_through_sign_in_and_back(documents):
