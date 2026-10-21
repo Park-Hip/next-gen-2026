@@ -27,6 +27,7 @@ CHECKS = (
     "only_allowed_citations",
     "conflict_pair",
     "key_facts",
+    "must_show",
 )
 
 
@@ -87,8 +88,9 @@ def _scope_ok(row: dict, record: dict) -> bool:
     for doc_id in row.get("forbidden_by_rules", []):
         if doc_id in scope_docs:
             return False
-    if row["card"] == "conflict":
-        if tuple(sorted(row["conflict_pair"])) not in scope_conflicts:
+    pair = row.get("conflict_pair")
+    if row["card"] == "conflict" and pair:
+        if tuple(sorted(pair)) not in scope_conflicts:
             return False
     if row["card"] == "answer":
         conflict_docs = {d for pair in scope_conflicts for d in pair}
@@ -101,6 +103,15 @@ def _citations(card: dict | None) -> set[str]:
     if not card:
         return set()
     return {_doc_of_chunk(cid) for cid in card.get("cited", []) or []}
+
+
+def _line_text(line) -> str:
+    """One line of a card: a {kind, text} record, or a flat string from an older run."""
+    return line.get("text", "") if isinstance(line, dict) else str(line)
+
+
+def _lines_text(card: dict) -> str:
+    return "\n".join(_line_text(line) for line in card.get("lines") or [])
 
 
 def score_row(row: dict, records: list[dict]) -> RowScore:
@@ -141,19 +152,27 @@ def score_row(row: dict, records: list[dict]) -> RowScore:
         checks["no_forbidden_for_llm"] = not any(doc_id in forbidden_llm for doc_id in cited_docs)
 
     if card is not None and row.get("must_not_contain"):
-        folded_card = _fold("\n".join(card.get("lines") or []))
+        folded_card = _fold(_lines_text(card))
         checks["must_not_contain"] = all(
             _fold(bad) not in folded_card for bad in row["must_not_contain"]
         )
 
+    if card is not None and row.get("must_cite"):
+        checks["must_cite"] = set(row["must_cite"]) <= cited_docs
+
     answer_card = row["card"] == "answer" and card_kind == "answer"
     if answer_card:
-        checks["must_cite"] = set(row["must_cite"]) <= cited_docs
         allowed = set(row.get("must_cite", [])) | set(row.get("may_cite", []))
         checks["only_allowed_citations"] = cited_docs <= allowed
         folded_answer = _fold(card.get("answer_text") or "")
         checks["key_facts"] = all(
             _fold(fact) in folded_answer for fact in row.get("key_facts", [])
+        )
+
+    if card is not None and row.get("must_show"):
+        folded_card = _fold(_lines_text(card))
+        checks["must_show"] = all(
+            _fold(text) in folded_card for text in row["must_show"]
         )
 
     conflict_card = row["card"] == "conflict" and card_kind == "conflict"
@@ -218,7 +237,7 @@ def refusals_identical(scores: list[RowScore], personas) -> bool:
         card = record["card"] if record else None
         if record and card and card["kind"] == "refusal":
             hr = personas[record["persona"]].hr
-            lines = card.get("lines") or []
+            lines = [_line_text(line) for line in card.get("lines") or []]
             texts.add(tuple(line.replace(hr, "{hr}") for line in lines[1:]))
     return len(texts) <= 1
 

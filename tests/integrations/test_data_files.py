@@ -158,6 +158,9 @@ def test_cases_well_formed(cases, documents, personas):
         tag = f"test case {c['id']}"
         assert c["kind"] in ("good", "hard", "limitation"), tag
         assert c["card"] in ("answer", "conflict", "refusal"), tag
+        if "rules_card" in c:
+            assert c["kind"] == "limitation", tag
+            assert c["rules_card"] in ("answer", "conflict", "refusal"), tag
         assert c["persona"] in personas, tag
         assert c["as_of"], tag
         assert c["questions"] and all(isinstance(q, str) and q for q in c["questions"]), tag
@@ -168,7 +171,10 @@ def test_cases_well_formed(cases, documents, personas):
         if c["card"] == "answer":
             assert c.get("must_cite") and "conflict_pair" not in c, tag
         elif c["card"] == "conflict":
-            assert len(c.get("conflict_pair", [])) == 2 and not cites, tag
+            pair = c.get("conflict_pair", [])
+            assert len(pair) == 2 and not c.get("may_cite"), tag
+            assert set(c.get("must_cite", [])) == set(pair), tag
+            assert c.get("must_show"), tag
         else:
             assert not cites and "conflict_pair" not in c, tag
         for field in ("must_cite", "may_cite", "conflict_pair", "forbidden_by_rules", "forbidden_for_llm"):
@@ -176,8 +182,12 @@ def test_cases_well_formed(cases, documents, personas):
                 assert doc_id in doc_ids, f"{tag}: {doc_id} is not a loaded document"
         if "data_edit" in c:
             edit = c["data_edit"]
+            assert "remove" in edit or edit.get("set"), f"{tag}: data_edit changes nothing"
             body = next(d.body for d in documents if d.id == edit["document"])
-            assert edit["remove"] in body.splitlines(), f"{tag}: data_edit line not found"
+            if "remove" in edit:
+                assert edit["remove"] in body.splitlines(), f"{tag}: data_edit line not found"
+            for key in (edit.get("set") or {}):
+                assert key in ("topic", "complements"), f"{tag}: data_edit cannot set {key}"
 
 
 def test_cases_key_facts(cases):

@@ -31,11 +31,17 @@ def _sheet_score(row_id: int, card_kind: str) -> RowScore:
             "cited": [],
             "conflicts": [],
             "answer_text": "14 ngày" if card_kind == "answer" else None,
-            "lines": ["intro", "thẻ"],
+            "lines": [
+                {"kind": "who", "text": "intro"},
+                {"kind": "claim", "text": "Bạn được nghỉ 14 ngày."},
+                {"kind": "quote", "text": '"14 ngày."'},
+            ],
         },
         "raw": '{"points": []}',
-        "points": [],
-        "retrieved_text": {},
+        "points": [
+            {"claim": "Bạn được nghỉ 14 ngày.", "quote": "14 ngày.", "chunks": ["X#1"]}
+        ] if card_kind == "answer" else [],
+        "retrieved_text": {"X#1": "14 ngày."},
     }
     return RowScore(
         row=row, record=record, errors=(), checks={},
@@ -57,3 +63,12 @@ def test_review_sheet_faithful_filled_for_answer_card():
     text = build_review_sheet("run", scores, reviews)
     assert "- Faithful: yes" in text
     assert "- Faithful: -" not in text
+
+
+def test_review_sheet_shows_each_claim_beside_its_quote():
+    scores = [_sheet_score(1, "answer")]
+    text = build_review_sheet("run", scores, {})
+    assert "- claim: Bạn được nghỉ 14 ngày." in text
+    assert "    quote: 14 ngày." in text
+    assert "    chunk X#1: 14 ngày." in text
+    assert "  - Bạn được nghỉ 14 ngày." in text

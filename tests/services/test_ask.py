@@ -37,13 +37,21 @@ class CountingAnswerer:
 
 def _row1_reply(documents):
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
-    point = Point(chunks=(c2.id,), quote=c2.text)
+    point = Point(
+        claim="Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm.",
+        quote=c2.text,
+        chunks=(c2.id,),
+    )
     return Reply(retrieved=(c2.id,), points=(point,), raw="{}")
 
 
 def test_ask_is_card_for_answer_plus_render(personas, documents):
     g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
-    conflict_point = Point(chunks=(g1.id,), quote=g1.text)
+    conflict_point = Point(
+        claim="Theo Quy chế nghỉ phép Tập đoàn, bạn được nghỉ 12 ngày.",
+        quote=g1.text,
+        chunks=(g1.id,),
+    )
     cases = [
         (scope(personas["minh"], AS_OF, documents), _row1_reply(documents)),               # answer card (row 1)
         (scope(personas["ha"], AS_OF, documents),
@@ -96,14 +104,66 @@ def test_cache_evicts_the_least_recently_used(personas, documents):
     assert answerer.calls == 4
 
 
-def test_ask_never_shows_text_the_model_added(personas, documents):
-    # Issue #47: a one-word quote used to carry an invented sentence onto the card.
-    # Pydantic drops a stray "text" at parse time; here the point has no such field at all.
+def test_ask_shows_the_claim_above_the_verified_quote(personas, documents):
+    # Issue #75: the model's sentence is shown, but only above the quote step 7 checked.
     s = scope(personas["minh"], AS_OF, documents)
-    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote="ngày")
+    point = Point(
+        claim="Theo quy chế GameCo, bạn được nghỉ 14 ngày.",
+        quote="ngày",
+        chunks=("LEAVE-GAMECO-v2#2",),
+    )
     reply = Reply(retrieved=("LEAVE-GAMECO-v2#2",), points=(point,), raw="{}")
     asked = ask(s, "q", CountingAnswerer(reply))
     assert asked.card.kind == "answer"
-    assert asked.lines[1] == '"ngày"'
-    assert asked.lines[2].startswith("Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2")
+    assert [line.kind for line in asked.lines[:4]] == ["who", "claim", "quote", "source"]
+    assert asked.lines[1].text == "Theo quy chế GameCo, bạn được nghỉ 14 ngày."
+    assert asked.lines[2].text == '"ngày"'
+    assert asked.lines[3].text.startswith("Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2")
     assert not hasattr(point, "text")
+
+
+def test_ask_does_not_check_the_claim(personas, documents):
+    # ADR 0011: no rule reads the sentence. A wrong number on top of a verified quote
+    # still gets an answer card; Hiep's Faithfulness reading is the control.
+    s = scope(personas["minh"], AS_OF, documents)
+    point = Point(
+        claim="Bạn được nghỉ 30 ngày mỗi năm.",
+        quote="ngày",
+        chunks=("LEAVE-GAMECO-v2#2",),
+    )
+    reply = Reply(retrieved=("LEAVE-GAMECO-v2#2",), points=(point,), raw="{}")
+    asked = ask(s, "q", CountingAnswerer(reply))
+    assert asked.card.kind == "answer"
+    assert asked.lines[1].text == "Bạn được nghỉ 30 ngày mỗi năm."
+    assert asked.lines[2].text == '"ngày"'
+
+
+def test_ask_claim_never_changes_the_card_kind(personas, documents):
+    # The sentence says PayCo applies, but the citation is the Group side of a declared pair:
+    # only the rules decide, so the card is a conflict and shows no model text.
+    s = scope(personas["ha"], AS_OF, documents)
+    group = _chunk(documents, "LEAVE-GROUP-v1#1")
+    point = Point(
+        claim="Theo quy chế PayCo, bạn được nghỉ 13 ngày.",
+        quote=group.text,
+        chunks=(group.id,),
+    )
+    reply = Reply(retrieved=(group.id,), points=(point,), raw="{}")
+    asked = ask(s, "q", CountingAnswerer(reply))
+    assert asked.card.kind == "conflict"
+    assert all("Theo quy chế PayCo" not in line.text for line in asked.lines)
+
+
+def test_ask_refusal_hides_the_claim(personas, documents):
+    s = scope(personas["minh"], AS_OF, documents)
+    chunk = _chunk(documents, "LEAVE-GAMECO-v2#2")
+    point = Point(
+        claim="MODEL TEXT MUST NOT APPEAR",
+        quote="câu không có trong tài liệu",
+        chunks=(chunk.id,),
+    )
+    reply = Reply(retrieved=(chunk.id,), points=(point,), raw="{}")
+    asked = ask(s, "q", CountingAnswerer(reply))
+    assert asked.card.kind == "refusal"
+    assert asked.card.reason == "quote_mismatch"
+    assert all("MODEL TEXT MUST NOT APPEAR" not in line.text for line in asked.lines)

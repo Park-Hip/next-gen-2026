@@ -2,7 +2,7 @@
 from datetime import date
 
 from appota_kb.models.answer import Point
-from appota_kb.models.card import Card
+from appota_kb.models.card import Card, CardLine
 from appota_kb.services.card_text import REFUSAL_TEXT, refusal_text, render
 from appota_kb.services.chunking import chunks
 from appota_kb.services.citations import pick_card
@@ -23,24 +23,50 @@ def test_answer_card_wording(personas, documents):
     s = scope(persona, date(2026, 10, 7), documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
-    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=c2.text)
+    point = Point(
+        claim="Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm.",
+        quote=c2.text,
+        chunks=("LEAVE-GAMECO-v2#2",),
+    )
     lines = render(card, s, (point,), (c2,))
     assert lines == (
-        "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.",
-        '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."',
-        "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.",
+        CardLine("who", "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."),
+        CardLine("claim", "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."),
+        CardLine("quote", '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'),
+        CardLine("source", "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo."),
     )
 
 
-def test_answer_card_shows_the_folded_quote_once_per_distinct_quote(personas, documents):
+def test_answer_card_folds_each_points_quote(personas, documents):
     persona = personas["minh"]
     s = scope(persona, date(2026, 10, 7), documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
     spaced = "  Nhân sự GameCo được nghỉ phép năm\n14 ngày mỗi năm.  "
-    point = Point(chunks=("LEAVE-GAMECO-v2#2",), quote=spaced)
+    point = Point(claim="Theo quy chế, 14 ngày.", quote=spaced, chunks=("LEAVE-GAMECO-v2#2",))
     lines = render(card, s, (point, point), (c2,))
-    assert lines[1] == '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'
+    quotes = [line.text for line in lines if line.kind == "quote"]
+    assert quotes == ['"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'] * 2
+
+
+def test_answer_card_gives_each_point_its_own_source_line(personas, documents):
+    persona = personas["ha"]
+    s = scope(persona, date(2026, 10, 7), documents)
+    g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
+    p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
+    card = Card("answer", persona.hr, (g1, p1), ())
+    points = (
+        Point(claim="Theo quy chế Tập đoàn, 12 ngày.", quote=g1.text, chunks=(g1.id,)),
+        Point(claim="Theo quy chế PayCo, 13 ngày.", quote=p1.text, chunks=(p1.id,)),
+    )
+    lines = render(card, s, points, (g1, p1))
+    assert [line.kind for line in lines] == [
+        "who", "claim", "quote", "source", "claim", "quote", "source"
+    ]
+    assert lines[1].text == "Theo quy chế Tập đoàn, 12 ngày."
+    assert lines[3].text.startswith("Nguồn: Quy chế nghỉ phép Tập đoàn")
+    assert lines[4].text == "Theo quy chế PayCo, 13 ngày."
+    assert lines[6].text.startswith("Nguồn: Quy chế nghỉ phép PayCo")
 
 
 def test_conflict_card_wording(personas, documents):
@@ -51,16 +77,20 @@ def test_conflict_card_wording(personas, documents):
     g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
     p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
     card = Card("conflict", persona.hr, (g1,), ((group, payco),))
-    marker = Point(chunks=("LEAVE-GROUP-v1#1",), quote="MODEL QUOTE MUST NOT APPEAR")
+    marker = Point(
+        claim="MODEL CLAIM MUST NOT APPEAR",
+        quote="MODEL QUOTE MUST NOT APPEAR",
+        chunks=("LEAVE-GROUP-v1#1",),
+    )
     lines = render(card, s, (marker,), (g1, p1))
     assert lines == (
-        "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.",
-        "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. Hệ thống không tự chọn.",
-        'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."',
-        'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."',
-        "Vui lòng hỏi HR PayCo.",
+        CardLine("who", "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán."),
+        CardLine("lead", "Có hai quy định cùng áp dụng cho bạn nhưng chưa được khai báo quan hệ với nhau. Hệ thống không tự chọn."),
+        CardLine("quote", 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."'),
+        CardLine("quote", 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."'),
+        CardLine("plain", "Vui lòng hỏi HR PayCo."),
     )
-    assert all("MODEL QUOTE" not in line for line in lines)
+    assert all("MODEL" not in line.text for line in lines)
 
 
 def test_refusal_card_wording(personas, documents):
@@ -69,9 +99,9 @@ def test_refusal_card_wording(personas, documents):
     card = Card("refusal", persona.hr, (), ())
     lines = render(card, s, None, ())
     assert lines == (
-        "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.",
-        "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn.",
-        "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo.",
+        CardLine("who", "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."),
+        CardLine("lead", "Hệ thống không tìm thấy quy định phù hợp để trả lời câu hỏi này cho bạn."),
+        CardLine("plain", "Hệ thống chỉ trả lời các quy định áp dụng cho bạn. Vui lòng liên hệ HR GameCo."),
     )
 
 

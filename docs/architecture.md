@@ -9,10 +9,10 @@ What v1 simplifies, defers and gets wrong is in [`scope.md`](scope.md); each des
 The core loop of the brief is "câu hỏi + bối cảnh người dùng → tìm đúng tri thức → sử dụng đúng phạm vi → trả lời có nguồn kiểm chứng".
 v1 splits it in two.
 First, deterministic rules build the asker's scope from document metadata, the asker's unit and roles, and the as-of date, without reading the question and without any AI.
-Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer and quotes them, and rules check every citation and quote before choosing which of three cards to show.
+Then search and one LLM call work only inside that scope: the LLM picks the clauses that answer, writes one plain sentence per clause and quotes each clause, and rules check every citation and quote before choosing which of three cards to show.
 So a wrong version, another unit's rule or a restricted document cannot reach an answer, because the AI never sees them.
-No card shows text the LLM wrote: the answer card shows the quotes the rules verified, word for word.
-What the AI can still get wrong is choosing which clause in the scope answers the question, which is what the test report measures.
+The answer card shows the model's sentence above the quote the rules verified, then the source line (ADR 0011); the conflict and refusal cards show fixed wording and no model text.
+What the AI can still get wrong is choosing which clause in the scope answers the question, and writing a sentence that drops a condition or adds a fact; the test report and Hiep's reading measure both.
 
 ## The 7 steps
 
@@ -35,12 +35,12 @@ flowchart TD
     s3["3. Applies declared replacements, then keeps what the asker may read"]
     s4["4. Marks conflict pairs: same topic, no declared relation"]
     s5{{"5. Hybrid search in the scope, BM25 and embeddings: top 5 chunks"}}
-    s6{{"6. The LLM cites chunks and quotes each clause word for word"}}
+    s6{{"6. The LLM writes one plain sentence per clause, cites chunks, quotes each clause word for word"}}
     valid{"7. Citations and quotes valid?"}
     conflict{"7. Cites a conflict pair?"}
     refusal[/"Refusal card"/]
     conflictcard[/"Conflict card"/]
-    answercard[/"Answer card: the verified quotes, no AI text"/]
+    answercard[/"Answer card: sentence, verified quote, source; conflict and refusal cards: fixed wording"/]
     documents[("Documents with metadata")]
     index[("Search index")]
 
@@ -63,7 +63,7 @@ A document the asker may not read still replaces its series, and the asker gets 
 ## Who decides what
 
 Deterministic rules decide access, validity, applicability, precedence and the card.
-The AI only works with language: it ranks chunks, and it picks and quotes the clauses that answer the question.
+The AI only works with language: it ranks chunks, picks the clauses that answer, writes one sentence per clause and quotes them (ADR 0011).
 
 | Decision | Decided by | How | Code | If it goes wrong |
 |---|---|---|---|---|
@@ -73,9 +73,10 @@ The AI only works with language: it ranks chunks, and it picks and quotes the cl
 | Which policy wins (precedence) | Rules, step 3 | Only an `overrides` ("dùng thay") the owner declared; there is no default "lower unit wins" | `scope` in `services/scope.py` | An undeclared pair is not resolved, it becomes a conflict pair |
 | Which policies conflict | Rules, step 4 | Same `topic`, both kept, neither lists the other in `complements` ("bổ sung") | `scope` in `services/scope.py` | The rules never decide a conflict; the card sends the asker to HR |
 | Which chunks are relevant | Search, step 5: BM25 plus `gemini-embedding-001` (ADRs 0001, 0002) | Ranks only the scope's chunks; anything outside the scope raises an error | `services/retrieval/search.py` | A missed chunk means the LLM finds nothing, so the asker gets a refusal: safe, but over-cautious |
-| Which clauses answer the question | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks and the asker's unit; may cite only retrieved ids, and quotes each clause word for word, or returns no points | `services/answering/` | See "What the rules cannot catch" below |
+| Which clauses answer the question | LLM, step 6: `gemini-3.5-flash-lite` (ADRs 0003, 0008) | Sees only the retrieved chunks and the asker's unit; may cite only retrieved ids, writes one plain sentence per clause, and quotes each clause word for word, or returns no points | `services/answering/` | See "What the rules cannot catch" below |
 | Whether the answer is shown, and which card | Rules, step 7 (ADR 0003) | Refuses the whole answer if any point has no citation, cites a chunk that was not retrieved, or its quote is not in the cited chunk; a cited document in a conflict pair gives the conflict card | `card_for_answer` and `pick_card` in `services/citations.py` | Deterministic and tested |
-| The card's text | Rules | Fixed wording from the Mission 1 design; the answer card shows the quotes step 7 verified, never a sentence the LLM wrote (ADR 0009); the conflict card quotes one clause per side, chosen without reading meaning (ADR 0005) | `services/card_text.py` | Deterministic and tested |
+| The answer card's sentence | LLM, step 6 | One plain Vietnamese sentence per point, naming the document; not checked at run time (ADR 0011); Hiep reads every sentence against its quote | `services/answering/`, `services/card_text.py` | A wrong sentence can mislead; the verified quote under it and the Faithfulness reading are the controls |
+| The card kind, the verified quote, the source line, and the conflict and refusal text | Rules | The card kind comes from step 7 citations; the answer card shows the quote step 7 verified and the source line; the conflict card quotes one clause per side, chosen without reading meaning (ADRs 0003, 0005, 0011) | `services/card_text.py` | Deterministic and tested |
 
 If Gemini fails after retries, the page shows an error, never a card.
 
@@ -90,6 +91,8 @@ If Gemini fails after retries, the page shows an error, never a card.
 
 - The LLM cites and quotes a clause in the scope that is real but does not answer the question.
   The quote check proves the clause exists, not that it answers; the test report reads every answer by hand.
+- The model's sentence can add a fact, drop a condition such as "chính thức", or decide which rule applies, and no rule checks it (ADR 0011).
+  The quote under it is checked, and Hiep's Faithfulness reading names the error; limitation #74 covers an undeclared content conflict that shows two values on one answer card.
 - A question that needs the clause applied to a case, such as "nghỉ thứ Hai thì hạn chót nộp đơn là ngày nào?", is often refused although the clause is retrieved, because the LLM is told to answer only what is written ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
 - A question about another period, such as next year, gets the version in force on the as-of date, because the rules never read the question ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)).
 - Wrong metadata from an owner, such as a wrong topic or a wrong "bổ sung": the rules trust the metadata, and v1 has no check at publish time ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)).
@@ -105,7 +108,7 @@ Each is an open issue labelled `limitation`; [`scope.md`](scope.md#known-limitat
 | Có dữ liệu giả lập ở nhiều cấp tổ chức | Group, two member companies and their units (diagram below); policies at Group and company level | 1, 5, 7 |
 | Hiểu được bối cảnh người hỏi | The asker's unit and roles, from a simulated persona picker that stands in for the HR system, and the as-of date | 1, 2, 5, 7 |
 | Không sử dụng/làm lộ thông tin ngoài quyền | Steps 1-4 build the scope before search; the search and the LLM never see anything outside it | 6, 10, 13 |
-| Câu trả lời có nguồn/căn cứ | Every point cites chunk ids and quotes the clause; step 7 checks both; the card names the document, the Điều and the effective date | 1, 3, 4 |
+| Câu trả lời có nguồn/căn cứ | Every point has a plain sentence, chunk ids and a quote; step 7 checks the citation and the quote; the card names the document, the Điều and the effective date | 1, 3, 4 |
 | Biết từ chối khi thiếu dữ liệu | The LLM may return no points; step 7 then shows the refusal card with the asker's HR contact | 8, 9, 11, 14 |
 | Có khả năng xử lý phiên bản hoặc thông tin mâu thuẫn | Step 1 keeps the version in force; step 4 marks undeclared pairs and step 7 shows the conflict card | 2, 3, 7, 12 |
 
@@ -158,20 +161,22 @@ Minh's search runs on 11 chunks, Lan's on 2 and Hà's on 4.
 
 ### Steps 5-7: the cards
 
-From the committed evaluation run [`20261014-2239`](../results/20261014-2239.jsonl), the final run, rows 1, 5 and 7; the card lines are copied word for word.
+From the 21/10/2026 run, [`20261021-1032`](../results/20261021-1032.jsonl), rows 1, 5 and 7; the card lines are copied word for word.
 
 **Minh: answer card.**
-Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the quote.
+Search returned five of his chunks; the LLM cited `LEAVE-GAMECO-v2#2`, and step 7 found its quote in that chunk, so the card shows the model's sentence above the quote.
 
 > Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.
+> Theo Quy chế nghỉ phép GameCo (bản 2), nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.
 > "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo.
 
 **Lan: answer card.**
 Her scope has two chunks; the LLM cited `LEAVE-GROUP-v1#1`.
-The quote keeps the condition "chính thức", which the rules do not check; the employee reads it on the card.
+The sentence and the quote both keep the condition "chính thức"; step 7 checks the quote, not the sentence, so the employee reads both on the card.
 
 > Bạn đang hỏi với tư cách: nhân sự Tập đoàn, Nhân sự Tập đoàn.
+> Theo Quy chế nghỉ phép Tập đoàn, nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.
 > "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép Tập đoàn, Điều 1, hiệu lực từ 01/01/2024. Hỏi thêm: HR Tập đoàn.
 
@@ -215,8 +220,8 @@ All code is in `src/appota_kb/`; the folder layout is in [`development.md`](deve
 | Load and validate the data; the load fails on two versions with the same start date, a self-override or an override cycle | `integrations/data_files.py` | `tests/integrations/test_data_files.py` | - |
 | 1-4, the scope | `services/scope.py`, `services/chunking.py` | `tests/services/test_scope.py`, `tests/services/test_chunking.py`, `tests/test_parity.py` | ADR 0010 |
 | 5, search | `services/retrieval/` | `tests/services/retrieval/` | `retrieval` in `config.yaml`; ADRs 0001, 0002 |
-| 6, the LLM answer | `services/answering/`, `integrations/gemini.py` | `tests/services/answering/`, `tests/integrations/test_gemini.py` | `llm` in `config.yaml`; ADRs 0003, 0008 |
-| 7, the card | `services/citations.py`, `services/card_text.py` | `tests/services/test_citations.py`, `tests/services/test_card_text.py` | ADRs 0003, 0005, 0009 |
+| 6, the LLM answer | `services/answering/`, `integrations/gemini.py` | `tests/services/answering/`, `tests/integrations/test_gemini.py` | `llm` in `config.yaml`; ADRs 0003, 0008, 0011 |
+| 7, the card | `services/citations.py`, `services/card_text.py` | `tests/services/test_citations.py`, `tests/services/test_card_text.py` | ADRs 0003, 0005, 0011 |
 | One question end to end | `services/ask.py`, used by both the page and the evaluation | `tests/services/test_ask.py` | - |
 | The page | `api/page.py`, `api/templates/` | `tests/api/test_page.py` | `page` in `config.yaml`; ADR 0004 |
 | The evaluation | `evaluation/` | `tests/evaluation/` | `eval` in `config.yaml`; ADRs 0006, 0007 |

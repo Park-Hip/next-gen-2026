@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from appota_kb.models.answer import Reply
-from appota_kb.models.card import Card
+from appota_kb.models.card import Card, CardLine
 from appota_kb.models.scope import Scope
 from appota_kb.services.card_text import render
 from appota_kb.services.citations import card_for_answer
@@ -18,7 +18,7 @@ from appota_kb.services.citations import card_for_answer
 class Asked:
     reply: Reply
     card: Card
-    lines: tuple[str, ...]
+    lines: tuple[CardLine, ...]
     cache_hit: bool
 
 

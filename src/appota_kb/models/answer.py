@@ -4,9 +4,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Point:
-    """One grounded fact from the model: the chunks it cites and a verbatim quote that step 7 checks."""
-    chunks: tuple[str, ...]
+    """One grounded fact from the model: a plain sentence, a verbatim quote that step 7 checks,
+    and the chunks it cites.
+
+    The sentence is shown above the quote (ADR 0011); step 7 never reads it.
+    """
+    claim: str
     quote: str
+    chunks: tuple[str, ...]
 
 
 @dataclass(frozen=True)

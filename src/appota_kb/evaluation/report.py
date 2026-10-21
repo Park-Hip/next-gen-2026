@@ -28,7 +28,7 @@ REPORT_REL = Path("docs") / "mission2" / "test_report.md"
 REPORT_PATH = ROOT / REPORT_REL
 
 # Each limitation row links the issue that keeps it open (ADR 0006).
-LIMITATION_ISSUES = {15: "#24", 16: "#51", 17: "#52", 18: "#53"}
+LIMITATION_ISSUES = {15: "#24", 16: "#51", 17: "#52", 18: "#53", 19: "#74"}
 
 
 def _cell(text) -> str:
@@ -79,7 +79,7 @@ def _actual(score: RowScore) -> str:
     text = f"{label}: {detail}" if detail else label
     failed = failures(score)
     if failed:
-        text += ". Không đạt ở: " + ", ".join(failed)
+        text = text.rstrip(".") + ". Không đạt ở: " + ", ".join(failed)
     return text
 
 

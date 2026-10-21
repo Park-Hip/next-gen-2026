@@ -390,6 +390,7 @@ Changed: the prompt adds these rules.
 3. When clauses from different documents give different answers, make one point for each, and do not choose between them, merge them or decide which one applies.
 4. Do not return no points only because clauses disagree.
 5. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
+6. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
 
 The prompt never says which documents form a conflict pair: the rules decide the card, so the model gains nothing from knowing.
 
@@ -698,7 +699,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | 0003, 0008 | One model call that cites retrieved ids and quotes | Holds; the prompt changes (section 6.3) |
 | 0004 | The host, and leaving "Báo sai" and the owners' page out of Mission 2 | The owner console reverses the second part and needs a new ADR |
 | 0005 | The conflict card | Holds |
-| 0009 | The card shows only the verified quote | A new ADR supersedes it with the sentence above the quote (section 6.4) |
+| 0009 | The card shows only the verified quote | Superseded by 0011: the card shows the sentence above the verified quote (section 6.4) |
 | 0010 | Access is checked last | Holds |
 
 ### 15.2 Decisions this design needs
@@ -718,7 +719,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | No | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |
-| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | Possibly; needs the ADR that supersedes ADR 0009 | 6.3, 6.4 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time | ADR 0011 | 6.3, 6.4 |
 | SD15 | Whether a content conflict scan runs when an owner publishes | To discuss with the owner workflow | Yes | 12 |
 | SD16 | Whether owners get a list of answers that cite documents with no declared relation between them | To discuss with the owner workflow | No | 12 |
 | SD17 | The criterion for Readability (spec section 6.2) | - | No | 14 |

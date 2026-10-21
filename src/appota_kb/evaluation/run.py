@@ -123,15 +123,16 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
     record["retrieved_text"] = {cid: by_text[cid] for cid in reply.retrieved}
     record["raw"] = reply.raw
     record["points"] = None if reply.points is None else [
-        {"chunks": list(p.chunks), "quote": p.quote} for p in reply.points
+        {"claim": p.claim, "quote": p.quote, "chunks": list(p.chunks)} for p in reply.points
     ]
+    claims = " ".join(p.claim for p in reply.points or ())
     record["card"] = {
         "kind": card.kind,
         "reason": card.reason,
         "cited": [c.id for c in card.cited],
         "conflicts": [sorted([a.id, b.id]) for a, b in card.conflicts],
-        "answer_text": lines[1] if card.kind == "answer" else None,
-        "lines": list(lines),
+        "answer_text": claims if card.kind == "answer" else None,
+        "lines": [{"kind": line.kind, "text": line.text} for line in lines],
     }
     return record
 

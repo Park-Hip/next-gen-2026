@@ -1,6 +1,7 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
-# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
-# found by probing v1 on 14/10/2026 (issues #51, #52, #53), kept as limitation rows.
+# Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-19 are failures
+# kept as limitation rows: rows 16-18 found by probing v1 on 14/10/2026 (issues #51, #52, #53), row 19 is #74;
+# row 20 is the hard case added with #75.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
 # purpose: why the case is tested, in plain Vietnamese for the judges' "Test cases" page: what it sets up, what the system
@@ -8,15 +9,18 @@
 # questions: every wording the case is asked in; each one must get the same result.
 # card: answer | conflict | refusal, the card step 7 must show.
 # expected_answer: what a correct reply says, the "Kỳ vọng" of the report; read by hand against the actual reply.
-# must_cite, may_cite (answer rows): the reply cites every must_cite document and nothing outside must_cite + may_cite.
-# conflict_pair (conflict rows): the reply cites at least one of the pair; the card shows both.
-# key_facts (answer rows): short strings the answer text must contain, after NFC, whitespace folding and
-#   casefolding (ADR 0006, decision 3 of the #14 plan); reviewed by Hiep.
+# must_cite, may_cite (answer and conflict rows): the reply cites every must_cite document; an answer card
+#   cites nothing outside must_cite + may_cite.
+# conflict_pair (conflict rows): the pair the rules must find; the card shows both sides.
+# key_facts (answer rows): short strings the answer text (the model's sentences) must contain, after NFC,
+#   whitespace folding and casefolding (ADR 0006, decision 3 of the #14 plan); reviewed by Hiep.
+# must_show (answer and conflict rows): strings the card must show, so both sides of a conflict are visible.
+# rules_card (limitation rows, only when the ideal card differs): the card the deterministic rules currently pick.
 # Refusal rows cite nothing: any citation is a failure.
 # forbidden_by_rules: outside the asker's scope, so rules guarantee they are never retrieved or cited.
 # forbidden_for_llm: inside the scope, so they can be retrieved and only the LLM can avoid citing them.
 # must_not_contain: text the reply must never show.
-# data_edit (only when needed): the row runs on the data with this line removed from one document.
+# data_edit (only when needed): the row runs on the data with one line removed and/or metadata fields set.
 - id: 1
   kind: good
   purpose: >-
@@ -139,6 +143,8 @@
   card: conflict
   expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 1 (12 ngày) và PayCo Điều 1 (13 ngày), không tự chọn, mời hỏi HR PayCo.
   conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_cite: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_show: [12 ngày, 13 ngày]
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
   forbidden_for_llm: []
 - id: 8
@@ -216,6 +222,8 @@
   card: conflict
   expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 2 (báo trước 3 ngày làm việc) và PayCo Điều 2 (báo trước 5 ngày làm việc), không tự chọn, mời hỏi HR PayCo.
   conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_cite: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_show: [3 ngày làm việc, 5 ngày làm việc]
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
   forbidden_for_llm: []
 - id: 13
@@ -322,3 +330,49 @@
   expected_answer: Thẻ từ chối - v1 chỉ trả lời quy định đang hiệu lực vào ngày áp dụng, không trả lời cho năm sau, mời liên hệ HR GameCo; không hiện thẻ trả lời 14 ngày.
   forbidden_by_rules: [LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT, LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2]
+- id: 19
+  kind: limitation
+  purpose: >-
+    Hạn chế đã biết của v1, ghi ở issue #74; tình huống này được chờ là chưa đạt. Hà hỏi số ngày phép năm,
+    nhưng dữ liệu đã sửa đặt chủ đề của quy chế PayCo thành nghi_phep_nam, nên quy tắc không còn thấy hai quy
+    chế cùng chủ đề và không tạo cặp mâu thuẫn. Đúng ra Hà phải nhận thẻ mâu thuẫn như hàng 7, trích cả 12 ngày
+    của Tập đoàn và 13 ngày của PayCo. Hàng này kiểm tra yêu cầu tối thiểu của #75: dù thẻ là thẻ trả lời, cả hai
+    con số phải cùng hiện, không được chỉ hiện một bên.
+  persona: ha
+  as_of: 2026-10-07
+  data_edit:
+    document: LEAVE-PAYCO-v1
+    set:
+      topic: nghi_phep_nam
+  questions:
+    - Phép năm của tôi là bao nhiêu ngày?
+  card: conflict
+  rules_card: answer
+  expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 1 (12 ngày) và PayCo Điều 1 (13 ngày), không tự chọn, mời hỏi HR PayCo; v1 chưa phát hiện được vì metadata bị sửa.
+  conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_cite: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_show: [12 ngày, 13 ngày]
+  forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
+  forbidden_for_llm: []
+- id: 20
+  kind: hard
+  purpose: >-
+    Minh hỏi ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không. Dữ liệu đã sửa bỏ khai báo "bổ sung" của
+    hướng dẫn đăng ký nghỉ phép, nên hướng dẫn và quy chế nghỉ phép GameCo thành một cặp mâu thuẫn trong phạm vi
+    của Minh; cả hai vẫn có thể được tìm thấy cho câu hỏi này. Câu trả lời chỉ có ở Điều 3 quy định làm thêm giờ,
+    nên hệ thống phải trả thẻ trả lời chứ không phải thẻ mâu thuẫn. Hàng này kiểm tra rằng một văn bản trong cặp
+    mâu thuẫn được tìm thấy nhưng không được trích thì không được biến câu trả lời thành thẻ mâu thuẫn.
+  persona: minh
+  as_of: 2026-10-07
+  data_edit:
+    document: LEAVE-PROC-GAMECO-v1
+    set:
+      complements: []
+  questions:
+    - Ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không?
+  card: answer
+  expected_answer: Không, ngày nghỉ bù không trừ vào số ngày phép năm, theo Quy định làm thêm giờ GameCo, Điều 3; hai văn bản nghỉ phép bị đặt vào cặp mâu thuẫn vẫn được tìm thấy nhưng không trả lời câu hỏi, nên thẻ phải là thẻ trả lời.
+  must_cite: [OT-GAMECO-v1]
+  key_facts: [không trừ]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3, LEAVE-GAMECO-v4-DRAFT]
+  forbidden_for_llm: []

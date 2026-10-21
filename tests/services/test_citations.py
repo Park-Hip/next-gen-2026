@@ -3,6 +3,7 @@ from datetime import date
 
 import pytest
 
+from appota_kb.evaluation.data_edit import with_edit
 from appota_kb.models.answer import Point
 from appota_kb.services.chunking import chunks
 from appota_kb.services.citations import (
@@ -19,9 +20,10 @@ def _chunk_by_id(documents, chunk_id):
     return next(c for d in documents if d.id == doc_id for c in chunks(d) if c.id == chunk_id)
 
 
-def _point(chunk_id, documents, quote=None):
+def _point(chunk_id, documents, quote=None, claim=None):
     chunk = _chunk_by_id(documents, chunk_id)
-    return Point(chunks=(chunk_id,), quote=chunk.text if quote is None else quote)
+    quote = chunk.text if quote is None else quote
+    return Point(claim=claim or quote, quote=quote, chunks=(chunk_id,))
 
 
 def test_conflict_quotes(personas, documents):
@@ -133,6 +135,15 @@ def test_card_for_answer_invented_id_is_refused(personas, documents):
     assert card.kind == "refusal" and card.reason == "outside_retrieved"
 
 
+def test_card_for_answer_one_bad_quote_refuses_the_whole_answer(personas, documents):
+    s = scope(personas["minh"], date(2026, 10, 7), documents)
+    retrieved = ("LEAVE-GAMECO-v2#2", "LEAVE-PROC-GAMECO-v1#1")
+    good = _point("LEAVE-GAMECO-v2#2", documents)
+    bad = _point("LEAVE-PROC-GAMECO-v1#1", documents, quote="câu không có trong tài liệu")
+    card = card_for_answer(s, retrieved, (good, bad))
+    assert card.kind == "refusal" and card.reason == "quote_mismatch"
+
+
 def test_card_for_answer_quote_rules(personas, documents):
     s = scope(personas["minh"], date(2026, 10, 7), documents)
     retrieved = ("LEAVE-GAMECO-v2#2",)
@@ -176,3 +187,20 @@ def test_card_for_answer_retrieved_outside_scope_raises(personas, documents):
     s = scope(personas["minh"], date(2026, 10, 7), documents)
     with pytest.raises(ValueError):
         card_for_answer(s, ("SAL-BAND-GAMECO#2",), None)
+
+
+def test_card_for_answer_conflict_pair_document_retrieved_but_not_cited(cases, personas, documents):
+    # Row 20: removing the "complements" declaration puts the leave procedure and the
+    # GameCo policy in a declared conflict pair, and both are retrieved for an overtime
+    # question. Only the overtime clause answers, so citing it must give an answer card.
+    row = next(c for c in cases if c["id"] == 20)
+    docs = with_edit(documents, row["data_edit"])
+    s = scope(personas[row["persona"]], row["as_of"], docs)
+    assert [tuple(sorted((a.id, b.id))) for a, b in s.conflicts] == [
+        ("LEAVE-GAMECO-v2", "LEAVE-PROC-GAMECO-v1")
+    ]
+    retrieved = ("LEAVE-PROC-GAMECO-v1#1", "LEAVE-GAMECO-v2#1", "OT-GAMECO-v1#3")
+    point = _point("OT-GAMECO-v1#3", docs)
+    card = card_for_answer(s, retrieved, (point,))
+    assert card.kind == "answer"
+    assert [c.id for c in card.cited] == ["OT-GAMECO-v1#3"]

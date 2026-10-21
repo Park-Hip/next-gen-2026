@@ -1,7 +1,8 @@
 """Hiep's reading of a run: the review YAML he fills in and the review sheet he reads (decision D6).
 
 The YAML holds `faithful` (answer cards) and `lesson` (every row); the sheet shows, per row,
-the question, the expectation, the card, the raw reply and the points against the cited chunks.
+the question, the expectation, the card, the raw reply and each point's sentence and quote
+against the cited chunks.
 """
 from pathlib import Path
 
@@ -45,7 +46,8 @@ def lesson_of(review: dict | None) -> str:
 def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> str:
     """The sheet Hiep reads: per row the question, expectation, card, raw reply and points."""
     out = [f"# Review sheet for run {run_id}", ""]
-    out.append("Read every answer card against the cited chunks; mark `faithful` in the review YAML.")
+    out.append("Read every answer sentence against its quote and the cited chunks; mark `faithful` in the review YAML.")
+    out.append("If a sentence is unfaithful, name the error: a changed number, a dropped condition, an added fact, a flipped meaning, the wrong people, or deciding which rule applies.")
     out.append("")
     for score in scores:
         row = score.row
@@ -61,13 +63,15 @@ def build_review_sheet(run_id: str, scores: list[RowScore], reviews: dict) -> st
         lines = card.get("lines") or [] if card else []
         out.append("- Thẻ:")
         for line in lines:
-            out.append(f"  - {line}")
+            text = line.get("text", "") if isinstance(line, dict) else line
+            out.append(f"  - {text}")
         out.append(f"- Raw reply: {score.record.get('raw') or '(empty)'}")
         points = score.record.get("points")
         if points:
             out.append("- Points:")
             for point in points:
-                out.append(f"  - quote: {point['quote']}")
+                out.append(f"  - claim: {point.get('claim', '(none)')}")
+                out.append(f"    quote: {point['quote']}")
                 for cid in point.get("chunks", []):
                     full = score.record.get("retrieved_text") or {}
                     out.append(f"    chunk {cid}: {full.get(cid, '(not retrieved)')}")

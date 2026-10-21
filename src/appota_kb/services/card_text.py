@@ -1,11 +1,12 @@
-"""The three cards' lines of text, word for word from the submitted document (Phần 2).
+"""The three cards' lines: fixed wording from the submitted document (Phần 2), plus each answer point's sentence.
 
 No FastAPI and no LLM here: the page and the templates render these lines.
-Every fact on an answer card is a quote that step 7 checked against its cited chunk (ADR 0009).
+Each answer point shows the model's sentence above the quote that step 7 checked (ADR 0011).
+The conflict and refusal cards keep fixed wording and show no model text.
 ADR 0004 drops the "Báo sai" button; #15 later adds the "Đã ghi nhận" line (recorded=True).
 """
 from appota_kb.models.answer import Point
-from appota_kb.models.card import Card
+from appota_kb.models.card import Card, CardLine
 from appota_kb.models.document import Chunk, Document
 from appota_kb.models.org import Persona
 from appota_kb.models.scope import Scope
@@ -54,39 +55,34 @@ def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]
     return [(doc_id, tuple(by_doc[doc_id])) for doc_id in order]
 
 
-def _quotes(points: tuple[Point, ...]) -> list[str]:
-    """The folded quotes step 7 verified, in order, each once; the card never shows any other model text."""
-    seen: list[str] = []
-    for point in points:
-        quote = fold(point.quote)
-        if quote not in seen:
-            seen.append(quote)
-    return seen
-
-
-def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[str, ...]:
+def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[CardLine, ...]:
+    """One claim, its folded quote and its source line(s) per point, in the model's order."""
     docs = {d.id: d for d in scope.documents}
-    answer = " ".join(f'"{quote}"' for quote in _quotes(points))
-    lines = [intro(scope.persona), answer]
-    for doc_id, doc_chunks in _group_cited(card.cited):
-        lines.append(_source_line(docs[doc_id], doc_chunks, card.hr))
+    by_id = {c.id: c for c in scope.chunks}
+    lines = [CardLine("who", intro(scope.persona))]
+    for point in points:
+        lines.append(CardLine("claim", point.claim))
+        lines.append(CardLine("quote", f'"{fold(point.quote)}"'))
+        cited = tuple(by_id[cid] for cid in dict.fromkeys(point.chunks))
+        for doc_id, doc_chunks in _group_cited(cited):
+            lines.append(CardLine("source", _source_line(docs[doc_id], doc_chunks, card.hr)))
     return tuple(lines)
 
 
-def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[str, ...]:
-    lines = [intro(scope.persona), CONFLICT_HEADLINE]
+def conflict_card(card: Card, scope: Scope, quotes, recorded: bool) -> tuple[CardLine, ...]:
+    lines = [CardLine("who", intro(scope.persona)), CardLine("lead", CONFLICT_HEADLINE)]
     for (a, b), (left, right) in zip(card.conflicts, quotes):
         for doc, doc_chunks in ((a, left), (b, right)):
             for chunk in doc_chunks:
-                lines.append(_quote_line(doc, chunk))
-    lines.append(f"Vui lòng hỏi {card.hr}.")
+                lines.append(CardLine("quote", _quote_line(doc, chunk)))
+    lines.append(CardLine("plain", f"Vui lòng hỏi {card.hr}."))
     if recorded:
         owners: list[str] = []
         for a, b in card.conflicts:
             for doc in (a, b):
                 if doc.owner not in owners:
                     owners.append(doc.owner)
-        lines.append("Đã ghi nhận để " + " và ".join(owners) + " xác nhận.")
+        lines.append(CardLine("plain", "Đã ghi nhận để " + " và ".join(owners) + " xác nhận."))
     return tuple(lines)
 
 
@@ -94,8 +90,13 @@ def refusal_text(card: Card) -> str:
     return REFUSAL_TEXT.format(hr=card.hr)
 
 
-def refusal_card(card: Card, scope: Scope) -> tuple[str, ...]:
-    return (intro(scope.persona),) + tuple(refusal_text(card).splitlines())
+def refusal_card(card: Card, scope: Scope) -> tuple[CardLine, ...]:
+    text = refusal_text(card).splitlines()
+    return (
+        CardLine("who", intro(scope.persona)),
+        CardLine("lead", text[0]),
+        *(CardLine("plain", line) for line in text[1:]),
+    )
 
 
 def render(
@@ -104,7 +105,7 @@ def render(
     points: tuple[Point, ...] | None,
     retrieved: tuple[Chunk, ...],
     recorded: bool = False,
-) -> tuple[str, ...]:
+) -> tuple[CardLine, ...]:
     if card.kind == "answer":
         return answer_card(card, scope, tuple(points or ()))
     if card.kind == "conflict":

@@ -32,10 +32,12 @@ def test_ask_row_1_ok(personas, documents, cases):
     assert record["question"] == row["questions"][0]
     assert record["card"]["kind"] == "answer"
     assert "LEAVE-GAMECO-v2#2" in record["retrieved"]
-    # The answer text is the verified quote the card shows, nothing else.
-    assert record["card"]["answer_text"] == f'"{quote}"'
-    assert record["card"]["answer_text"] == record["card"]["lines"][1]
-    assert record["points"] == [{"chunks": ["LEAVE-GAMECO-v2#2"], "quote": quote}]
+    # The answer text is the model's sentence, and the card puts it above the verified quote.
+    claim = f"Theo tài liệu, {quote}"
+    assert record["card"]["answer_text"] == claim
+    assert record["card"]["lines"][1] == {"kind": "claim", "text": claim}
+    assert record["card"]["lines"][2] == {"kind": "quote", "text": f'"{quote}"'}
+    assert record["points"] == [{"claim": claim, "quote": quote, "chunks": ["LEAVE-GAMECO-v2#2"]}]
     assert record["retrieved_text"]["LEAVE-GAMECO-v2#2"] == quote
     assert record["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
     assert record["card"]["lines"]

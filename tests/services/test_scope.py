@@ -174,7 +174,7 @@ def test_case_row(personas, documents, row):
     cited_ids = []
     for doc_id in row.get("must_cite", []) + row.get("conflict_pair", [])[:1]:
         cited_ids += [c.id for c in chunks(next(d for d in docs if d.id == doc_id))]
-    assert pick_card(s, s.chunk_ids, cited_ids).kind == row["card"]
+    assert pick_card(s, s.chunk_ids, cited_ids).kind == row.get("rules_card", row["card"])
 
 
 def test_leak_no_restricted_chunks(personas, dates, documents):

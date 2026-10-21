@@ -1,6 +1,6 @@
 # 0009. The answer card shows the quote that step 7 verified, not the model's sentence
 
-- Status: Accepted
+- Status: Superseded by 0011
 - Date: 2026-10-14
 - Origin: AI, accepted
 - Supersedes: The `text` field of ADR 0003's output contract, and the answer line wording of Mission 1 C2 (Phần 2)

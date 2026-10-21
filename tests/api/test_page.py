@@ -79,15 +79,19 @@ def test_healthz(page_client):
 
 def test_answer_card_row_1(documents):
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
+    claim = "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
+        claim_from={"LEAVE-GAMECO-v2#2": claim},
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
     card = _card_text(page)
     assert card.startswith("Trả lời Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.")
+    # The model's sentence, then its verified quote, then the source line (ADR 0011).
+    assert card.index(claim) < card.index(f'"{quote}"') < card.index("Nguồn:")
     assert "14 ngày" in card
     assert "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026. Hỏi thêm: HR GameCo." in card
     assert "Báo sai" not in page
@@ -98,8 +102,15 @@ def test_answer_card_row_1(documents):
 def test_conflict_card_row_7(documents):
     quote = chunk_text(documents, "LEAVE-GROUP-v1#1")
     reply = reply_citing(
-        "LEAVE-GROUP-v1#1",
-        quote_from={"LEAVE-GROUP-v1#1": quote},
+        "LEAVE-GROUP-v1#1", "LEAVE-PAYCO-v1#1",
+        quote_from={
+            "LEAVE-GROUP-v1#1": chunk_text(documents, "LEAVE-GROUP-v1#1"),
+            "LEAVE-PAYCO-v1#1": chunk_text(documents, "LEAVE-PAYCO-v1#1"),
+        },
+        claim_from={
+            "LEAVE-GROUP-v1#1": "MODEL TEXT MUST NOT APPEAR",
+            "LEAVE-PAYCO-v1#1": "MODEL TEXT MUST NOT APPEAR",
+        },
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
@@ -110,8 +121,28 @@ def test_conflict_card_row_7(documents):
     assert 'Tập đoàn, Điều 1 (từ 01/01/2024): "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."' in card
     assert 'PayCo, Điều 1 (từ 01/01/2025): "Nhân sự PayCo được nghỉ phép năm 13 ngày mỗi năm."' in card
     assert card.endswith("Vui lòng hỏi HR PayCo.")
-    assert "LLM TEXT MUST NOT APPEAR" not in page
+    assert "MODEL TEXT MUST NOT APPEAR" not in page
     assert "Đã ghi nhận" not in page
+
+
+def test_conflict_card_row_12_quotes_the_cited_clauses(documents, cases):
+    row = next(c for c in cases if c["id"] == 12)
+    ids = ("LEAVE-GROUP-v1#2", "LEAVE-PAYCO-v1#2")
+    quotes = {cid: chunk_text(documents, cid) for cid in ids}
+    reply = reply_citing(
+        *ids,
+        quote_from=quotes,
+        claim_from={cid: "MODEL TEXT MUST NOT APPEAR" for cid in ids},
+    )
+    client, _ = _client(documents, reply=reply)
+    _, page = _ask(client, row["persona"], str(row["as_of"]), row["questions"][0])
+    card = _card_text(page)
+    assert card.startswith("Mâu thuẫn Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán.")
+    for quote in quotes.values():
+        assert f'"{quote}"' in card
+    for text in row["must_show"]:
+        assert text in card
+    assert "MODEL TEXT MUST NOT APPEAR" not in page
 
 
 def test_refusal_row_8_ha(documents):
@@ -228,7 +259,12 @@ class CiteAllGemini(FakeGemini):
         user = messages[-1].content
         points = []
         for match in re.finditer(r'<chunk id="([^"]+)"[^>]*>(.*?)</chunk>', user):
-            points.append({"chunks": [match.group(1)], "quote": match.group(2)})
+            quote = match.group(2)
+            points.append({
+                "claim": f"Theo tài liệu, {quote}",
+                "quote": quote,
+                "chunks": [match.group(1)],
+            })
         return ChatResult(generations=[ChatGeneration(message=AIMessage(content=json.dumps({"points": points})))])
 
 
