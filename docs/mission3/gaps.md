@@ -167,7 +167,7 @@ Three open proposals already touch these requirements; this page does not decide
 
 ## How Mission 3 fixes the gaps
 
-Hiep's decisions so far; only section 1 is decided, and sections 2-5 are still open (step 2 of the checklist).
+Hiep's decisions so far; sections 1 and 3 are decided, and sections 2, 4 and 5 are still open (step 2 of the checklist).
 The fixes below are planned, not built: none of them has passed a run yet.
 
 ### 1. Versions and effective dates
@@ -188,6 +188,32 @@ What stays a limitation after these changes:
 - The system never answers with a future version's content.
 - Only the next change of each cited document is shown; a later change inside the period the question asks about is not.
 - The owner rule of ADR 0013 cannot be enforced from the metadata, so an owner who breaks it still gives [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) example 2 and row 15 ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)); both issues stay open.
+
+### 3. Conflicting sources and levels
+
+Decided by Hiep on 21/10/2026.
+The principle behind the changes: any doubt about which rule applies sends the asker to HR, never to one side.
+
+| Gap | Decision | How | Where | How it is checked |
+|---|---|---|---|---|
+| G3.1 | An owner rule, no code | A company that changes one clause of a Group policy publishes a complete policy of its own that keeps the Group clauses and declares "dùng thay" | [ADR 0013](../decisions/0013-owners-change-a-document-only-by-a-full-new-version.md) | No new test; row 15 stays a limitation, its data breaks the owner rule |
+| G3.2 | Keep as a limitation, on purpose | Removing a conflict card on the model's word that both sides agree would turn a wrong reading into a wrong answer given with confidence; today the asker is sent to HR, the safe direction; the publish check below is the future fix | [#52](https://github.com/Park-Hip/next-gen-2026/issues/52) | Row 17 stays a strict xfail |
+| G3.3 | Now: the model flags a disagreement, the rules decide the card; later: a check when the owner publishes | The model's reply may name two cited chunks from two documents in the asker's scope that give different answers; step 7 accepts the flag only if both were retrieved, both quotes pass and the documents differ, then shows the conflict card for them, even across a declared "bổ sung"; the model can add a conflict card, never remove one | [#87](https://github.com/Park-Hip/next-gen-2026/issues/87); [ADR 0014](../decisions/0014-the-model-may-add-a-conflict-never-remove-one.md), reasons awaited from Hiep | Row 19 (planned in #75) expects the conflict card with 12 and 13 days; rows 3 and 20 watch for false alarms; pytest for each flag that must be ignored |
+| G3.4 | Optional | A pytest with a Studio document added in memory, if time remains | - | - |
+| G3.5 | Defer, with the owner side | Telling owners of a conflict needs the owners' page, cut by ADR 0004 | - | - |
+| G3.6 | Fix it with rules | Conflict pairs are formed before the access filter; a cited document paired with a document the asker may not read gives the refusal card, which names nothing; the hidden document is still dropped before chunking and retrieval | #87; [ADR 0015](../decisions/0015-a-hidden-side-of-a-conflict-gives-the-refusal.md), reasons awaited from Hiep | P8 becomes a pytest; `test_hiding_one_document_removes_only_that_document` changes its expected result |
+| G3.7 | Fix the card text | The headline is worded by the number of documents, and each document is quoted once | #87 | P9 becomes a pytest |
+
+The future fix for G3.2, G3.3 and G3.5 is Hiep's idea of a check when an owner publishes: each clause of the new document is searched against the knowledge base, an LLM compares it with the similar clauses found, and the owner sees any contradiction or agreement and settles it by declaring a relation or changing the text.
+It catches a conflict before any employee sees it, and a person with authority settles it, so the rules at question time stay deterministic.
+It needs the owners' page, so it is not built in Mission 3.
+
+What stays a limitation after these changes:
+
+- A disagreement the model does not notice, or whose other side is not retrieved, still gives the answer card.
+- Two sides of a pair that agree on the point asked still give the conflict card (G3.2).
+- With G3.6, every question that cites the readable side of a pair with a hidden document is refused, even one the hidden document does not touch.
+- Owners are not told of conflicts (G3.5).
 
 ## Appendix: the probes
 
