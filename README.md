@@ -195,10 +195,16 @@ Một bài kiểm thử thử mọi người hỏi × mọi ngày biên × mọi
 
 ## Try it
 
-Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/), pick an employee (Minh, Lan or Hà) and a date, and ask a question in Vietnamese.
+Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/), sign in as a simulated account, and ask a question in Vietnamese.
+Every simulated account uses the same demo password, **`[chờ Hiệp]`**.
+It is published on purpose: the accounts and every document are simulated ("giả lập"), and it only decides who is asking; no other password or key is in this repository.
+The accounts are Minh, Lan, Hà and Hoa (HR GameCo, who may read the salary band), and **Giám khảo**, the judge account.
+Only Giám khảo opens the two guide pages below, and only Giám khảo can ask as another account, by choosing it on the ask page.
 It runs on a free host that sleeps after 15 idle minutes, so the first page can take about a minute to load.
 
-Each link below fills in the form and asks the question:
+Each link below fills in the form and asks the question.
+Sign in as **Giám khảo** first, because the link names the account to ask as and the server honours that only for the judge; for an employee account the name in the link is ignored and the card is for the account signed in.
+Signed out, a link goes through the sign-in page and comes back to the question.
 
 1. **Same question, three employees**: "Phép năm của tôi là bao nhiêu ngày?" as [Minh](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=minh&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F), [Lan](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=lan&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F) and [Hà](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=ha&as_of=2026-10-07&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F), the cards in the image above.
 2. **A new version**: the same question as [Minh on 01/01/2027](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/?persona=minh&as_of=2027-01-01&q=Ph%C3%A9p+n%C4%83m+c%E1%BB%A7a+t%C3%B4i+l%C3%A0+bao+nhi%C3%AAu+ng%C3%A0y%3F) gets 15 days instead of 14, from the version that comes into force that day.
@@ -275,7 +281,7 @@ Known failures that stay in v1, each an open issue labelled [`limitation`](https
 - [#50](https://github.com/Park-Hip/next-gen-2026/issues/50): a mistake in the information a document owner sets, such as a wrong topic, gives a normal-looking answer, and nothing in v1 detects it; the rules are only as right as that information.
 - [#74](https://github.com/Park-Hip/next-gen-2026/issues/74): when two documents give different values but their information declares no relation, the rule does not see a conflict, so both values can appear on one answer card; naming the document in each sentence is the only aid (test case 19).
 
-v1 also simplifies on purpose: there is no login, so the asker is picked from three simulated employees, and each test case was asked once.
+v1 also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once.
 What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
 
 ## Documentation

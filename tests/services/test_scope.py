@@ -143,14 +143,14 @@ def test_hidden_v3_does_not_bring_the_group_policy_back(personas, documents):
     assert not {c.document_id for c in s.chunks} & {"LEAVE-GROUP-v1", "LEAVE-GAMECO-v3"}
 
 
-def test_hiding_one_document_removes_only_that_document(personas, dates, documents):
+def test_hiding_one_document_removes_only_that_document(employees, dates, documents):
     """Access is the last filter: hiding a document takes it and its conflict pairs out, nothing else."""
     def pairs(s):
         return [(a.id, b.id) for a, b in s.conflicts]
 
     for hidden in documents:
         edited = [replace(d, access="roles:nobody") if d.id == hidden.id else d for d in documents]
-        for persona in personas.values():
+        for persona in employees.values():
             for day in dates:
                 full = scope(persona, day, documents)
                 part = scope(persona, day, edited)
@@ -177,12 +177,12 @@ def test_case_row(personas, documents, row):
     assert pick_card(s, s.chunk_ids, cited_ids).kind == row.get("rules_card", row["card"])
 
 
-def test_leak_no_restricted_chunks(personas, dates, documents):
-    for pid in ("minh", "lan", "ha"):
-        persona = personas[pid]
+def test_leak_no_restricted_chunks(employees, dates, documents):
+    for persona in employees.values():
         for as_of in dates:
             s = scope(persona, as_of, documents)
-            assert not any(c.document_id == "SAL-BAND-GAMECO" for c in s.chunks)
+            if "hr_gameco" not in persona.roles:
+                assert not any(c.document_id == "SAL-BAND-GAMECO" for c in s.chunks)
             for c in s.chunks:
                 d = next(d for d in documents if d.id == c.document_id)
                 readable = d.access == "all_staff" or (
@@ -190,6 +190,22 @@ def test_leak_no_restricted_chunks(personas, dates, documents):
                     and any(role in d.access[6:].split(",") for role in persona.roles)
                 )
                 assert readable, f"{c.id} leaks {d.access}"
+
+
+def test_hoa_sees_the_salary_band_and_minh_does_not(personas, documents):
+    """G2.4: the simulated HR GameCo account is granted the restricted document."""
+    day = date(2026, 10, 7)
+    assert personas["hoa"].roles == ("employee", "hr_gameco")
+    assert "SAL-BAND-GAMECO" in [d.id for d in scope(personas["hoa"], day, documents).documents]
+    assert "SAL-BAND-GAMECO" not in [d.id for d in scope(personas["minh"], day, documents).documents]
+
+
+@pytest.mark.parametrize("access", ["roles:hr_gamco", "roles:hr_gameco ", "roles:HR_GAMECO", "unit:Studoi", "unit:Nhân sự GameCoo"])
+def test_a_misspelt_role_or_unit_in_access_hides_the_document_from_everyone(employees, documents, access):
+    """A typo fails closed: no account is granted a document whose access names nothing real (G2.3 stays open)."""
+    edited = [replace(d, access=access) if d.id == "SAL-BAND-GAMECO" else d for d in documents]
+    for persona in employees.values():
+        assert "SAL-BAND-GAMECO" not in [d.id for d in scope(persona, date(2026, 10, 7), edited).documents], persona.id
 
 
 def test_leak_hr_gameco_sees_salary(personas, documents):

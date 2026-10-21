@@ -13,7 +13,7 @@
     <p>{{ c.purpose }}</p>
   </details>
   <dl class="facts">
-    <div><dt>Người hỏi</dt><dd>{{ persona_label(c.persona) }}</dd></div>
+    <div><dt>Tài khoản hỏi</dt><dd>{{ persona_label(c.persona) }}</dd></div>
     <div><dt>Ngày áp dụng</dt><dd>{{ c.as_of }}</dd></div>
     <div>
       <dt>{% if c.wordings|length > 1 %}Cùng một câu hỏi, {{ c.wordings|length }} cách nói{% else %}Câu hỏi{% endif %}</dt>
@@ -58,7 +58,7 @@
 ({{ all_cases|selectattr('kind', 'equalto', 'good')|list|length }} làm tốt,
 {{ all_cases|selectattr('kind', 'equalto', 'hard')|list|length }} khó,
 {{ all_cases|selectattr('kind', 'equalto', 'limitation')|list|length }} chưa xử lý tốt).</p>
-<p class="lede muted">Bấm Thử ngay để hỏi lại trên trang "Hỏi"; đó là một lần hỏi mới tới Gemini, nên câu chữ có thể khác lần chạy đánh giá.</p>
+<p class="lede muted">Bấm Thử ngay để hỏi lại trên trang "Hỏi" với tài khoản của tình huống (chỉ tài khoản Giám khảo làm được); đó là một lần hỏi mới tới Gemini, nên câu chữ có thể khác lần chạy đánh giá.</p>
 
 {% if run %}
 <section class="panel guide-panel" aria-label="Lần chạy đánh giá">
@@ -79,7 +79,7 @@
 {% endif %}
 
 {% if featured %}
-<h2 class="section">Bắt buộc theo đề: cùng một câu hỏi, người hỏi khác nhau, kết quả khác nhau</h2>
+<h2 class="section">Bắt buộc theo đề: cùng một câu hỏi, tài khoản khác nhau, kết quả khác nhau</h2>
 {% for c in featured %}{{ case_panel(c) }}{% endfor %}
 <h2 class="section">Các tình huống khác</h2>
 {% endif %}

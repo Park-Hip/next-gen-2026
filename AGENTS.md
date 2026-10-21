@@ -48,6 +48,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - Hiep must be able to explain or rebuild any part in the PITCH round: explain your reasoning and flag every factual claim that needs checking, because an unverified hallucination fails the criterion.
 - Credit any public source or solution used.
 - The repository is public: no API keys, passwords or sensitive data.
+  One exception, on purpose: the shared demo password of the simulated accounts is published in the README, because the accounts and data are simulated (ADR 0016); no other password or key ever is.
 
 ## Config
 

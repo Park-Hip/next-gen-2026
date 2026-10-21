@@ -18,8 +18,8 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 |---|---|---|---|---|
 | D1 | "10 văn bản giả lập dạng Markdown, chia đoạn theo Điều, kèm metadata" | Phần 3 | The 10 files; the procedure document has no Điều, so it is chunked by paragraph (as planned in `artifacts.md`) | Built: 10 files in `data/documents/`, 25 chunks; the procedure is chunked by line |
 | D2 | Metadata per document: version series, status and effective date, who may see it, unit it applies to, "dùng thay", "bổ sung", topic, owner | Phần 2 | Front matter of each file, same fields as `adopted_rules.py` | Built: front matter of each file, checked on load |
-| D3 | The asker's profile has only unit (path in the org tree) and role | Phần 2 | Persona file: Minh, Lan, Hà | Built: `data/personas.yaml` |
-| D4 | "Bộ chọn người hỏi giả lập thay cho hệ thống nhân sự"; the real system takes the unit from HR records, never from the user | Phần 3, Câu 2 | Persona picker on the page; no field where users type their unit | Built: the persona picker on the page; there is no field to type a unit |
+| D3 | The asker's profile has only unit (path in the org tree) and role | Phần 2 | Persona file: Minh, Lan, Hà | Built: `data/personas.yaml`; ADR 0016 adds Hoa (HR GameCo) and the judge account |
+| D4 | "Bộ chọn người hỏi giả lập thay cho hệ thống nhân sự"; the real system takes the unit from HR records, never from the user | Phần 3, Câu 2 | Persona picker on the page; no field where users type their unit | Changed (ADR 0016): the picker is replaced by a simulated sign-in, so the server decides who is asking; there is still no field to type a unit |
 | D5 | Every unit, person, document and number is simulated | Header | Labels "giả lập" in the data and on the page | Built: labelled in the data, on every page and in the docs |
 
 ## 2. Rules (steps 1-4 and 7)
@@ -81,14 +81,14 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 |---|---|---|---|---|
 | B1 | Rules and tests first, correct in every case before any LLM | Phần 5, Câu 2 | Commit history: rules and tests pass before the retriever lands | Built: the rules and their tests merged on 13/10 at 17:23 (PR #25), before retrieval (PR #28, 21:55) |
 | B2 | Then retrieval and generation, the test set run several times | Phần 5, Câu 2 | Run log | Changed (ADR 0006): the test set runs once |
-| B3 | Then a minimal page: persona and date picker, three cards, "Báo sai", owners' list | Phần 5, Câu 2 | The page | Changed (ADR 0004): persona and date picker and the three cards are built; "Báo sai" and the owners' list are not |
-| B4 | Not doing: real login, HR system connection, chat tool integration, DOCX/PDF reading | Câu 2 | None of them in v1 | Built: none of them is in v1 |
+| B3 | Then a minimal page: persona and date picker, three cards, "Báo sai", owners' list | Phần 5, Câu 2 | The page | Changed (ADR 0004, ADR 0016): the date picker and the three cards are built, and the persona picker is now a simulated sign-in; "Báo sai" and the owners' list are not |
+| B4 | Not doing: real login, HR system connection, chat tool integration, DOCX/PDF reading | Câu 2 | None of them in v1 | Built: none of them is in v1; the sign-in is simulated, with a demo password shared by every account and published on purpose (ADR 0016) |
 
 ## Tensions to settle when the Mission 2 brief arrives
 
 - **Answer 2 vs Phần 5, step 3:** Answer 2's day 3 says "giao diện web chọn người hỏi, xem kết quả"; Phần 5 adds the date picker, "Báo sai" and the owners' list.
   Building the Phần 5 version satisfies both.
-  Settled: the page has the persona and date picker; "Báo sai" and the owners' list were cut by ADR 0004 (B3).
+  Settled: the page has the date picker and, since ADR 0016, a simulated sign-in in place of the persona picker; "Báo sai" and the owners' list were cut by ADR 0004 (B3).
 - **Invented citations (R7):** the rule script checks citations against the whole scope, because there is no retriever yet; v1 must check them against the chunks actually retrieved.
   Settled: step 7 checks them against the retrieved chunks, and checks each quote (ADR 0003).
 - **Answer line wording (C2, A4):** Phần 2 shows the answer as a sentence the model writes, "Phép năm của bạn là 14 ngày mỗi năm.".
