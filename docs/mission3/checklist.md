@@ -1,7 +1,7 @@
 # Mission 3 checklist
 
 The acceptance checklist for Mission 3, taken from [`docs/competition/mission3_brief.md`](../competition/mission3_brief.md).
-Claude draft, 20/10/2026, for Hiep to check against the brief.
+Claude draft, 20/10/2026, updated 21/10/2026, for Hiep to check against the brief.
 Every box is either ticked with its evidence, or left open with the reason.
 
 Deadline: **11:48, 23/10/2026**; the system locks and there is no extension, so plan to submit by the evening of 22/10.
@@ -10,9 +10,9 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 
 ## 0. Before any change
 
-- [ ] Tag the commit submitted for Mission 2 (`mission2`), so "before" is one fixed commit that judges can open.
+- [x] Tag the commit submitted for Mission 2 (`mission2`), so "before" is one fixed commit that judges can open.
   - Annotated tag `mission2` created locally on `b6ca78d` (merge of PR #71, 15/10 16:25), the last commit on `main` before the Mission 2 deadline (about 20:00 on 15/10, [`plan.md`](../mission2/plan.md)); the next commit on `main` is the Mission 3 brief on 20/10.
-  - Open: Hiep confirms that `b6ca78d` is what the portal received, then `git push origin mission2`.
+  - Hiep asked for the push on 21/10 and the tag is on `origin` (`git ls-remote --tags origin mission2` shows it).
 - [x] Keep the Mission 2 run `results/20261014-2239.jsonl` as the baseline; never regenerate it.
   - The file is committed once (`9e3b384`) and unchanged since: SHA-256 `597e1480124ec35bfac7e35ad6f72bb3d75ba95aef2093efc446eb82ae018a26` on disk, at `b6ca78d` and at `836d770`.
   - It holds 18 rows, all run at commit `c3120ff` with a clean tree and `gemini-3.5-flash-lite`.
@@ -31,6 +31,9 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 - [ ] Pin the Mission 2 service before the first Mission 3 code change is merged: Render Dashboard, the service's Deploys page, "Manual Deploy > Deploy a specific commit", `b6ca78d`.
   - The deploy steps in the #11 plan create the service from the Blueprint (`render.yaml`); if so, a Blueprint sync applies `autoDeploy: true` from `render.yaml` again, so `render.yaml` must also be changed to match: auto-deploy off for the Mission 2 service, and a second service for Mission 3.
   - Both services would share one `GEMINI_API_KEY` quota unless the second gets its own key.
+  - Open and urgent, as of 21/10: Mission 3 code has already merged (#90, #92, #93, #94) and `render.yaml` still has one service on `main` with `autoDeploy: true`.
+    Unless Hiep pinned the service by hand in the dashboard, the Mission 2 link now serves Mission 3 code.
+    The repository cannot show the dashboard; Hiep checks it.
 
 ## 1. Understand the new requirement
 
@@ -50,11 +53,16 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 
 ## 2. Choose
 
+- Merged so far (21/10), for reference when the lists below are written:
+  - With an issue and a plan: #75 (ADR 0011, supersedes 0009), #76 (simulated sign-in, ADR 0016), #83 (validity window and next change, ADR 0012), #87 (conflicts, ADR 0014 and 0015; the G3.6 fix was dropped).
+  - Docs only: ADR 0013 and the section write-ups (#85, #86, #88, #91, #95, #97).
+  - Still proposals: #96 (why a refusal happens), #77 (open the cited Điều), #39 (docs for judges), #16 (submission README).
 - [ ] Every candidate change has a priority and one line of reason in Hiep's words.
 - [ ] A written "chủ động chưa làm" list: each item not built, with why (it feeds Question 1).
 - [ ] Each of the 5 general requirements is either improved, or explicitly kept as it is, with the reason.
 - [ ] The Change Request is improved; it is never skipped.
 - [ ] Every design change has an ADR in `docs/decisions/` in the same PR; a reversal of an earlier ADR (for example #75 against ADR 0009) says what is given up.
+  - Open: ADRs 0011 to 0016 exist; check each against its PR before ticking, and ADR 0013 landed in a docs PR (#85), not with code.
 - [ ] A choice with real alternatives went through a `research` issue first.
 - [ ] Nothing is rebuilt from scratch: every change lands on the Mission 2 code, in the same repository.
 
@@ -71,6 +79,8 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 ### 4.1 Regression
 
 - [ ] All 18 Mission 2 rows are run again on the Mission 3 code, through the same harness as the demo.
+  - Open: the only Mission 3 run so far is `results/20261021-1032.jsonl` (20 rows, all `ok`, commit `d31d304`).
+    It predates #90, #92, #93 and #94, so it is an early run, not the final one; its review sheet is still "[chờ Hiệp]" for faithful and lesson.
 - [ ] Every gate that passed in M2 still passes: rules correct, 0 leaks, 0 unsafe answers, over-cautious within target, faithfulness on every answer.
 - [ ] A row that changed result is explained, whether it got better or worse.
 
