@@ -25,7 +25,7 @@ LEAVE_QUESTION = "Phép năm của tôi là bao nhiêu ngày?"
 PASSWORD = secrets.token_urlsafe(12)
 SECRET = secrets.token_urlsafe(24)
 AS_OF = "2026-10-07"
-NOTE = "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."
+NOTE = "Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."
 
 
 class CountingEmbeddings(SyllableEmbeddings):
@@ -140,7 +140,7 @@ def test_conflict_and_refusal_cards_have_no_note(documents):
     page = ask(conflict).text
     assert "Mâu thuẫn" in page
     assert NOTE not in page
-    refusal = signed_in_with_reply(documents, '{"points": [], "disagreement": []}', "minh")
+    refusal = signed_in_with_reply(documents, '{"answer": "", "points": [], "disagreement": []}', "minh")
     page = ask(refusal).text
     assert "Hệ thống không tìm thấy quy định phù hợp" in page
     assert NOTE not in page

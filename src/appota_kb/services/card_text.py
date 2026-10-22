@@ -1,7 +1,7 @@
-"""The three cards' lines: fixed wording from the submitted document (Phần 2), plus each answer point's sentence.
+"""The three cards' lines: fixed wording from the submitted document (Phần 2), plus the model's answer.
 
 No FastAPI and no LLM here: the page and the templates render these lines.
-Each answer point shows the model's sentence above the quote that step 7 checked (ADR 0011).
+The answer card shows one answer above the quotes that step 7 checked (ADR 0018).
 The conflict and refusal cards keep fixed wording and show no model text.
 A refusal's wording is picked from the card's reason by a fixed mapping, never from model text (ADR 0017).
 A document that leaves the asker's scope later gets the end of its window on the source line and a
@@ -53,7 +53,7 @@ def intro(persona: Persona) -> str:
 
 NOTICE_LABEL = "Sắp thay đổi: "
 
-ANSWER_NOTE = "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."
+ANSWER_NOTE = "Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."
 
 
 def dmy(day: date) -> str:
@@ -123,13 +123,14 @@ def _group_cited(cited: tuple[Chunk, ...]) -> list[tuple[str, tuple[Chunk, ...]]
     return [(doc_id, tuple(by_doc[doc_id])) for doc_id in order]
 
 
-def answer_card(card: Card, scope: Scope, points: tuple[Point, ...]) -> tuple[CardLine, ...]:
-    """One claim, its folded quote and its source line(s) per point, in the model's order."""
+def answer_card(card: Card, scope: Scope, points: tuple[Point, ...], answer: str) -> tuple[CardLine, ...]:
+    """The answer in bold once, then each point's folded quote and source line(s), in the model's order."""
     docs = {d.id: d for d in scope.documents}
     by_id = {c.id: c for c in scope.chunks}
     lines = [CardLine("who", intro(scope.persona)), CardLine("note", ANSWER_NOTE)]
+    if answer:
+        lines.append(CardLine("claim", answer))
     for point in points:
-        lines.append(CardLine("claim", point.claim))
         lines.append(CardLine("quote", f'"{fold(point.quote)}"'))
         cited = tuple(by_id[cid] for cid in dict.fromkeys(point.chunks))
         for doc_id, doc_chunks in _group_cited(cited):
@@ -175,9 +176,10 @@ def render(
     points: tuple[Point, ...] | None,
     retrieved: tuple[Chunk, ...],
     recorded: bool = False,
+    answer: str = "",
 ) -> tuple[CardLine, ...]:
     if card.kind == "answer":
-        return answer_card(card, scope, tuple(points or ()))
+        return answer_card(card, scope, tuple(points or ()), answer)
     if card.kind == "conflict":
         return conflict_card(card, scope, conflict_quotes(card, retrieved), recorded)
     return refusal_card(card, scope)

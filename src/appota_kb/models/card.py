@@ -11,8 +11,8 @@ LineKind = Literal["who", "note", "claim", "lead", "quote", "source", "notice", 
 class CardLine:
     """One line of a card, with the role the template renders it as.
 
-    The answer card has claim, quote and source lines per point (ADR 0011), and a notice line under the
-    source line of a document that changes later (ADR 0012).
+    The answer card has one claim line, then quote and source lines per point (ADR 0018), and a notice line
+    under the source line of a document that changes later (ADR 0012).
     The answer card also has one fixed note line under the asker line (#77).
     The conflict card has lead, quote, notice and plain lines; the refusal card has lead and plain lines.
 

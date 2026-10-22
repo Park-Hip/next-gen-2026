@@ -41,16 +41,23 @@ def test_build_messages_structure(personas, documents):
             assert f'id="{c.id}"' not in user
 
 
-def test_prompt_rules_for_the_sentence_and_conflicts():
-    # Issue #75: the sentence is checked by Hiep's reading, so the prompt must ask for
-    # one plain sentence per clause, both sides of a disagreement, and no computation.
+def test_prompt_asks_for_one_answer_above_the_quotes():
+    # Issue #112, ADR 0018: one answer covers the whole question; the points are only its quotes.
     text = SYSTEM_INSTRUCTION
-    assert '"claim": one sentence' in text
-    assert "names the document" in text
-    assert "one point for each clause" in text
-    assert "Never choose between them, merge them" in text
-    assert "Do not return an empty list only because clauses disagree." in text
+    assert '"answer" is the only claim' in text
+    assert "answers every part of the question" in text
+    assert "A typical answer is one sentence" in text
+    assert '"points" holds only the quotes that support the answer' in text
+    assert "Do not cite a clause the question does not ask about" in text
     assert "Never compute a date, an amount" in text
+
+
+def test_prompt_names_a_document_only_for_a_disagreement():
+    text = SYSTEM_INSTRUCTION
+    assert "state both values in the answer and name each document in it" in text
+    assert "Never choose between them, merge them" in text
+    assert "Do not name a document in the answer otherwise" in text
+    assert "Do not return an empty list only because clauses disagree." in text
 
 
 def test_prompt_refuses_a_personal_value_no_clause_states():
@@ -62,8 +69,8 @@ def test_prompt_refuses_a_personal_value_no_clause_states():
 
 def test_prompt_keeps_the_output_contract():
     text = SYSTEM_INSTRUCTION
-    assert '"claim"' in text and '"quote"' in text and '"chunks"' in text
-    assert 'return {"points": [], "disagreement": []}' in text
+    assert '"answer"' in text and '"quote"' in text and '"chunks"' in text
+    assert 'return {"answer": "", "points": [], "disagreement": []}' in text
     assert '"disagreement"' in text
 
 
@@ -116,18 +123,18 @@ def test_prompt_never_names_a_restricted_successor(personas, documents):
 def test_prompt_rule_for_a_time_outside_the_window():
     text = SYSTEM_INSTRUCTION
     assert "only between its valid_from and valid_to" in text
-    assert "say in the sentence until when the clause applies" in text
+    assert "say in the answer until when the clause applies" in text
     assert "never present the clause as the rule for that time" in text
     assert "Never compute a date" in text
 
 
 def test_prompt_rule_for_what_the_quotes_do_not_cover():
-    # Issue #96: a caveat in the sentence, never a check; the strict-grounding clause stays.
+    # Issue #96: a caveat in the answer, never a check; the strict-grounding clause stays.
     text = SYSTEM_INSTRUCTION
-    assert "If the quotes do not answer every part of the question, say in the sentence which part they do not answer." in text
-    assert "say in the sentence that the system does not compute that value" in text
+    assert "If the quotes do not answer every part of the question, say in the answer which part they do not answer." in text
+    assert "say in the answer that the system does not compute that value" in text
     # Row 11 stays a refusal: the own-record rule is in charge of it.
     assert "This does not apply to a value about the employee's own record: for that, return an empty list as above." in text
-    assert "If no clause states the answer, you must return an empty list of points." in text
+    assert "If no clause states the answer, you must return an empty answer and an empty list of points." in text
     assert "If the question asks for a value about the employee's own record that no clause states" in text
     assert "Never compute a date, an amount or another value." in text

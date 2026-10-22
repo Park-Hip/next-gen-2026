@@ -15,6 +15,7 @@ from appota_kb.evaluation.run import _check_resume, _select_rows, ask_row, run, 
 from appota_kb.evaluation.run import main as run_main
 from appota_kb.evaluation.score import load_run
 from appota_kb.services.answering.answerer import Answerer
+from appota_kb.services.card_text import ANSWER_NOTE
 from appota_kb.services.retrieval.index import build_index
 
 
@@ -32,12 +33,18 @@ def test_ask_row_1_ok(personas, documents, cases):
     assert record["question"] == row["questions"][0]
     assert record["card"]["kind"] == "answer"
     assert "LEAVE-GAMECO-v2#2" in record["retrieved"]
-    # The answer text is the model's sentence, and the card puts it above the verified quote.
-    claim = f"Theo tài liệu, {quote}"
-    assert record["card"]["answer_text"] == claim
-    assert record["card"]["lines"][2] == {"kind": "claim", "text": claim}
-    assert record["card"]["lines"][3] == {"kind": "quote", "text": f'"{quote}"'}
-    assert record["points"] == [{"claim": claim, "quote": quote, "chunks": ["LEAVE-GAMECO-v2#2"]}]
+    # One answer for the whole question, then the verified quote under it (ADR 0018).
+    answer = f"Theo tài liệu, {quote}"
+    assert record["answer"] == answer
+    assert record["card"]["answer_text"] == answer
+    assert record["card"]["lines"][:4] == [
+        {"kind": "who", "text": "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."},
+        {"kind": "note", "text": ANSWER_NOTE},
+        {"kind": "claim", "text": answer},
+        {"kind": "quote", "text": f'"{quote}"'},
+    ]
+    assert record["points"] == [{"quote": quote, "chunks": ["LEAVE-GAMECO-v2#2"]}]
+    assert "claim" not in record["points"][0]
     assert record["retrieved_text"]["LEAVE-GAMECO-v2#2"] == quote
     assert record["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
     assert record["card"]["lines"]

@@ -86,12 +86,12 @@ flowchart TD
     question[/"Asks a question (Changed)"/]
     scope["Scope rules: in force, applies, not replaced, readable; conflict pairs"]
     search{{"Hybrid search in the scope"}}
-    answerer{{"Answerer: sentence, quote, chunks (Changed)"}}
+    answerer{{"Answerer: answer, quote, chunks (Changed)"}}
     verified{"Quotes valid?"}
     conflict{"Cites a conflict pair?"}
     refusal[/"Refusal card"/]
     conflictcard[/"Conflict card"/]
-    answercard[/"Answer card: sentence, quote, source (Changed)"/]
+    answercard[/"Answer card: answer, quotes, sources (Changed)"/]
     clause[/"Opens the cited clause (New)"/]
     trace["Trace recorder (New)"]
     directory[("Directory (Changed)")]
@@ -116,9 +116,9 @@ flowchart TD
 
 - The unit and roles come from the account, never from the question.
 - The scope rules never read the question, so every question the same asker asks on the same date gets the same scope.
-- The answerer writes, for each point, one sentence in plain Vietnamese, the clause it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
+- The answerer writes one answer in plain Vietnamese that covers every part of the question, the clauses it rests on quoted word for word, and the chunks it cites; it never chooses between clauses that disagree (section 6.3).
 - The whole answer is refused if a citation was not retrieved or a quote is not in the chunk it cites (section 6.4).
-- The answer card shows each sentence above its verified quote, then the document, Điều and effective date; the conflict and refusal cards keep their fixed wording and send the employee to HR.
+- The answer card shows the answer once above the verified quotes, then the document, Điều and effective date under each quote; the conflict and refusal cards keep their fixed wording and send the employee to HR.
 - Conflicts come from declared metadata, and the model may add one it reads in the text, never remove one (ADR 0014); a content conflict the model does not notice still gives an answer card (section 12.1).
 - Each source line of the answer card and each quote of the conflict card links to the cited version, which opens only if it is in the asker's scope on that date (section 6.5).
 - The order of the rules inside the scope rules is described in [`architecture.md`](architecture.md#the-7-steps).
@@ -201,7 +201,7 @@ sequenceDiagram
     H->>M: embed the question
     H-->>A: top chunks, all inside the scope
     A->>L: chunks, asker's unit, question
-    L-->>A: points: sentence, quote and cited chunk ids
+    L-->>A: answer, points with quote and cited chunk ids
     A->>C: retrieved chunks, points
     C-->>P: answer, conflict or refusal card
     P->>T: the record of this question
@@ -371,27 +371,30 @@ The full design changes the rules' inputs and callers, not the rules:
 One call to `gemini-3.5-flash-lite` at medium thinking (ADR 0008), with no sampling and with structured output.
 The model sees only the retrieved chunks, the asker's unit and the question.
 
-Changed: it returns a list of points, or no points.
-Each point is one sentence in plain Vietnamese that answers part of the question (`claim`), the passage it rests on copied word for word (`quote`), and the retrieved chunk ids it cites, from an enumerated list (ADR 0003; v1 has no `claim` since ADR 0009, which a new ADR supersedes).
+Changed: it returns one answer and a list of points, or no points.
+The answer covers every part of the question in plain Vietnamese.
+Each point is only a passage the answer rests on, copied word for word (`quote`), and the retrieved chunk ids it cites, from an enumerated list; a point has no sentence of its own (ADR 0018).
 For example, for a GameCo employee who asks how many days of annual leave they get, with the simulated document `LEAVE-GAMECO-v2`:
 
 ```json
-{"points": [{
-  "claim": "Bạn được nghỉ phép năm 14 ngày mỗi năm.",
-  "quote": "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.",
-  "chunks": ["LEAVE-GAMECO-v2#2"]
-}]}
+{"answer": "Bạn được nghỉ phép năm 14 ngày mỗi năm.",
+ "points": [{
+   "quote": "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.",
+   "chunks": ["LEAVE-GAMECO-v2#2"]
+ }]}
 ```
 
 Changed: the prompt adds these rules.
 
-1. Write the sentence in plain Vietnamese and keep every condition its quote names, such as "chính thức".
-2. Make one point per document's clause, so each sentence rests on one quote.
-3. When clauses from different documents give different answers, make one point for each, and do not choose between them, merge them or decide which one applies.
-4. Do not return no points only because clauses disagree.
-5. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
-6. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
-7. When two clauses from different documents give different answers, list the ids of those two chunks in `disagreement` (ADR 0014); both must also be cited by a point.
+1. Write one answer in plain Vietnamese that answers every part of the question; a typical answer is one sentence, and two or three short sentences are allowed only when the question has several parts.
+2. Keep every condition its quotes name, such as "chính thức".
+3. Cite only the quotes that support the answer; do not cite a clause the question does not ask about, such as a deadline it did not ask for.
+4. When clauses from different documents give different answers, state both values in the answer and name each document there, and do not choose between them or merge them.
+5. Name no document in the answer otherwise; the source line under each quote already names it.
+6. Do not return no points only because clauses disagree.
+7. State only values the text states; do not compute a date or an amount from them, so applied questions stay a limitation ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)).
+8. If the question asks for a value about the employee's own record that no clause states, such as how many leave days are left, return no points; a general yearly entitlement is not that value.
+9. When two clauses from different documents give different answers, list the ids of those two chunks in `disagreement` (ADR 0014); both must also be cited by a point.
 
 The prompt never says which documents form a conflict pair: the rules decide the card, and the flag is only an input that step 7 checks.
 
@@ -402,12 +405,12 @@ The rules pick the card from the citations, never from the model's words, in thi
 | Card | When | Shows |
 |---|---|---|
 | Refusal | The output is malformed, has no points, has a point with no citation, cites a chunk that was not retrieved, or quotes text that is not in a chunk it cites, after Unicode and whitespace folding | Fixed text that sends the employee to HR; "not allowed" and "not found" read the same (E4) |
-| Conflict | A cited document is in a conflict pair, or the model's `disagreement` names two chunks that pass step 7's checks (ADR 0014) | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's sentences |
-| Answer | Otherwise | Changed: for each point, the model's sentence on top and the verified quote under it in quotation marks; then the document, the "Điều", the effective date and the HR contact (E7; SD14, decided by Hiep on 20/10/2026) |
+| Conflict | A cited document is in a conflict pair, or the model's `disagreement` names two chunks that pass step 7's checks (ADR 0014) | One clause per side, chosen without reading meaning, and fixed text that sends the employee to HR (ADR 0005); never the model's answer |
+| Answer | Otherwise | Changed: one answer for the whole question in bold, then each verified quote in quotation marks under it, then the document, the "Điều", the effective date and the HR contact for that quote (E7; ADR 0018, decided by Hiep on 22/10/2026) |
 
 Every card starts with who the asker is asking as.
-Every answer card then has one fixed line saying that the bold sentence is the system's paraphrase and the quoted text is the checked wording of the rule (#77, G5.4); the conflict and refusal cards show no model text and do not have it.
-The sentence is not checked at run time, by rules or by a second model call (SD14); the employee reads it above its quote, and the evaluation reads it against its quote (section 14).
+Every answer card then has one fixed line saying that the bold text is the system's answer and the quoted text is the checked wording of the rule (#77, G5.4); the conflict and refusal cards show no model text and do not have it.
+The answer is not checked at run time, by rules or by a second model call; the employee reads it above its quotes, and the evaluation reads it against all of them (section 14).
 
 ### 6.5 Reading the cited part (E7)
 
@@ -560,7 +563,7 @@ Proposed: the page writes one record per question in the same shape the evaluati
 | The scope's documents, conflict pairs and chunks | Yes | Yes |
 | Retrieved chunks and their text | Yes | Yes |
 | Raw model reply, points, card, latency | Yes | Yes |
-| Each point's sentence | New | New |
+| The answer, then each point's quote | New | New |
 | Trace id | - | New |
 | Whether the cache answered | - | New |
 
@@ -614,7 +617,7 @@ Tests already check that no restricted chunk reaches any asker's scope for every
 | The impact preview | Showing another unit's restricted document | The preview shows only what the owner may read (section 7.3) |
 | The data and test-case pages | Showing restricted titles to employees | Only the judge account opens them; any other account gets a 404 (section 8.3) |
 | The session cookie | A forged account | Signed with `SESSION_SECRET` from the environment; it holds only the account id, and a tampered or wrongly signed cookie is treated as signed out |
-| Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its sentence is not checked; at worst it gives a refusal, or a misleading sentence above a real quote |
+| Document text written by owners | Instructions to the model inside a document | The model can only cite and quote retrieved chunks, and its answer is not checked; at worst it gives a refusal, or a misleading answer above real quotes |
 
 ## 12. Failure modes and limitations
 
@@ -625,7 +628,7 @@ The failures that look like right answers matter most, because the employee cann
 | Failure | Looks like | Caught by | In this design |
 |---|---|---|---|
 | The model quotes a real clause in scope that does not answer the question | A right answer | Hiep's reading in the evaluation; the employee reads the quote and its source | Unchanged |
-| The sentence changes a number, drops a condition of its quote, adds a fact, or applies the clause to the wrong people | A right answer | The quote under the sentence; Hiep's Faithfulness reading (section 14) | New with the sentence; a check on the sentence stays possible (section 16) |
+| The answer changes a number, drops a condition of its quotes, adds a fact, or applies the clause to the wrong people | A right answer | The quotes under the answer; Hiep's Faithfulness reading (section 14) | New with the answer; a check on the answer stays possible (section 16) |
 | Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides | The model's flag, when it notices both sides (ADR 0014); the evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | Mitigated at question time; a miss stays a limitation; the publish-time scan is SD15 |
 | An owner sets wrong metadata, such as a wrong topic or a wrong relation ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) | A right answer | Nothing in v1 | Partly mitigated by the relation list and the impact preview (sections 7.2, 7.3) |
 | A question about another period gets the rule in force on the date asked ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | A right answer | The evaluation | Unchanged; see section 16 |
@@ -689,9 +692,9 @@ How each metric of spec section 6.2 is measured:
 | Right sources and right kind | Each test question's scope and card compared with its expected documents and kind; gate "Rules correct in every case" | Built |
 | Leaks | Gate "Leaks", plus the exhaustive scope test of section 11.1 | Built |
 | Unsafe answers | Gates on the card and on the raw model reply, confirmed by hand (ADR 0006) | Built |
-| Faithfulness | Hiep reads every answer, each sentence against its quote, in a review file next to the run, and names the error of an unfaithful sentence: a changed number, a dropped condition, an added fact, a flipped meaning, or the wrong people | Changed: v1 cards have quotes only |
+| Faithfulness | Hiep reads every answer against all the quotes under it, in a review file next to the run, and names the error of an unfaithful answer: a changed number, a dropped condition, an added fact, a flipped meaning, or the wrong people | Changed: v1 cards have quotes only |
 | Over-caution | At most 10% of the questions that expect an answer (`eval.over_cautious_max_share`); rechecked after the prompt change of section 6.3 | Built |
-| Readability | Read by a person, on the answer card's sentences; the criterion is open in the spec | **[to decide]** |
+| Readability | Read by a person, on the answer card's answer; the criterion is open in the spec | **[to decide]** |
 | Source shown | Each answer card names the document, the part, the version and its date, and the part can be opened | Changed: the card already names them; opening the part is section 6.5; whether this is checked automatically today is to be checked |
 | Traceable answers | Every question has a trace with its scope, retrieved chunks and reply | New: v1 has this for evaluation runs only |
 | Owner scenarios | Automated tests on fake models: publish, then ask before and on the effective date; publish for another unit and be stopped; see the state; restart and ask again | New |
@@ -710,7 +713,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | 0003, 0008 | One model call that cites retrieved ids and quotes | Holds; the prompt changes (section 6.3) |
 | 0004 | The host, and leaving "Báo sai" and the owners' page out of Mission 2 | The owner console reverses the second part and needs a new ADR |
 | 0005 | The conflict card | Holds |
-| 0009 | The card shows only the verified quote | Superseded by 0011: the card shows the sentence above the verified quote (section 6.4) |
+| 0009 | The card shows only the verified quote | Superseded by 0011, then by 0018: the card shows one answer above all the verified quotes (section 6.4) |
 | 0010 | Access is checked last | Holds |
 
 ### 15.2 Decisions this design needs
@@ -730,7 +733,7 @@ The ADRs in [`decisions/`](decisions/README.md) hold for the full design; the on
 | SD11 | Who sees the data and test-case pages, and the date picker | Everyone; evaluator only | **Decided by Hiep, 21/10/2026**: the evaluator account only, others get a 404; the date picker stays, labelled as a demo control; ADR 0016 | 8.3 |
 | SD12 | Whether the card shows a trace id, and how long traces are kept | - | No | 10.1 |
 | SD13 | Whether the HR contact receives unanswered questions or is only named: the spec's Users table says they receive them, but no requirement covers it, and E6 only names who to ask | Add a requirement and a way to forward questions; change the Users row to say the HR contact is named | No | - |
-| SD14 | Whether the answer card keeps showing only the verified quote, or also a sentence the model words | **Decided by Hiep, 20/10/2026**: the sentence on top and the verified quote under it; the sentence is not checked at run time; no conflict detection at question time, **changed by ADR 0014**: the model may flag a disagreement, step 7 checks it | ADR 0011, ADR 0014 | 6.3, 6.4 |
+| SD14 | Whether the answer card keeps showing only the verified quote, or also text the model writes | **Decided by Hiep, 20/10/2026**: a sentence on top and the verified quote under it, not checked at run time (ADR 0011); **changed by Hiep, 22/10/2026**: one answer for the whole question above all the verified quotes, still not checked at run time (ADR 0018); no conflict detection at question time, **changed by ADR 0014**: the model may flag a disagreement, step 7 checks it | ADRs 0011, 0014, 0018 | 6.3, 6.4 |
 | SD15 | Whether a content conflict scan runs when an owner publishes | To discuss with the owner workflow | Yes | 12 |
 | SD16 | Whether owners get a list of answers that cite documents with no declared relation between them | To discuss with the owner workflow | No | 12 |
 | SD17 | The criterion for Readability (spec section 6.2) | - | No | 14 |
@@ -751,7 +754,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | Real single sign-on | The sign-in component only | The rules need only unit and roles |
 | Many more documents | The index moves to a persistent vector store | The rules, the answerer, the checks |
 | Another model | `config.yaml` and a new ADR | Everything else |
-| A check on each sentence at run time, by rules or by a second model call, if the Faithfulness reading shows that sentences mislead | The answer checks only, with a new ADR | The scope rules, search, the answerer, the cards |
+| A check on the answer at run time, by rules or by a second model call, if the Faithfulness reading shows that answers mislead | The answer checks only, with a new ADR | The scope rules, search, the answerer, the cards |
 | "Báo sai" and the owners' records | A new record type in the registry's store and a page in the owner console | The answering half |
 
 ## Appendix A. Requirements traceability

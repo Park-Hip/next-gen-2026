@@ -74,5 +74,5 @@ def ask(
     if cache is not None and not cache_hit and card.reason not in MODEL_FAULTS:
         cache.put(scope, question, reply)
     by_id = {c.id: c for c in scope.chunks}
-    lines = render(card, scope, reply.points, tuple(by_id[cid] for cid in reply.retrieved))
+    lines = render(card, scope, reply.points, tuple(by_id[cid] for cid in reply.retrieved), answer=reply.answer)
     return Asked(reply=reply, card=card, lines=lines, cache_hit=cache_hit)
