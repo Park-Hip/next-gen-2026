@@ -64,6 +64,11 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - Never use the em dash; use a plain "-".
 - One sentence per line in Markdown.
 - Code comments in English.
+- Write docs a judge reads (README, ADRs, architecture, Mission answers and evidence) for an outsider who does not know the code.
+  Use an internal term only when the page really needs it, and then define it or link the README glossary; otherwise use a plain description.
+  Keep code names, issue and PR numbers, internal IDs (G4.3, P6, R10), commit hashes and run ids out of headings and running text; put them in brackets at the end of a line or in a closing "Technical detail" section.
+  Open each page with what it is and what it concludes, and give one concrete example from the simulated data instead of describing the mechanism.
+- An ADR opens with `## In short` (the problem, the decision, what the employee sees, what we give up) and ends with `## Technical detail`, as in `docs/decisions/template.md`.
 
 ## Scope
 
