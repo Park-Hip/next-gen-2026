@@ -205,7 +205,7 @@ The terms this page and the documents it links use, in plain words.
 ## Try it
 
 Open the [demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/) and sign in as a simulated account.
-Every simulated account uses the same demo password, **`[chờ Hiệp: mật khẩu demo]`**.
+Every simulated account uses the same demo password, **`toiyeuappota`**.
 It is published on purpose ([decision record 0016](docs/decisions/0016-simulated-sign-in.md)): the accounts and every document are simulated ("giả lập"), and the password only decides who is asking; no other password or key is in this repository.
 The demo runs on a free host that sleeps after 15 idle minutes, so the first page can take about a minute to load.
 
@@ -352,7 +352,7 @@ uv sync
 uv run python -m pytest          # no key and no network: the tests replace both Gemini models with fakes
 export GEMINI_API_KEY=...        # PowerShell: $env:GEMINI_API_KEY = "..."
 export SESSION_SECRET=...        # any long random string
-export DEMO_PASSWORD=...         # any value locally; the demo uses the one published above
+export DEMO_PASSWORD=toiyeuappota  # the shared demo password, published above
 uv run uvicorn appota_kb.main:create_app --factory --reload
 ```
 

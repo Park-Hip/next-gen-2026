@@ -107,6 +107,7 @@ def build_app(
             "account_id": account_id,
             "next": next_path,
             "error": error,
+            "demo_password": demo_password,
         }
         return _render(request, "signin.html", context, status)
 
