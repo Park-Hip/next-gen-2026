@@ -36,6 +36,9 @@ The cards are the answer card, the conflict card and the refusal card.
 - "passed": the card is the one the test case expects and every automatic check passed.
 - "failed:" is followed by the reason in plain words.
   "should have been an answer card" means the card is of the wrong kind; "missing '…'" means a text that the test case requires is not on the card; "does not cite '…'" means the card does not cite a document it should; "the scope built by the rules is wrong" means the rules put the wrong documents in front of the asker.
+- "failed, unsafe answer:" is a failure that is also an unsafe answer: an answer card where there should be none, or one that misses a key fact (a fact the AI's sentence must contain).
+  It is the most serious kind of failure, so it is named first.
+  The reasons that make the answer unsafe come right after the colon, for example "missing '01/01/2027'" for a key fact; the other failed checks of the same run follow after "also".
 - "waiting for Hiep's reading": an answer card whose automatic checks all passed.
   No answer card is counted as passed before Hiep has read the AI's sentence against its quote.
 - "Kind" is the kind of test case: "good" is an ordinary question, "hard" is a trickier one, and "limitation" is a known failure left in on purpose, so its check is expected to fail.
@@ -45,9 +48,9 @@ The names of the checks behind these words are in [Technical detail](#technical-
 ## Summary
 
 - Minh asks on 15/12/2026 how many days of annual leave he gets from next year (row 18).
-  The Mission 2 version answered "14 ngày" in all 4 runs, although from 01/01/2027 the rule gives 15; it was the only unsafe answer of Mission 2.
+  The Mission 2 version answered "14 ngày" in all 4 runs, although from 01/01/2027 the rule gives 15; that is an unsafe answer in all 4 runs (the only one in the first run; row 19 below is the other).
   The Mission 3 version has no unsafe answer in its 3 runs.
-- When the labels on a document hide a disagreement (row 19: the PayCo leave policy is given a topic different from the Group leave policy's, so the rules no longer see them as covering the same point, and Hà asks how many days of annual leave she gets), the Mission 2 version gave a one-sided answer card in all 3 runs; the Mission 3 version gave the conflict card in all 3 runs.
+- When the labels on a document hide a disagreement (row 19: the PayCo leave policy is given a topic different from the Group leave policy's, so the rules no longer see them as covering the same point, and Hà asks how many days of annual leave she gets), the Mission 2 version gave a one-sided answer card (an unsafe answer) in all 3 runs; the Mission 3 version gave the conflict card in all 3 runs.
 - Row 18 was refused once in the 3 Mission 3 runs: the one over-cautious card of Mission 3, within the 10% target; the safe direction, but not a fix every time.
 - No row that passed in Mission 2 fails in Mission 3.
 - Rows 15 and 17 are limitations kept on purpose, and fail the same way in both versions.
@@ -63,7 +66,7 @@ What changed: the card now gives the end of each version's validity window and a
 |---|---|---|---|---|---|
 | 1 | good | Minh, 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | Answer card, failed: missing 'đến hết 31/12/2026', 'Sắp thay đổi': 4/4 | Answer card, waiting for Hiep's reading: 3/3 |
 | 2 | good | Minh, 01/01/2027 | Phép năm của tôi là bao nhiêu ngày? | Answer card, waiting for Hiep's reading: 4/4 | Answer card, waiting for Hiep's reading: 3/3 |
-| 18 | hard | Minh, 15/12/2026 | Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày? | Answer card, failed: missing 'đến hết 31/12/2026', 'Sắp thay đổi', '01/01/2027': 4/4 | Answer card, waiting for Hiep's reading: 2/3<br>Refusal card, failed: should have been an answer card: 1/3 |
+| 18 | hard | Minh, 15/12/2026 | Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày? | Answer card, failed, unsafe answer: missing '01/01/2027'; also missing 'đến hết 31/12/2026', 'Sắp thay đổi': 4/4 | Answer card, waiting for Hiep's reading: 2/3<br>Refusal card, failed: should have been an answer card: 1/3 |
 | 21 | hard | Minh, 07/10/2026 | Đi công tác được hỗ trợ ăn uống bao nhiêu một ngày? | Answer card, failed: missing 'đến hết 31/12/2026', 'Sắp thay đổi', 'hết hiệu lực với bạn sau 31/12/2026': 3/3 | Answer card, waiting for Hiep's reading: 3/3 |
 
 - Row 18 is the change: Mission 2 answered "14 ngày" for next year in 4 runs out of 4, with nothing saying that the next version of the GameCo leave policy starts on 01/01/2027.
@@ -113,7 +116,7 @@ The conflict card is worded by the number of documents and names each side's tit
 | 3 | good | Minh, 07/10/2026 | Tôi xin nghỉ phép ở đâu, ai duyệt? | Answer card, waiting for Hiep's reading: 4/4 | Answer card, waiting for Hiep's reading: 3/3 |
 | 7 | hard | Hà, 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | Conflict card, failed: does not cite 'Quy chế nghỉ phép Tập đoàn': 4/4 | Conflict card, passed: 3/3 |
 | 12 | hard | Hà, 07/10/2026 | Xin nghỉ phép phải báo trước mấy ngày? | Conflict card, failed: does not cite 'Quy chế nghỉ phép Tập đoàn': 4/4 | Conflict card, passed: 3/3 |
-| 19 | hard | Hà, 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | Answer card, failed: should have been a conflict card: 3/3 | Conflict card, passed: 3/3 |
+| 19 | hard | Hà, 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | Answer card, failed, unsafe answer: should have been a conflict card: 3/3 | Conflict card, passed: 3/3 |
 | 20 | hard | Minh, 07/10/2026 | Ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không? | Answer card, waiting for Hiep's reading: 3/3 | Answer card, waiting for Hiep's reading: 3/3 |
 | 15 | limitation | Minh, 07/10/2026 | Xin nghỉ phép phải báo trước mấy ngày? | Refusal card, failed: should have been an answer card; the scope built by the rules is wrong: 4/4 | Refusal card, failed: should have been an answer card; the scope built by the rules is wrong: 3/3 |
 | 17 | limitation | Hà, 07/10/2026 | Đơn nghỉ phép gửi cho ai duyệt? | Conflict card, failed: should have been an answer card; the scope built by the rules is wrong: 4/4 | Conflict card, failed: should have been an answer card; the scope built by the rules is wrong: 3/3 |
@@ -223,8 +226,10 @@ Everything the sections above keep out of the running text is here.
 
 | In the cell | Check of `evaluation/score.py` |
 |---|---|
-| "should have been an answer / a conflict / a refusal card" | `card`, which also sets `unsafe` (an answer card where none should be) or `over_cautious` (a refusal or conflict card where an answer was expected, and the swap between refusal and conflict) |
-| "missing '…'" | `must_show` (text on the card) and `key_facts` (text in the model's sentence); either one missing for an answer card is also `unsafe` |
+| "failed, unsafe answer:" | `unsafe`; the reasons before "also" are the checks that set it: `card` when an answer card is shown where none should be, `key_facts` and `no_forbidden_for_llm` |
+| "should have been an answer / a conflict / a refusal card" | `card`; it is an unsafe answer (`unsafe`) when an answer card is shown where none should be, otherwise `over_cautious` (a refusal or conflict card where an answer was expected, and the swap between refusal and conflict) |
+| "missing '…'" | `key_facts` (text in the model's sentence; a fact missing from an answer card makes it an unsafe answer) or, in every other case, `must_show` (text on the card) |
+| "cites a document the model must not use" | `no_forbidden_for_llm`; an unsafe answer |
 | "does not cite '…'" | `must_cite` |
 | "the scope built by the rules is wrong" | `rules_wrong`, from `scope` |
 | "waiting for Hiep's reading" | every check passed on an answer card; no review yet (ADR 0006) |
@@ -392,45 +397,57 @@ def contains(text, needle):
 
 
 def reasons_of(score):
-    """Why one run of a row failed, in plain words: one phrase per failed check of evaluation/score.py."""
+    """Why one run of a row failed, in plain words, as (unsafe reasons, other reasons).
+
+    The unsafe reasons are the checks of evaluation/score.py that set `unsafe`: an answer card where there
+    should be none, a key fact missing from the model's sentence, a document the model must not use.
+    """
     row, card, checks = score.row, score.record["card"], score.checks
-    found = []
+    unsafe, other = [], []
     if checks.get("card") is False:
-        found.append(f"should have been {EXPECTED[row['card']]}")
+        (unsafe if score.unsafe else other).append(f"should have been {EXPECTED[row['card']]}")
     else:
         # A line is a {kind, text} record, or a flat string in the Mission 2 runs.
         shown = "\n".join(line.get("text", "") if isinstance(line, dict) else str(line)
                           for line in card.get("lines") or [])
-        missing = [t for t in row.get("must_show", []) if not contains(shown, t)]
-        missing += [t for t in row.get("key_facts", [])
-                    if not contains(card.get("answer_text") or "", t) and t not in missing]
-        if missing:
-            found.append("missing " + ", ".join(f"'{t}'" for t in missing))
+        key_missing = [t for t in row.get("key_facts", [])
+                       if checks.get("key_facts") is False and not contains(card.get("answer_text") or "", t)]
+        if key_missing:
+            unsafe.append("missing " + ", ".join(f"'{t}'" for t in key_missing))
+        show_missing = [t for t in row.get("must_show", [])
+                        if not contains(shown, t) and t not in key_missing]
+        if show_missing:
+            other.append("missing " + ", ".join(f"'{t}'" for t in show_missing))
         cited = {c.rsplit("#", 1)[0] for c in card.get("cited", []) or []}
         uncited = [d for d in row.get("must_cite", []) if d not in cited]
         if uncited:
-            found.append("does not cite " + ", ".join(f"'{titles[d]}'" for d in uncited))
+            other.append("does not cite " + ", ".join(f"'{titles[d]}'" for d in uncited))
         if checks.get("conflict_pair") is False:
-            found.append("the conflict card names the wrong documents")
+            other.append("the conflict card names the wrong documents")
     if score.rules_wrong:
-        found.append("the scope built by the rules is wrong")
+        other.append("the scope built by the rules is wrong")
     if score.leak:
-        found.append("leak of restricted text")
+        other.append("leak of restricted text")
     if checks.get("no_forbidden_for_llm") is False:
-        found.append("cites a document the model must not use")
+        unsafe.append("cites a document the model must not use")
     if checks.get("only_allowed_citations") is False:
-        found.append("cites a document that is not allowed")
-    return found
+        other.append("cites a document that is not allowed")
+    if score.unsafe != bool(unsafe):
+        raise SystemExit(f"row {row['id']}: unsafe is {score.unsafe} but unsafe reasons are {unsafe!r}")
+    return unsafe, other
 
 
 def outcome(score, verdict):
     """One run of one row, in a few words: the card, then passed, failed with its reasons, or waiting for Hiep."""
     card = CARD[score.record["card"]["kind"]]
-    reasons = reasons_of(score)
-    if (verdict == "Chưa đạt") != bool(reasons):
-        raise SystemExit(f"row {score.row['id']}: verdict {verdict!r} but reasons {reasons!r}")
+    unsafe, other = reasons_of(score)
+    if (verdict == "Chưa đạt") != bool(unsafe or other):
+        raise SystemExit(f"row {score.row['id']}: verdict {verdict!r} but reasons {unsafe + other!r}")
+    if unsafe:
+        also = f"; also {'; '.join(other)}" if other else ""
+        return f"{card}, failed, unsafe answer: {'; '.join(unsafe)}{also}"
     if verdict == "Chưa đạt":
-        return f"{card}, failed: {'; '.join(reasons)}"
+        return f"{card}, failed: {'; '.join(other)}"
     if verdict == "Đạt":
         return f"{card}, passed"
     return f"{card}, waiting for Hiep's reading"
