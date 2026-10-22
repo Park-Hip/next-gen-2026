@@ -7,6 +7,18 @@
 - Issue: #47
 - Research: None
 
+## In short
+
+- **The problem:** The AI's own sentence on the answer card was never checked, so it could drop a condition.
+  In a real run, the quote said "chính thức" and the sentence on the card did not.
+- **The decision:** The answer card shows only the quote that fixed rules had checked against the document, word for word, and the source lines.
+  The AI's sentence is removed from the card.
+- **What the employee sees:** The checked quote in quotation marks, for example "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm." instead of the AI's "Phép năm của bạn là 14 ngày mỗi năm."
+- **What we give up:** A quote is faithful but does not always answer the question directly, and it can read as stiff.
+
+Replaced by ADR 0011, which puts the AI's sentence back above the verified quote, because, as ADR 0011 states, a quote alone does not always answer the question directly.
+This ADR is kept unchanged below.
+
 ## Context
 
 ADR 0003 made every point `{text, quote, chunks}` and step 7 checks `quote` against the cited chunks.
