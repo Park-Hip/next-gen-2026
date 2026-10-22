@@ -68,7 +68,7 @@ What v1 simplifies or defers beyond these promises is in [`docs/scope.md`](../sc
 
 | # | Promise | Where | Shown by | Status |
 |---|---|---|---|---|
-| V1 | A test set of simulated questions, each with the right result and the documents that must not be cited | Phần 5 | The 10 rows times 3 phrasings, as a data file | Changed (ADR 0006): 22 rows, each asked in its main wording; 8 good, 11 hard, 3 limitation (rows 15-17) |
+| V1 | A test set of simulated questions, each with the right result and the documents that must not be cited | Phần 5 | The 10 rows times 3 phrasings, as a data file | Changed (ADR 0006): 22 rows, each asked in its main wording; 8 good, 13 hard, 1 limitation (row 16); rows 15 and 17 stopped being limitations on 22/10/2026 (ADRs 0013 and 0019) |
 | V2 | The five situations: two units, before and after a new version, undeclared conflict, other unit's rule, restricted document | Phần 5 | Rows 1 and 5; 1 and 2; 7; 6; 10 | Built: same rows |
 | V3 | Metrics and targets: rules correct in every case, 0 leaks, 0 unsafe LLM answers, faithfulness read by hand for every answer, at most 10% over-cautious, context recall tracked only | Phần 5 | Results table from the 22/10/2026 run | Changed (ADR 0007): context recall is not tracked; the other metrics are gates in the test report, and faithfulness is read by Hiep |
 | V4 | "Mỗi ca chạy nhiều lần ... một lần sai tính là trượt" | Phần 5 | Each case run 3 times | Changed (ADR 0006): each case runs once, because of the Gemini free-tier rate limit |

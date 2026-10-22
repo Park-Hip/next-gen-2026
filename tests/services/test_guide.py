@@ -170,9 +170,12 @@ def test_data_edit_note_names_the_document_and_line(cases, personas, documents):
     title = next(d.title for d in documents if d.id == edit["document"])
     assert title in view.data_edit_note
     assert edit["remove"] in view.data_edit_note
-    assert view.limitation_issue == "#24"
-    assert view.kind_label == "Chưa xử lý tốt"
+    assert view.limitation_issue is None
+    assert view.kind_label == "Khó"
     assert view.as_of == "07/10/2026"
+    limitation = next(c for c in rest if c.id == 16)
+    assert limitation.limitation_issue == "#51"
+    assert limitation.kind_label == "Chưa xử lý tốt"
     assert next(c for c in rest if c.id == 2).data_edit_note is None
 
 

@@ -829,9 +829,10 @@ def test_cases_page_try_links(judge_client, cases):
     for row in cases:
         expected = 0 if "data_edit" in row else len(row["questions"])
         assert len(re.findall(link, bodies[row["id"]])) == expected, row["id"]
-    note = _case_panels(page)[15]
-    assert "Tình huống này chạy trên dữ liệu đã sửa" in note
-    assert "Hạn chế đã biết, theo dõi ở issue #24" in note
+    panels = _case_panels(page)
+    assert "Tình huống này chạy trên dữ liệu đã sửa" in panels[15]
+    assert "Hạn chế đã biết" not in panels[15]
+    assert "Hạn chế đã biết, theo dõi ở issue #51" in panels[16]
 
 
 def test_cases_page_without_run(documents, tmp_path):

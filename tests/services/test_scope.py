@@ -29,22 +29,8 @@ def make_persona(id="p", unit="Studio", company="GameCo", path=("Tập đoàn", 
     return Persona(id=id, name=id, unit=unit, company=company, path=path, roles=roles, hr=hr)
 
 
-# Limitation rows whose failure is in the rules; the other limitation rows fail only in the LLM's reply,
-# so their scope and card must still be right here.
-RULES_LIMITATIONS = {
-    15: "limitation #24: a one-clause dùng thay drops the whole Group policy (row 15, M1a)",
-    17: "limitation #52: citing a document in a conflict pair gives the conflict card, even where both agree",
-}
-
-
 def _case_params():
-    params = []
-    for row in CASES:
-        marks = ()
-        if row["id"] in RULES_LIMITATIONS:
-            marks = (pytest.mark.xfail(strict=True, reason=RULES_LIMITATIONS[row["id"]]),)
-        params.append(pytest.param(row, id=f"row-{row['id']}", marks=marks))
-    return params
+    return [pytest.param(row, id=f"row-{row['id']}") for row in CASES]
 
 
 def test_scope_manual_check(personas, documents):

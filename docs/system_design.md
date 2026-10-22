@@ -298,7 +298,7 @@ The list below is v1's metadata plus the fields publishing needs; it is a propos
 |---|---|
 | A new conflict pair: a document on the same topic applies to some of the same units, and no relation is declared | The employees of those units get the conflict card |
 | A new version that fewer people may read than the version it replaces | The employees who lose access get a refusal, not the older rule (ADR 0010) |
-| A version that replaces another document | Every clause of that document is gone for the units it applies to ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) |
+| A version that replaces another document | Every clause of that document is gone for the units it applies to, so the new version must restate the clauses it keeps ([ADR 0013](decisions/0013-owners-change-a-document-only-by-a-full-new-version.md)) |
 
 ### 4.4 The life of a version
 
@@ -632,8 +632,8 @@ The failures that look like right answers matter most, because the employee cann
 | Two documents state the same fact differently, and the owner side did not catch it: a wrong topic, a wrong "bổ sung", or different topics | A right answer, from one side; or an answer card with both sides | The model's flag, when it notices both sides (ADR 0014); the evaluation; a list of answers that cite documents with no declared relation, for owners to review (SD16) | Mitigated at question time; a miss stays a limitation; the publish-time scan is SD15 |
 | An owner sets wrong metadata, such as a wrong topic or a wrong relation ([#50](https://github.com/Park-Hip/next-gen-2026/issues/50)) | A right answer | Nothing in v1 | Partly mitigated by the relation list and the impact preview (sections 7.2, 7.3) |
 | A question about another period gets the rule in force on the date asked ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | A right answer | The evaluation | Unchanged; see section 16 |
-| A company replaces only one clause of a Group policy, and the whole Group policy drops out ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | A refusal | The evaluation | A warning in the impact preview (section 4.3); clause-level relations stay deferred |
-| Two policies in a conflict pair agree on the point asked, and the employee still gets the conflict card ([#52](https://github.com/Park-Hip/next-gen-2026/issues/52)) | A conflict notice | The evaluation | Unchanged |
+| A company replaces only one clause of a Group policy without restating the Group clauses it keeps, against the owner rule of [ADR 0013](decisions/0013-owners-change-a-document-only-by-a-full-new-version.md), and the whole Group policy drops out | A refusal | The evaluation (test case 15) | A warning in the impact preview (section 4.3); clause-level relations stay deferred |
+| Two policies in a conflict pair agree on the point asked, and the employee still gets the conflict card | A conflict notice | The evaluation (test case 17) | Unchanged, on purpose ([ADR 0019](decisions/0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md)) |
 | A question that needs a clause applied to a case is refused although the clause was found ([#51](https://github.com/Park-Hip/next-gen-2026/issues/51)) | A refusal | The evaluation | Unchanged |
 | The registry or the host loses published documents | Answers from the old rules | The restart scenario | Depends on section 9.2 |
 
@@ -746,7 +746,7 @@ The rows are candidates from the Mission 1 decisions and the deferred list, not 
 | Change | Lands in | Stays |
 |---|---|---|
 | A person in two units (kiêm nhiệm) | Accounts hold several units; the scope rules run once per unit, or the user picks the unit they ask for | Search, the answerer, the checks |
-| A company replaces one clause of a Group policy ([#24](https://github.com/Park-Hip/next-gen-2026/issues/24)) | Relations point at clauses instead of documents; the scope rules drop clauses instead of whole documents | Search, the answerer, the cards |
+| A company replaces one clause of a Group policy without publishing a complete policy ([ADR 0013](decisions/0013-owners-change-a-document-only-by-a-full-new-version.md)) | Relations point at clauses instead of documents; the scope rules drop clauses instead of whole documents | Search, the answerer, the cards |
 | Employment type or seniority decides applicability | A new field on versions and accounts, and one more rule in the scope rules | Everything after the scope |
 | Questions about another period ([#53](https://github.com/Park-Hip/next-gen-2026/issues/53)) | The user picks the period, never the AI, and the scope rules run on that date | The rules themselves |
 | DOCX or PDF documents | A parser in the publish service that produces the same chunks | Everything after chunking |

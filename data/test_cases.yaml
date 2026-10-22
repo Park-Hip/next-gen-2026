@@ -1,6 +1,7 @@
 # Test cases (giả lập). Rows 1-10 are the test matrix of artifacts.md "Phase 4 - Test matrix" (the numbers the
 # Mission 1 promises cite); rows 11-15 come from issue #10, where they are named N1-N5; rows 16-18 are failures
-# kept as limitation rows, found by probing v1 on 14/10/2026 (issues #51, #52, #53); row 19 was the limitation #74 and became
+# kept as limitation rows, found by probing v1 on 14/10/2026 (issues #51, #52, #53); rows 15 and 17 were the limitations
+# #24 and #52 and became hard cases with #114 (ADRs 0013 and 0019); row 19 was the limitation #74 and became
 # a hard case with #87 (ADR 0014); row 20 is the hard case added with #75; row 18 became a hard case with #83 (ADR 0012), which also added row 21; row 22 (#101) pairs with row 10: the HR GameCo account is granted the document Minh is refused.
 # kind: good | hard | limitation, so the report shows the mix the Mission 2 brief asks for.
 #   A limitation row states the ideal result, which v1 is known to miss; its check is expected to fail.
@@ -262,26 +263,27 @@
   forbidden_by_rules: [TRAVEL-GAMECO-v1, OT-GAMECO-v1]
   forbidden_for_llm: [LEAVE-GROUP-v1]
 - id: 15
-  kind: limitation
+  kind: hard
   purpose: >-
-    Hạn chế đã biết của v1, ghi ở issue #24; tình huống này được chờ là chưa đạt. Hàng này chạy trên dữ liệu đã sửa:
-    bỏ điều báo trước khỏi quy chế GameCo bản 2, nên quy chế GameCo chỉ còn thay điều về số ngày phép. Đúng ra điều
-    báo trước 3 ngày làm việc của Tập đoàn vẫn phải áp dụng cho Minh, nhưng v1 áp "dùng thay" cho cả bộ quy chế chứ
-    không cho từng điều, nên bỏ luôn cả quy chế Tập đoàn và từ chối.
+    Hàng này chạy trên dữ liệu đã sửa: bỏ điều báo trước khỏi quy chế GameCo bản 2, nhưng quy chế GameCo vẫn khai
+    báo "dùng thay" quy chế Tập đoàn. Chủ văn bản muốn thay một điều của quy chế Tập đoàn phải ban hành quy chế đầy
+    đủ của mình, chép lại những điều của Tập đoàn còn giữ; ở đây chủ văn bản làm sai quy tắc đó, nên với khai báo
+    này quy chế Tập đoàn bị loại khỏi phạm vi của Minh và không còn điều nào trả lời câu hỏi. Kết quả đúng là thẻ
+    từ chối mời liên hệ HR GameCo; trả lời "3 ngày làm việc" theo quy chế Tập đoàn, hay trích quy chế Tập đoàn, là
+    sai, vì hệ thống không tự đoán khai báo nào chủ văn bản định viết.
   persona: minh
   as_of: 2026-10-07
-  # "Dùng thay" replaces a whole series, never one clause (Mission 1 M1a). With the edit, GameCo replaces only the
-  # leave-days clause, so the Group notice clause should still apply to Minh, but rules drop the whole Group policy.
+  # "Dùng thay" replaces a whole series, never one clause (Mission 1 M1a, ADR 0013). With the edit, GameCo breaks
+  # the owner rule of ADR 0013, and the rules follow what it declares: the Group policy is out of Minh's scope.
   data_edit:
     document: LEAVE-GAMECO-v2
     remove: Điều 3. Đơn nghỉ phép được gửi cho trưởng nhóm trước ít nhất 3 ngày làm việc.
   questions:
     - Xin nghỉ phép phải báo trước mấy ngày?
-  card: answer
-  expected_answer: Bạn gửi đơn nghỉ phép cho quản lý trực tiếp trước ít nhất 3 ngày làm việc, theo Quy chế nghỉ phép Tập đoàn, Điều 2, vì quy chế GameCo chỉ thay điều về số ngày phép.
-  must_cite: [LEAVE-GROUP-v1]
-  key_facts: [3 ngày làm việc]
-  forbidden_by_rules: [LEAVE-PAYCO-v1]
+  card: refusal
+  expected_answer: Thẻ từ chối - quy chế GameCo khai báo dùng thay quy chế Tập đoàn nhưng không còn điều báo trước, nên không có quy định nào trả lời cho Minh; mời liên hệ HR GameCo, không nêu "3 ngày làm việc".
+  must_not_contain: [3 ngày làm việc]
+  forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
   forbidden_for_llm: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
 - id: 16
   kind: limitation
@@ -303,22 +305,22 @@
   forbidden_by_rules: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1, LEAVE-GAMECO-v1, LEAVE-GAMECO-v3]
   forbidden_for_llm: [OT-GAMECO-v1, TRAVEL-GAMECO-v1]
 - id: 17
-  kind: limitation
+  kind: hard
   purpose: >-
-    Hạn chế đã biết của v1, ghi ở issue #52; tình huống này được chờ là chưa đạt. Hà hỏi đơn nghỉ phép gửi cho ai
-    duyệt; hai quy chế của hàng 7 mâu thuẫn về số ngày phép và số ngày báo trước, nhưng cùng nói đơn gửi cho quản lý
-    trực tiếp. Đúng ra Hà nhận thẻ trả lời "quản lý trực tiếp", nhưng v1 xét mâu thuẫn theo văn bản chứ không theo
-    câu hỏi: trích một văn bản trong cặp mâu thuẫn là ra thẻ mâu thuẫn, vì quyết định hai điều có nói giống nhau
-    hay không là đọc nghĩa, việc thiết kế để cho con người.
+    Hà hỏi đơn nghỉ phép gửi cho ai duyệt; hai quy chế của hàng 7 mâu thuẫn về số ngày phép và số ngày báo trước,
+    nhưng cùng nói đơn gửi cho quản lý trực tiếp. Hai văn bản đã mâu thuẫn thì luôn được báo là mâu thuẫn, kể cả khi
+    chúng nói giống nhau ở điểm được hỏi, vì quyết định hai điều có nói giống nhau hay không là đọc nghĩa, việc để cho
+    con người. Kết quả đúng là thẻ mâu thuẫn trích nguyên văn Điều 2 của cả hai bên, trong đó Hà vẫn đọc được "quản
+    lý trực tiếp", và mời hỏi HR PayCo; một thẻ trả lời trích một bên là sai.
   persona: ha
   as_of: 2026-10-07
   questions:
     - Đơn nghỉ phép gửi cho ai duyệt?
-  card: answer
-  expected_answer: Đơn nghỉ phép được gửi cho quản lý trực tiếp, theo Quy chế nghỉ phép PayCo, Điều 2; Quy chế nghỉ phép Tập đoàn, Điều 2 nói giống vậy.
-  must_cite: [LEAVE-PAYCO-v1]
-  may_cite: [LEAVE-GROUP-v1]
-  key_facts: [quản lý trực tiếp]
+  card: conflict
+  expected_answer: Thẻ mâu thuẫn - trích nguyên văn Tập đoàn Điều 2 và PayCo Điều 2, cả hai cùng nói đơn gửi cho quản lý trực tiếp, không tự chọn, mời hỏi HR PayCo.
+  conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_cite: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]
+  must_show: [quản lý trực tiếp, 3 ngày làm việc, 5 ngày làm việc]
   forbidden_by_rules: [LEAVE-GAMECO-v2, LEAVE-PROC-GAMECO-v1]
   forbidden_for_llm: []
 - id: 18

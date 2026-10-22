@@ -407,7 +407,7 @@ def test_gates_exclude_limitation_row(cases, personas):
     settings = Eval(over_cautious_max_share=0.10, confidence=0.95)
     scores = [_row_score(c, _refusal_record(c["id"])) for c in cases]
     g = gates(scores, {}, settings, personas)
-    assert all(gate.n == 19 for gate in g if gate.unit == "rows")
+    assert all(gate.n == 21 for gate in g if gate.unit == "rows")
 
 
 def test_verdict_answer_card_needs_reading(personas, documents, cases):
