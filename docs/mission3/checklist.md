@@ -31,9 +31,8 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 - [ ] Pin the Mission 2 service before the first Mission 3 code change is merged: Render Dashboard, the service's Deploys page, "Manual Deploy > Deploy a specific commit", `b6ca78d`.
   - The deploy steps in the #11 plan create the service from the Blueprint (`render.yaml`); if so, a Blueprint sync applies `autoDeploy: true` from `render.yaml` again, so `render.yaml` must also be changed to match: auto-deploy off for the Mission 2 service, and a second service for Mission 3.
   - Both services would share one `GEMINI_API_KEY` quota unless the second gets its own key.
-  - Open and urgent, as of 21/10: Mission 3 code has already merged (#90, #92, #93, #94) and `render.yaml` still has one service on `main` with `autoDeploy: true`.
-    Unless Hiep pinned the service by hand in the dashboard, the Mission 2 link now serves Mission 3 code.
-    The repository cannot show the dashboard; Hiep checks it.
+  - Open and urgent: on 22/10 the Mission 2 link answers `GET /` with `303 See Other` to `/signin?next=%2F`, and sign-in exists only in Mission 3 code (#76), so the Mission 2 link already serves Mission 3.
+    The Mission 2 demo is not online; it needs a second service pinned to `b6ca78d`, set up by Hiep in the dashboard.
 
 ## 1. Understand the new requirement
 
@@ -78,11 +77,15 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 
 ### 4.1 Regression
 
-- [ ] All 18 Mission 2 rows are run again on the Mission 3 code, through the same harness as the demo.
-  - Open: the only Mission 3 run so far is `results/20261021-1032.jsonl` (20 rows, all `ok`, commit `d31d304`).
-    It predates #90, #92, #93 and #94, so it is an early run, not the final one; its review sheet is still "[chờ Hiệp]" for faithful and lesson.
+- [x] All 18 Mission 2 rows are run again on the Mission 3 code, through the same harness as the demo.
+  - 3 full runs of rows 1-22 on 21/10 at `504d3e0` (the code of `main` plus row 22, which PR #103 then merged on 21/10/2026, commit `f0fc270`): `20261021-2253`, `20261021-2258` and `20261021-2301`, all 22 rows `ok` in each; see [`runs.md`](runs.md).
+  - The Mission 2 code was run 3 more times on the same day, so both versions are compared on repeated runs, not on one each.
+  - `20261021-1032` (commit `d31d304`) is an early Mission 3 run, not a result.
 - [ ] Every gate that passed in M2 still passes: rules correct, 0 leaks, 0 unsafe answers, over-cautious within target, faithfulness on every answer.
+  - In the 3 runs: 0 rules wrong, 0 leaks and 0 unsafe cards each; 1 over-cautious card in 19 gated rows in one run (row 18), within the 10% target.
+  - Open: faithfulness waits for Hiep's reading of the three `.review.yaml` files.
 - [ ] A row that changed result is explained, whether it got better or worse.
+  - Drafted in [`runs.md`](runs.md), for Hiep to check.
 
 ### 4.2 New tests (brief minimum: 3)
 
@@ -94,8 +97,10 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 
 ### 4.3 Evidence that M3 is better
 
-- [ ] A before/after table per row: M2 result → M3 result, from the two committed runs, generated, never edited by hand.
-- [ ] A row that went from fail to pass is run more than once, so a lucky run (as row 16 in M2) is not counted as a fix; the number of runs is stated.
+- [x] A before/after table per row: M2 result → M3 result, from the two committed runs, generated, never edited by hand.
+  - [`runs.md`](runs.md); the script that generates its tables is in its appendix.
+- [x] A row that went from fail to pass is run more than once, so a lucky run (as row 16 in M2) is not counted as a fix; the number of runs is stated.
+  - Every row was run 3 times on the Mission 3 code and 3 or 4 times on the Mission 2 code; each cell of [`runs.md`](runs.md) gives the count.
 - [ ] Every new answer, and every sentence the model writes on a card, is read by Hiep against its quote.
 - [ ] Every number in the docs comes from a committed run; nothing is estimated or invented.
 - [ ] A known failure that stays keeps its issue open with the `limitation` label.
