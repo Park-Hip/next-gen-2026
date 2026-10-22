@@ -118,6 +118,10 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 
 ### 5.2 The 3 mandatory questions
 
+The answers are pasted into a text box on the portal, with no word limit (Hiep, 21/10/2026); the brief gives no length either.
+So [`answers.md`](answers.md) holds each answer as plain text, with no table or Markdown and full URLs, opening with the brief's question word for word.
+
+
 - [ ] Câu 1: what was prioritised and what was deliberately not done, and why.
 - [ ] Câu 2: the change that made the biggest difference, and the evidence that M3 is better.
 - [ ] Câu 3: the biggest remaining risk if real users had it tomorrow, and how it would be handled first.

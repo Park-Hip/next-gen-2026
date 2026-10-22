@@ -3,15 +3,30 @@
 - Status: Accepted; Reasons pending Hiep
 - Date: 2026-10-21
 - Origin: Hiep + AI
-- Supersedes: The persona-picker mechanism of Mission 1 D4, and the persona picker named in the B3 line of the promises ledger; not the promises themselves
+- Supersedes: Picking a persona from a list on the page (Mission 1 D4), and the persona picker named in the B3 line of the promises ledger; not the promises themselves
 - Issue: #76
 - Research: None
 
+## In short
+
+- **The problem:** Before this change, anyone could answer as Lan, who works in HR for the Group, just by putting her name in the web address.
+  There was no sign-in and no password, so anyone could ask as anyone and get that person's rules.
+  The judges' pages that list the data and the test cases also showed every visitor the title and text of a document that only one role may read.
+- **The decision:** The visitor picks a simulated account and types one demo password shared by all accounts.
+  The server remembers only the account in a signed browser-session cookie, and looks up the unit and roles in the accounts data on every request, never in the cookie.
+  Only the judge account (Giám khảo) opens the data and test-case pages.
+- **What the employee sees:** A sign-in page first.
+  After signing in, they always ask as their own account, and changing the web address changes nothing.
+  The judge can choose which employee account to ask as.
+  A new simulated HR GameCo account, Hoa, can read the restricted salary band that Minh is refused.
+- **What we give up:** The password is published in the README, so anyone who reads it can sign in; this is accepted because nothing real is behind it.
+  The product now needs two secrets set before it starts, and it uses one more software library.
+
 ## Context
 
-Before this change, `GET /?persona=lan&...` answered as Lan with no session and no credential, because `api/page.py` read `persona` from the query.
-Anyone could ask as anyone and get that person's rules, which breaks MVP spec E8: the unit and roles must come from the account, never from what the user types.
-The judges' pages `/data` and `/cases` also showed every visitor the title and text of a document only one role may read, which breaks E4.
+Before this change, a request such as `GET /?persona=lan&...` answered as Lan with no session and no credential, because the page read the account from the web address.
+Anyone could ask as anyone and get that person's rules, which breaks the spec line that the unit and roles must come from the account, never from what the user types.
+The judges' pages for the data and the test cases also showed every visitor the title and text of a document that only one role may read.
 The accounts and every document are simulated, so the sign-in does not protect any real secret; it decides who is asking.
 
 ## Options considered
@@ -24,13 +39,13 @@ The accounts and every document are simulated, so the sign-in does not protect a
 ## Decision
 
 The visitor picks a simulated account and types one demo password shared by all accounts (option 2).
-The password is read only from the environment variable `DEMO_PASSWORD`, checked with a constant-time comparison, sent only in a POST body and never logged; it is published in the README on purpose, because the accounts and data are simulated.
-The server keeps only the account id in a browser-session cookie signed by Starlette's `SessionMiddleware` with `SESSION_SECRET`; it reloads the unit and roles from `data/personas.yaml` on every request.
-For an employee, a `persona` in the URL or the form is ignored.
-Only the `Giám khảo` account (role `evaluator`) opens `/data` and `/cases` and may ask as any employee account it chooses; every other account gets a 404 on those pages.
+The password is read only from the environment, compared in constant time, sent only in the body of the sign-in request and never logged; it is published in the README on purpose, because the accounts and data are simulated.
+The server keeps only the account id, in a browser-session cookie it signs; it looks up the unit and roles in the accounts data on every request, never in the cookie.
+For an employee, an account named in the web address or in the form is ignored.
+Only the judge account, Giám khảo, opens the data and test-case pages and may ask as any employee account it chooses; every other account gets a "not found" page there.
 The as-of date picker stays on the ask page, labelled as a demo control.
-A simulated HR GameCo account, Hoa, holds `hr_gameco`, so the demo and the tests show a restricted document being granted and not only refused (gap G2.4).
-A wrong but valid `access` value still leaks (G2.3, issue #50); it stays a limitation on purpose.
+A simulated HR GameCo account, Hoa, holds the HR GameCo role, so the demo and the tests show a restricted document being granted and not only refused.
+A wrong but valid access value still leaks; it stays a limitation on purpose.
 
 ## Reasons
 
@@ -38,14 +53,14 @@ A wrong but valid `access` value still leaks (G2.3, issue #50); it stays a limit
 
 ## Consequences
 
-- A visitor cannot change who is asking by editing the URL; a forged, tampered or wrongly signed cookie is signed out.
+- A visitor cannot change who is asking by editing the web address; a forged, tampered or wrongly signed cookie is signed out.
 - No restricted title reaches a page an employee can open.
-- `itsdangerous==2.2.0` is a new dependency, needed by `SessionMiddleware`.
-- `main.create_app` fails at start-up without `SESSION_SECRET` or `DEMO_PASSWORD`, so Render needs both set before the deploy: `SESSION_SECRET` is generated by `render.yaml`, `DEMO_PASSWORD` is set by hand.
-- The JSON log line gets a key `account` (who is signed in); `persona` stays the account the question is asked as.
-- The evaluation harness is unchanged: it calls the scope rules with each row's account directly.
+- One new software dependency is needed to sign the cookie.
+- The product fails at start-up without both secrets, so the host needs both set before the deploy: the cookie secret is generated by the deploy file, and the demo password is set by hand.
+- The JSON log line gets a key for who is signed in; the existing persona key stays the account the question is asked as.
+- The evaluation harness is unchanged: it calls the scope rules with each test case's account directly.
 - Published shared password: anyone who reads the README can sign in; this is accepted because nothing real is behind it.
-- Not done: the evaluation row where Hoa asks the salary band question; it needs a full run with the real model, and until then Hoa's access is tested on the scope rules and the page with the fake model.
+- Not done when this ADR was written: the evaluation case where Hoa asks the salary band question; it needs a full run with the real AI model, and until then Hoa's access is tested on the scope rules and the page with the fake model.
 
 ## Would change if
 
@@ -53,7 +68,19 @@ Real employees use the product, or an account protects anything real; then the s
 
 ## Evidence
 
-- `tests/api/test_page.py`: signed out redirects to sign-in; a wrong password and an unknown account set no session; `?persona=` changes nothing for an employee; a tampered cookie and a cookie signed with another secret are signed out; employees get a 404 on `/data` and `/cases`; the judge asks as the chosen account; Hoa gets the salary band that Minh is refused.
-- `tests/services/test_scope.py`: Hoa's scope holds `SAL-BAND-GAMECO` and Minh's does not; a misspelt role or unit in `access` hides the document from every account.
-- `tests/test_main.py`: a missing or empty `SESSION_SECRET` or `DEMO_PASSWORD` fails at start-up.
+- Offline tests of the page: signed out redirects to sign-in; a wrong password and an unknown account set no session; an account named in the web address changes nothing for an employee; a tampered cookie and a cookie signed with another secret are signed out; employees get a "not found" page on the data and test-case pages; the judge asks as the chosen account; Hoa gets the salary band that Minh is refused.
+- Offline tests of the scope rules: Hoa's scope holds the salary band and Minh's does not; a misspelt role or unit in the access value hides the document from every account.
+- A test of start-up: a missing or empty cookie secret or demo password fails.
 - Manual run on 21/10/2026 with the fake model: the flows above over HTTP with curl, and screenshots of the pages.
+
+## Technical detail
+
+- Issue #76; MVP spec lines E8 (unit and roles come from the account) and E4 (no restricted title for an employee); Mission 1 decision D4 and the B3 line of the promises ledger; gaps G2.3 and G2.4; limitation [#50](https://github.com/Park-Hip/next-gen-2026/issues/50).
+- The old behaviour: `api/page.py` read `persona` from the query string.
+- Environment variables: `DEMO_PASSWORD` (compared with a constant-time comparison, read from the environment only) and `SESSION_SECRET` (signs the cookie through Starlette's `SessionMiddleware`).
+- Accounts file: `data/personas.yaml`; the judge is `giam_khao` (display name `Giám khảo`) with role `evaluator`; Hoa is `hoa` with `hr_gameco`.
+- Pages: `/data` and `/cases` return 404 for every non-judge account.
+- New dependency: `itsdangerous==2.2.0`, needed by `SessionMiddleware`.
+- `main.create_app` fails without `SESSION_SECRET` or `DEMO_PASSWORD`; `render.yaml` generates `SESSION_SECRET` and leaves `DEMO_PASSWORD` to be set by hand.
+- The JSON log line gets the key `account`; `persona` is the account the question is asked as.
+- Tests: `tests/api/test_page.py`, `tests/services/test_scope.py`, `tests/test_main.py`.
