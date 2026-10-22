@@ -8,7 +8,7 @@ All company data in this repository is simulated ("giả lập"); no real Appota
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](docs/images/same-question-three-askers.png)
 
-*The image predates Mission 3; the current card adds the model's sentence above each quote and the end of the version's validity.*
+*The image predates Mission 3; the current card shows one answer above the verified quotes, with the end of the version's validity.*
 
 Same question, same day, three employees.
 Each gets the policy that applies to them, quoted with its source.
@@ -20,10 +20,8 @@ Where two policies apply and nobody has said which one wins, the system does not
 
 ## Test report
 
-[chờ lần chạy cuối]
-
-The only Mission 3 report generated so far is the [early test report](docs/mission2/test_report.md).
-It covers the first 20 test cases and was made on 21/10/2026, before most Mission 3 changes, so the final run replaces it (run 20261021-1032, commit d31d304).
+The latest full run is the [test report](docs/mission2/test_report.md), made on 22/10/2026 with all 22 test cases and the real model.
+The rules picked the right documents and card in every good and hard case, with no leak, no unsafe answer and no over-cautious answer in the 19 gated cases; the Faithfulness reading is still pending Hiệp.
 
 What the final runs show, case by case, for the Mission 2 version against the Mission 3 version, is in [`docs/mission3/runs.md`](docs/mission3/runs.md).
 
@@ -59,7 +57,7 @@ Every number below is from [`docs/mission3/runs.md`](docs/mission3/runs.md): eac
 - The next-year leave question was refused once in 3 Mission 3 runs: the one over-cautious card of the Mission 3 version, the safe direction, but not a fix every time.
 - No test case that passed in the Mission 2 version fails in the Mission 3 version.
   Cases 15 and 17 are limitations kept on purpose and fail the same way in both.
-- Every answer card still waits for Hiệp's reading of the model's sentence against its quote ("chờ Hiệp đọc"); no answer card is counted as faithful before that.
+- Every answer card still waits for Hiệp's reading of the model's answer against its quotes ("chờ Hiệp đọc"); no answer card is counted as faithful before that.
 
 ### 1. Versions and effective dates
 
@@ -78,7 +76,7 @@ Every number below is from [`docs/mission3/runs.md`](docs/mission3/runs.md): eac
   - A version that ends with no successor (case 21): the GameCo travel-allowance rule, edited to end on 31/12/2026, is shown with the rule stopping for Minh after 31/12/2026 and his being sent to HR GameCo, in 3 runs out of 3.
   - Regression check (case 2): on 01/01/2027 both versions answer 15 days from version 3, and the Mission 3 version shows no notice.
 - **Giới hạn còn lại:** a question about another period is still answered with the rule in force on the chosen date.
-  In both answered runs of the next-year question, the sentence ends by saying the documents do not give next year's number, which can be read as "no document gives it"; it waits for Hiệp's reading.
+  In both answered runs of the next-year question, the answer ends by saying the documents do not give next year's number, which can be read as "no document gives it"; it waits for Hiệp's reading.
 
 Trail: issue #83, ADR 0012, PR #93; gaps G1.1-G1.2; open limitation issue #53; cases 18, 21 and 2.
 
@@ -128,10 +126,10 @@ Trail: issue #87, ADR 0014, ADR 0015, PR #92; gap G3.3; open limitation issues #
 
 - **M2 trước:** every refusal, whatever its reason, showed the same text, "không tìm thấy quy định", which can be read as "there is no such rule".
 - **Vấn đề/yêu cầu:** requirement 4: say clearly when the basis is not enough, and why.
-- **Quyết định:** the rules choose one of three fixed refusal texts from the reason for refusing, and the model says in its sentence when the quote does not answer every part of the question.
+- **Quyết định:** the rules choose one of three fixed refusal texts from the reason for refusing, and the model says in its answer when the quotes do not answer every part of the question.
   What the final check on citations and quotes refuses did not change.
 - **M3 sau:** a refusal says why; an answer says what it does not cover.
-  For example, Minh asks for the last day to request leave for Monday 19/10/2026 (case 16), and each sentence says that the system does not compute that date.
+  For example, Minh asks for the last day to request leave for Monday 19/10/2026 (case 16), and each answer says that the system does not compute that date.
 - **Bằng chứng:**
   - Cases 8, 9, 11 and 14 are refused in every run of both versions, as before.
   - Case 16 was answered in 2 of 4 runs of the Mission 2 version and in 3 of 3 runs of the Mission 3 version.
@@ -145,15 +143,15 @@ Trail: issue #96, ADR 0017, PR #102; gaps G4.3, G4.5; open limitation issue #51;
 
 - **M2 trước:** the card showed only the verified quote, which is faithful but does not always answer the question directly, and the employee could not open the rest of the cited version.
 - **Vấn đề/yêu cầu:** requirement 5: let the user check which documents were used.
-- **Quyết định:** the model's sentence goes above the verified quote, with a fixed line saying that the bold sentence is the system's reading and the quoted text is the checked clause.
+- **Quyết định:** the model's answer goes above the verified quotes, with a fixed line saying that the bold answer is the system's answer and the quoted text is the checked clause.
   Each source now opens the cited version, showing its validity window, who it applies to and the cited Điều highlighted; anything outside the asker's scope gets the same "not found" page (HTTP 404).
-  Not done: checking the sentence at run time.
-- **M3 sau:** every answer card shows the sentence, the quote and a link to the version.
+  Not done: checking the answer at run time.
+- **M3 sau:** every answer card shows the answer, its quotes and a link to the version.
 - **Bằng chứng:**
-  - Every answer card of the 3 Mission 3 runs has that fixed line ("Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."), and no conflict or refusal card has it.
+  - Every answer card of the 3 Mission 3 runs has that fixed line ("Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."), and no conflict or refusal card has it.
   - Every conflict card names each side's document.
   - The link and the page it opens are not in the run records; the automated tests cover them.
-- **Giới hạn còn lại:** the sentence is not checked at run time, so a wrong number or a dropped condition next to a correct quote is caught only by Hiệp's reading of the 29 answer cards of the 3 Mission 3 runs, which is still to come.
+- **Giới hạn còn lại:** the answer is not checked at run time, so a wrong number or a dropped condition next to a correct quote is caught only by Hiệp's reading of the 29 answer cards of the 3 Mission 3 runs, which is still to come.
 
 Trail: issue #77, PR #99; issue #75, ADR 0011 (replaces ADR 0009), PR #90; gaps G5.1-G5.4; tests `test_answer_card_source_links_to_the_cited_clause`, `test_every_refusal_is_the_same_404`, `test_the_page_opens_exactly_when_the_scope_holds_the_chunk`.
 
@@ -188,7 +186,7 @@ The terms this page and the documents it links use, in plain words.
 | Scope | The documents that this asker may read, that apply to their unit, and that are in force on the as-of date. Fixed rules build it before any AI reads anything, so the AI never sees the rest. |
 | Owner, owner metadata | The unit that publishes a document, and the facts it writes on it: which units it applies to, who may read it, its topic, and whether it replaces ("dùng thay") or adds to ("bổ sung") another document. |
 | Conflict | Two documents in the asker's scope that give different rules on the same point, with no statement from their owners of which one wins. |
-| Answer card | The answer the employee sees: one sentence written by the AI, above the exact quote from the document, with the source and its dates. |
+| Answer card | The answer the employee sees: one answer written by the AI, above the exact quotes from the documents, with their sources and dates. |
 | Conflict card | Shown instead of an answer when the sources disagree: it quotes each side and sends the employee to HR; no AI-written text. |
 | Refusal card | Shown when there is no answer the system can stand behind: it says so, and who to ask. |
 | Quote check | Before any answer is shown, fixed rules check that every quote matches the document word for word; if one does not, the system refuses. |
@@ -197,7 +195,7 @@ The terms this page and the documents it links use, in plain words.
 | Unsafe answer | An answer card where there should be none, or one that misses a key fact. |
 | Over-cautious | A refusal or a conflict card where a plain answer was expected. |
 | Leak | Restricted content reaching someone not allowed to read it. |
-| Hiệp's reading ("chờ Hiệp đọc") | Hiệp reads each answer card's sentence against its quote and marks it faithful or not; until then, no answer card counts as faithful. |
+| Hiệp's reading ("chờ Hiệp đọc") | Hiệp reads each answer card's answer against its quotes and marks it faithful or not; until then, no answer card counts as faithful. |
 | Gap | A weakness of the Mission 2 version, found by reading the Mission 3 requirements, listed in the [gap analysis](docs/mission3/gaps.md). |
 | Probe | A small scripted experiment that shows a gap without calling the real AI model. |
 | Limitation | A known failure left in on purpose, kept as an open GitHub issue labelled `limitation`. |
@@ -271,7 +269,7 @@ flowchart TB
         search, then pick
         and quote the clauses
         that answer, write one
-        sentence, flag a disagreement`"]
+        answer, flag a disagreement`"]
         ai --> rules2["`**Rules, no AI**
         check every quote
         word for word against
@@ -290,14 +288,14 @@ flowchart TB
 ```
 
 A wrong version, another unit's rule or a document the asker may not read cannot reach the answer, because the AI never sees it.
-The answer card shows the AI's sentence above the clause itself, checked word for word against its source; the sentence cannot change the kind of card, and the conflict and refusal cards use fixed wording only.
+The answer card shows one answer from the AI above the clauses themselves, checked word for word against their sources; the answer cannot change the kind of card, and the conflict and refusal cards use fixed wording only.
 When two policies apply and no owner has declared which one replaces the other, the rules do not choose: the card quotes both and sends the asker to HR.
 The AI may also flag two documents that disagree although no owner declared it; the rules check the flag, and it can only add a conflict, never remove one.
-The AI is Google Gemini: one model for search, and one to pick the clauses, write the sentence, quote each clause and flag a disagreement.
+The AI is Google Gemini: one model for search, and one to pick the clauses, write the answer, quote each clause and flag a disagreement.
 
 The full design, with each decision, who makes it and the same question traced step by step for all three employees, is in [`docs/architecture.md`](docs/architecture.md).
 
-Trail: ADR 0011 (the sentence above the quote), ADR 0014 (the model's flag); models `gemini-embedding-001` and `gemini-3.5-flash-lite`.
+Trail: ADR 0018 (one answer above the quotes), ADR 0014 (the model's flag); models `gemini-embedding-001` and `gemini-3.5-flash-lite`.
 
 ## Known limitations
 

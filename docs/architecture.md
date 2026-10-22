@@ -33,12 +33,12 @@ flowchart TD
     s3["3. Apply declared replacements, then keep only what the asker may read"]
     s4["4. Mark conflicts: same topic, no declared relation"]
     s5{{"5. Search the scope by keywords and by meaning: best 5 passages"}}
-    s6{{"6. The AI writes one plain sentence per passage, names its sources, quotes each passage word for word, and flags two passages that disagree"}}
+    s6{{"6. The AI writes one plain answer to the whole question, cites only the passages that support it, quotes each passage word for word, and flags two passages that disagree"}}
     valid{"7. Are the sources and quotes valid?"}
     conflict{"7. Is a cited document in a conflict, or does a valid AI flag add one?"}
     refusal[/"Refusal card: fixed wording"/]
     conflictcard[/"Conflict card: fixed wording, quotes each side"/]
-    answercard[/"Answer card: the AI's sentence, the verified quote, the source"/]
+    answercard[/"Answer card: the AI's answer, the verified quotes, the sources"/]
     documents[("Documents with their owners' facts")]
     index[("Search index")]
 
@@ -88,19 +88,19 @@ A passage outside his scope is never ranked, and if one were returned the produc
 
 **Step 6 - the AI reads and writes.**
 The AI receives the 5 passages with their dates, Minh's unit, the date and the question.
-It returns one plain sentence for each passage that states the answer, which passage it comes from, and a quote copied word for word.
+It returns one plain answer to the whole question, the passages it cites, and a quote copied word for word for each.
 It may also return nothing, or flag two passages that disagree.
-In the 21/10/2026 run it cited GameCo's leave policy v2, Điều 2.
+In the 22/10/2026 run it cited GameCo's leave policy v2, Điều 2.
 
 **Step 7 - the rules check the AI and pick the card.**
-Every sentence must have a source, the source must be one of the 5 passages, and the quote must appear word for word in the passage it cites.
+Every quote must have a source entry, the source must be one of the 5 passages, and the quote must appear word for word in the passage it cites.
 If any check fails, the product refuses.
 Otherwise a cited document that is in a conflict, or one that a valid AI flag pairs with another, gives the conflict card; if not, the answer card.
-Minh gets the answer card; the AI's sentence and quote are from the 21/10/2026 run, and the other lines are produced by the rules:
+Minh gets the answer card; the AI's answer and quote are from the 22/10/2026 run, and the other lines are produced by the rules:
 
 > Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.
-> Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu.
-> Theo Quy chế nghỉ phép GameCo (bản 2), nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.
+> Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu.
+> **Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm.**
 > "Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo.
 > Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027.
@@ -112,7 +112,7 @@ The same question from Lan and from Hà gives a different scope and a different 
 Fixed rules, never the AI, choose the card.
 
 **The answer card** is shown when the AI found passages that state the answer, every quote checks out and no conflict is involved.
-It shows who the asker is asking as, the AI's sentence (the only text on any card that the AI wrote), the exact quote under it, and a source line with the document, its Điều, the dates it applies and whom to ask.
+It shows who the asker is asking as, the AI's answer (the only text on any card that the AI wrote) once at the top, the exact quotes under it, and a source line for each quote with the document, its Điều, the dates it applies and whom to ask.
 When the document stops applying to the asker on a later date, the source line ends with "đến hết <ngày>" and a "Sắp thay đổi" notice names what replaces it [ADR 0012].
 Each source line links to the whole cited version of the document with the cited Điều highlighted, but only when the signed-in asker's scope on that date holds it; every other request gets the same "not found" page [#77].
 
@@ -139,7 +139,7 @@ If the AI service fails after retries, the page shows an error, never a card.
 
 Deterministic rules decide access, validity, applicability, precedence and the card.
 These are five separate questions: may the asker read it, is it in force, does it apply to the asker's unit, which policy wins, and which card is shown.
-The AI only works with language: an embedding model helps rank passages by meaning, and the language model picks the passages that answer, writes one sentence per passage and quotes them [ADR 0011].
+The AI only works with language: an embedding model helps rank passages by meaning, and the language model answers the question, cites only the passages that support the answer and quotes them [ADR 0018].
 
 | Decision | Decided by | How | If it goes wrong |
 |---|---|---|---|
@@ -150,9 +150,9 @@ The AI only works with language: an embedding model helps rank passages by meani
 | Which policy wins (precedence) | Rules, step 3 | Only a replacement ("dùng thay") that the owner declared; there is no default such as "the lower unit wins" | An undeclared pair is not resolved, it becomes a conflict |
 | Which policies conflict | Rules, step 4; plus the AI's flag, checked by step 7 [ADR 0014] | Same topic, both kept, and neither says it adds to the other ("bổ sung"); the AI may add the pair of two cited passages that disagree, never remove one | The rules never decide a conflict; the card sends the asker to HR |
 | Which passages are relevant | Search, step 5 [ADRs 0001, 0002] | Ranks only the scope's passages, by keywords and by meaning; anything outside the scope raises an error | A missed passage means the AI finds nothing, so the asker gets a refusal: safe, but over-cautious |
-| Which passages answer the question | The AI, step 6 [ADRs 0003, 0008] | Sees only the retrieved passages, the asker's unit, the as-of date and each passage's dates and next change [ADR 0012]; may cite only retrieved passages, writes one plain sentence per passage and quotes each word for word, or returns nothing | See "What the AI can still get wrong" below |
+| Which passages answer the question | The AI, step 6 [ADRs 0003, 0008] | Sees only the retrieved passages, the asker's unit, the as-of date and each passage's dates and next change [ADR 0012]; may cite only retrieved passages, writes one plain answer to the whole question, cites only the passages that support it and quotes each word for word, or returns nothing | See "What the AI can still get wrong" below |
 | Whether the answer is shown, and which card | Rules, step 7 [ADR 0003] | Refuses the whole answer if any point has no source, cites a passage that was not retrieved, or has a quote that is not in the cited passage; a cited document in a conflict, or in a valid AI flag, gives the conflict card | Deterministic and tested |
-| The answer card's sentence | The AI, step 6 | One plain Vietnamese sentence per point, naming the document; not checked at run time [ADR 0011]; Hiep reads every sentence against its quote | A wrong sentence can mislead; the verified quote under it and Hiep's reading (the test report calls it the faithfulness reading) are the controls |
+| The answer card's answer | The AI, step 6 | One plain Vietnamese answer to the whole question; it names no document unless two documents give different values; not checked at run time [ADR 0018]; Hiep reads it against all the quotes under it | A wrong answer can mislead; the verified quotes under it and Hiep's reading (the test report calls it the faithfulness reading) are the controls |
 | The card kind, the verified quote, the source line and its notice, and the conflict and refusal text | Rules | The card kind comes from the step 7 sources; the answer card shows the quote step 7 verified, and the source line with the end of the validity window and the "Sắp thay đổi" notice [ADR 0012]; the conflict card quotes one side per document, chosen without reading meaning [ADRs 0003, 0005, 0011] | Deterministic and tested |
 
 ### How the scope keeps out what the asker may not see
@@ -166,8 +166,8 @@ The AI only works with language: an embedding model helps rank passages by meani
 
 - The AI cites and quotes a passage in the scope that is real but does not answer the question.
   The quote check proves the passage exists, not that it answers; the test report reads every answer by hand.
-- The AI's sentence can add a fact, drop a condition such as "chính thức", or decide which rule applies, and no rule checks it [ADR 0011].
-  The quote under it is checked, and Hiep's reading names the error.
+- The AI's answer can add a fact, drop a condition such as "chính thức", or decide which rule applies, and no rule checks it [ADR 0018].
+  The quotes under it are checked, and Hiep's reading names the error.
   The AI's disagreement flag [ADR 0014] catches an undeclared conflict in content only when the AI notices it and both passages are retrieved.
 - A question that needs the passage applied to a case, such as "nghỉ thứ Hai thì hạn chót nộp đơn là ngày nào?", is often refused although the passage is retrieved, because the AI is told to answer only what is written [#51].
 - A question about another period, such as next year, gets the version in force on the as-of date, because the rules never read the question [#53].
@@ -186,7 +186,7 @@ Each is an open issue labelled `limitation`; [`scope.md`](scope.md#known-limitat
 | Có dữ liệu giả lập ở nhiều cấp tổ chức | The Group, two member companies and their units (diagram below); policies at Group and company level | 1, 5, 7 |
 | Hiểu được bối cảnh người hỏi | The asker's unit and roles, from the signed-in simulated account that stands in for the HR system [ADR 0016], and the as-of date | 1, 2, 5, 7 |
 | Không sử dụng/làm lộ thông tin ngoài quyền | Steps 1-4 build the scope before search; the search and the AI never see anything outside it | 6, 10, 13 |
-| Câu trả lời có nguồn/căn cứ | Every point has a plain sentence, its sources and a quote; step 7 checks the sources and the quote; the card names the document, the Điều and the date it applies from | 1, 3, 4 |
+| Câu trả lời có nguồn/căn cứ | The answer rests on one quote per point with its source; step 7 checks each source and quote; the card names the document, the Điều and the date it applies from under each quote | 1, 3, 4 |
 | Biết từ chối khi thiếu dữ liệu | The AI may return nothing; step 7 then shows the refusal card with the asker's HR contact | 8, 9, 11, 14 |
 | Có khả năng xử lý phiên bản hoặc thông tin mâu thuẫn | Step 1 keeps the version in force; step 4 marks undeclared conflicts and step 7 shows the conflict card | 2, 3, 7, 12 |
 
@@ -242,15 +242,15 @@ Minh's search runs on 11 passages, Lan's on 2 and Hà's on 4.
 ### Steps 5-7: the cards
 
 Minh's answer card is shown [above](#the-7-steps).
-The AI's sentences and quotes below are from the 21/10/2026 run (rows 1, 5 and 7); the other lines are produced by the rules, as they are now.
+The AI's answer and quotes below are from the 22/10/2026 run (rows 1, 5 and 7); the other lines are produced by the rules, as they are now.
 
 **Lan: answer card.**
 Her scope has two passages; the AI cited the Group leave policy, Điều 1.
-The sentence and the quote both keep the condition "chính thức"; step 7 checks the quote, not the sentence, so the employee reads both on the card.
+The answer and the quote both keep the condition "chính thức"; step 7 checks the quote, not the answer, so the employee reads both on the card.
 
 > Bạn đang hỏi với tư cách: nhân sự Tập đoàn, Nhân sự Tập đoàn.
-> Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu.
-> Theo Quy chế nghỉ phép Tập đoàn, nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.
+> Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu.
+> **Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm.**
 > "Nhân sự chính thức của Tập đoàn được nghỉ phép năm 12 ngày mỗi năm."
 > Nguồn: Quy chế nghỉ phép Tập đoàn, Điều 1, hiệu lực từ 01/01/2024. Hỏi thêm: HR Tập đoàn.
 
@@ -299,13 +299,13 @@ Step numbers are those of the diagram above.
 | Which policy wins | `scope` in `services/scope.py`: only `overrides` ("dùng thay"); an undeclared pair becomes a conflict pair | 0010 |
 | Which policies conflict | `scope` in `services/scope.py` (same `topic`, neither lists the other in `complements`); `flagged_pair` in `services/citations.py` for the AI's flag | 0014 |
 | Which passages are relevant | `services/retrieval/search.py`: BM25 plus `gemini-embedding-001`, fused by reciprocal rank fusion; `ScopeLeakError` if a result is outside the scope | 0001, 0002 |
-| Which passages answer | `services/answering/`: `gemini-3.5-flash-lite`; may cite only retrieved ids; returns `points` or an empty list | 0003, 0008 |
+| Which passages answer | `services/answering/`: `gemini-3.5-flash-lite`; may cite only retrieved ids; returns one answer and its points, or nothing | 0003, 0008 |
 | Whether the answer is shown, which card | `card_for_answer` and `pick_card` in `services/citations.py` | 0003 |
-| The sentence, the quote, the source line, the notice, the conflict and refusal text | `services/card_text.py` | 0003, 0005, 0011, 0012, 0017 |
+| The answer, the quotes, the source lines, the notices, the conflict and refusal text | `services/card_text.py` | 0003, 0005, 0012, 0017, 0018 |
 
 ### Step 7 refusal reasons and texts
 
-`card_for_answer` refuses, with the reason in brackets, on output that is not valid JSON of the contract (`malformed`), no points (`no_points`), a point without chunks or a cited id outside the retrieved ones (`outside_retrieved`), and an empty quote or one that is not a substring of any chunk the point cites, both sides folded by NFC and single spaces (`quote_mismatch`).
+`card_for_answer` refuses, with the reason in brackets, on output that is not valid JSON of the contract (`malformed`, which includes no `answer`, or an empty one while points are not empty), no points (`no_points`), a point without chunks or a cited id outside the retrieved ones (`outside_retrieved`), and an empty quote or one that is not a substring of any chunk the point cites, both sides folded by NFC and single spaces (`quote_mismatch`).
 It raises `ValueError` if the retrieved chunks are not all inside the scope.
 The AI's `disagreement` is read only after those checks pass, and gives a valid pair only for exactly two different chunks, both retrieved, each holding the quote of a point that cites it, from two different documents in the scope; the card then has the reason `model_flagged` if the declared conflict pairs did not already hold the pair.
 The refusal text is chosen by `REFUSAL_TEXT_BY_REASON` in `services/card_text.py`: `quote_mismatch` and `outside_retrieved` give the "could not check" text, `malformed` the "error" text, and every other reason, including none, the "not found" text, which reveals nothing.
@@ -337,7 +337,7 @@ The two refusal texts not shown above, for Minh:
 
 - The trace of steps 1-4 comes from `uv run python scripts/show_scope.py <minh|lan|ha> 2026-10-07 --why`, which calls the same rule functions as the product and reports an error if its reasons differ from `scope()`.
 - The document ids behind the table, in its row order: `LEAVE-GROUP-v1`, `LEAVE-GAMECO-v1`, `LEAVE-GAMECO-v2`, `LEAVE-GAMECO-v3`, `LEAVE-GAMECO-v4-DRAFT`, `LEAVE-PAYCO-v1`, `LEAVE-PROC-GAMECO-v1`, `OT-GAMECO-v1`, `SAL-BAND-GAMECO`, `TRAVEL-GAMECO-v1`.
-- The three cards come from the recorded model replies of the run [`20261021-1032`](../results/20261021-1032.jsonl), rows 1, 5 and 7, rendered by the current `ask()`; the run itself was made before #83, so its stored card lines lack the end date and the "Sắp thay đổi" notice, and it used an older conflict wording.
+- The three cards come from the recorded model replies of the run [`20261022-1432`](../results/20261022-1432.jsonl), rows 1, 5 and 7, rendered by the current `ask()`; the run was made after the one-answer change, so its stored card lines show one answer above the quotes and the "Sắp thay đổi" notice.
 - In that run Minh's search returned five of his chunks and the AI cited `LEAVE-GAMECO-v2#2`; Lan's cited `LEAVE-GROUP-v1#1`; Hà's cited `LEAVE-GROUP-v1#1` and `LEAVE-PAYCO-v1#1`.
 
 ### Document fields

@@ -1,6 +1,6 @@
 # 0011. The answer card shows the model's sentence above the verified quote
 
-- Status: Accepted
+- Status: Accepted; point contract and answer card layout partly superseded by 0018
 - Date: 2026-10-20
 - Origin: Hiep + AI
 - Supersedes: Showing only the verified quote, without the AI's sentence (ADR 0009), and the AI's prompt rules (ADR 0003)

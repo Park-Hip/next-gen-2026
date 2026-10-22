@@ -90,6 +90,7 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
         "retrieved": None,
         "retrieved_text": None,
         "raw": None,
+        "answer": None,
         "points": None,
         "disagreement": None,
         "card": None,
@@ -123,17 +124,18 @@ def ask_row(answerer, row: dict, documents, personas, meta: dict) -> dict:
     record["retrieved"] = list(reply.retrieved)
     record["retrieved_text"] = {cid: by_text[cid] for cid in reply.retrieved}
     record["raw"] = reply.raw
+    record["answer"] = reply.answer
     record["points"] = None if reply.points is None else [
-        {"claim": p.claim, "quote": p.quote, "chunks": list(p.chunks)} for p in reply.points
+        {"quote": p.quote, "chunks": list(p.chunks)} for p in reply.points
     ]
     record["disagreement"] = list(reply.disagreement)
-    claims = " ".join(p.claim for p in reply.points or ())
     record["card"] = {
         "kind": card.kind,
         "reason": card.reason,
         "cited": [c.id for c in card.cited],
         "conflicts": [sorted([a.id, b.id]) for a, b in card.conflicts],
-        "answer_text": claims if card.kind == "answer" else None,
+        # Kept under its old name so score.py, report.py and older runs read one field (ADR 0018).
+        "answer_text": reply.answer if card.kind == "answer" else None,
         "lines": [{"kind": line.kind, "text": line.text} for line in lines],
     }
     return record

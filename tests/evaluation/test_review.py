@@ -30,16 +30,17 @@ def _sheet_score(row_id: int, card_kind: str) -> RowScore:
             "reason": None,
             "cited": [],
             "conflicts": [],
-            "answer_text": "14 ngày" if card_kind == "answer" else None,
+            "answer_text": "Bạn được nghỉ 14 ngày." if card_kind == "answer" else None,
             "lines": [
                 {"kind": "who", "text": "intro"},
                 {"kind": "claim", "text": "Bạn được nghỉ 14 ngày."},
                 {"kind": "quote", "text": '"14 ngày."'},
             ],
         },
-        "raw": '{"points": []}',
+        "raw": '{"answer": ""}',
+        "answer": "Bạn được nghỉ 14 ngày." if card_kind == "answer" else "",
         "points": [
-            {"claim": "Bạn được nghỉ 14 ngày.", "quote": "14 ngày.", "chunks": ["X#1"]}
+            {"quote": "14 ngày.", "chunks": ["X#1"]}
         ] if card_kind == "answer" else [],
         "retrieved_text": {"X#1": "14 ngày."},
     }
@@ -65,10 +66,30 @@ def test_review_sheet_faithful_filled_for_answer_card():
     assert "- Faithful: -" not in text
 
 
-def test_review_sheet_shows_each_claim_beside_its_quote():
+def test_review_sheet_shows_the_answer_above_its_quotes():
     scores = [_sheet_score(1, "answer")]
     text = build_review_sheet("run", scores, {})
-    assert "- claim: Bạn được nghỉ 14 ngày." in text
-    assert "    quote: 14 ngày." in text
+    assert "- Answer: Bạn được nghỉ 14 ngày." in text
+    assert text.index("- Answer:") < text.index("- Points:")
+    assert "  - quote: 14 ngày." in text
     assert "    chunk X#1: 14 ngày." in text
     assert "  - Bạn được nghỉ 14 ngày." in text
+
+
+def test_review_sheet_reads_an_old_run_with_one_claim_per_point():
+    """A run from before ADR 0018 stored per-point claims and no `answer`; the sheet still shows the claim."""
+    score = _sheet_score(1, "answer")
+    old = {
+        **score.record,
+        "points": [{"claim": "Bạn được nghỉ 14 ngày.", "quote": "14 ngày.", "chunks": ["X#1"]}],
+    }
+    old.pop("answer")
+    old_score = RowScore(
+        row=score.row, record=old, errors=(), checks={},
+        rules_wrong=False, leak=False, unsafe=False, over_cautious=False,
+        raw_unsafe=False, caught_by_step7=False,
+    )
+    text = build_review_sheet("run", [old_score], {})
+    assert "- Answer: Bạn được nghỉ 14 ngày." in text
+    assert "  - quote: 14 ngày." in text
+    assert "- claim:" not in text

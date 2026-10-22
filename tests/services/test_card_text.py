@@ -36,15 +36,15 @@ def test_answer_card_wording(personas, documents):
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
     point = Point(
-        claim="Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm.",
         quote=c2.text,
         chunks=("LEAVE-GAMECO-v2#2",),
     )
-    lines = render(card, s, (point,), (c2,))
+    answer = "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."
+    lines = render(card, s, (point,), (c2,), answer=answer)
     assert lines == (
         CardLine("who", "Bạn đang hỏi với tư cách: nhân sự GameCo, Studio."),
         CardLine("note", ANSWER_NOTE),
-        CardLine("claim", "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."),
+        CardLine("claim", answer),
         CardLine("quote", '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'),
         CardLine(
             "source",
@@ -62,8 +62,8 @@ def test_answer_card_folds_each_points_quote(personas, documents):
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
     spaced = "  Nhân sự GameCo được nghỉ phép năm\n14 ngày mỗi năm.  "
-    point = Point(claim="Theo quy chế, 14 ngày.", quote=spaced, chunks=("LEAVE-GAMECO-v2#2",))
-    lines = render(card, s, (point, point), (c2,))
+    point = Point(quote=spaced, chunks=("LEAVE-GAMECO-v2#2",))
+    lines = render(card, s, (point, point), (c2,), answer="Một câu.")
     quotes = [line.text for line in lines if line.kind == "quote"]
     assert quotes == ['"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."'] * 2
 
@@ -75,17 +75,31 @@ def test_answer_card_gives_each_point_its_own_source_line(personas, documents):
     p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
     card = Card("answer", persona.hr, (g1, p1), ())
     points = (
-        Point(claim="Theo quy chế Tập đoàn, 12 ngày.", quote=g1.text, chunks=(g1.id,)),
-        Point(claim="Theo quy chế PayCo, 13 ngày.", quote=p1.text, chunks=(p1.id,)),
+        Point(quote=g1.text, chunks=(g1.id,)),
+        Point(quote=p1.text, chunks=(p1.id,)),
     )
-    lines = render(card, s, points, (g1, p1))
+    lines = render(card, s, points, (g1, p1), answer="Hai quy định ghi 12 và 13 ngày.")
     assert [line.kind for line in lines] == [
-        "who", "note", "claim", "quote", "source", "claim", "quote", "source"
+        "who", "note", "claim", "quote", "source", "quote", "source"
     ]
-    assert lines[2].text == "Theo quy chế Tập đoàn, 12 ngày."
+    assert lines[2].text == "Hai quy định ghi 12 và 13 ngày."
     assert lines[4].text.startswith("Nguồn: Quy chế nghỉ phép Tập đoàn")
-    assert lines[5].text == "Theo quy chế PayCo, 13 ngày."
-    assert lines[7].text.startswith("Nguồn: Quy chế nghỉ phép PayCo")
+    assert lines[6].text.startswith("Nguồn: Quy chế nghỉ phép PayCo")
+
+
+def test_answer_card_has_exactly_one_claim_line_before_every_quote(personas, documents):
+    persona = personas["ha"]
+    s = scope(persona, date(2026, 10, 7), documents)
+    g1 = _chunk(documents, "LEAVE-GROUP-v1#1")
+    p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
+    card = Card("answer", persona.hr, (g1, p1), ())
+    points = (Point(quote=g1.text, chunks=(g1.id,)), Point(quote=p1.text, chunks=(p1.id,)))
+    lines = render(card, s, points, (g1, p1), answer="Một câu trả lời cho cả hai phần.")
+    claim_positions = [i for i, line in enumerate(lines) if line.kind == "claim"]
+    quote_positions = [i for i, line in enumerate(lines) if line.kind == "quote"]
+    assert claim_positions == [2]
+    assert all(2 < position for position in quote_positions)
+    assert [line.text for line in lines if line.kind == "claim"] == ["Một câu trả lời cho cả hai phần."]
 
 
 def test_conflict_card_wording(personas, documents):
@@ -97,11 +111,10 @@ def test_conflict_card_wording(personas, documents):
     p1 = _chunk(documents, "LEAVE-PAYCO-v1#1")
     card = Card("conflict", persona.hr, (g1,), ((group, payco),))
     marker = Point(
-        claim="MODEL CLAIM MUST NOT APPEAR",
         quote="MODEL QUOTE MUST NOT APPEAR",
         chunks=("LEAVE-GROUP-v1#1",),
     )
-    lines = render(card, s, (marker,), (g1, p1))
+    lines = render(card, s, (marker,), (g1, p1), answer="MODEL ANSWER MUST NOT APPEAR")
     assert lines == (
         CardLine("who", "Bạn đang hỏi với tư cách: nhân sự PayCo, Kế toán."),
         CardLine("lead", "Có 2 quy định cùng áp dụng cho bạn nhưng chưa được khai báo quy định nào được dùng thay quy định nào. Hệ thống không tự chọn."),
@@ -120,6 +133,7 @@ def test_conflict_card_wording(personas, documents):
         CardLine("plain", "Vui lòng hỏi HR PayCo."),
     )
     assert all("MODEL" not in line.text for line in lines)
+    assert "claim" not in [line.kind for line in lines]
 
 
 def test_conflict_card_headline_counts_documents_and_quotes_each_once(personas, documents):
@@ -243,8 +257,8 @@ def _row1_card(personas, documents, as_of):
     s = scope(persona, as_of, documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2") if as_of < date(2027, 1, 1) else _chunk(documents, "LEAVE-GAMECO-v3#2")
     card = Card("answer", persona.hr, (c2,), ())
-    point = Point(claim="Một câu.", quote=c2.text, chunks=(c2.id,))
-    return render(card, s, (point,), (c2,))
+    point = Point(quote=c2.text, chunks=(c2.id,))
+    return render(card, s, (point,), (c2,), answer="Một câu.")
 
 
 def test_a_notice_follows_the_source_line_on_each_point(personas, documents):
@@ -252,9 +266,9 @@ def test_a_notice_follows_the_source_line_on_each_point(personas, documents):
     s = scope(persona, date(2026, 12, 15), documents)
     c2 = _chunk(documents, "LEAVE-GAMECO-v2#2")
     card = Card("answer", persona.hr, (c2,), ())
-    point = Point(claim="Một câu.", quote=c2.text, chunks=(c2.id,))
-    lines = render(card, s, (point, point), (c2,))
-    assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source", "notice", "claim", "quote", "source", "notice"]
+    point = Point(quote=c2.text, chunks=(c2.id,))
+    lines = render(card, s, (point, point), (c2,), answer="Một câu.")
+    assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source", "notice", "quote", "source", "notice"]
     assert lines[4].text.endswith("hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo.")
 
 
@@ -268,7 +282,7 @@ def test_a_document_with_no_change_shows_the_start_only(personas, documents):
     persona = personas["lan"]
     s = scope(persona, date(2026, 10, 7), documents)
     c1 = _chunk(documents, "LEAVE-GROUP-v1#1")
-    lines = render(Card("answer", persona.hr, (c1,), ()), s, (Point("Một câu.", c1.text, (c1.id,)),), (c1,))
+    lines = render(Card("answer", persona.hr, (c1,), ()), s, (Point(c1.text, (c1.id,)),), (c1,), answer="Một câu.")
     assert [line.kind for line in lines] == ["who", "note", "claim", "quote", "source"]
     assert "đến hết" not in lines[4].text
 

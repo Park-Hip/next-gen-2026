@@ -21,10 +21,10 @@ def _chunk_by_id(documents, chunk_id):
     return next(c for d in documents if d.id == doc_id for c in chunks(d) if c.id == chunk_id)
 
 
-def _point(chunk_id, documents, quote=None, claim=None):
+def _point(chunk_id, documents, quote=None):
     chunk = _chunk_by_id(documents, chunk_id)
     quote = chunk.text if quote is None else quote
-    return Point(claim=claim or quote, quote=quote, chunks=(chunk_id,))
+    return Point(quote=quote, chunks=(chunk_id,))
 
 
 def test_conflict_quotes(personas, documents):
@@ -281,7 +281,7 @@ def test_each_invalid_flag_is_ignored(personas, documents):
     s = scope(personas["ha"], AS_OF, docs)
     both = _both_points(docs)
     group2, payco2 = "LEAVE-GROUP-v1#2", "LEAVE-PAYCO-v1#2"
-    only_group_quote = Point(claim="c", quote=_chunk_by_id(docs, "LEAVE-GROUP-v1#1").text, chunks=LEAVE_RETRIEVED)
+    only_group_quote = Point(quote=_chunk_by_id(docs, "LEAVE-GROUP-v1#1").text, chunks=LEAVE_RETRIEVED)
     cases = [
         ("one id", LEAVE_RETRIEVED, both, ("LEAVE-GROUP-v1#1",)),
         ("three ids", LEAVE_RETRIEVED + (payco2,), both, LEAVE_RETRIEVED + (payco2,)),
@@ -307,7 +307,7 @@ def test_each_invalid_flag_is_ignored(personas, documents):
 def test_a_point_citing_two_chunks_validates_only_the_chunk_holding_its_quote(personas, documents):
     docs = _wrong_topic(documents)
     s = scope(personas["ha"], AS_OF, docs)
-    both_cited = Point(claim="c", quote=_chunk_by_id(docs, "LEAVE-GROUP-v1#1").text, chunks=LEAVE_RETRIEVED)
+    both_cited = Point(quote=_chunk_by_id(docs, "LEAVE-GROUP-v1#1").text, chunks=LEAVE_RETRIEVED)
     # The PayCo chunk is cited but never quoted: the flag is ignored.
     assert card_for_answer(s, LEAVE_RETRIEVED, (both_cited,), LEAVE_RETRIEVED).kind == "answer"
     # With a second point quoting the PayCo chunk itself, the flag holds.

@@ -2,6 +2,7 @@
 
 Parsing stays loose so an out-of-enum chunk id reaches step 7 as data rather than failing here,
 and a missing or malformed `disagreement` is an empty flag rather than a refusal (ADR 0014).
+One answer covers the whole question; the points are only the quotes that support it (ADR 0018).
 """
 from typing import Literal
 
@@ -11,17 +12,17 @@ from appota_kb.models.answer import Point
 
 
 class _LoosePoint(BaseModel):
-    claim: str
     quote: str
     chunks: list[str]
 
 
 class _LooseAnswer(BaseModel):
+    answer: str
     points: list[_LoosePoint]
 
 
 def answer_schema(ids: tuple[str, ...]) -> dict:
-    """JSON schema of {points: [{claim, quote, chunks}], disagreement: [id, ...]} with chunks an enum
+    """JSON schema of {answer, points: [{quote, chunks}], disagreement: [id, ...]} with chunks an enum
     of `ids`, min 1 item; `points` may be empty, which means "không tìm thấy". `disagreement` is
     required, at most 2 ids of the same enum, and empty when no two clauses disagree (ADR 0014).
 
@@ -33,12 +34,12 @@ def answer_schema(ids: tuple[str, ...]) -> dict:
         raise ValueError("answer_schema needs at least one retrieved id")
     point = create_model(
         "Point",
-        claim=(str, ...),
         quote=(str, ...),
         chunks=(tuple[Literal[ids], ...], Field(min_length=1)),
     )
     answer = create_model(
         "Answer",
+        answer=(str, ...),
         points=(list[point], ...),
         disagreement=(tuple[Literal[ids], ...], Field(max_length=2)),
     )
@@ -69,16 +70,24 @@ def raw_text(raw) -> str:
     return str(content)
 
 
-def parse_points(parsed) -> tuple[Point, ...] | None:
+def parse_reply(parsed) -> tuple[str, tuple[Point, ...] | None]:
+    """The answer and its points, or ("", None) when the reply is malformed.
+
+    A missing `answer`, or an empty one while `points` is not empty, is malformed (ADR 0018):
+    the card would otherwise show quotes with no answer. Empty points with an empty answer
+    stay a valid "không tìm thấy" reply, which step 7 turns into a refusal.
+    """
     if parsed is None:
-        return None
+        return "", None
     try:
         loose = _LooseAnswer.model_validate(parsed)
     except ValidationError:
-        return None
-    return tuple(
-        Point(claim=p.claim, quote=p.quote, chunks=tuple(p.chunks)) for p in loose.points
-    )
+        return "", None
+    answer = loose.answer.strip()
+    if not answer and loose.points:
+        return "", None
+    points = tuple(Point(quote=p.quote, chunks=tuple(p.chunks)) for p in loose.points)
+    return answer, points
 
 
 def parse_disagreement(parsed) -> tuple[str, ...]:

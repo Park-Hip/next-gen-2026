@@ -74,6 +74,7 @@ def test_committed_run_matches_the_report(cases, documents, personas, tmp_path):
         "kind": "quote",
         "text": '"Nhân sự GameCo được nghỉ phép năm 14 ngày mỗi năm."',
     }
+    assert [line["kind"] for line in first.card["lines"]].count("claim") == 1
     assert first.failures == ()
 
     # A refusal row that expects a refusal passes; a row that expects an answer fails.

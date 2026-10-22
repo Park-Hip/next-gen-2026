@@ -317,19 +317,20 @@ def test_as_of_is_labelled_as_a_demo_control(minh_client):
 
 def test_answer_card_row_1(documents):
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
-    claim = "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."
+    answer = "Theo Quy chế nghỉ phép GameCo (bản 2), bạn được nghỉ phép năm 14 ngày mỗi năm."
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
-        claim_from={"LEAVE-GAMECO-v2#2": claim},
+        answer=answer,
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
     card = _card_text(page)
     assert card.startswith("Trả lời Bạn đang hỏi với tư cách: nhân sự GameCo, Studio.")
-    # The model's sentence, then its verified quote, then the source line (ADR 0011).
-    assert card.index(claim) < card.index(f'"{quote}"') < card.index("Nguồn:")
+    # One answer, then its verified quote, then the source line (ADR 0018).
+    assert card.index(answer) < card.index(f'"{quote}"') < card.index("Nguồn:")
+    assert card.count(answer) == 1
     assert "14 ngày" in card
     assert (
         "Nguồn: Quy chế nghỉ phép GameCo (bản 2), Điều 2, hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo."
@@ -348,10 +349,7 @@ def test_conflict_card_row_7(documents):
             "LEAVE-GROUP-v1#1": chunk_text(documents, "LEAVE-GROUP-v1#1"),
             "LEAVE-PAYCO-v1#1": chunk_text(documents, "LEAVE-PAYCO-v1#1"),
         },
-        claim_from={
-            "LEAVE-GROUP-v1#1": "MODEL TEXT MUST NOT APPEAR",
-            "LEAVE-PAYCO-v1#1": "MODEL TEXT MUST NOT APPEAR",
-        },
+        answer="MODEL TEXT MUST NOT APPEAR",
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "ha", "2026-10-07", LEAVE_QUESTION)
@@ -379,7 +377,7 @@ def test_conflict_card_row_12_quotes_the_cited_clauses(documents, cases):
     reply = reply_citing(
         *ids,
         quote_from=quotes,
-        claim_from={cid: "MODEL TEXT MUST NOT APPEAR" for cid in ids},
+        answer="MODEL TEXT MUST NOT APPEAR",
     )
     client, _ = _client(documents, reply=reply)
     _, page = _ask(client, row["persona"], str(row["as_of"]), row["questions"][0])
@@ -408,7 +406,7 @@ SYSTEM_ERROR = "Hệ thống gặp lỗi khi tạo câu trả lời."
 
 
 def test_invented_citation_is_refused(documents):
-    reply = json.dumps({"points": [{"claim": "c", "chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]})
+    reply = json.dumps({"answer": "c", "points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]})
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, "minh", "2026-10-07", LEAVE_QUESTION)
     assert response.status_code == 200
@@ -439,7 +437,7 @@ def test_p6_the_four_replies_give_three_texts(documents):
             reply_citing(
                 "LEAVE-GAMECO-v2#2",
                 quote_from={"LEAVE-GAMECO-v2#2": "Nhân sự GameCo được nghỉ phép năm 30 ngày."},
-                claim_from={"LEAVE-GAMECO-v2#2": "MODEL TEXT MUST NOT APPEAR"},
+                answer="MODEL TEXT MUST NOT APPEAR",
             ),
             NOT_VERIFIED,
         ),
@@ -447,7 +445,7 @@ def test_p6_the_four_replies_give_three_texts(documents):
             reply_citing(
                 "OT-GAMECO-v1#1",
                 quote_from={"OT-GAMECO-v1#1": c2},
-                claim_from={"OT-GAMECO-v1#1": "MODEL TEXT MUST NOT APPEAR"},
+                answer="MODEL TEXT MUST NOT APPEAR",
             ),
             NOT_VERIFIED,
         ),
@@ -477,7 +475,7 @@ def test_no_points_refusal_text_is_unchanged(documents):
     )
 
 
-@pytest.mark.parametrize("reply", ["not json at all", json.dumps({"points": [{"claim": "c", "chunks": ["OT-GAMECO-v1#1"], "quote": "x"}]})])
+@pytest.mark.parametrize("reply", ["not json at all", json.dumps({"answer": "", "points": [{"chunks": ["OT-GAMECO-v1#1"], "quote": "x"}]})])
 def test_a_refused_model_fault_is_asked_again(documents, reply):
     # "Thử lại" or "hỏi lại" on the page must reach the model, not replay the cached failure.
     client, chat = _client(documents, reply=reply)
@@ -576,11 +574,11 @@ class CiteAllGemini(FakeGemini):
         for match in re.finditer(r'<chunk id="([^"]+)"[^>]*>(.*?)</chunk>', user):
             quote = match.group(2)
             points.append({
-                "claim": f"Theo tài liệu, {quote}",
                 "quote": quote,
                 "chunks": [match.group(1)],
             })
-        return ChatResult(generations=[ChatGeneration(message=AIMessage(content=json.dumps({"points": points})))])
+        answer = " ".join(f"Theo tài liệu, {point['quote']}" for point in points)
+        return ChatResult(generations=[ChatGeneration(message=AIMessage(content=json.dumps({"answer": answer, "points": points})))])
 
 
 def _cite_all_client(documents):
@@ -919,7 +917,7 @@ def test_flagged_conflict_card_on_the_wrong_topic_data(documents, monkeypatch):
     reply = reply_citing(
         *ids,
         quote_from={cid: chunk_text(docs, cid) for cid in ids},
-        claim_from={cid: "MODEL TEXT MUST NOT APPEAR" for cid in ids},
+        answer="MODEL TEXT MUST NOT APPEAR",
         disagreement=ids,
     )
     client, _ = _client(docs, reply=reply, monkeypatch=monkeypatch)
@@ -967,11 +965,11 @@ def test_try_link_for_an_employee_ignores_the_persona(documents):
 def test_answer_card_row_18_shows_the_window_and_the_notice(documents, cases):
     row = next(c for c in cases if c["id"] == 18)
     quote = chunk_text(documents, "LEAVE-GAMECO-v2#2")
-    claim = "Theo Quy chế nghỉ phép GameCo (bản 2), 14 ngày chỉ áp dụng đến hết 31/12/2026."
+    answer = "Theo Quy chế nghỉ phép GameCo (bản 2), 14 ngày chỉ áp dụng đến hết 31/12/2026."
     reply = reply_citing(
         "LEAVE-GAMECO-v2#2",
         quote_from={"LEAVE-GAMECO-v2#2": quote},
-        claim_from={"LEAVE-GAMECO-v2#2": claim},
+        answer=answer,
     )
     client, _ = _client(documents, reply=reply)
     response, page = _ask(client, row["persona"], str(row["as_of"]), row["questions"][0])
@@ -979,7 +977,7 @@ def test_answer_card_row_18_shows_the_window_and_the_notice(documents, cases):
     card = _card_text(page)
     source = "hiệu lực từ 01/01/2026 đến hết 31/12/2026. Hỏi thêm: HR GameCo."
     notice = "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027."
-    assert card.index(claim) < card.index(f'"{quote}"') < card.index(source) < card.index(notice)
+    assert card.index(answer) < card.index(f'"{quote}"') < card.index(source) < card.index(notice)
     assert '<p class="change-notice"><strong>Sắp thay đổi:</strong>' in page
     for text in row["must_show"]:
         assert text in card

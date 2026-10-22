@@ -11,7 +11,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 import pytest
 
 from builders import RETRIEVAL, chunk_text, minh_scope
-from fakes import FakeGemini, SyllableEmbeddings, reply_citing
+from fakes import FakeGemini, SyllableEmbeddings, no_points, reply_citing
 
 from appota_kb.services.answering.answerer import Answerer, AnswerUnavailable
 from appota_kb.services.citations import card_for_answer
@@ -33,10 +33,11 @@ def test_answerer_row1_reply(personas, documents):
     assert "LEAVE-GAMECO-v2#2" in reply.retrieved
     assert set(reply.retrieved) <= s.chunk_ids
     assert reply.points is not None and len(reply.points) == 1
+    assert reply.answer.startswith("Theo tài liệu,")
     point = reply.points[0]
     assert point.chunks == ("LEAVE-GAMECO-v2#2",)
     assert point.quote == quote
-    assert point.claim.startswith("Theo tài liệu,")
+    assert not hasattr(point, "claim")
     assert not hasattr(point, "text")
 
 
@@ -54,9 +55,9 @@ def test_answerer_returns_the_disagreement_flag(personas, documents):
 def test_answerer_missing_or_malformed_flag_keeps_the_points(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
-    point = {"claim": "14 ngày", "quote": chunk_text(documents, "LEAVE-GAMECO-v2#2"), "chunks": ["LEAVE-GAMECO-v2#2"]}
+    point = {"quote": chunk_text(documents, "LEAVE-GAMECO-v2#2"), "chunks": ["LEAVE-GAMECO-v2#2"]}
     for flag in ({}, {"disagreement": "nope"}, {"disagreement": [3]}, {"disagreement": None}):
-        chat = FakeGemini(reply=json.dumps({"points": [point], **flag}))
+        chat = FakeGemini(reply=json.dumps({"answer": "14 ngày.", "points": [point], **flag}))
         reply = Answerer(index, chat, RETRIEVAL)(s, "Phép năm của tôi là bao nhiêu ngày?")
         assert reply.points is not None and len(reply.points) == 1, flag
         assert reply.disagreement == (), flag
@@ -67,7 +68,7 @@ def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
     chat = FakeGemini(reply=json.dumps(
-        {"points": [{"claim": "Mức lương bậc 2.", "chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]}
+        {"answer": "Mức lương bậc 2.", "points": [{"chunks": ["SAL-BAND-GAMECO#2"], "quote": "x"}]}
     ))
     answerer = Answerer(index, chat, RETRIEVAL)
     reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
@@ -79,17 +80,30 @@ def test_answerer_out_of_enum_id_comes_through_as_data(personas, documents):
 def test_answerer_malformed_output_gives_none(personas, documents):
     s = minh_scope(personas, documents)
     index = build_index(documents, SyllableEmbeddings())
+    point = {"quote": "14 ngày", "chunks": ["LEAVE-GAMECO-v2#2"]}
     bad_outputs = [
         "not json at all",
-        json.dumps({"points": [{"claim": "14 ngày", "chunks": ["LEAVE-GAMECO-v2#2"]}]}),  # missing quote
-        json.dumps({"points": [{"quote": "14 ngày", "chunks": ["LEAVE-GAMECO-v2#2"]}]}),  # missing claim
-        json.dumps({"points": "nope"}),
+        json.dumps({"answer": "14 ngày", "points": [{"chunks": ["LEAVE-GAMECO-v2#2"]}]}),  # missing quote
+        json.dumps({"answer": "14 ngày", "points": [{"quote": "14 ngày"}]}),  # missing chunks
+        json.dumps({"points": [point]}),  # missing answer
+        json.dumps({"answer": "", "points": [point]}),  # empty answer with points
+        json.dumps({"answer": "   ", "points": [point]}),  # blank answer with points
+        json.dumps({"answer": "14 ngày", "points": "nope"}),
     ]
     for bad in bad_outputs:
         chat = FakeGemini(reply=bad)
         answerer = Answerer(index, chat, RETRIEVAL)
         reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
         assert reply.points is None, bad
+        assert reply.answer == "", bad
+
+
+def test_answerer_empty_answer_with_no_points_is_not_malformed(personas, documents):
+    s = minh_scope(personas, documents)
+    index = build_index(documents, SyllableEmbeddings())
+    reply = Answerer(index, FakeGemini(reply=no_points()), RETRIEVAL)(s, "Phép năm của tôi là bao nhiêu ngày?")
+    assert reply.points == ()
+    assert reply.answer == ""
 
 
 def test_answerer_empty_scope_makes_no_call(personas, documents):
@@ -101,6 +115,7 @@ def test_answerer_empty_scope_makes_no_call(personas, documents):
     reply = answerer(s, "Phép năm của tôi là bao nhiêu ngày?")
     assert reply.retrieved == ()
     assert reply.points == ()
+    assert reply.answer == ""
     assert chat.call_count == 0
 
 
@@ -157,8 +172,9 @@ def test_answer_log_line(personas, documents, caplog):
     assert payload["question"] == question
     assert payload["model"] == "gemini-3.8-flash"
     assert set(payload["retrieved"]) <= s.chunk_ids
+    assert payload["answer"].startswith("Theo tài liệu,")
     assert payload["points"] and payload["points"][0]["chunks"] == ["LEAVE-GAMECO-v2#2"]
-    assert payload["points"][0]["claim"].startswith("Theo tài liệu,")
+    assert "claim" not in payload["points"][0]
     assert payload["disagreement"] == []
     assert payload["raw"]
     assert isinstance(payload["latency_ms"], (int, float))
