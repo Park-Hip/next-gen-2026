@@ -190,6 +190,13 @@ def test_sign_in_form_never_prefills_the_password(page_client):
     assert re.search(r'name="password"[^>]*value=', page) is None
 
 
+def test_sign_in_page_shows_the_demo_password(page_client):
+    """The demo password is published on purpose (ADR 0016), so the form shows it as a placeholder, never as a value."""
+    page = page_client.get("/signin").text
+    assert f'placeholder="{PASSWORD}"' in page
+    assert f'value="{PASSWORD}"' not in page
+
+
 def test_sign_in_returns_to_next(page_client):
     path = "/?" + urlencode({"as_of": "2026-10-07", "q": LEAVE_QUESTION})
     page = page_client.get("/signin", params={"next": path}).text
