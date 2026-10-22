@@ -21,7 +21,7 @@ Where two policies apply and nobody has said which one wins, the system does not
 ## Test report
 
 The latest full run is the [test report](docs/mission2/test_report.md), made on 22/10/2026 with all 22 test cases and the real model.
-The rules picked the right documents and card in every good and hard case, with no leak, no unsafe answer and no over-cautious answer in the 19 gated cases; the Faithfulness reading is still pending Hiệp.
+The rules picked the right documents and card in every good and hard case, with no leak, no unsafe answer and no over-cautious answer in the 21 gated cases; the Faithfulness reading is still pending Hiệp.
 
 What the final runs show, case by case, for the Mission 2 version against the Mission 3 version, is in [`docs/mission3/runs.md`](docs/mission3/runs.md).
 

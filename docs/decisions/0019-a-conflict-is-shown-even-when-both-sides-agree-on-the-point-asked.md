@@ -55,8 +55,8 @@ Hiep, 22/10/2026: "hai văn bản có mâu thuẫn thì nên được báo cáo 
 
 ## Evidence
 
-- All 8 committed full runs, 4 of the Mission 2 version and 4 of the Mission 3 version, give the conflict card on test case 17, with the clause of each side quoted and "quản lý trực tiếp" visible on both.
-- The AI cited only the PayCo clause in the 4 Mission 2 runs and both clauses in the 4 Mission 3 runs; the card quoted both sides every time, so the Mission 2 runs fail only on "does not cite", as test cases 7 and 12 do, which the asker does not see (ADR 0005).
+- All 9 committed full runs, 4 of the Mission 2 version and 5 of the Mission 3 version, give the conflict card on test case 17, with the clause of each side quoted and "quản lý trực tiếp" visible on both.
+- The AI cited only the PayCo clause in the 4 Mission 2 runs and both clauses in the 5 Mission 3 runs; the card quoted both sides every time, so the Mission 2 runs fail only on "does not cite", as test cases 7 and 12 do, which the asker does not see (ADR 0005).
 - The automated test of the rules on test case 17 now passes as a normal test instead of an expected failure.
 
 ## Technical detail
@@ -64,4 +64,4 @@ Hiep, 22/10/2026: "hai văn bản có mâu thuẫn thì nên được báo cáo 
 - Issue #114; closes the limitation issue [#52](https://github.com/Park-Hip/next-gen-2026/issues/52); gap G3.2 in `docs/mission3/gaps.md`; promise R7; ADR 0014 option 3; ADR 0005 for which clause each side quotes.
 - Row 17 of `data/test_cases.yaml`: `kind: hard`, `card: conflict`, `conflict_pair: [LEAVE-GROUP-v1, LEAVE-PAYCO-v1]`, `must_show: [quản lý trực tiếp, 3 ngày làm việc, 5 ngày làm việc]`, `must_cite` equal to the pair as for rows 7 and 12.
 - `pick_card` in `services/citations.py` is unchanged; `tests/services/test_scope.py::test_case_row[row-17]` lost its strict xfail.
-- Runs `results/20261021-2253.jsonl`, `-2258`, `-2301` and `results/20261022-1432.jsonl` cite `LEAVE-GROUP-v1#2` and `LEAVE-PAYCO-v1#2`; `results/20261014-2239.jsonl`, `20261021-2311`, `-2315` and `-2319` cite only `LEAVE-PAYCO-v1#2`.
+- Runs `results/20261021-2253.jsonl`, `-2258`, `-2301`, `results/20261022-1432.jsonl` and `results/20261022-1602.jsonl` cite `LEAVE-GROUP-v1#2` and `LEAVE-PAYCO-v1#2`; `results/20261014-2239.jsonl`, `20261021-2311`, `-2315` and `-2319` cite only `LEAVE-PAYCO-v1#2`.
