@@ -174,10 +174,10 @@ The AI only works with language: an embedding model helps rank passages by meani
 - Wrong facts from an owner: the rules trust what the owner wrote on the document, and the product has no check when it is published [#50].
   The AI's flag can add the conflict that a wrong topic or a wrong "bổ sung" hides, but cannot fix a wrong "dùng thay" or a wrong reading right.
   A document that applies to an asker who may not read it is the owner's error and is applied as written [ADR 0015].
-- Conflicts are per document, not per question: when two policies in a conflict agree on the point asked, the asker still gets the conflict card [#52].
-- A company that changes only one clause of a Group policy cannot say so: "dùng thay" drops the whole Group policy [#24].
+- Conflicts are per document, not per question: when two policies in a conflict agree on the point asked, the asker still gets the conflict card; this is intended [ADR 0019].
+- A company that changes only one clause of a Group policy must publish a complete policy that keeps the Group clauses; if it does not, "dùng thay" drops the whole Group policy and the asker is refused [ADR 0013].
 
-Each is an open issue labelled `limitation`; [`scope.md`](scope.md#known-limitations) lists them with the test rows that show them.
+Each is an open issue labelled `limitation`, except the last two, which are decisions with their cost; [`scope.md`](scope.md#known-limitations) lists them with the test rows that show them.
 
 ## What the brief asks the MVP to show
 

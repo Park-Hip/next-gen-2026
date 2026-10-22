@@ -1,7 +1,7 @@
 # Mission 3 runs: before and after
 
 This page shows what happened when the Mission 2 version and the Mission 3 version of the product were asked the same test questions several times, with the real AI model.
-It is the evidence for step 4 of the [Mission 3 checklist](checklist.md), and it concludes in the [Summary](#summary) that Mission 3 corrects the wrong answer about next year's leave (in 2 of 3 runs) and exposes the hidden conflict (in 3 of 3), that nothing Mission 2 did right now fails, and that two known limitations remain.
+It is the evidence for step 4 of the [Mission 3 checklist](checklist.md), and it concludes in the [Summary](#summary) that Mission 3 corrects the wrong answer about next year's leave (in 2 of 3 runs) and exposes the hidden conflict (in 3 of 3), that nothing Mission 2 did right now fails, and that known limitations remain.
 Claude draft, 22/10/2026, for Hiep to check.
 All data is simulated ("giả lập"); terms such as "answer card", "gap" or "limitation" are explained in the [glossary](../../README.md#glossary).
 
@@ -23,7 +23,7 @@ The Change Request is not assigned yet; when it arrives, its rows get a section 
 - Every run finished with all its rows answered: no error and no leak record.
 - Rows 19-21 change labels on a document (for example the topic of the PayCo leave policy), which the Mission 2 test runner cannot do: it can only remove a line.
   The script applies each edit to the loaded documents in memory, then calls the Mission 2 runner's own function to ask the row; no Mission 2 file is changed, and each record says so in a note.
-- Every run, Mission 2 included, is scored by the Mission 3 checks and the Mission 3 test file, so both columns use one yardstick.
+- Every run, Mission 2 included, is scored by the Mission 3 checks and the Mission 3 test file, so both columns use one yardstick; the tables were scored again on 22/10/2026, after rows 15 and 17 stopped being limitations, with no new model call.
   Under its own test file, Mission 2 passes every gate in all 4 runs, because row 18 was then a limitation row whose ideal result was a refusal, and rows 19-22 did not exist.
 - Commits, the model name and the other technical details are in [Technical detail](#technical-detail) at the end.
 
@@ -53,7 +53,7 @@ The names of the checks behind these words are in [Technical detail](#technical-
 - When the labels on a document hide a disagreement (row 19: the PayCo leave policy is given a topic different from the Group leave policy's, so the rules no longer see them as covering the same point, and Hà asks how many days of annual leave she gets), the Mission 2 version gave a one-sided answer card (an unsafe answer) in all 3 runs; the Mission 3 version gave the conflict card in all 3 runs.
 - Row 18 was refused once in the 3 Mission 3 runs: the one over-cautious card of Mission 3, within the 10% target; the safe direction, but not a fix every time.
 - No row that passed in Mission 2 fails in Mission 3.
-- Rows 15 and 17 are limitations kept on purpose, and fail the same way in both versions.
+- Rows 15 and 17 give the same card in every run of both versions, and both are the intended result since Hiep's decision of 22/10/2026: a refusal for row 15 and the conflict card for row 17.
 
 ## 1. Versions and effective dates
 
@@ -118,15 +118,18 @@ The conflict card is worded by the number of documents and names each side's tit
 | 12 | hard | Hà, 07/10/2026 | Xin nghỉ phép phải báo trước mấy ngày? | Conflict card, failed: does not cite 'Quy chế nghỉ phép Tập đoàn': 4/4 | Conflict card, passed: 3/3 |
 | 19 | hard | Hà, 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | Answer card, failed, unsafe answer: should have been a conflict card: 3/3 | Conflict card, passed: 3/3 |
 | 20 | hard | Minh, 07/10/2026 | Ngày nghỉ bù sau làm thêm giờ có trừ vào phép năm không? | Answer card, waiting for Hiep's reading: 3/3 | Answer card, waiting for Hiep's reading: 3/3 |
-| 15 | limitation | Minh, 07/10/2026 | Xin nghỉ phép phải báo trước mấy ngày? | Refusal card, failed: should have been an answer card; the scope built by the rules is wrong: 4/4 | Refusal card, failed: should have been an answer card; the scope built by the rules is wrong: 3/3 |
-| 17 | limitation | Hà, 07/10/2026 | Đơn nghỉ phép gửi cho ai duyệt? | Conflict card, failed: should have been an answer card; the scope built by the rules is wrong: 4/4 | Conflict card, failed: should have been an answer card; the scope built by the rules is wrong: 3/3 |
+| 15 | hard | Minh, 07/10/2026 | Xin nghỉ phép phải báo trước mấy ngày? | Refusal card, passed: 4/4 | Refusal card, passed: 3/3 |
+| 17 | hard | Hà, 07/10/2026 | Đơn nghỉ phép gửi cho ai duyệt? | Conflict card, failed: does not cite 'Quy chế nghỉ phép Tập đoàn': 4/4 | Conflict card, passed: 3/3 |
 
 - Row 19 is the change: with the PayCo leave policy given a topic different from the Group leave policy's, the rules no longer see the two as covering the same point, so Mission 2 forms no conflict pair, and its model cited only the PayCo clause, so Hà got an answer card "13 ngày" with nothing about the Group's 12 days, in 3 runs out of 3.
   In Mission 3 the model flagged both clauses in every run, and Hà got the conflict card with 12 and 13 days in 3 runs out of 3.
 - Rows 3 and 20 watch for false alarms of the flag: both give an answer card in every run of both versions.
 - Rows 7 and 12 fail in Mission 2 because the model cited one side only, but this is not a difference the asker sees: the Mission 2 conflict card still quoted both sides, so the text the card must show was there. [ADR 0005]
   Mission 3 asks the model to quote both sides, and it did in every run.
-- Rows 15 and 17 are limitations kept on purpose and fail the same way in every run of both versions. [Issues [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) and [#52](https://github.com/Park-Hip/next-gen-2026/issues/52); G3.1, G3.2]
+- Rows 15 and 17 give the same card in every run of both versions, and both are the intended result.
+  Row 15 runs on data where GameCo's policy replaces the Group policy but leaves out the Group notice clause it meant to keep, which breaks the owner rule of ADR 0013, so the refusal is right.
+  Row 17 gives the conflict card although both policies say "quản lý trực tiếp", because two documents that conflict are always reported as a conflict (ADR 0019); in Mission 2 it fails only on "does not cite", for the same reason as rows 7 and 12.
+  [Issue [#114](https://github.com/Park-Hip/next-gen-2026/issues/114), which closes [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) and [#52](https://github.com/Park-Hip/next-gen-2026/issues/52); G3.1, G3.2]
 
 ## 4. Refusing when the basis is not enough
 
@@ -182,15 +185,15 @@ The gates count, for each run, the failures that matter most.
 
 | Version | Run | Rows counted | Rules wrong | Leaks | Unsafe answers | Over-cautious | Answer cards to read |
 |---|---|---|---|---|---|---|---|
-| Mission 2 | [run 1, 14/10 22:39](../../results/20261014-2239.jsonl) | 15 | 0 | 0 | 1 | 0 | 6 |
-| Mission 2 | [run 2, 21/10 23:11](../../results/20261021-2311.jsonl) + [rows 19-21, 22/10 06:27](../../results/20261022-0627-m2-rows19-21.jsonl) | 18 | 0 | 0 | 2 | 0 | 9 |
-| Mission 2 | [run 3, 21/10 23:15](../../results/20261021-2315.jsonl) + [rows 19-21, 22/10 06:28](../../results/20261022-0628-m2-rows19-21.jsonl) | 18 | 0 | 0 | 2 | 0 | 9 |
-| Mission 2 | [run 4, 21/10 23:19](../../results/20261021-2319.jsonl) + [rows 19-21, 22/10 06:30](../../results/20261022-0630-m2-rows19-21.jsonl) | 18 | 0 | 0 | 2 | 0 | 9 |
-| Mission 3 | [run 1, 21/10 22:53](../../results/20261021-2253.jsonl) | 19 | 0 | 0 | 0 | 0 | 9 |
-| Mission 3 | [run 2, 21/10 22:58](../../results/20261021-2258.jsonl) | 19 | 0 | 0 | 0 | 0 | 9 |
-| Mission 3 | [run 3, 21/10 23:01](../../results/20261021-2301.jsonl) | 19 | 0 | 0 | 0 | 1 | 8 |
+| Mission 2 | [run 1, 14/10 22:39](../../results/20261014-2239.jsonl) | 17 | 0 | 0 | 1 | 0 | 6 |
+| Mission 2 | [run 2, 21/10 23:11](../../results/20261021-2311.jsonl) + [rows 19-21, 22/10 06:27](../../results/20261022-0627-m2-rows19-21.jsonl) | 20 | 0 | 0 | 2 | 0 | 9 |
+| Mission 2 | [run 3, 21/10 23:15](../../results/20261021-2315.jsonl) + [rows 19-21, 22/10 06:28](../../results/20261022-0628-m2-rows19-21.jsonl) | 20 | 0 | 0 | 2 | 0 | 9 |
+| Mission 2 | [run 4, 21/10 23:19](../../results/20261021-2319.jsonl) + [rows 19-21, 22/10 06:30](../../results/20261022-0630-m2-rows19-21.jsonl) | 20 | 0 | 0 | 2 | 0 | 9 |
+| Mission 3 | [run 1, 21/10 22:53](../../results/20261021-2253.jsonl) | 21 | 0 | 0 | 0 | 0 | 9 |
+| Mission 3 | [run 2, 21/10 22:58](../../results/20261021-2258.jsonl) | 21 | 0 | 0 | 0 | 0 | 9 |
+| Mission 3 | [run 3, 21/10 23:01](../../results/20261021-2301.jsonl) | 21 | 0 | 0 | 0 | 1 | 8 |
 
-The rows counted are rows 1-14 and 18 in the baseline (run 1), plus 19-21 in the other Mission 2 runs, and rows 1-14 and 18-22 in Mission 3.
+The rows counted are rows 1-15, 17 and 18 in the baseline (run 1), plus 19-21 in the other Mission 2 runs, and rows 1-15 and 17-22 in Mission 3.
 In Mission 2, the 2 unsafe answers of each paired run are rows 18 and 19; the baseline has only row 18, because it did not ask row 19.
 Faithfulness is not in the table: no run has Hiep's reading yet.
 
