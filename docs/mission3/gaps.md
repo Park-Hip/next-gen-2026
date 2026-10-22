@@ -175,7 +175,7 @@ Three open proposals already touch these requirements; this page does not decide
 ## How Mission 3 fixes the gaps
 
 Hiep's decisions so far; all five sections are decided (step 2 of the checklist).
-All the fixes below are built and merged, except row 22 of G2.4, which is in PR #103; their results, 3 runs of every row on the Mission 3 code against the same rows on the Mission 2 code, are in [`runs.md`](runs.md).
+All the fixes below are built and merged, including row 22 of G2.4 (PR #103, merged on 21/10/2026, commit `f0fc270`); their results, 3 runs of every row on the Mission 3 code against the same rows on the Mission 2 code, are in [`runs.md`](runs.md).
 
 ### 1. Versions and effective dates
 

@@ -78,7 +78,7 @@ Scoring (`rules.md`): 40% problem framing, 35% execution, 25% decision quality.
 ### 4.1 Regression
 
 - [x] All 18 Mission 2 rows are run again on the Mission 3 code, through the same harness as the demo.
-  - 3 full runs of rows 1-22 on 21/10 at `504d3e0` (the code of `main` plus row 22 of PR #103): `20261021-2253`, `20261021-2258` and `20261021-2301`, all 22 rows `ok` in each; see [`runs.md`](runs.md).
+  - 3 full runs of rows 1-22 on 21/10 at `504d3e0` (the code of `main` plus row 22, which PR #103 then merged on 21/10/2026, commit `f0fc270`): `20261021-2253`, `20261021-2258` and `20261021-2301`, all 22 rows `ok` in each; see [`runs.md`](runs.md).
   - The Mission 2 code was run 3 more times on the same day, so both versions are compared on repeated runs, not on one each.
   - `20261021-1032` (commit `d31d304`) is an early Mission 3 run, not a result.
 - [ ] Every gate that passed in M2 still passes: rules correct, 0 leaks, 0 unsafe answers, over-cautious within target, faithfulness on every answer.

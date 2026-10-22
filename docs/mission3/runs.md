@@ -167,7 +167,8 @@ Faithfulness is not in the table: no run has Hiep's reading yet.
 
 - Hiep's reading of the 29 Mission 3 answer cards, which decides the faithfulness gate and every "chờ Hiệp đọc" cell.
 - The Change Request's rows, once it is assigned.
-- Row 22 is in PR #103, which must be merged for `main` to hold the row these runs asked.
+- Row 22 is on `main`: PR #103 was merged on 21/10/2026 (merge commit `f0fc270`).
+  `git diff 504d3e0 f0fc270 --stat` shows only `docs/mission3/choices.md` (from PR #104), so the code, data, config and prompts of `main` equal those of the runs.
 - The Mission 2 demo is not online: the Mission 2 link already serves Mission 3 (checklist step 0), so a live side-by-side for the video needs a second service pinned to `b6ca78d`.
 
 ## Appendix: the scripts
