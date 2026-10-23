@@ -8,27 +8,11 @@ One file per decision, from Mission 2 on.
 Each file records the context, the options, the choice, the reasons and who decided.
 Mission 1 decisions stay in `docs/mission1/redraft/decisions.md` (frozen); an ADR that changes one names its old ID under "Supersedes".
 
-## When to write one
-
-Write an ADR when at least one of these holds:
-
-- A real alternative was considered and rejected.
-- It changes or reverses an earlier decision, including a Mission 1 ID such as M1a.
-- A judge could ask "why A over B" about it in the PITCH round.
-
-Anything smaller is a line in the PR, not an ADR.
-
-## How
-
-1. Copy `template.md` to `NNNN-short-title.md`, using the next free number.
-2. Fill it in; one sentence per line.
-   Start with "In short" (the problem, the decision, what the employee sees, what we give up), in plain words with no code names or IDs.
-   Write the rest for a reader who does not know the code, and put function and field names, file paths, test names and issue, PR, gap and promise IDs in "Technical detail" at the end.
-   If research fed the decision, link the write-up in `docs/research/`; the ADR and the write-up land in the same PR, which closes the research issue.
-3. Add a row to the index below.
-4. When a later ADR replaces this one, set this one's status to "Superseded by NNNN"; do not delete or rewrite it.
-
-The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Mission 2 mandatory question 2 (what changed since the Mission 1 plan, and why).
+The Mission 3 improvement, an answer card that answers the question and stays checkable, is made of five decisions:
+the answer above the checked quotes ([0011](0011-answer-card-shows-the-models-sentence-above-the-verified-quote.md), [0018](0018-one-answer-per-question-above-the-verified-quotes.md)),
+the end of a version and what replaces it ([0012](0012-the-card-tells-the-asker-when-a-version-ends-and-what-replaces-it.md)),
+a conflict the AI may add but never remove ([0014](0014-the-model-may-add-a-conflict-never-remove-one.md)),
+and a refusal that says why ([0017](0017-a-refusal-says-why-and-an-answer-says-what-it-does-not-cover.md)).
 
 ## Index
 
@@ -53,3 +37,25 @@ The ADRs whose "Supersedes" names a Mission 1 ID are the raw material for Missio
 | [0017](0017-a-refusal-says-why-and-an-answer-says-what-it-does-not-cover.md) | A refusal says why, and an answer says what it does not cover | A refusal says why (nothing found, answer could not be checked, or system error), and an answer says which part of the question it does not cover; "not allowed" and "not found" still read the same. | Accepted | The refusal wording of Mission 1 Phần 2 (C4) for `quote_mismatch`, `outside_retrieved` and `malformed`; R10 is kept |
 | [0018](0018-one-answer-per-question-above-the-verified-quotes.md) | One answer per question, above the verified quotes | The AI writes one answer that covers every part of the question, above the exact quotes that the rules checked; the quotes are the only text checked while the product runs, and Hiep reads the answer afterwards. | Accepted; Reasons pending Hiep | ADR 0011's point contract and answer card layout |
 | [0019](0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md) | A conflict is shown even when both sides agree on the point asked | Two documents that conflict always give the conflict card, even when both say the same thing on the point asked; this is intended, not a known failure. | Accepted | None; turns a known failure into a decision and confirms Mission 1 R7 |
+
+## Writing a new ADR
+
+### When to write one
+
+Write an ADR when at least one of these holds:
+
+- A real alternative was considered and rejected.
+- It changes or reverses an earlier decision, including a Mission 1 ID such as M1a.
+- A judge could ask "why A over B" about it in the PITCH round.
+
+Anything smaller is a line in the PR, not an ADR.
+
+### How
+
+1. Copy `template.md` to `NNNN-short-title.md`, using the next free number.
+2. Fill it in; one sentence per line.
+   Start with "In short" (the problem, the decision, what the employee sees, what we give up), in plain words with no code names or IDs.
+   Write the rest for a reader who does not know the code, and put function and field names, file paths, test names and issue, PR, gap and promise IDs in "Technical detail" at the end.
+   If research fed the decision, link the write-up in `docs/research/`; the ADR and the write-up land in the same PR, which closes the research issue.
+3. Add a row to the index below.
+4. When a later ADR replaces this one, set this one's status to "Superseded by NNNN"; do not delete or rewrite it.

@@ -98,10 +98,10 @@ Hiep reads the answer against all the quotes under it and names the error of an 
 - The automated tests cover the output schema, the parsing, the prompt, the step 7 malformed refusal, the card, the run record, the review sheet and the older runs that stored one sentence per point.
   The test files are listed in Technical detail.
 - The full run on the configured model on 22/10/2026 asked all 22 test cases: 0 rules failures, 0 leaks, 0 unsafe answers and 0 over-cautious answers in the 19 gated cases.
-  The two known-failure cases failed as expected and the third limitation case answered; Hiep's Faithfulness reading of the 9 answer cards is pending.
+  The two known-failure cases failed as expected and the third limitation case answered.
 - The manual check as Minh on 07/10/2026 for "Tôi xin nghỉ phép ở đâu, ai duyệt?" gave one answer that covers both where and who approves.
   The card cited the two clauses of the leave-request procedure and showed no "3 ngày" quote.
-- The review sheet for that run and its answer slots are in the run folder; `faithful` and `lesson` are still `[chờ Hiệp]`.
+- The next full run, on 22/10/2026 at 16:02, had 0 rules failures, 0 leaks, 0 unsafe answers and 0 over-cautious answers in its 21 gated cases, and Hiep reviewed its 10 answer cards against their quotes and found all 10 faithful.
 - The evidence log line of 22/10/2026 records the tools, the decision and how the result was checked.
 
 ## Technical detail
@@ -115,5 +115,5 @@ Hiep reads the answer against all the quotes under it and names the error of an 
 - `evaluation/run.py` stores top-level `answer` and keeps `card.answer_text` for `score.py` and `report.py`.
 - `evaluation/review.py` has `answer_of`, which falls back to the joined per-point `claim` values of older runs.
 - Tests: `tests/services/answering/test_output.py`, `test_prompt.py`, `test_answerer.py`, `tests/services/test_card_text.py`, `test_ask.py`, `test_citations.py`, `tests/api/test_page.py`, `tests/api/test_source_page.py`, `tests/evaluation/test_run.py`, `test_review.py`, `test_committed.py`.
-- Run `results/20261022-1432.jsonl`; review files `results/20261022-1432.review.md` and `results/20261022-1432.review.yaml`; report `docs/mission2/test_report.md`.
+- Run `results/20261022-1432.jsonl`; review files `results/20261022-1432.review.md` and `results/20261022-1432.review.yaml`; report `docs/test_report.md` (then in `docs/mission2/`); the reviewed run is `results/20261022-1602.jsonl` with `results/20261022-1602.review.yaml`.
 - Promise C2 and MVP spec E1 in `docs/mission2/mission1_promises.md`; cache key and card kind unchanged in `services/ask.py`.

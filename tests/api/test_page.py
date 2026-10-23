@@ -435,7 +435,7 @@ def test_malformed_output_is_refused_as_a_system_error(documents):
 
 
 def test_p6_the_four_replies_give_three_texts(documents):
-    """Probe P6 of gaps.md: Minh, 07/10/2026, the leave question; each reply the model may give."""
+    """Probe P6 of the Mission 3 gap analysis (archived in git history): Minh, 07/10/2026, the leave question; each reply the model may give."""
     c2 = chunk_text(documents, "LEAVE-GAMECO-v2#2")
     replies = {
         "no points": (no_points(), NOT_FOUND),

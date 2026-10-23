@@ -10,5 +10,5 @@ The evaluation harness (`src/appota_kb/evaluation/`) writes here and the report 
 | `<run_id>-m2-rows19-21.jsonl` | Rows 19-21, which change metadata, asked through the Mission 2 code by the script in the appendix of [`docs/mission3/runs.md`](../docs/mission3/runs.md); same record format, with a `note` field (committed; never edited by hand) |
 
 `run_id` is the Vietnam local time the run started, `YYYYMMDD-HHMM`.
-The demo's `/cases` page shows the run that the committed `docs/mission2/test_report.md` names, so a practice run saved here never replaces the official one.
+The demo's `/cases` page shows the run that the committed `docs/test_report.md` names, so a practice run saved here never replaces the official one.
 All data here is simulated ("giả lập").

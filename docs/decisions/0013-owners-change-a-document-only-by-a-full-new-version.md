@@ -4,7 +4,7 @@
 - Date: 2026-10-21
 - Origin: Hiep
 - Supersedes: None; it confirms Mission 1 decision M1a ("an overriding policy must be complete on its topic") and extends it to an owner's own policy
-- Issue: None; gaps G1.3 and G3.1 in `docs/mission3/gaps.md`, limitations #24 and #50
+- Issue: None; gaps G1.3 and G3.1 of the archived [gap analysis](https://github.com/Park-Hip/next-gen-2026/blob/384f68a/docs/mission3/gaps.md), limitations #24 and #50
 - Research: None
 
 ## In short
@@ -78,7 +78,7 @@ Evidence log line of 21/10/2026.
 
 ## Technical detail
 
-- Gaps G1.3 and G3.1 in `docs/mission3/gaps.md`; limitations [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) (test case 15) and [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) (example 2); Mission 1 decision M1a.
+- Gaps G1.3 and G3.1 of the archived [gap analysis](https://github.com/Park-Hip/next-gen-2026/blob/384f68a/docs/mission3/gaps.md); limitations [#24](https://github.com/Park-Hip/next-gen-2026/issues/24) (test case 15) and [#50](https://github.com/Park-Hip/next-gen-2026/issues/50) (example 2); Mission 1 decision M1a.
 - "Deferred" row for relations per clause: `docs/scope.md`.
 - `in_force` picks the new version on its start date; `overrides` ("dùng thay") replaces the whole Group policy.
 - The legitimate procedure document is `LEAVE-PROC-GAMECO-v1`, which declares `complements: [LEAVE-GAMECO]` ("bổ sung").

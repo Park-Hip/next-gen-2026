@@ -112,7 +112,8 @@ Hiep reads every sentence against its quote and names the error of an unfaithful
 - Reference only: this update is not finished, so the full run below and Hiep's reading of it do not count as the evaluation of this decision.
   They show how the first version behaves and are kept for comparison; the evaluation of the finished update is a later run.
 - That full run used `gemini-3.5-flash-lite`: 20 test cases, 0 rule failures, 0 leaks, 0 unsafe answers and 0 over-cautious answers in the 15 gated cases; cases 18 and 19 are the two unsafe-answer limitation cases, and case 11 refuses.
-- Hiep's review of that run is not finished: the "faithful" and "lesson" fields are still `[chờ Hiệp]`.
+- That run was not reviewed, because the decision was then finished by ADR 0018.
+  The finished decision was evaluated on the full run of 22/10/2026 16:02: Hiep reviewed its 10 answer cards against their quotes and found all 10 faithful.
 - Evidence log line of 21/10/2026.
 
 ## Technical detail

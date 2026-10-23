@@ -95,7 +95,7 @@ Evidence log line of 14/10/2026 08:53 (Claude Opus 5.5, Pi).
 ## Technical detail
 
 - Runner: `src/appota_kb/evaluation/run.py` (`eval/run.py` when this ADR was written) calls the same `Answerer` and step 7 as the page; each `results/` line holds persona, as-of date, question, model id, commit, retrieved ids, raw reply, card, refusal reason and latency.
-  Scoring writes `docs/mission2/test_report.md`.
+  Scoring writes `docs/test_report.md`.
 - Test file `data/test_cases.yaml`: main wording is the first entry of `questions`; checks use `must_cite`, `may_cite`, `conflict_pair`, `forbidden_for_llm`, `must_not_contain`; the new field is `key_facts`; limitation rows have `kind: limitation` (row 15).
 - Errors: a rate-limit error, a timeout or `AnswerUnavailable` is recorded as `error`.
 - Bound: 1 - 0.05^(1/n) when k is 0, the formula Mission 1's `run_matrix` used; `eval.confidence` and `eval.over_cautious_max_share` in `config.yaml` (ADR 0006).
