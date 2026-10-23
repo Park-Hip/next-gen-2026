@@ -118,7 +118,6 @@ Trail: issue #76, ADR 0016, PR #94; issue #101, PR #103; gaps G2.1, G2.2, G2.4 a
   - Cases 3 and 20 watch for false alarms of the flag and give an answer card in both runs.
   - Cases 7 and 12 give the conflict card in the Mission 3 run.
 - **Giới hạn còn lại:** if the model does not notice that two documents disagree, or the search misses one side's clause, the employee gets an answer card citing one side.
-  When both policies of a conflict say the same thing on the point asked, Hà still gets the conflict card in both runs; this is intended, so the employee always sees that the two policies conflict (case 17, [ADR 0019](docs/decisions/0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md)).
 
 Trail: issue #87, ADR 0014, ADR 0015, PR #92; gap G3.3; open limitation issue #74; issue #114 and ADR 0019 (case 17; closes #52).
 
@@ -300,12 +299,13 @@ Trail: ADR 0018 (one answer above the quotes), ADR 0014 (the model's flag); mode
 
 ## Known limitations
 
-Known failures that stay in v1, each an open issue labelled [`limitation`](https://github.com/Park-Hip/next-gen-2026/issues?q=is%3Aissue+is%3Aopen+label%3Alimitation):
+Known failures that stay in the Mission 3 version: the open issues labelled [`limitation`](https://github.com/Park-Hip/next-gen-2026/issues?q=is%3Aissue+is%3Aopen+label%3Alimitation), plus the fact that no rule checks the answer at run time.
 
-- A mistake in the information a document owner sets gives a normal-looking answer unless the model's flag catches it; a wrong topic or a wrong "bổ sung" can be caught when the two clauses disagree (test case 19), a wrong "dùng thay" or access setting cannot, so a company policy that replaces the Group policy but leaves out a Group clause it meant to keep gives a refusal (test case 15); the rules are only as right as that information (issue #50).
+- A mistake in the information a document owner sets can show a normal-looking answer or leak a document, because the rules are only as right as that information and nothing checks it at publish time; a wrong topic is caught when the two clauses disagree (test case 19), but a wrong access setting or an amendment declared "bổ sung" is not (issue #50).
 - A question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in the Mission 2 run, answered in the Mission 3 run) (issue #51).
 - A question about another period, such as next year, is answered with the rule in force on the chosen date; the card now says when that rule ends and what replaces it, but never gives the next version's number (test case 18) (issue #53).
 - The model can add a conflict, never remove one; if the model does not notice that two documents disagree, or the clause of one side is not found, the employee gets an answer card citing one side (issue #74, [ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)).
+- The answer is not checked at run time: a correct quote next to a wrong number or a dropped condition reaches the asker, and only a person reading the card catches it; Hiep's note on row 3, that the answer leaves out that the approval result is sent to the company email, is today's example (section 5's remaining limitation).
 
 Some limits are decisions, not open defects.
 Conflicts are flagged per document, not per question: when both policies of a conflict say the same thing on the point asked, the employee still gets the conflict card and is sent to HR, because two documents that conflict are always reported as a conflict (test case 17, [ADR 0019](docs/decisions/0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md)).
@@ -313,8 +313,8 @@ A company that changes one clause of a Group policy must publish a complete poli
 The refusal texts for a reply that could not be verified and for output that could not be read are shown only by the automated tests, because no test case produces them ([ADR 0017](docs/decisions/0017-a-refusal-says-why-and-an-answer-says-what-it-does-not-cover.md)).
 The caveat that a faithful answer adds about what it does not cover is a sentence the model writes, so no rule checks it and only a reader of the answers catches a wrong or missing one.
 
-v1 also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once per run.
-What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
+The Mission 3 version also simplifies on purpose: the sign-in is simulated, so the visitor picks one of five simulated accounts and types a demo password shared by all of them, and each test case was asked once per run.
+What the Mission 3 version simplifies, leaves for later and gets wrong, with the reasons: [`docs/scope.md`](docs/scope.md).
 
 ## The 3 mandatory questions
 
