@@ -34,7 +34,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 - A known failure that stays in v1 keeps its issue open with the `limitation` label, so the test suite, README and video report it.
 - Before a PR, run `python -m pytest`.
 - Do not edit `docs/competition/` or `docs/mission1/`, except "Deferred ideas" in `docs/mission1/playbook.md`.
-- At the end of each session that changes the project, add one line under "Ghi chú nhanh Mission 2" at the end of the evidence log, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
+- At the end of each session that changes the project, add one line under "Ghi chú nhanh" at the end of the evidence log, in Vietnamese: date and time, tool and model, task, Hiep's decision, and how the result was checked.
   Take tool, model and time from `scripts/ai_sessions.py`; write "[chờ Hiệp]" when the decision is unknown.
   The log is one local file, ignored by git, so a worktree does not contain it.
   Always write to the copy in the main checkout: `$(git rev-parse --path-format=absolute --git-common-dir)/../evidence_log.md`.

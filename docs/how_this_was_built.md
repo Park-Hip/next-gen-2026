@@ -63,5 +63,6 @@ The rules for every AI agent working on the repository are in [`AGENTS.md`](../A
 
 Every AI session that changed the project has one line in the evidence log: date and time, tool and model, the task, Hiep's decision and how the result was checked.
 `scripts/ai_sessions.py` lists the recorded sessions of Pi, Claude Code and opencode, in the main checkout and in every worktree, so the log can be checked against them.
-The Mission 2 log is published as a snapshot in [`evidence_log.md`](evidence_log.md), in Vietnamese, refreshed from Hiep's local working copy before submission.
-The Mission 1 evidence log, as submitted, is in [`docs/mission1/submitted/`](mission1/submitted/).
+The log is published as a snapshot in [`evidence_log.md`](evidence_log.md), in Vietnamese, refreshed from Hiep's local working copy before submission.
+It opens with a short summary of Missions 2 and 3: one line per tool and task, with how the output was checked.
+The detailed lines follow as appendices; the Mission 1 log, as submitted, is also in [`docs/mission1/submitted/`](mission1/submitted/).

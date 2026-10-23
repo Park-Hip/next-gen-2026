@@ -1,14 +1,165 @@
-# Nhật ký Bằng chứng - Bài test B: Tri thức nội bộ Appota (Mission 1)
+# Nhật ký Bằng chứng - Bài test B: Tri thức nội bộ Appota
 
 **Ứng viên:** Phạm Bách Hiệp
+
+Trang này khai báo mọi công cụ AI đã định hình bài nộp Mission 2 và Mission 3, kèm cách tôi kiểm đầu ra của chúng.
+Mỗi dòng ghi một công cụ, việc nó làm và cách kiểm, theo mẫu trong quy định dùng AI của cuộc thi.
+Ví dụ: Claude Opus 5.5 chạy mỗi tình huống kiểm thử 3 lần trên cả hai bản để so trước và sau; đếm lại từ tệp kết quả, câu hỏi về phép năm sau của Minh được bản Mission 2 trả "14 ngày" không cảnh báo cả 4/4 lần, bản Mission 3 không lần nào.
+Phần tóm tắt được lọc từ nhật ký chi tiết ở Phụ lục B và từ lịch sử phiên do `scripts/ai_sessions.py` đọc, không viết theo trí nhớ của AI.
+Nhật ký Mission 1 nằm ở Phụ lục A.
+Mọi đơn vị, nhân sự, văn bản và con số đều là giả lập.
+
+Nhãn kiểm chứng:
+
+- **[Tôi]** tôi tự kiểm.
+- **[AI]** AI kiểm bằng test, script hoặc đối chiếu tệp; tôi chưa tự kiểm lại.
+- **[Duyệt]** tôi đọc và đồng ý, chưa kiểm độc lập.
+
+## Tuyên bố trách nhiệm
+
+Tôi đưa ra mọi quyết định và lựa chọn kỹ thuật trong hệ thống này.
+Các công cụ AI soạn nháp, nghiên cứu và viết code theo chỉ đạo của tôi.
+Tôi xem nội dung của mọi issue, mọi kế hoạch triển khai và mọi pull request trước khi cho làm tiếp.
+Tôi không gửi dữ liệu thật của Appota hay dữ liệu cá nhân cho công cụ AI nào.
+
+## Công cụ
+
+| Công cụ | Mô hình | Dùng để |
+|---|---|---|
+| Pi, agent chạy trong terminal, gọi Claude qua tiện ích claude-bridge | Claude Opus 5.5 | Kế hoạch triển khai, nghiên cứu, rà soát, chạy đánh giá, tài liệu cho giám khảo |
+| Pi qua claude-bridge; Claude Code (CLI) ở vài phiên Mission 2 | Claude Sonnet 5.5 | Viết code theo kế hoạch đã duyệt; subagent rà soát tài liệu |
+| Pi qua nhà cung cấp ModelScope | DeepSeek V4 Pro 0813 | Viết code theo kế hoạch đã duyệt; soạn nháp lý do cho 3 bản ghi quyết định |
+| opencode (CLI) | DeepSeek V4.1 Flash Free | Viết code theo kế hoạch đã duyệt; soạn nháp phiếu đọc độ trung thực |
+| opencode (CLI) | GLM 5.3 Flash Free, OpenRouter stealth/ox-alpha | Một phiên hỏi đáp ngày 23/10, không đổi tệp nào |
+| Pi, qua subagent | Agnes 2.5 Flash, mức suy luận max | Tìm nguồn web cho các bài nghiên cứu Mission 2; giải thích ngắn ở Mission 3 |
+| Gemini API | gemini-3.5-flash-lite, gemini-embedding-001 | Chạy bên trong sản phẩm, ở bước tìm kiếm và bước viết câu trả lời; không dùng để viết bài nộp |
+| Lavish, Wispr Flow, Orca CLI | Không | Ghi chú review lên bản nháp, nhập prompt bằng giọng nói, quản lý phiên; không tạo nội dung |
+
+## Việc AI làm và cách kiểm
+
+Nhóm theo phần của sản phẩm.
+Tham chiếu tới issue, bản ghi quyết định (ADR) và lần chạy nằm trong ngoặc vuông cuối mỗi dòng.
+
+### 1. Dữ liệu giả lập
+
+- **Claude Opus 5.5 (Pi):** chép 10 văn bản giả lập, cây tổ chức, 3 nhân sự và bộ tình huống kiểm thử từ thiết kế Mission 1 thành tệp dữ liệu.
+  [AI] Một script so từng trường với nguồn; khi sửa thử 14 thành 15 ngày, script báo lỗi. [M2.1]
+- **DeepSeek V4.1 Flash (opencode), Claude Sonnet 5.5 (Pi):** thêm 4 tình huống kiểm thử cho Mission 3: mâu thuẫn chỉ đọc được trong nội dung, câu trả lời do AI viết, văn bản hết hạn không có bản thay, tài khoản HR GameCo được xem bảng lương.
+  [AI] Mỗi tình huống có test; [Duyệt] phiếu đọc thẻ trả lời của 3 tình huống trong lần chạy thật ngày 22/10. [tình huống 19-22; #75, #83, #101]
+
+### 2. Luật quyền xem, hiệu lực và mâu thuẫn
+
+- **DeepSeek V4 Pro (Pi):** viết bộ luật chọn văn bản theo quyền xem, hiệu lực và đơn vị, theo kế hoạch Claude Opus soạn và tôi duyệt.
+  [AI] 43 test; xoá thử từng luật 3 lần thì đều có test đỏ, rồi hoàn lại. [#9]
+- **Claude Sonnet 5.5 (Pi):** sửa hai lỗi Claude Opus tìm ra khi phê bình hệ thống: văn bản người hỏi không được xem làm quy chế cũ của Tập đoàn quay lại, và hai bản trùng ngày hiệu lực vẫn được nạp.
+  [AI] Test mới đỏ trên code cũ, xanh trên code mới. [#48, #49, ADR 0010]
+- **Claude Sonnet 5.5 (Pi):** Mission 3: thẻ ghi ngày cuối một phiên bản còn áp dụng và bản nào thay nó.
+  [AI] Câu hỏi về phép năm sau của Minh có dòng "Sắp thay đổi" 4/5 lần chạy và bị từ chối 1 lần; [Duyệt] phiếu đọc thẻ của lần chạy 22/10. [tình huống 18; #83, ADR 0012]
+- **Claude Sonnet 5.5 (Pi):** Mission 3: AI được báo hai điều khoản trái nhau; luật kiểm cờ đó rồi mới thêm thẻ mâu thuẫn, không bao giờ bỏ thẻ.
+  [AI] Mâu thuẫn chỉ đọc được trong nội dung ra thẻ trả lời "13 ngày" 3/3 lần ở Mission 2 và thẻ mâu thuẫn 5/5 lần ở Mission 3; test xác nhận cờ sai bị bỏ qua. [tình huống 19; #87, ADR 0014]
+- **Claude Sonnet 5.5 (Pi):** Mission 3: đăng nhập bằng tài khoản giả lập, máy chủ quyết định ai đang hỏi.
+  [AI] Chạy trang thật: sửa địa chỉ thành `?persona=lan` không đổi thẻ của Minh, cookie giả bị coi là chưa đăng nhập. [#76, ADR 0016]
+
+### 3. Tìm kiếm và bước gọi AI
+
+- **Claude Opus 5.5 (Pi), cùng subagent Agnes 2.5 Flash ở 3 bài đầu:** bốn bài nghiên cứu: tìm kiếm tiếng Việt, chọn mô hình và cách buộc trích dẫn, nơi chạy demo, cách đánh giá.
+  [AI] Claude tự mở mọi nguồn được dẫn và ghi lại các khẳng định của Agnes bị loại vì không có trên trang. [docs/research/, ADR 0002-0007]
+- **Claude Sonnet 5.5:** tìm kiếm lai (từ khóa và ngữ nghĩa) chỉ trong phạm vi người hỏi được xem.
+  [AI] Test rò rỉ chạy mọi nhân sự x mọi ngày biên x mọi câu hỏi; xoá thử bộ lọc phạm vi thì test đỏ. [#12]
+- **DeepSeek V4 Pro (Pi):** bước gọi Gemini và bước kiểm trích dẫn nguyên văn.
+  [AI] 140 test với mô hình giả. [#13]
+- **Claude Opus 5.5 (Pi):** thử 5 mô hình Gemini và Gemma trên các câu khó, tìm ra lỗi khiến AI không thể trả lời "không tìm thấy".
+  [AI] Đọc đầu ra thô, mỗi ô chạy 1 lần nên chưa phải tỉ lệ; tôi duyệt đổi sang gemini-3.5-flash-lite. [#40, #41, ADR 0008]
+
+### 4. Thẻ trả lời và giao diện
+
+- **Claude Opus 5.5 (Pi):** giao diện theo màu của Appota.
+  [AI] Chụp màn hình rộng 1280 và 375 px; đo độ tương phản đạt WCAG AA. [#11]
+- **Claude Sonnet 5.5 (Pi):** Mission 2: thẻ chỉ hiện đoạn trích đã kiểm, bỏ câu do AI viết.
+  [AI] Chạy lại trường hợp AI trích đúng một chữ "ngày": thẻ không còn câu bịa. [#47, ADR 0009]
+- **DeepSeek V4.1 Flash (opencode):** Mission 3: AI viết một câu trả lời cho cả câu hỏi, đặt trên các đoạn trích đã kiểm.
+  [AI] Chạy thật 22 tình huống: không rò rỉ, không câu trả lời nguy hiểm; câu trả lời của tình huống 3 có đủ nơi gửi đơn và người duyệt. [#75, #112, ADR 0011, 0018]
+- **Claude Sonnet 5.5 (Pi):** Mission 3: mở nguyên văn Điều được trích từ thẻ; lời từ chối nói rõ lý do.
+  [AI] Quét mọi tài khoản x mọi ngày biên x mọi đoạn để chắc không mở được đoạn ngoài phạm vi; ảnh chụp ở rộng 1000 và 520 px. [#77, #96, ADR 0017]
+
+### 5. Bộ đánh giá
+
+- **DeepSeek V4 Pro (Pi):** bộ chạy đánh giá và báo cáo kiểm thử theo mẫu của đề.
+  [AI] 180 test; chạy với mô hình giả rồi đọc lại báo cáo. [#14, ADR 0006]
+- **Claude Opus 5.5 (Pi):** chạy mỗi tình huống 3 lần trên cả bản Mission 2 và bản Mission 3 để so trước và sau.
+  [AI] Mọi lượt chạy xong không lỗi; bảng so sánh sinh bằng script từ tệp kết quả. [docs/mission3/runs.md]
+- **Claude Opus 5.5 (Pi), DeepSeek V4.1 Flash (opencode):** soạn nháp phiếu đọc độ trung thực của câu trả lời.
+  [AI] Đối chiếu từng câu với đoạn trích được dẫn; [Duyệt] tôi duyệt phiếu đọc của 7 thẻ ở Mission 2 và 10 thẻ ở Mission 3. [20261014-2239, 20261022-1602]
+- **Claude Opus 5.5 (Pi):** đổi tình huống 15 và 17 từ "lỗi đã biết" thành hành vi mong muốn, theo quyết định của tôi.
+  [AI] Chấm lại 8 lần chạy cũ; 449 test đạt. [#114, ADR 0013, 0019]
+
+### 6. Hiểu yêu cầu mới của Mission 3
+
+- **Claude Opus 5.5 (Pi):** đọc đề Mission 3 và lập bảng khoảng trống của bản Mission 2 theo 5 yêu cầu chung, mỗi khoảng trống có bằng chứng từ lần chạy, test hoặc phép thử với mô hình giả.
+  [AI] Một subagent rà độc lập, tìm 14 chỗ sai và 4 khoảng trống bị sót, đã sửa; tôi quyết cách xử lý từng khoảng trống. [gaps.md, còn trong lịch sử git]
+- **Claude Opus 5.5 (Pi):** kiểm lại 4 lỗi đã biết trên bản Mission 3 bằng mô hình thật.
+  [AI] Mỗi câu hỏi chạy 3 đến 9 lần; kết quả ghi là thăm dò, không phải tỉ lệ. [#50, #51, #53, #74]
+
+### 7. Tài liệu, câu trả lời và video
+
+- **Claude Opus 5.5 (Pi):** README, kiến trúc, phạm vi, thiết kế hệ thống và các bản ghi quyết định.
+  [AI] Số liệu đối chiếu với tệp kết quả; liên kết kiểm bằng script; xem trang hiển thị trên GitHub.
+- **Claude Opus 5.5 (Pi) cùng 6 subagent Claude Sonnet 5.5:** viết lại tài liệu bằng lời thường, bớt mã nội bộ.
+  [AI] So bảng kết quả cũ và mới, 22 dòng không khác; khi đối chiếu code, Claude tìm ra một câu sai trong ADR 0016.
+- **Claude Opus 5.5 (Pi) cùng 2 subagent Claude Sonnet 5.5:** README và trang Mission 3 xoay quanh một hướng cải tiến.
+  [AI] Subagent kiểm số liệu với tệp kết quả, tìm ra 2 chỗ sai, đã sửa. [#122]
+- **DeepSeek V4 Pro (Pi):** soạn lý do cho 3 bản ghi quyết định từ những nguyên tắc tôi đã nêu.
+  [Duyệt] Tôi đọc và duyệt; mỗi mục ghi "Drafted by AI; approved by Hiep". [ADR 0012, 0014, 0017]
+- **Claude Opus 5.5 (Pi), Claude Sonnet 5.5 (Pi):** nháp 3 câu trả lời bắt buộc của Mission 2 và Mission 3; tôi tự sửa Câu 1 của Mission 3.
+  [AI] Đối chiếu thẻ của tình huống 18 và 19 trong tệp kết quả; câu hỏi chép nguyên văn từ đề.
+- **Claude Opus 5.5 (Pi), Claude Sonnet 5.5 (Pi):** kịch bản video Mission 2 và Mission 3.
+  [AI] Số liệu lấy từ README và lần chạy; đếm âm tiết để giữ dưới 5 phút.
+- **DeepSeek V4.1 Flash (opencode):** sửa script đọc lịch sử phiên để thấy cả phiên trong worktree và phiên opencode, nhờ đó nhật ký này đối chiếu được với lịch sử thật.
+  [AI] Số phiên tìm thấy tăng từ 82 lên 119; test xác nhận cơ sở dữ liệu của opencode không bị đổi. [#84]
+
+## Những lần tôi bác bỏ hoặc đổi hướng AI
+
+1. Claude đề xuất đo độ phủ ngữ cảnh (context recall) ngay ở Mission 2; tôi hoãn: "it is too soon to measure recall in this mission and we should defer this. Revisit when we have real document." [#12, ADR 0007]
+2. Kế hoạch Mission 1 chạy mỗi tình huống 3 lần; ở Mission 2 tôi đổi thành 1 lần vì giới hạn lượt gọi Gemini, rồi ở Mission 3 yêu cầu chạy lại 3 lần: "run each test cases three times, record that". [ADR 0006, docs/mission3/runs.md]
+3. Claude đưa nút "Báo sai" và trang cho chủ sở hữu văn bản vào kế hoạch demo; tôi bỏ: "it add little value to mission 2", "drop the page too, we will revisit later". [ADR 0004]
+4. Claude khuyên chọn thay đổi về hiệu lực làm thay đổi lớn nhất của Mission 3; tôi chọn câu trả lời của AI trên đoạn trích đã kiểm, cùng việc AI báo mâu thuẫn: "It is the biggest behavior change, and the fact that LLM also can flag conflicts is good also". [#75, #87]
+5. AI sửa bằng code trường hợp quyền xem che mất một mâu thuẫn; tôi bác: "đây là lỗi của metadata nên hệ thống không cần sửa cho trường hợp này", và phần code đó được gỡ. [PR #92, ADR 0015]
+6. Tôi yêu cầu viết lại tài liệu cho giám khảo vì AI dùng quá nhiều mã nội bộ: "only use the jargon or internal terms when we really need it ... especially the ADRs". [22/10]
+
+## Lỗi của AI đã phát hiện và sửa
+
+1. Schema câu trả lời đặt ràng buộc sai chỗ nên Gemini không thể trả "không tìm thấy", và một test còn khóa đúng lỗi đó; Claude phát hiện khi thử các mô hình. [#40]
+2. Thẻ trả lời hiện câu do AI viết chưa qua kiểm tra; AI trích đúng một chữ "ngày" vẫn qua bước kiểm. [#47]
+3. Văn bản người hỏi không được xem làm quy chế cũ của Tập đoàn quay lại. [#48]
+4. Bộ nhớ đệm câu trả lời không có ngày hỏi trong khóa nên có thể trả câu trả lời của ngày khác, và còn lưu cả câu trả lời bị từ chối vì lỗi mô hình; phát hiện khi lập kế hoạch. [#83, #96]
+5. Tài liệu ghi sai: ADR 0016 nói tài khoản được nạp lại ở mỗi yêu cầu, trong khi code chỉ nạp một lần lúc khởi động; README và bảng kết quả ghi sai chủ đề của tình huống 19. [22/10]
+6. Bảng khoảng trống gọi lần chạy đầu trên code Mission 3 là lần chạy Mission 2, và ghi "đã đọc 7/7" cho nhầm lần chạy. [21/10]
+7. Bản nháp trang Mission 3 mô tả chưa đúng kết quả của bản Mission 2 với câu hỏi về hạn chót (thực tế trả lời 2/4 lần) và bỏ sót việc AI còn được báo mâu thuẫn; subagent kiểm số liệu phát hiện. [23/10]
+8. Chính nhật ký này: script đọc lịch sử phiên bỏ sót phiên trong worktree và phiên opencode (sửa ở #84); 5 dòng Mission 3 ghi nhầm công cụ là Claude Code trong khi là Pi, đã sửa ngày 23/10 sau khi đối chiếu với script.
+
+## Phiên AI không định hình nội dung
+
+Các phiên dưới đây không đổi tệp nào của dự án và không tạo nội dung bài nộp; liệt kê để nhật ký đầy đủ.
+
+- **Agnes 2.5 Flash (Pi), 8 phiên từ 20/10 đến 23/10:** giải thích khái niệm trong tài liệu (ví dụ `session_secret`, mâu thuẫn bị quyền xem che), tìm nhánh Mission 2 trên GitHub, cách gỡ opencode.
+- **opencode, 10 phiên từ 21/10 đến 23/10, chủ yếu DeepSeek V4.1 Flash:** đọc một issue, hỏi giải thích, liệt kê các cảnh dự định của video trong chat, hoặc chỉ có "hi"; một phiên ngày 23/10 dùng thêm GLM 5.3 Flash và OpenRouter stealth/ox-alpha.
+- **Claude Code, 21/10:** một phiên chỉ có "hi".
+- **Claude qua Pi:** các phiên chỉ hỏi đáp, ví dụ hỏi tiến độ (21/10), hỏi kết quả lần chạy mới nhất và yêu cầu kiểm thử của đề (22/10), hỏi hai loại thẻ mâu thuẫn có phân biệt được không (22/10 và 23/10), và một lượt kiểm nhật ký bị dừng giữa chừng (23/10).
+
+<div style="page-break-before: always"></div>
+
+# Phụ lục A - Nhật ký Mission 1
+
+Phụ lục này giữ nhật ký Mission 1 như bản đã nộp ngày 08/10 (`docs/mission1/submitted/`), cộng các dòng kiểm chứng tôi tự làm ngày 15/10 và đường dẫn đã rút gọn.
+Khung A1 để trống như trong bản đã nộp; tuyên bố trách nhiệm hiện hành ở đầu trang.
 
 Nhật ký gồm hai phần.
 Phần A tóm tắt việc dùng AI: ai làm gì, tôi đã bác bỏ hoặc đổi những gì, và dữ kiện nào đã được kiểm chứng.
 Phần B ghi từng lần dùng AI theo thời gian, kèm prompt nguyên văn, đầu ra, quyết định của tôi và cách xác minh.
 
-# Phần A - Tóm tắt
+## Phần A - Tóm tắt
 
-## A1. Tuyên bố trách nhiệm
+### A1. Tuyên bố trách nhiệm
 
 > **[Hiệp tự viết, 4-6 câu, rồi xoá khung gợi ý này.]**
 > Gợi ý các ý nên có, không phải câu chữ:
@@ -18,7 +169,7 @@ Phần B ghi từng lần dùng AI theo thời gian, kèm prompt nguyên văn, �
 > - Tôi giải thích được và chịu trách nhiệm cho mọi câu trong bài nộp.
 > - Dữ liệu đều là giả lập; tôi không đưa dữ liệu thật hay dữ liệu cá nhân cho AI.
 
-## A2. Công cụ
+### A2. Công cụ
 
 | Công cụ | Mô hình | Dùng để | Mục |
 |---|---|---|---|
@@ -35,7 +186,7 @@ Phần B ghi từng lần dùng AI theo thời gian, kèm prompt nguyên văn, �
 Không subagent nào trả về nội dung, và phiên không đổi file nào (mục 29).
 Ngoài các công cụ trên, tôi không dùng công cụ AI nào khác cho Mission 1.
 
-## A3. Nguồn gốc từng phần bài nộp
+### A3. Nguồn gốc từng phần bài nộp
 
 Câu chữ của mọi phần do Claude viết; tôi review, yêu cầu sửa và duyệt bản cuối.
 Bảng dưới tách ý của tôi với đề xuất của AI mà tôi duyệt.
@@ -50,7 +201,7 @@ Bảng dưới tách ý của tôi với đề xuất của AI mà tôi duyệt.
 | 3 câu trả lời | Gửi lại bản đầu vì dài, lập luận về phương án khác và dùng thuật ngữ nội bộ (mục 33); duyệt các chỗ sửa sau review của ChatGPT và Gemini (mục 36) | Bản nháp và các chỗ sửa (mục 33, 36) | Số từ: 115 / 146 / 130 |
 | Dữ liệu giả lập | Giữ trạng thái "dự thảo / đã ban hành" sau khi hỏi và xác nhận đây là giả định của chúng tôi; nêu tình huống hai văn bản cùng chủ đề không mâu thuẫn (mục 14) | 10 văn bản, persona, các bẫy, lần vết câu hỏi của nhân viên GameCo (mục 14-19) | Script dùng chính bảng dữ liệu này |
 
-## A4. Những lần tôi bác bỏ hoặc đổi hướng AI
+### A4. Những lần tôi bác bỏ hoặc đổi hướng AI
 
 1. Bác bỏ đề xuất dùng LLM đọc hai đoạn văn bản để xác nhận có mâu thuẫn hay không, vì AI có thể ảo giác và nói "không mâu thuẫn"; chuyển cho người thật (mục 4).
    Đây là gốc của Quyết định 1 ở Phần 4.
@@ -64,7 +215,7 @@ Bảng dưới tách ý của tôi với đề xuất của AI mà tôi duyệt.
 9. Không duyệt bản đầu của 3 câu trả lời và gửi lại kèm nhận xét cụ thể (mục 33).
 10. Dừng Phase 2 sớm vì các bước sau không thêm giá trị cho bài nộp (mục 14).
 
-## A5. Lỗi của AI đã phát hiện và sửa
+### A5. Lỗi của AI đã phát hiện và sửa
 
 - Script kiểm tra luật cho thấy bộ luật ban đầu sai: khi bản 3 có hiệu lực, bản 1 "sống lại"; khi Tập đoàn ra bản mới, mọi nhân sự GameCo nhận cảnh báo mâu thuẫn (mục 15).
 - Bản đầu của bước kiểm tra lúc đăng văn bản bỏ sót ngày hết hiệu lực; Claude sửa và chạy lại (mục 18).
@@ -73,7 +224,7 @@ Bảng dưới tách ý của tôi với đề xuất của AI mà tôi duyệt.
 - Lý do "chưa làm" ở Câu 2 ban đầu sai, vì hệ thống nhân sự quyết định đơn vị của người hỏi; ChatGPT phát hiện, đã sửa (mục 36).
 - Chính nhật ký này: 3 khẳng định sai về việc ai làm gì, 1 phiên bị bỏ sót và 1 mô hình bị thiếu (sửa ở mục 20); các mục 30-36 ghi nhầm công cụ là Claude Code trong khi là Pi, và thiếu 4 phiên phụ (sửa ở mục 37).
 
-## A6. Kiểm chứng dữ kiện trong bài nộp
+### A6. Kiểm chứng dữ kiện trong bài nộp
 
 **[Tôi]** tôi tự kiểm; **[AI]** AI kiểm bằng script hoặc đối chiếu file, tôi chưa tự kiểm lại.
 
@@ -93,7 +244,7 @@ Giới hạn đã biết:
 - Tài liệu 5 trang chỉ được review bởi mô hình cùng họ với mô hình viết nháp (Claude, mục 29); ChatGPT và Gemini chỉ đọc tài liệu để đối chiếu với 3 câu trả lời.
 - Nhận định trong Phần 1 và Phần 4 về cách naive RAG hoặc phương án B có thể sai là suy luận trên dữ liệu giả lập, chưa đo; tài liệu ghi "dễ xếp", không đưa con số.
 
-## A7. Dữ liệu và quyền riêng tư
+### A7. Dữ liệu và quyền riêng tư
 
 Mọi đơn vị, nhân sự, văn bản và con số trong bài nộp là giả lập.
 Prompt gửi cho AI chỉ chứa đề bài, ghi chú của tôi và dữ liệu giả lập; tôi không gửi dữ liệu thật của Appota hay dữ liệu cá nhân cho công cụ AI nào.
@@ -101,9 +252,9 @@ Prompt gửi cho AI chỉ chứa đề bài, ghi chú của tôi và dữ liệu
 
 <div style="page-break-before: always"></div>
 
-# Phần B - Nhật ký chi tiết
+## Phần B - Nhật ký chi tiết
 
-## Cách lập nhật ký này
+### Cách lập nhật ký này
 
 - Nhật ký bắt đầu lúc 13:59 ngày 07/10 với prompt "First add today's AI use to the evidence log."
   Sau đó, cuối mỗi phiên, Claude ghi nháp mục mới.
@@ -120,7 +271,7 @@ Prompt gửi cho AI chỉ chứa đề bài, ghi chú của tôi và dữ liệu
   T1-T11 là các bẫy trong dữ liệu giả lập.
   P, S, L là 3 quyết định ở Phần 4 của tài liệu: P là Quyết định 1 (ai chọn văn bản thắng), S là Quyết định 2 (tìm văn bản cho câu hỏi bằng cách nào), L là Quyết định 3 (ai dùng trước); R (từ chối hay trả lời kèm cảnh báo) bị thay bằng L ở mục 21.
 
-## Nhãn kiểm chứng
+### Nhãn kiểm chứng
 
 - **[Tôi]** tôi tự kiểm chứng; ghi rõ cách.
 - **[AI]** AI kiểm chứng (chạy script, mở nguồn, đếm trang); tôi chưa tự kiểm lại.
@@ -130,7 +281,7 @@ Prompt gửi cho AI chỉ chứa đề bài, ghi chú của tôi và dữ liệu
 
 Trước khi nộp, mỗi mục [Chưa] phải được làm xong, hoặc dữ kiện liên quan bị bỏ khỏi bài nộp và chuyển thành [Không dùng].
 
-## Phiên AI không định hình nội dung bài nộp
+### Phiên AI không định hình nội dung bài nộp
 
 Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc thay đổi nội dung bài nộp.
 
@@ -157,9 +308,9 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **08/10, 12:47-12:56, Claude Opus 5.5:** lần chạy đầu của prompt review "người đọc mới", bị ngắt; Pi tự khởi chạy subagent với các mô hình khác (xem mục 29); không có đầu ra nào được dùng.
 - **08/10, 15:34-15:48, Claude Opus 5.5:** hỏi kế hoạch viết lại đã xong chưa ("is docs/mission1/redraft_plan.md done ?") và commit ("commit"); không đổi nội dung.
 
-## Các mục định hình nội dung
+### Các mục định hình nội dung
 
-### 1. Nghiên cứu cuộc thi và lập kế hoạch Mission 1
+#### 1. Nghiên cứu cuộc thi và lập kế hoạch Mission 1
 
 - **Thời gian:** 09:44.
 - **Công cụ:** Claude Opus 5.5 qua Pi, có tìm kiếm web.
@@ -177,7 +328,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Danh sách công ty thành viên của Appota và lộ trình NextGen.
   - Ghi chú: toàn bộ dữ liệu tổ chức và persona (GameCo, PayCo, AdsCo, Lan, Minh, Hà, An) là giả lập, không dùng dữ liệu thật của Appota.
 
-### 2. Sổ tay bài tập tư duy (thinking workbook)
+#### 2. Sổ tay bài tập tư duy (thinking workbook)
 
 - **Thời gian:** 11:37 đến 13:48.
 - **Công cụ:** Claude Opus 5.5 qua Pi, skill Lavish để tạo trang HTML tương tác, có tìm kiếm web.
@@ -195,7 +346,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Điều 118-119, Luật 91/2025/QH15 và nguồn pre-mortem: bài nộp không dẫn các nguồn này.
   - Ghi chú: các con số minh họa trong sổ tay (điểm tương đồng khi tìm kiếm, số liệu Hệ thống A/B) chỉ dùng để luyện tư duy, không đưa vào bài nộp như dữ liệu thật.
 
-### 3. Phản biện câu trả lời và chốt quyết định
+#### 3. Phản biện câu trả lời và chốt quyết định
 
 - **Thời gian:** 13:48.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -207,7 +358,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   Phần mở rộng trong đó (ví dụ thứ bậc loại tài liệu, quan hệ `complements`, điều kiện đổi ý) là đề xuất của Claude mà tôi duyệt chung ở mục 4.
 - **Xác minh:** không có dữ kiện cần kiểm chứng; đây là thảo luận và quyết định.
 
-### 4. Bản nháp do AI viết cho các phần còn thiếu
+#### 4. Bản nháp do AI viết cho các phần còn thiếu
 
 - **Thời gian:** 13:48-14:14.
 - **Trạng thái:** bản nháp tài liệu dựa trên các mục này đã được thay bằng bản viết lại (mục 10 trở đi); phần còn dùng được ghi lại thành quyết định trong `decisions.md`.
@@ -230,7 +381,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Duyệt]** Toàn bộ bản nháp và 7 đề xuất.
   - **[Không dùng]** Bản nháp này đã được thay; lý do của các quyết định còn dùng được viết lại ở mục 22 và tôi review qua các mục 26-34.
 
-### 5. Bản nháp 3 câu hỏi bắt buộc
+#### 5. Bản nháp 3 câu hỏi bắt buộc
 
 - **Thời gian:** từ 14:14.
 - **Trạng thái:** đã được thay bằng bản viết lại ở Phase 6 (mục 33).
@@ -243,7 +394,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Câu 3 đã sửa theo quyết định của tôi (không dùng AI để phán xét mâu thuẫn).
   - **[Không dùng]** Bản nháp này đã được thay bằng bản viết lại ở mục 33; kiểm chứng bản nộp ở mục 33, 36 và Phần A6.
 
-### 6. Bản nháp tài liệu 5 trang
+#### 6. Bản nháp tài liệu 5 trang
 
 - **Thời gian:** từ 14:14.
 - **Trạng thái:** đã được thay bằng bản viết lại (mục 10 trở đi).
@@ -255,7 +406,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Xuất PDF và đếm trang bằng script: 5 trang (bản đầu 7 trang; đã đổi sơ đồ sang chiều ngang, gộp bảng để vừa giới hạn).
   - **[AI]** Kiểm tra từng trang bằng ảnh chụp: dấu tiếng Việt hiển thị đúng, bảng không tràn, chữ trong sơ đồ đọc được.
 
-### 7. Prompt cho AI review độc lập
+#### 7. Prompt cho AI review độc lập
 
 - **Thời gian:** 14:51.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -267,7 +418,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Bản nháp được review đã bị thay toàn bộ.
   - Giới hạn: review khác họ mô hình chỉ được làm cho 3 câu trả lời (mục 35-36); tài liệu 5 trang chỉ có review cùng họ (mục 29).
 
-### 8. Cập nhật theo tiêu chí chấm và yêu cầu nộp bài mới trong đề
+#### 8. Cập nhật theo tiêu chí chấm và yêu cầu nộp bài mới trong đề
 
 - **Thời gian:** 14:44-15:14.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -284,7 +435,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đối chiếu nội dung cập nhật với nguyên văn đề trong `docs/competition/mission1_brief.md`.
   - **[AI]** Trường "Quyết định của tôi" của các mục 1, 2, 6, 7 được Claude điền ở mục 37 theo lịch sử phiên; tôi kiểm khi đọc lại nhật ký (mục 20).
 
-### 9. Review bản nháp theo `review_prompt.md`
+#### 9. Review bản nháp theo `review_prompt.md`
 
 - **Thời gian:** 15:31-15:49.
 - **Công cụ:** Claude Opus 5.5 qua Pi, có tìm kiếm web.
@@ -305,7 +456,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Các dữ kiện pháp lý trên: bài nộp không dẫn luật.
   - Giới hạn: không chạy lại trên AI khác họ (mục 7).
 
-### 10. Tóm tắt review và kế hoạch viết lại
+#### 10. Tóm tắt review và kế hoạch viết lại
 
 - **Thời gian:** 17:09-17:16.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -318,7 +469,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[Không dùng]** Bản nháp được review đã bị thay toàn bộ; các review sau ở mục 29 và 36.
 
-### 11. Phase 0 - Chốt khung bài (F1-F5)
+#### 11. Phase 0 - Chốt khung bài (F1-F5)
 
 - **Thời gian:** 17:26-17:39.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -333,7 +484,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - F4: Claude giải thích bức tranh tổng thể các quyết định; tôi tự chọn R (từ chối hay trả lời kèm cảnh báo) và S (cách tìm kiếm), cùng P (đề xuất của Claude); tạm thời, có thể đổi trong Phase 1-3.
 - **Xác minh:** không có dữ kiện cần kiểm chứng; nguồn gốc từng quyết định được ghi trong `decisions.md`.
 
-### 12. Phase 1 - Mô hình lõi (M0-M8) và phác thảo dữ liệu
+#### 12. Phase 1 - Mô hình lõi (M0-M8) và phác thảo dữ liệu
 
 - **Thời gian:** 17:47-18:29.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -355,7 +506,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude phân loại nguồn gốc từng phần mô hình (đề bài, thực tế phổ biến, giả định của chúng tôi) theo nguyên văn đề bài.
   - Lần vết câu hỏi của Minh: xem mục 14.
 
-### 13. Prompt cho Phase 2 (dữ liệu giả lập và lần vết)
+#### 13. Prompt cho Phase 2 (dữ liệu giả lập và lần vết)
 
 - **Thời gian:** 19:20-19:26.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -368,7 +519,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   Khi chạy prompt ở mục 14, tôi đổi ý và giao bước này cho AI.
 - **Xác minh:** prompt đã được chạy ở mục 14.
 
-### 14. Chạy Phase 2: bẫy, persona, tài liệu giả lập và lần vết của Minh
+#### 14. Chạy Phase 2: bẫy, persona, tài liệu giả lập và lần vết của Minh
 
 - **Thời gian:** 19:25-20:18 và 21:58.
 - **Công cụ:** Claude Sonnet 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -401,7 +552,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Tôi]** Tôi đọc từng dòng bản lần vết cuối (7 bước, mục 19) và tự giải thích được, để chuẩn bị vòng PITCH. (làm xong 15/10/2026)
     Sổ quyết định (A7) và tiêu đề bản lần vết đang ghi "Hiep checked every row"; câu này chỉ đúng sau khi tôi làm xong bước này.
 
-### 15. Rà soát mô hình lõi theo thực tế vận hành
+#### 15. Rà soát mô hình lõi theo thực tế vận hành
 
 - **Thời gian:** 20:24-20:47.
 - **Công cụ:**
@@ -427,7 +578,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Nguồn S1-S10: bài nộp không dẫn nguồn web.
     2 script này là lịch sử; script đang dùng (`adopted_rules.py`) được kiểm ở Phần A6.
 
-### 16. Áp dụng P1-P3 vào dữ liệu giả lập và giải thích `covers`
+#### 16. Áp dụng P1-P3 vào dữ liệu giả lập và giải thích `covers`
 
 - **Thời gian:** 20:47-21:07.
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -446,7 +597,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude tự sửa 2 đề xuất của chính nó trong quá trình làm: bỏ trạng thái `withdrawn` (trùng với `effective_to`) và sửa nhận định "gắn khóa cho cả văn bản là đủ cho MVP" (cần gắn theo từng Điều).
   - Lần vết của Minh: xem mục 14.
 
-### 17. Thảo luận luật mâu thuẫn và quy trình thực tế trong sản phẩm
+#### 17. Thảo luận luật mâu thuẫn và quy trình thực tế trong sản phẩm
 
 - **Thời gian:** 21:07-21:37.
 - **Công cụ:**
@@ -467,7 +618,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Lượt kiểm tra thứ hai của Agnes loại 2 trích dẫn không có trên trang (Microsoft Copilot, Azure AI Search) và đánh dấu nguồn ServiceNow là yếu vì không tải được trang gốc.
   - **[Không dùng]** Nguồn S11-S19: bài nộp không dẫn nguồn web.
 
-### 18. Áp dụng `complements`, kiểm tra lúc đăng tài liệu và bẫy T11
+#### 18. Áp dụng `complements`, kiểm tra lúc đăng tài liệu và bẫy T11
 
 - **Thời gian:** 21:37-21:56.
 - **Công cụ:** Claude Opus 5.5 qua Pi; phần cuối (đổi `complements` thành danh sách, chạy lại script, ghi M16-M17) do Claude Sonnet 5.5. Không dùng tìm kiếm web.
@@ -490,7 +641,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** `adopted_rules.py` cho đúng kết quả với 3 persona, các kịch bản phiên bản và T11 (khai báo thì trả lời, không khai báo thì báo mâu thuẫn); script thử cho thấy tài liệu thứ ba cần khai báo cả hai chuỗi mới hết mâu thuẫn.
   - Lần vết của Minh: xem mục 14.
 
-### 19. Rà soát tiến độ, rút gọn Phase 2 và bỏ bước chọn chủ đề cho câu hỏi
+#### 19. Rà soát tiến độ, rút gọn Phase 2 và bỏ bước chọn chủ đề cho câu hỏi
 
 - **Thời gian:** 23:22-23:51.
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -516,7 +667,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - Giới hạn: script giả lập bước 5-6 (retriever và LLM) bằng một hàm thay thế, nên chưa kiểm tra được LLM thật có trích dẫn đúng hay không; việc này để Mission 2.
   - Lần vết của Minh: xem mục 14.
 
-### 20. Best practice cho nhật ký và đối chiếu nhật ký với lịch sử phiên
+#### 20. Best practice cho nhật ký và đối chiếu nhật ký với lịch sử phiên
 
 - **Thời gian:** từ 23:28.
 - **Công cụ:** Claude Opus 5.5 qua Pi, có tìm kiếm web.
@@ -535,7 +686,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude mở trực tiếp trang của 3 khung tham khảo (trang hướng dẫn AID Framework của University of Waterloo, blog IBM Research, tóm tắt trên arXiv) trước khi dẫn.
   - **[Tôi]** Tôi đọc lại toàn bộ nhật ký đã sửa và xác nhận phần đề bài trong `docs/competition/` do tôi tự sao chép từ portal. (làm xong 15/10/2026)
 
-### 21. Phase 3 - Chọn lại 3 quyết định cho phần 4
+#### 21. Phase 3 - Chọn lại 3 quyết định cho phần 4
 
 - **Thời gian:** 00:00-00:15, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -553,7 +704,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Duyệt]** Tôi đọc lập luận và đồng ý; không có dữ kiện bên ngoài cần kiểm chứng.
   - Giới hạn đã ghi trong F4r: Mission 2 chỉ kiểm tra được điều kiện tiên quyết của L, tín hiệu thật (tỷ lệ "Báo sai") cần thí điểm.
 
-### 22. Phase 3 - Bản nháp lập luận A-vs-B cho P, S, L
+#### 22. Phase 3 - Bản nháp lập luận A-vs-B cho P, S, L
 
 - **Thời gian:** sau mục 21, cùng phiên, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -566,7 +717,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Bản nháp này được đưa vào Phần 4 và tôi review ở các mục 30, 31, 34.
   - Ví dụ câu hỏi chạm hai chủ đề còn trong Phần 4 dưới dạng suy luận, chưa đo (Phần A6).
 
-### 23. Phase 4 - Bản nháp kiểm chứng và MVP
+#### 23. Phase 4 - Bản nháp kiểm chứng và MVP
 
 - **Thời gian:** 00:11-00:20 và 07:48-07:55, ngày 08/10 (phiên bị ngắt giữa chừng, tiếp tục bằng "continue").
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -586,7 +737,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Không dùng]** Cận trên 9,5% cho "0 lỗi trên 30 ca" (công thức 1 - 0,05^(1/30), Claude tính bằng Python): đã bỏ khỏi bài nộp ở mục 31.
   - **[Không dùng]** Bảng test 10 dòng không còn trong bài nộp (mục 31); bài nộp chỉ nêu năm tình huống test bằng lời.
 
-### 24. Phase 5 - Bản nháp tài liệu 5 trang
+#### 24. Phase 5 - Bản nháp tài liệu 5 trang
 
 - **Thời gian:** 08:00-08:30, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi. Không dùng tìm kiếm web.
@@ -607,7 +758,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Tôi]** Tôi review bản nháp qua 4 đợt ghi chú (mục 26, 28, 31, 32) và mục 34; V1-V7 được duyệt ở mục 25; câu chữ vẫn do Claude viết.
   - **[Tôi]** Xác nhận câu chữ của ba thẻ kết quả (A8) và việc giao Claude viết nháp (A11), hai dòng còn ghi "chờ tôi xác nhận" trong sổ quyết định. (làm xong 15/10/2026)
 
-### 25. Phase 4 - Duyệt bộ test, chỉ số và kế hoạch 3 ngày
+#### 25. Phase 4 - Duyệt bộ test, chỉ số và kế hoạch 3 ngày
 
 - **Thời gian:** 09:38-11:44, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -622,7 +773,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude chạy lại `adopted_rules.py` trước khi tóm tắt: 10/10 dòng phần luật đạt.
   - **[Tôi]** Đọc bản tóm tắt và các phản biện, duyệt từng mục.
 
-### 26. Phase 5 - Review bằng Lavish và bản nháp thứ hai
+#### 26. Phase 5 - Review bằng Lavish và bản nháp thứ hai
 
 - **Thời gian:** 11:48-12:37, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú trực tiếp lên tài liệu, không sinh nội dung.
@@ -642,7 +793,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude render lại (5 trang), xem ảnh từng trang, kiểm tra không còn dấu gạch dài và ký hiệu nội bộ; các con số không đổi so với bản đầu.
   - **[Tôi]** Tôi review bản nháp thứ hai qua các đợt ghi chú ở mục 28, 31, 32 và mục 34; câu chữ vẫn do Claude viết.
 
-### 27. Phase 5 - Prompt review "người đọc mới"
+#### 27. Phase 5 - Prompt review "người đọc mới"
 
 - **Thời gian:** 12:37, phần bổ sung lúc 12:45, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -654,7 +805,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - Prompt được chạy trên Claude ở mục 29.
   - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
-### 28. Phase 5 - Ghi chú review đợt 2 và chỉnh sửa
+#### 28. Phase 5 - Ghi chú review đợt 2 và chỉnh sửa
 
 - **Thời gian:** 12:39-12:42, ngày 08/10 (lần gửi nhầm lúc 12:38 ở mục "Phiên AI không định hình nội dung bài nộp").
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -665,7 +816,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Claude render lại (5 trang), xem ảnh trang 2 và 5, kiểm tra không còn tên riêng, "bộ quy định" hay dấu gạch dài.
   - **[Tôi]** Tôi đọc lại bản đã sửa trong đợt review 3 (mục 31).
 
-### 29. Phase 5 - Chạy prompt review "người đọc mới" (cùng họ mô hình)
+#### 29. Phase 5 - Chạy prompt review "người đọc mới" (cùng họ mô hình)
 
 - **Thời gian:** 12:47-13:07, ngày 08/10.
 - **Công cụ:** Claude Code (CLI), mô hình Claude Opus 5.5, từ 12:57.
@@ -683,7 +834,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Tôi]** Đọc bản tóm tắt kết quả và chọn mục cần sửa (mục 30).
   - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
-### 30. Phase 5 - Quyết định và chỉnh sửa sau review "người đọc mới"
+#### 30. Phase 5 - Quyết định và chỉnh sửa sau review "người đọc mới"
 
 - **Thời gian:** 13:25-14:04, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -705,7 +856,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Tôi]** Tôi đọc lại bản đã sửa trong đợt review 3, đổi Phần 4 thành bảng (mục 31) và xem lại quyết định 2 (mục 34).
   - Giới hạn: không chạy lại trên mô hình khác họ (Phần A6).
 
-### 31. Phase 5 - Ghi chú review đợt 3 và chỉnh sửa
+#### 31. Phase 5 - Ghi chú review đợt 3 và chỉnh sửa
 
 - **Thời gian:** 14:04-15:18, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi; Lavish (`lavish-axi`, chạy cục bộ) chỉ để tôi ghi chú lên tài liệu.
@@ -724,7 +875,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Render PDF đúng 5 trang, xem ảnh từng trang; kiểm tra không còn "retrieval", "generation", "kế toán PayCo", "thí điểm", "30 ca", "9,5%" và dấu gạch dài.
   - **[Tôi]** Tôi đọc lại Phần 5 và gửi thêm ghi chú (mục 32), đọc lại quyết định 2 ở Phần 4 (mục 34).
 
-### 32. Phase 5 - Chỉnh sửa đợt 4 trong chat
+#### 32. Phase 5 - Chỉnh sửa đợt 4 trong chat
 
 - **Thời gian:** 15:18-15:28, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -734,7 +885,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
 - **Xác minh:**
   - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 5.
 
-### 33. Phase 6 - Viết lại 3 câu hỏi bắt buộc
+#### 33. Phase 6 - Viết lại 3 câu hỏi bắt buộc
 
 - **Thời gian:** 14:56-15:40, ngày 08/10, trong một phiên Pi chạy song song với mục 31-32.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -755,7 +906,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đếm lại bằng script: Câu 1 = 114, Câu 2 = 134, Câu 3 = 130 từ; kiểm tra không còn thuật ngữ nội bộ và dấu gạch dài.
   - **[Duyệt]** Tôi duyệt cả 3 câu của bản thứ hai ngày 08/10 (prompt: "approve the answers").
 
-### 34. Phase 5 - So sánh phương án cho quyết định 2 và sửa cột quyết định 2
+#### 34. Phase 5 - So sánh phương án cho quyết định 2 và sửa cột quyết định 2
 
 - **Thời gian:** 15:28-15:47, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -771,7 +922,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Render PDF đúng 5 trang, xem ảnh trang 4 và 5.
   - Chuẩn bị PITCH: tôi tự trình bày lại so sánh A và B của quyết định 2 bằng lời của mình.
 
-### 35. Phase 6 - Prompt review độc lập cho 3 câu trả lời (mô hình khác họ)
+#### 35. Phase 6 - Prompt review độc lập cho 3 câu trả lời (mô hình khác họ)
 
 - **Thời gian:** 15:51, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -784,7 +935,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Script kiểm tra 3 câu hỏi khớp nguyên văn đề bài và số từ 114 / 134 / 130; dấu gạch dài trong tiêu đề đề bài được đổi thành gạch thường.
   - Prompt được chạy ở mục 36.
 
-### 36. Phase 6 - Kết quả review độc lập 3 câu trả lời (ChatGPT, Gemini)
+#### 36. Phase 6 - Kết quả review độc lập 3 câu trả lời (ChatGPT, Gemini)
 
 - **Thời gian:** 19:48-20:13, ngày 08/10.
 - **Công cụ:** ChatGPT web (mô hình `gpt-5-6-t-mini`, đọc từ dữ liệu trang chia sẻ) và Gemini web (Gemini 3 Pro, chưa chắc chắn); Claude Opus 5.5 qua Pi tải và tổng hợp kết quả.
@@ -799,7 +950,7 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[AI]** Đếm số từ bản đề xuất bằng script.
   - **[Duyệt]** Tôi duyệt bản sửa; số từ sau khi sửa: 115 / 146 / 130.
 
-### 37. Phase 7 - Best practice cho nhật ký, trang "thiết kế hiện tại" và hoàn thiện nhật ký
+#### 37. Phase 7 - Best practice cho nhật ký, trang "thiết kế hiện tại" và hoàn thiện nhật ký
 
 - **Thời gian:** 20:00-21:00, ngày 08/10.
 - **Công cụ:** Claude Opus 5.5 qua Pi, có tìm kiếm web.
@@ -829,13 +980,13 @@ Liệt kê để nhật ký đầy đủ; các phiên này không tạo hoặc t
   - **[Tôi]** Tôi đọc `current_design.md`, xác nhận từng dòng và 6 việc còn mở. (làm xong 15/10/2026)
   - **[Chưa]** Tôi viết tuyên bố trách nhiệm (Phần A1).
 
-## Mẫu cho các mục tiếp theo
+### Mẫu cho các mục tiếp theo
 
 Chạy `python tools/ai_sessions.py` để thấy mọi phiên của cả Pi và Claude Code và kiểm tra phiên nào chưa có mục; thêm `--since dd/mm` để chỉ xem từ một ngày.
 Chạy `python tools/ai_sessions.py --prompts HH:MM` để lấy nguyên văn prompt của phiên bắt đầu lúc HH:MM.
 
 ```
-### N. <Việc đã làm>
+#### N. <Việc đã làm>
 
 - **Thời gian:** <giờ theo lịch sử phiên>
 - **Công cụ:** <công cụ và mô hình>
@@ -848,7 +999,14 @@ Chạy `python tools/ai_sessions.py --prompts HH:MM` để lấy nguyên văn pr
 
 <div style="page-break-before: always"></div>
 
-# Mission 2
+<div style="page-break-before: always"></div>
+
+# Phụ lục B - Nhật ký chi tiết Mission 2 và Mission 3
+
+Mỗi dòng ghi tình trạng lúc viết.
+Chỗ "[chờ Hiệp]" là quyết định còn mở lúc đó; phần lớn đã được quyết sau trong issue, PR hoặc bản ghi quyết định tương ứng.
+
+## Mission 2
 
 Ghi như Phần B của Mission 1, với ba thay đổi rút ra từ Mission 1:
 
@@ -858,24 +1016,7 @@ Ghi như Phần B của Mission 1, với ba thay đổi rút ra từ Mission 1:
 
 Mục được đánh số M2.1, M2.2, ... để không trùng với Mission 1.
 
-## Tóm tắt Mission 2 (tạm; tôi rà lại trước khi nộp)
-
-| Công cụ | Mô hình | Dùng để | Ghi chú |
-|---|---|---|---|
-| Pi, qua claude-bridge | Claude Opus 5.5 | Kế hoạch triển khai đăng trên issue, nghiên cứu, ADR, README và tài liệu cho giám khảo, rà soát, kịch bản video | Phần lớn các dòng ghi chú bên dưới |
-| Pi, qua claude-bridge; Claude Code | Claude Sonnet 5.5 | Làm các issue #12, #34, #40, #41, #47, #48, #49 | Theo kế hoạch tôi đã duyệt trên issue |
-| Pi | modelscope/deepseek-ai/DeepSeek-V4-Pro-0813 | Viết code cho #9, #11, #13, #14 theo kế hoạch đã duyệt | Chạy trong Pi, không qua Claude |
-| Pi, qua subagent | Agnes 2.5 Flash (mức suy luận max) | Tìm web cho các bài nghiên cứu R2-R5 và mục M2.2; tôi chọn dùng Agnes để chạy nghiên cứu | Claude mở lại từng nguồn; các khẳng định không kiểm chứng được bị loại và ghi trong báo cáo |
-| Công cụ `web_search` (nhà cung cấp Exa, OpenAI) | Không | Tìm kiếm web trong mục M2.2 | Ghi tay, không có trong `ai_sessions.py` |
-| Gemini API | gemini-3.5-flash-lite (mức medium; trước đó gemini-3.8-flash), gemini-embedding-001 | Chạy trong sản phẩm ở bước 5-6; không dùng để viết bài nộp | Chọn mô hình theo #41 và ADR 0008 |
-| Lavish, Wispr Flow, Orca CLI | Không | Như Mission 1 | Không tạo nội dung |
-
-Cách kiểm chứng đã lặp lại ở Mission 2: chạy `python -m pytest` (229 passed, 2 xfailed ở lần chạy cuối), bẻ code để thấy test đỏ rồi hoàn, clone mới từ GitHub và chạy lại, chạy đánh giá thật 20261014-2239 với 18 hàng, và quét lịch sử git tìm khóa API.
-Điều AI soạn nháp và tôi duyệt: bản review faithfulness của lần chạy 20261014-2239 (dòng 15/10 09:17) và lý do của ADR 0009, 0010.
-Lỗi và giới hạn đã biết nằm trong issue có nhãn `limitation` (#24, #50, #51, #52, #53) và trong `docs/scope.md`.
-
-
-### M2.1. Sau khi nộp Mission 1: lưu bài nộp và chuẩn bị Mission 2
+#### M2.1. Sau khi nộp Mission 1: lưu bài nộp và chuẩn bị Mission 2
 
 - **Thời gian:** 21:33-21:50 ngày 08/10, tiếp tục lúc 13:36 ngày 10/10; cùng phiên với mục 37.
 - **Công cụ:** Claude Opus 5.5 qua Pi.
@@ -904,7 +1045,7 @@ Lỗi và giới hạn đã biết nằm trong issue có nhãn `limitation` (#24
   - **[Tôi]** Tôi xác nhận 3 ô trong `docs/mission1/submitted/README.md` (đúng file đã tải lên portal). (làm xong 15/10/2026)
   - **[Tôi]** Tôi đọc `mission1_promises.md` đối chiếu với PDF đã nộp. (làm xong 15/10/2026)
 
-### M2.2. Nghiên cứu cách viết nhật ký bằng chứng tốt nhất cho Mission 2
+#### M2.2. Nghiên cứu cách viết nhật ký bằng chứng tốt nhất cho Mission 2
 
 - **Thời gian:** 13:44-14:02 ngày 10/10.
 - **Công cụ:**
@@ -926,10 +1067,12 @@ Lỗi và giới hạn đã biết nằm trong issue có nhãn `limitation` (#24
   - **[AI]** Khi đối chiếu, Claude loại 4 khẳng định của subagent Agnes: thang điểm 10 điểm của Stanford CS230 (không có trên trang), các mức chấm của TEQSA (không tìm thấy, bản tóm tắt nói gần như ngược lại), cách diễn đạt của Monash, quy định về commit của ETHGlobal (không thấy trong trang đã mở).
   - **[AI]** Số liệu về nhật ký Mission 1 (16.850 từ, 45 nhãn [AI] so với 11 nhãn [Tôi], 15 dấu [Chưa]) đếm bằng `wc` và `grep` trên `docs/mission1/submitted/evidence_log.md`; số trang (28) lấy từ `docs/mission1/submitted/README.md`.
 
-## Ghi chú nhanh Mission 2
+## Ghi chú nhanh
 
 Mỗi phiên thay đổi dự án một dòng: thời gian, công cụ và mô hình, việc đã làm, quyết định của tôi, cách kiểm tra.
 Các dòng này do agent ghi theo quy tắc trong `AGENTS.md` và tôi duyệt khi merge PR liên quan; chúng giữ lại quyết định và cách kiểm tra.
+
+### Mission 2 (12/10-15/10)
 
 - 12/10, Claude Opus 5.5 (Pi): thêm quy tắc ghi chú một dòng mỗi phiên vào `AGENTS.md` và tạo mục này. Tôi chọn cách để agent tự ghi (phương án 2); kiểm bằng cách đọc lại quy tắc.
 - 12/10 19:33, Claude Opus 5.5 (Pi): tạo mẫu issue (báo lỗi, đề xuất thay đổi, việc tiếp theo) và mẫu PR trong `.github/`, dựa trên ghi chú mẫu của tôi trong DevBrain và đề Mission 2; thêm quy tắc dùng issue/PR vào `AGENTS.md`. Quyết định: [đã xử lý sau: xem PR đã merge]. Kiểm bằng cách đọc YAML bằng PyYAML (id và lựa chọn không trùng) và tìm dấu gạch dài.
@@ -1008,3 +1151,87 @@ Các dòng này do agent ghi theo quy tắc trong `AGENTS.md` và tôi duyệt k
 - 15/10 (tiếp phiên Pi 10:34), Claude Opus 5.5 (Pi, claude-bridge), không subagent: xóa dòng gemini-3.8-flash khỏi bảng Câu 2 trong README (lựa chọn của Mission 2, không phải thay đổi so với Mission 1), PR #67. Quyết định của Hiệp: 'delete the row for me'. Kiểm: đọc diff, pytest 232 passed 2 xfailed.
 - 15/10 12:53-13:32 (cùng phiên với dòng trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: sửa ba sơ đồ Mermaid trong README theo cách của PR #66 (nhãn chữ SVG, wrappingWidth 400, chữ đậm bằng nhãn Markdown, hai hàng để tránh nút zoom của GitHub; sơ đồ 'How it works' từ 1144px còn 414px), PR #68 (No issue - minor fix). Quyết định của Hiệp: làm trong PR riêng. Kiểm: render qua iframe Mermaid thật của GitHub ở Chrome, Firefox, Opera, nền sáng và tối; trang chủ thật của nhánh ở Chrome (README rộng 838px): đủ chữ, không ô nào bị nút zoom che; pytest 232 passed 2 xfailed.
 - 15/10 13:23-13:37 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: soạn bản nháp 1 kịch bản video Mission 2 bằng tiếng Việt, 8 cảnh theo thứ tự đề (bài toán, phần chọn, demo, tình huống khó, hạn chế), mỗi cảnh có mục tiêu, màn hình, lời đọc và chỗ cần Hiệp chọn; lưu ở build/video_script.md và build/video_script.docx (thư mục bị git bỏ qua, không commit), chuyển sang .docx bằng một script chỉ dùng thư viện chuẩn để ngoài repo. Quyết định của Hiệp: yêu cầu kịch bản chi tiết, có phân cảnh, dạng file doc để đọc khi quay; nội dung từng cảnh [chưa chốt tính đến 15/10; Hiệp chọn khi quay]. Kiểm: mọi con số và tình huống lấy từ README, data/test_cases.yaml, data/documents/ và đề Mission 2; đối chiếu cảnh 5 với issue #47 và sửa lời đọc vì câu trả lời "30 ngày" là câu tự dựng, không phải do mô hình viết; đếm âm tiết lời đọc (935, khoảng 4:40 ở 200 âm tiết/phút); mở file bằng Word (9 trang); tìm dấu gạch dài.
+- 15/10 (tiếp phiên Pi 10:34), Claude Opus 5.5 (Pi, claude-bridge), không subagent: thêm link video YouTube vào README thay VIDEO_URL, PR mới. Quyết định của Hiệp: gửi link video. Kiểm: oEmbed YouTube trả 200 (xem được không cần đăng nhập).
+- 15/10 16:17-16:30, Claude Opus 5.5 (Pi, claude-bridge), không subagent: kiểm tra cuối trước khi nộp (repo public, CI xanh, demo và banner mới, video 4:55, link tương đối, docs/evidence_log.md không lộ dữ liệu); mở PR sửa how_this_was_built.md (nhật ký đã công bố), ADR 0005 Accepted và đường dẫn mới, ADR 0006/0007 ghi đã duyệt khi merge PR #33/#28. Quyết định của Hiệp: 'Open PR'. Kiểm: pytest 232 passed 2 xfailed, kiểm link 48 tệp.
+- 15/10 16:24-16:30, Claude Opus 5.5 (Pi, claude-bridge), không subagent: xóa dòng ghi chú bản nháp trên 3 câu trả lời trong README (PR mới); ghi nhận PR #70 đã vô tình mang theo các thay đổi Hiệp đã stage (docs/evidence_log.md, link README, AGENTS.md, .gitignore). Quyết định của Hiệp: 'I've re-read the three answers so remove them now'. Kiểm: pytest 232 passed 2 xfailed; commit chỉ chứa README.md.
+- 13/10 09:30-11:30 (phiên Pi trong worktree simulated-data-as-files-reviewed-by-hiep; #84 thêm worktree vào scripts/ai_sessions.py nên phiên này mới hiện), Claude Opus 5.5 (Pi, claude-bridge), không subagent: rà PR #18 và bộ test cases Mission 2 đã đổi; chốt giữ bộ test cũ, gộp issue #10 vào PR #18, gộp trường situation và cách hỏi thành `expected_answer` (Hiệp chọn tên), giữ ID N1-N5, đưa evidence_log.md ra khỏi GitHub; sửa data/test_cases.yaml, tools/check_data.py, data/README.md. Quyết định của Hiệp: "approve", "I approve the remaining update", tự chọn tên trường, giữ N1-N5 [chờ Hiệp xác nhận]. Kiểm: PR #18 merge lúc 11:34; diff chỉ ba tệp; danh sách tệp và thời gian lấy từ scripts/ai_sessions.py.
+
+### Mission 3 (20/10-23/10)
+
+- 20/10 14:19-16:29, Claude Opus 5.5 (Pi, claude-bridge), không subagent: đọc đề Mission 3, đối chiếu 5 yêu cầu cải tiến chung với các limitation mở (#24, #50, #51, #52, #53) và thảo luận hướng đi; mở PR #72 thêm docs/competition/mission3_brief.md nguyên văn. Quyết định của Hiệp: bỏ qua Change Request vì chưa được giao; hướng tới MVP cho nhân viên thật, cân nhắc đổi ADR 0009 sang câu trả lời tự nhiên và thêm giao diện HR quản lý tài liệu, nhưng làm thiết kế hệ thống MVP trước; 'PR that for me'. Kiểm: diff PR chỉ 1 tệp; văn bản đề giữ nguyên như các đề trước.
+- 20/10 20:18-20:45 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: đọc docs/mvp_spec.md, đề xuất dàn ý tài liệu thiết kế hệ thống cho toàn bộ MVP (không chỉ Mission 3), rồi soạn bản nháp docs/system_design.md trên nhánh no-issue-system-design (2 commit, chưa push, chưa mở PR): bối cảnh, thiết kế tổng quan với nhãn Built/Changed/New so với v1, các luồng hỏi và ban hành, mô hình dữ liệu, phía chủ sở hữu, đăng nhập và phân quyền, lưu trữ, truy vết, bảo mật, đánh giá, 14 quyết định mở SD1-SD14 và bảng truy vết yêu cầu E1-S5. Quyết định của Hiệp: duyệt dàn ý và 5 khuyến nghị, sơ đồ tổng quan không ghi số bước; các quyết định SD1-SD14 [chờ Hiệp]. Kiểm: mọi mô tả v1 đối chiếu với mã nguồn (scope.py, citations.py, answerer.py, page.py, data_files.py, config.yaml) và ADR 0004; 6 sơ đồ Mermaid dựng được bằng mermaid-cli, sơ đồ tổng quan vẽ lại 3 lần cho dễ đọc; không có dấu gạch dài; pytest 232 passed 2 xfailed. Phát hiện ghi trong tài liệu: bảng Users của spec nói HR nhận câu hỏi chưa trả lời được nhưng không có yêu cầu nào; trang "Dữ liệu giả lập" hiện tên văn bản hạn chế, sẽ trái E4 khi có đăng nhập.
+- 20/10 20:45-21:10 (tiếp phiên Pi 20:18), Claude Opus 5.5 (Pi, claude-bridge), không subagent: sửa docs/system_design.md trên nhánh no-issue-system-design (commit mới, chưa push): thay mục 0 bằng bảng mục lục, bỏ mục mục tiêu và nguyên tắc (trỏ sang mvp_spec.md là nguồn yêu cầu) và mục bối cảnh hệ thống, vẽ lại thiết kế tổng quan thành 3 lưu đồ theo luồng nhân sự, chủ sở hữu văn bản, người đánh giá, phân biệt bằng hình dạng thay vì màu; đánh số lại mục và mọi tham chiếu chéo. Quyết định của Hiệp: yêu cầu các thay đổi trên; nội dung luồng tổng quan sẽ thảo luận tiếp [chờ Hiệp]. Kiểm: 7 sơ đồ Mermaid dựng được bằng mermaid-cli và xem ảnh từng lưu đồ (vẽ lại lưu đồ chủ sở hữu vì đường nối kho chồng chéo); in và đọc lại từng tham chiếu mục được đổi số; không có dấu gạch dài.
+- 20/10 21:10-21:55 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: thảo luận luồng hỏi đáp của nhân sự trong docs/system_design.md (câu trả lời bằng lời thay ADR 0009, mâu thuẫn theo nội dung mà metadata không phát hiện, có cần lớp kiểm câu trả lời và lệnh gọi mô hình thứ hai), rồi sửa tài liệu trên nhánh no-issue-system-design trong worktree riêng (commit d21fa71, chưa push): mục 2.2, 2.5, 2.6, 3.1, 3.6, 6.3, 6.4, 10.1, 11.2, 12, 14, 15, 16, 17 và phụ lục A. Quyết định của Hiệp: câu do mô hình viết đặt trên trích dẫn đã kiểm (không thay); không thêm lệnh gọi mô hình thứ hai, chỉ kiểm số và ngày bằng luật; không phát hiện mâu thuẫn lúc hỏi; quan hệ vẫn theo văn bản, không theo Điều; quét mâu thuẫn lúc ban hành để bàn ở luồng chủ sở hữu; ghi nhận giới hạn: mâu thuẫn nội dung bị bỏ sót cho thẻ trả lời, không bao giờ thẻ mâu thuẫn. Kiểm: đối chiếu với citations.py, prompt.py, scope.py, ADR 0003/0005/0008/0009/0010 và issue #50-#52; lưu đồ 2.2 và sơ đồ tuần tự 3.1 dựng được bằng mermaid-cli, xem ảnh lưu đồ; không có dấu gạch dài. ADR thay ADR 0009 và issue limitation chưa soạn [chờ Hiệp].
+- 20/10 21:55-22:00 (tiếp phiên Pi 21:10), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bỏ kiểm tra số và ngày (anchor check) khỏi docs/system_design.md và rút gọn nhãn lưu đồ 2.2, chuyển chi tiết xuống các gạch đầu dòng; gộp chỉ số "Sentence checks" vào Faithfulness (commit mới trên no-issue-system-design, chưa push). Quyết định của Hiệp: 'Remove it', yêu cầu không có kiểm tra nào được nêu trong spec; câu của mô hình không được kiểm lúc chạy, trích dẫn bên dưới và đọc tay khi đánh giá là chỗ dựa cho S1. Kiểm: grep không còn 'anchor'; lưu đồ 2.2 và sơ đồ 3.1 dựng được bằng mermaid-cli, xem ảnh lưu đồ; không có dấu gạch dài.
+- 20/10 22:00-22:07 (tiếp phiên Pi 20:18), Claude Opus 5.5 (Pi, claude-bridge), không subagent: docs/system_design.md trên nhánh no-issue-system-design (worktree, commit mới, chưa push): bỏ sơ đồ ER và bảng thực thể ở mục 4.1, thay bằng bảng thuật ngữ (văn bản, phiên bản, điều khoản, quan hệ) kèm ví dụ LEAVE-GAMECO; đổi tên mục 4 thành "Documents and versions"; thay "series" bằng "document" trong toàn tài liệu, trừ tên trường `series`. Quyết định của Hiệp: duyệt đề xuất bỏ sơ đồ và đổi thuật ngữ. Kiểm: đối chiếu ví dụ với data/ (4 bản cùng series LEAVE-GAMECO, bản 4 là draft); grep không còn "series" ngoài tên trường; không có dấu gạch dài; pytest 232 passed, 2 xfailed.
+- 20/10 22:07-22:15 (tiếp phiên Pi 20:18), Claude Opus 5.5 (Pi, claude-bridge), không subagent: docs/system_design.md trên nhánh no-issue-system-design (worktree, commit mới, chưa push): bỏ mục 2.5 Components và 2.6 What stays and what is added; trong luồng 3.1 và bảng lỗi 3.6 thay "Gemini" bằng "LLM" và "Embedder". Quyết định của Hiệp: yêu cầu các thay đổi này. Kiểm: sơ đồ 3.1 dựng được bằng mermaid-cli và đã xem ảnh; grep không còn tham chiếu đến 2.5, 2.6; không có dấu gạch dài.
+- 20/10 22:00-22:15 (tiếp phiên Pi 21:10), Claude Opus 5.5 (Pi, claude-bridge), không subagent: soạn và mở issue #75 (Change proposal: câu của mô hình đặt trên trích dẫn đã kiểm, thay ADR 0009; ghi các rủi ro của quy tắc mâu thuẫn trong prompt và các dòng kiểm thử mới) và issue #74 (limitation: mâu thuẫn nội dung không khai báo cho thẻ trả lời, không bao giờ thẻ mâu thuẫn). Quyết định của Hiệp: ghi các lưu ý về prompt vào issue thay vì system design vì các mục chi tiết sẽ được viết lại; 'approve add the limitation issue also open the issue now'. Kiểm: tái hiện #74 trên main 384da8d chỉ bằng luật, không gọi mô hình: đổi topic LEAVE-PAYCO-v1 thì cặp mâu thuẫn của Hà biến mất và card_for_answer cho thẻ trả lời với câu trả lời trích một hoặc cả hai bên (dữ liệu gốc cho thẻ mâu thuẫn); phát hiện xung đột với lời hứa A4 và ghi vào #75; không có dấu gạch dài.
+- 20/10 22:30-22:35 (phiên Pi trong worktree no-issue-system-design), Claude Opus 5.5 (Pi, claude-bridge), không subagent: docs/system_design.md trên nhánh no-issue-system-design (worktree, chưa commit): bỏ mục 2.4 Evaluator và dòng hình "Rectangle with double sides" ở chú giải 2.1; mục 2 còn hai luồng; chuyển định nghĩa người đánh giá và ý "câu hỏi kiểm thử đi qua luồng nhân sự không đổi" vào đầu mục 14. Quyết định của Hiệp: 'Just remove it', vì mục này làm giám khảo phân tâm và tài liệu đang quá dài. Kiểm: grep không còn tham chiếu đến 2.4 hay hình '[[' nào; không có dấu gạch dài.
+- 20/10 22:28-22:42 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: rà docs/mvp_spec.md và docs/system_design.md (nhánh no-issue-system-design) cùng đề Mission 3 (PR #72) để đề xuất issue cho bản mới; soạn và mở issue #76 (Change proposal: đăng nhập bằng tài khoản giả lập, máy chủ quyết định người hỏi, thay bộ chọn người hỏi của lời hứa D4) và #77 (Change proposal: thẻ trả lời mở Điều được trích, máy chủ kiểm phạm vi của người hỏi tại ngày đó). Quyết định của Hiệp: mở issue B và C; issue A (lưu trữ và máy chủ) bàn trực tiếp trong phiên; issue D (trace) cân nhắc dùng log. Kiểm: đối chiếu với mã trên main 384da8d (persona là tham số URL trong api/page.py; trang /data liệt kê tiêu đề 'Khung bậc lương GameCo'; LEAVE-GAMECO-v1..v4 và Điều 2 của v2); đọc tài liệu Render (log lưu 7 ngày ở gói Hobby; Postgres miễn phí hết hạn sau 30 ngày); không có dấu gạch dài.
+- 20/10 22:36-22:40 (tiếp phiên Pi 22:30), Claude Opus 5.5 (Pi, claude-bridge), không subagent: commit 2fae89c, push nhánh no-issue-system-design và mở PR #78 "Docs: add the system design of the whole MVP" theo mẫu PR, nêu #74, #75 và các quyết định SD còn mở. Quyết định của Hiệp: 'commit', 'PR the document'. Kiểm: python -m pytest 232 passed, 2 xfailed; script kiểm liên kết tương đối và anchor trong trang, không có liên kết hỏng; không có dấu gạch dài.
+- 20/10 22:54-23:05 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: rút gọn mục 3 của docs/system_design.md trên nhánh no-issue-system-design-main-flows (chưa commit): mục 3 chỉ còn hai sơ đồ 3.1 và 3.2; bỏ 3.3 và 3.4 vì trùng 2.3, 4.4, 6.6 và 7.2 (chuyển hai câu riêng của 3.3 vào 7.2, câu H3 vào 4.4, lý do khóa cache vào 6.6); chuyển 3.5 thành 13.2 và 3.6 thành 12.2 (mục 12 tách 12.1/12.2, mục 13 tách 13.1/13.2); bỏ các gạch đầu dòng trùng dưới sơ đồ; sửa tham chiếu trong mục lục, SD2 và Phụ lục A (cột Flow đổi thành Section). Quyết định của Hiệp: 'yes' với đề xuất bỏ hoặc chuyển các mục con không phải sơ đồ. Kiểm: grep không còn tham chiếu tới 3.3-3.6; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 20/10 22:58-23:10 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: đối chiếu đề Mission 3 với sản phẩm Mission 2, spec, system design và các issue mở; soạn docs/mission3/checklist.md (chưa commit, trên nhánh no-issue-system-design-main-flows) gồm 7 phần theo đề: chuẩn bị, hiểu yêu cầu, lựa chọn, cải tiến, kiểm chứng (regression 18 ca, tối thiểu 3 test mới, bảng trước/sau), giải thích (Before → After, 3 câu, README, video), nộp bài; khuyến nghị: ưu tiên #53 (câu trả lời nguy hiểm duy nhất của M2) và bằng chứng trước tính năng, không xây trang chủ sở hữu và lưu trữ bền vững trong Mission 3. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: mọi mục đối chiếu nguyên văn docs/competition/mission3_brief.md và rules.md; không có dấu gạch dài.
+- 20/10 22:53-23:08 (phiên opencode), DeepSeek V4.1 Flash Free (opencode), không subagent: đọc issue #76 và mã hiện tại, kiểm tra itsdangerous/python-multipart trong uv.lock và venv, viết và đăng kế hoạch triển khai lên issue #76 với 4 quyết định của issue và 6 quyết định mới. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: pytest nền 232 passed 2 xfailed tại 836d770; đối chiếu api/page.py, templates, data/personas.yaml, tests/api/test_page.py, tests/services/test_guide.py, tests/integrations/test_data_files.py, docs/system_design.md, render.yaml.
+- 20/10 23:14-23:17 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: làm bước 0 của docs/mission3/checklist.md: tạo tag mission2 (annotated, chỉ cục bộ, chưa push) trên b6ca78d, commit cuối của main trước hạn Mission 2 (~20:00 15/10); ghi bằng chứng baseline results/20261014-2239.jsonl (SHA-256 không đổi từ 9e3b384 đến 836d770, 18 hàng chạy ở c3120ff cây sạch, từ c3120ff đến b6ca78d chỉ đổi chữ banner và mã báo cáo; harness từ chối ghi đè và từ chối --resume khi commit khác); đọc tài liệu Render (750 giờ miễn phí mỗi workspace mỗi tháng, dịch vụ ngủ không tốn giờ, 'Deploy a specific commit' tắt auto-deploy) và khuyến nghị giữ dịch vụ hiện tại cho M2 ghim ở b6ca78d, tạo dịch vụ thứ hai cho M3. Quyết định của Hiệp: xác nhận commit đã nộp, push tag, giữ demo M2 hay không, kiểm portal [chờ Hiệp]. Kiểm: git log --first-parent origin/main, git ls-remote --tags (chưa có tag), sha256sum ở 3 commit, git diff c3120ff b6ca78d trên src/data/config, đọc evaluation/run.py, curl /healthz demo 200 sau 32 giây; không có dấu gạch dài.
+- 20/10 23:17-23:22 (tiếp phiên Pi 23:14), Claude Opus 5.5 (Pi, claude-bridge), không subagent: mở PR #79 (No issue - minor fix, nhánh no-issue-mission3-checklist từ origin/main trong worktree riêng) thêm docs/mission3/checklist.md với bước 0 đã làm và dòng docs/mission3/ trong sơ đồ thư mục của docs/development.md; ghi quyết định giữ demo Mission 2 và bước Hiệp cần làm trên Render (ghim dịch vụ hiện tại vào b6ca78d trước khi merge mã Mission 3; render.yaml phải đổi theo vì Blueprint sync bật lại autoDeploy); xóa bản checklist chưa commit trong checkout chính sau khi diff chỉ khác các sửa đổi mới. Quyết định của Hiệp: 'do the PR and keep the mission demo online'; push tag mission2 và issue đổi render.yaml [chờ Hiệp]. Kiểm: uv run python -m pytest 232 passed 2 xfailed; liên kết tương đối trong checklist tồn tại; đọc Blueprint spec của Render (autoDeployTrigger, sync áp cấu hình cho dịch vụ trùng tên); CI pytest và GitGuardian pass trên PR #79; không có dấu gạch dài.
+- 20/10 23:25 (tiếp phiên Pi 23:14), Claude Opus 5.5 (Pi, claude-bridge), không subagent: commit 004140e (chỉ docs/system_design.md, phần rút gọn mục 3 của phiên 22:54) và push nhánh no-issue-system-design-main-flows; chưa mở PR. Quyết định của Hiệp: 'commit the system design and push it'. Kiểm: git diff --stat chỉ 1 tệp, tiêu đề mục đổi khớp ghi chú phiên 22:54; không có dấu gạch dài trong diff.
+- 20/10 23:27 (tiếp phiên Pi 23:14), Claude Opus 5.5 (Pi, claude-bridge), không subagent: mở PR #80 (No issue - minor fix) cho nhánh no-issue-system-design-main-flows: mục 3 của docs/system_design.md chỉ còn hai sơ đồ. Quyết định của Hiệp: 'PR'. Kiểm: python -m pytest 232 passed 2 xfailed; script kiểm liên kết tương đối và anchor trong trang không có lỗi; grep không còn tham chiếu 3.3-3.6; CI pytest và GitGuardian pass.
+- 20/10 23:28-23:30, Claude Opus 5.5 (Pi, claude-bridge), không subagent: vẽ lại sơ đồ 7 bước trong docs/architecture.md theo kiểu của docs/system_design.md (flowchart TD, wrappingWidth 260, phân biệt bằng hình chứ không bằng màu, bỏ subgraph; thêm một câu dẫn tới mục 2.1 của system_design.md); commit 65c9a9e trên nhánh no-issue-architecture-flowchart-style, mở PR #81 (No issue - minor fix). Quyết định của Hiệp: 'make the flowchart in architecture.md the same style format with the system_design.md', rồi 'PR'. Kiểm: render cả hai sơ đồ bằng mermaid-cli và so sánh bằng mắt; nội dung các bước khớp bảng 'Who decides what' và card_for_answer/pick_card trong services/citations.py; top_k 5 khớp config.yaml; python -m pytest 232 passed 2 xfailed; không có dấu gạch dài.
+- 20/10 23:10-23:40 (phiên Pi, tiếp phiên 22:54), Claude Opus 5.5 (Pi, claude-bridge), không subagent: rà mục 4 đến hết docs/system_design.md và đổi trình bày trên nhánh no-issue-system-design-main-flows (worktree workspaces/next-gen/no-issue-system-design-main-flows, commit thêm vào PR #80): sơ đồ cho quy tắc phạm vi (mục 5) và sáu lớp chặn rò rỉ (11.1); bảng cho cảnh báo khi đăng (4.3), các thẻ (6.4), lựa chọn quan hệ (7.2), sửa sai (7.4), đăng nhập (8.2), nơi lưu (9.2), bản ghi trace (10.1), ADR (15.1), đầu vào của quy tắc (5); ví dụ JSON điểm trả lời từ LEAVE-GAMECO-v2 Điều 2 (6.3); bỏ phần lặp: dòng cuối 4.1, hai gạch cuối 6.4, 7.1 gộp vào đầu mục 7 (đánh số lại 7.x), 8.4 thành một dòng của bảng 8.3, câu hỏi embedding ở 9.2, 11.3, mục 17 (Readability thành SD17, câu về HR vào SD13). Quyết định của Hiệp: 'approve' với đề xuất. Kiểm: đối chiếu mã (scope.py: cặp mâu thuẫn tính sau bước quyền đọc; ask.py: cache khóa theo persona id; scope() được trang hỏi, đánh giá và guide.py gọi); vẽ cả 7 sơ đồ mermaid bằng mmdc, sơ đồ 11.1 đổi từ ngang sang dọc vì quá rộng; mọi tham chiếu mục đều tồn tại; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 20/10 23:45-23:55 (tiếp phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: push commit f099cf4 thì PR #80 đã được merge chỉ với commit đầu; khôi phục tiêu đề và mô tả gốc của #80 (đã lỡ sửa thành mô tả cả hai commit); cherry-pick sang nhánh no-issue-system-design-tables trên main 137acb3 (đã có #81) và mở PR #82 cho phần mục 4 đến hết. Quyết định của Hiệp: 'PR'. Kiểm: kiểm liên kết và anchor (gồm anchor sang architecture.md sau #81) không hỏng; python -m pytest 232 passed, 2 xfailed; PR #82 có 1 commit, chỉ docs/system_design.md; không có dấu gạch dài.
+- 20/10 23:21-21/10 07:08 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge); subagent reviewer trên anthropic/claude-opus-5-5 (lần đầu trên claude-bridge lỗi, không chạy): làm mục 1 của docs/mission3/checklist.md - viết docs/mission3/gaps.md, bảng khoảng trống cho 5 yêu cầu chung của Mission 3 (G1.1-G5.3, mỗi khoảng trống có bằng chứng: hàng của lần chạy 20261014-2239, issue limitation, test hoặc probe P1-P9 chạy bằng model giả, script đính kèm trong phụ lục), cập nhật mục 1 của checklist và dòng docs/mission3/ trong docs/development.md; commit 3d55e20 trên nhánh no-issue-mission3-gaps (worktree workspaces/next-gen/no-issue-mission3-gaps, xếp chồng trên PR #79), chưa push, chưa mở PR. Change Request chưa có nên dòng của nó còn mở. Quyết định của Hiệp: 'do the 1.'; thứ tự ưu tiên các khoảng trống [chờ Hiệp]. Kiểm: chạy lại script probe trích từ phụ lục, giống hệt file đã chạy và cho cùng kết quả; reviewer đọc độc lập đối chiếu nguồn, tìm 14 chỗ sai (ví dụ ADR 0004 đã chọn file ghi mâu thuẫn, bị cắt khi đóng #15) và 4 khoảng trống thiếu, đã sửa và thêm G1.5, G3.6, G3.7, G4.5 với probe P8, P9; tự kiểm trạng thái issue #15, #74-#77, git diff b6ca78d 259bfbb trên src data config.yaml tests rỗng, score_all cho 0 rò rỉ trên 18 hàng; kiểm liên kết và anchor; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 21/10 09:18-09:23 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: Hiệp hỏi có cần sửa tài liệu khi dùng thêm opencode với DeepSeek làm worker không; đọc scripts/ai_sessions.py, docs/how_this_was_built.md và opencode.db (chỉ đọc), thấy script bỏ sót phiên trong worktree và phiên opencode; mở issue #84 (follow-up, High) và đăng kế hoạch triển khai lên #84. Quyết định của Hiệp: đồng ý mở issue và sửa tài liệu; các quyết định 1-5 trong kế hoạch [chờ Hiệp]. Kiểm tra: đếm file phiên trong ~/.pi và ~/.claude, truy vấn session_v2 trong opencode.db, so với kết quả script (82 phiên).
+- 21/10 đến 09:30 (phiên Pi trong worktree no-issue-mission3-gaps; giờ bắt đầu chưa lấy được vì scripts/ai_sessions.py bỏ sót phiên trong worktree, #84), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bàn mục 1 của docs/mission3/gaps.md (phiên bản và hiệu lực) theo trình tự của đề Mission 3; đề xuất các phương án cho G1.1 và G1.2, mở issue #83 (đề xuất: khoảng hiệu lực và thay đổi sắp tới trên thẻ, đưa ngày vào prompt, xây trên #75); viết ADR 0013 (chủ sở hữu chỉ sửa một điều bằng cách ban hành bản mới đầy đủ, áp dụng cả giữa các chủ sở hữu), thêm quy tắc vào data/README.md, đánh dấu G1.3 và G3.1 là có chủ đích trong gaps.md; commit c76a7a5, rebase lên main 26fb4f7, mở PR #85. Quyết định của Hiệp: G1.1 sửa bằng prompt cùng #75 chứ không bằng thẻ từ chối hay cho model chọn ngày; G1.2 thông báo bản sắp hiệu lực và văn bản sắp hết hiệu lực; duyệt các đề xuất 1-7, nhưng hàng khó (hàng 18) chỉ chạy 1 lần; quy tắc 'sửa một điều thì ban hành bản mới' áp dụng cả giữa các chủ sở hữu, lý do: bản mới giữ lại các điều cũ không đổi nên không mất điều nào; 'approve' mở #83, 'PR' mở #85; lý do cho ADR 0012 [chờ Hiệp]. Kiểm: chạy scope() cho Minh ngày 01/06/2025, 15/12/2026, 01/01/2027, 2023, 2030 (năm 2025 ra cặp mâu thuẫn LEAVE-GAMECO-v1 và LEAVE-GROUP-v1, nên mô tả 13 ngày trong #53 không đúng); đọc prompt.py trên main và nhánh #75 (chưa có commit, prompt không có ngày nào); đối chiếu M1a, M6, M8 trong decisions.md; xác nhận LEAVE-PROC-GAMECO-v1 cùng chủ sở hữu, chủ đề, đơn vị và khai báo bổ sung nên quy tắc không thể kiểm bằng metadata; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 21/10 09:30-09:40 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: thêm mục 'How Mission 3 fixes the gaps' vào docs/mission3/gaps.md, ghi cách xử lý từng khoảng trống của mục 1 theo quyết định của Hiệp (G1.1 qua #75 và #83, G1.2 qua #83, G1.3 qua ADR 0013, G1.4 để cho #76, G1.5 chưa làm và Hiệp chưa quyết) và các giới hạn còn lại; commit c2912e4 vào PR #85, cập nhật mô tả PR. Quyết định của Hiệp: 'Add a section in the gaps.md on how we fix the limitation'; G1.5 [chờ Hiệp]. Kiểm: đối chiếu từng dòng với issue #83 và ADR 0013; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 21/10 09:45 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: sửa dòng trên - PR #85 đã được merge lúc 09:28, trước khi commit c2912e4 được push (09:30), nên mục 'How Mission 3 fixes the gaps' không vào main; cherry-pick thành b05ea59 trên nhánh no-issue-mission3-gaps-fixes từ main da5dfbf, đã push, chưa mở PR; khôi phục mô tả của PR #85 về đúng nội dung đã merge. Quyết định của Hiệp: [chờ Hiệp] về việc mở PR. Kiểm: git branch -r --contains c2912e4 chỉ ra nhánh cũ; diff của nhánh mới so với main chỉ có docs/mission3/gaps.md; python -m pytest 232 passed, 2 xfailed.
+- 21/10 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: mở PR cho nhánh no-issue-mission3-gaps-fixes (b05ea59, mục 'How Mission 3 fixes the gaps'). Quyết định của Hiệp: 'PR'. Kiểm: python -m pytest 232 passed, 2 xfailed; diff chỉ có docs/mission3/gaps.md.
+- 20/10 22:48-21/10 10:16 (phiên opencode; giờ và model lấy từ scripts/ai_sessions.py), DeepSeek V4.1 Flash Free (opencode), không subagent: làm issue #75 trên worktree answer-card-show-the-models-sentence-above-its-v (câu của mô hình ở trên, đoạn trích đã kiểm ở dưới; thay ADR 0009): thêm `claim` vào contract, prompt, log và review sheet; thẻ trả lời theo từng điểm gồm câu, đoạn trích và dòng nguồn; giữ nguyên thẻ mâu thuẫn, thẻ từ chối và bước 7; thêm hàng 19 (#74) và hàng 20 (#75), `must_cite`, `must_show`, `rules_card`, `data_edit set:`; viết ADR 0011 và cập nhật docs; commit 0fd57d9; sau đó merge main c46e466, sửa xung đột docs/architecture.md và docs/decisions/README.md, đồng bộ docs/system_design.md và docs/mission3/gaps.md với ADR 0011; push nhánh và mở PR #90 (draft) vì còn chờ lý do ADR và run. Quyết định của Hiệp: duyệt các quyết định 1-5 ngày 20/10; ngày 21/10 chọn chạy đánh giá thật sau ("I will run later skip it") và sẽ tự viết lý do ADR 0011; lý do ADR và kết quả run còn [chờ Hiệp]. Kiểm: pytest 260 passed, 2 failed, 2 xfailed; hai lỗi chỉ vì docs/mission2/test_report.md còn 18 hàng và thiếu hàng 19-20, sẽ hết sau run thật; git diff --check sạch; không có dấu gạch dài; kiểm thẻ hàng 1, 7, 12, 19, 20 và prompt bằng test; CI pytest fail cùng hai lỗi báo cáo cũ; PR mergeable.
+- 21/10 09:24-09:43 (phiên opencode), DeepSeek V4.1 Flash Free (opencode), không subagent: làm issue #84 - sửa scripts/ai_sessions.py để đọc phiên Pi và Claude Code của checkout chính và mọi worktree Orca, kể cả worktree đã xóa, đọc phiên opencode từ opencode.db bằng mode=ro, gộp phiên con (subagent) thành một lần gọi của phiên cha, thêm dòng `where:` và hiển thị tệp đã đổi theo checkout của phiên; thêm tests/scripts/test_ai_sessions.py (4 test); cập nhật docs/how_this_was_built.md (dòng opencode, câu nêu ba công cụ đọc phiên); sửa nhật ký cục bộ: bỏ dòng trùng của mục #14, sửa giờ phiên #76 thành 22:53-23:08, bỏ câu "không tìm thấy phiên nào" đã cũ ở dòng 20/10 22:30, thêm dòng bù cho phiên Pi 13/10 09:30-11:30 trong worktree simulated-data-as-files-reviewed-by-hiep và phiên opencode #75. Quyết định của Hiệp: theo các khuyến nghị 1-5 trong kế hoạch #84, chưa ghi câu trả lời vào issue; 'Open the PR now' cho việc mở PR. Kiểm: python -m pytest 236 passed, 2 xfailed; chạy thật script ra 119 phiên (trước 82), `--since 20/10` thấy phiên #75 và phiên này; test so sánh byte của opencode.db trước và sau khi đọc, không đổi; commit ed8e802 trên nhánh 84-worktree-and-opencode-sessions (gốc origin/main 942915d), đã push, mở PR #89; không có dấu gạch dài.
+- 21/10 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bàn mục 3 của docs/mission3/gaps.md (mâu thuẫn), giải thích chi tiết từng khoảng trống G3.1-G3.7 và cách xử lý; mở issue #87 (đề xuất: model báo hai điều trái nhau thì quy tắc thêm thẻ mâu thuẫn, không bao giờ bỏ; cặp mâu thuẫn tính trước bước quyền đọc, bên bị ẩn thì từ chối; thẻ cho 3 văn bản trở lên); viết ADR 0014 và 0015 ở trạng thái Proposed, lý do để [chờ Hiệp]; thêm mục 3 vào 'How Mission 3 fixes the gaps'; commit c774e51 trên nhánh no-issue-mission3-conflicts-docs, mở PR. Quyết định của Hiệp: ý tưởng kiểm tra khi chủ sở hữu đăng văn bản (tìm điều tương tự trong kho và dùng LLM kiểm mâu thuẫn) là hướng lâu dài, chưa làm; duyệt các đề xuất: G3.3, G3.6, G3.7 trong một đề xuất sau #75, cờ của model chỉ thêm thẻ mâu thuẫn, tính cả khi đã khai báo bổ sung, giữ tiêu đề và ghi reason model_flagged, G3.6 ra thẻ từ chối, G3.2 và G3.5 giữ là giới hạn, G3.4 chỉ làm nếu còn thời gian; 'I approve' mở #87 và PR; lý do của ADR 0014, 0015 [chờ Hiệp]. Kiểm: đọc scope.py, citations.py, card_text.py, hai quy chế nghỉ phép, personas, hàng 17 và kế hoạch #75 trên main; phát hiện v1 không có trace nên ghi lý do vào trường reason của thẻ (run.py ghi vào kết quả); phát hiện SD14 trong system_design.md (Hiệp quyết 20/10) ghi 'không phát hiện mâu thuẫn lúc hỏi' nên ADR 0014 ghi là thay thế điểm đó; python -m pytest 232 passed, 2 xfailed; không có dấu gạch dài.
+- 21/10 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bàn mục 2 của docs/mission3/gaps.md (quyền truy cập); kiểm allowed(), bước kiểm access khi nạp dữ liệu, khoá cache trả lời, org.yaml, personas.yaml, hàng 5, 6, 10, 13; phát hiện khoảng trống mới G2.4 (không tài khoản nào có hr_gameco nên quyền chỉ được thể hiện là từ chối); sửa comment kế hoạch và nội dung issue #76 theo quyết định; thêm G2.4 và mục 2 của 'How Mission 3 fixes the gaps', commit e95dc77, PR #91. Quyết định của Hiệp: duyệt các khuyến nghị của kế hoạch #76, với hai thay đổi: đăng nhập bằng chọn tài khoản và một mật khẩu demo chung (giá trị do Hiệp chọn, lấy từ biến môi trường DEMO_PASSWORD, không ghi vào repo hay issue), và giám khảo được hỏi, tự chọn tài khoản nhân viên để hỏi thay; thêm tài khoản HR GameCo và hàng 21 vào #76; G2.3 giữ là giới hạn, kiểm tra lúc đăng văn bản là hướng sau; ADR của #76 đổi thành 0016, lý do [chờ Hiệp]; tên tài khoản HR GameCo và cách giám khảo nhận mật khẩu [chờ Hiệp]. Kiểm: python -m pytest 236 passed, 2 xfailed; grep không có dấu gạch dài và không có mật khẩu trong comment, issue và gaps.md.
+- 21/10 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: hoàn thiện kế hoạch #76 để Hiệp tự giao người làm; đã bắt đầu code rồi dừng theo yêu cầu của Hiệp và reset worktree 76-simulated-sign-in về origin/main f154453 (không có commit nào). Quyết định của Hiệp: mật khẩu demo ghi trong README, AGENTS.md thêm một dòng ngoại lệ; đọc form bằng parse_qs; tài khoản HR GameCo tên Hoa; giám khảo gửi persona không hợp lệ thì trả 400 như hiện nay; giữ các link ?persona= trong README; Hiệp tự giao việc code. Kiểm: đọc lại toàn bộ comment kế hoạch, sửa các chỗ mâu thuẫn (mật khẩu 'không ghi vào repo' ở nội dung issue và dòng G2.1 của gaps.md, .env không được create_app đọc, giám khảo không hiện trong cây tổ chức của /data, thứ tự với #75); grep không có dấu gạch dài.
+- 21/10 10:50-10:53 (phiên Pi trong worktree answer-card-show-the-models-sentence-above-its-v-2), Claude Sonnet 5.5 (Pi, claude-bridge; 1 lượt Claude Opus 5.5), không subagent (công cụ và giờ sửa ngày 23/10 theo `scripts/ai_sessions.py`): xem PR #90 (issue #75) để hoàn tất; ghi vào ADR 0011 và README của decisions rằng lượt chạy 20261021-1032 chỉ để tham khảo vì bản cập nhật chưa xong, ADR đăng nguyên trạng với lý do [chờ Hiệp], bài đọc Faithfulness của Hiệp chưa xong; sửa mô tả PR #90 cho khớp, commit trên nhánh 75-answer-card-sentence-above-quote. Quyết định của Hiệp: để quyết định lý do ADR 0011 sau; đánh giá lượt này không có ý nghĩa, chỉ dùng làm tham khảo. Kiểm: python -m pytest 264 passed, 2 xfailed; grep không có dấu gạch dài.
+- 21/10 10:55, Claude Opus 5.5 (Pi, claude-bridge), không subagent: viết kế hoạch triển khai cho #87 và đăng thành comment trên issue (https://github.com/Park-Hip/next-gen-2026/issues/87#issuecomment-6307732417); không sửa code. Kế hoạch gồm 9 quyết định cho Hiệp, mỗi quyết định có khuyến nghị: hình dạng trường disagreement, điều kiện cờ hợp lệ, khi nào ghi reason model_flagged, Scope.hidden_partners cho G3.6, tiêu đề thẻ mâu thuẫn (tiêu đề hiện tại sai khi cờ vượt qua khai báo bổ sung), hàng 19 và bộ chấm điểm (thêm conflict_from: model), lượt chạy chung sau #83, đóng #74, lý do ADR 0014 và 0015. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: tái hiện trên 40a6836 bằng dữ liệu sửa trong bộ nhớ và điểm trả lời viết sẵn, không gọi Gemini: sai chủ đề và sai bổ sung đều ra thẻ trả lời 12 và 13 ngày, P8 ra thẻ trả lời 12 ngày, P9 ra tiêu đề 'Có hai quy định' và trích PayCo hai lần; đọc hàng 3, 7, 12, 17, 19, 20 của lượt 20261021-1032 (hàng 19 đã trích cả hai Điều 1); phát hiện _scope_ok và test_case_row không cho hàng 19 đạt nếu không sửa; python -m pytest 264 passed, 2 xfailed; grep không có dấu gạch dài; việc Gemini chấp nhận schema và điền trường bắt buộc tốt hơn trường tuỳ chọn chưa được kiểm, ghi rõ trong kế hoạch.
+- 21/10 10:56-12:20 (phiên Pi trong worktree versions-show-each-cited-versions-validity-windo), Claude Opus 5.5 (Pi, claude-bridge), không subagent: viết kế hoạch triển khai cho #83 (khoảng hiệu lực và thay đổi sắp tới trên thẻ, đưa ngày vào prompt) và đăng làm bình luận trên issue; 11 quyết định chờ Hiệp (nơi tính thay đổi, nghĩa của 'đến hết', câu thông báo khi không có văn bản thay thế được nêu tên, vị trí dòng thông báo, thẻ mâu thuẫn, prompt, hàng 18 thành hard và #53 giữ mở, hàng biên TRAVEL-GAMECO-v1 có effective_to, hàng 1 và 2, lần chạy chung sau #76 và #87, lý do ADR 0012). Quyết định của Hiệp: 'make implementation plan for #83'; các quyết định trong kế hoạch [chờ Hiệp]. Kiểm: đọc scope.py, card_text.py, prompt.py, ask.py, data_edit.py, score.py và test_cases.yaml trên main 40a6836; probe bằng dữ liệu thật và sửa trong bộ nhớ (không gọi Gemini): Minh 07/10 và 15/12/2026 ra LEAVE-GAMECO-v2 đến hết 31/12/2026 rồi v3, 01/01/2027 không có thay đổi, bản v3 bị hạn chế không được nêu tên, v2 hết hạn không có v3 thì quy chế Tập đoàn quay lại; phát hiện ReplyCache không có as_of trong khóa nên sẽ trả câu trả lời của ngày khác khi prompt có ngày; python -m pytest 264 passed, 2 xfailed; không có dấu gạch dài.
+- 21/10 10:57-12:30 (phiên Pi trong worktree sign-in-as-a-simulated-account-so-the-server-dec-2), Claude Sonnet 5.5 (Pi, claude-bridge; 1 lượt Claude Opus 5.5), không subagent: làm #76 theo kế hoạch Hiệp đã chốt ngày 21/10 (đăng nhập giả lập với mật khẩu demo dùng chung, phiên ký bằng SessionMiddleware, `/data` và `/cases` chỉ cho tài khoản Giám khảo, Giám khảo hỏi với tư cách tài khoản nhân viên, tài khoản Hoa giữ vai trò hr_gameco, ADR 0016, cập nhật tài liệu); chưa thêm hàng test 21 vào `data/test_cases.yaml` vì ba bài kiểm thử về báo cáo đã commit đòi mọi hàng có kết quả trong lần chạy thật, mà lần chạy đó cần khóa Gemini nên chưa chạy, bản vá của hàng 21 để ngoài repo; tên nhánh `76-simulated-sign-in-2` vì `76-simulated-sign-in` đang mở ở worktree khác; lý do ADR 0016 và giá trị mật khẩu demo trong README: [chờ Hiệp]. Kiểm tra: `python -m pytest` 326 passed, 2 xfailed; chạy trang thật trên mô hình giả bằng uvicorn và curl (chưa đăng nhập bị chuyển hướng, sai mật khẩu không có phiên, `?persona=lan` không đổi thẻ của Minh, cookie giả bị coi là chưa đăng nhập, Giám khảo hỏi với tư cách Lan và Hoa), xem ảnh chụp trang bằng Chrome không giao diện; chưa gọi Gemini thật.
+- 21/10 13:12-13:40 (phiên Pi trong worktree conflicts-a-disagreement-the-model-reads-a-hidde), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: làm #87 theo kế hoạch trên issue; Hiệp chốt cả 8 khuyến nghị đầu (trường disagreement bắt buộc tối đa 2 id, điều kiện cờ hợp lệ, reason model_flagged chỉ khi cờ thêm cặp mới, Scope.hidden_partners, một tiêu đề thẻ mâu thuẫn, hàng 19 thành hard với conflict_from: model, lần chạy chung sau #83, đóng #87 và #74); lý do cho ADR 0014 và 0015 vẫn [chờ Hiệp] nên hai ADR còn Proposed. Đã làm: Scope.hidden_partners và thẻ từ chối hidden_conflict (P8), cờ disagreement trong schema, parser, prompt, nhật ký và bước 7, tiêu đề đếm theo số văn bản và mỗi văn bản trích một lần (P9), hàng 19 và bộ chấm, báo cáo, ADR 0014/0015 và tài liệu. Kiểm tra: python -m pytest 299 passed, 2 xfailed và ruff sạch (chạy với PYTHONPATH=src vì gói cài sẵn trỏ về checkout chính); các test trang kiểm tra dữ liệu sửa thật sự tới trang; chưa chạy Gemini vì worktree không có GEMINI_API_KEY; docs/mission2/test_report.md được tạo lại offline từ lượt 20261021-1032 (cảnh báo 'test file changed', hàng 19 Chưa đạt) cho tới khi Hiệp chạy lượt chung
+- 21/10 13:25-13:45 (phiên Pi trong worktree versions-show-each-cited-versions-validity-windo), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: làm #83 theo kế hoạch trên issue; Hiệp chốt cả 10 khuyến nghị đầu (`scope()` tính thay đổi kế tiếp và lưu vào `Scope.changes`, "đến hết" là ngày cuối trong phạm vi của người hỏi, ba loại thông báo "Sắp thay đổi", dòng thông báo dưới dòng nguồn, ngày áp dụng và khoảng hiệu lực trong prompt, hàng 18 thành hàng khó có thẻ trả lời, hàng 21 mới cho văn bản hết hạn không có bản thay, một lượt chạy chung sau #76, #83 và #87), câu hỏi 11 về lý do của ADR 0012 còn mở nên ADR ghi "[chờ Hiệp]"; tôi thêm `Change`, `_changes`, dòng `notice` và kiểu CSS `change-notice` (lớp `notice` đã dùng cho biểu ngữ), `effective_to` cho `data_edit`, bỏ hàng 18 khỏi `LIMITATION_ISSUES`, và cho hai test đọc lượt chạy đã commit bỏ qua khi một hàng chưa có kết quả (hàng 21 chưa có lượt chạy) - điều này không có trong kế hoạch, Hiệp xem lại; sửa 3 lỗi ruff cũ trong test. Kiểm tra: `python -m pytest` 294 passed, 2 skipped, 2 xfailed (trước đó 264 passed, 2 xfailed), ruff sạch, chụp màn hình trang với câu trả lời giả (FakeGemini) ở 1280 px và 500 px (Chrome headless không thu nhỏ dưới 500 px nên chưa chụp 375 px); chưa chạy đánh giá thật vì không có GEMINI_API_KEY trong workspace, lượt chạy chung là của Hiệp
+- 21/10 13:53-14:05 (phiên Pi trong worktree answer-card-open-the-cited-i-u-checked-against-t), Claude Opus 5.5 (Pi, claude-bridge), không subagent: viết kế hoạch triển khai cho #77 (mở Điều được trích từ thẻ, kiểm theo phạm vi của người hỏi) và đăng làm bình luận trên issue (https://github.com/Park-Hip/next-gen-2026/issues/77#issuecomment-6310157094); không sửa code. 5 quyết định chờ Hiệp, mỗi quyết định có khuyến nghị: trang hiện cả bản được trích và tô Điều được trích, thẻ mâu thuẫn cũng có link trên phần 'GameCo, Điều 1' sẵn có, link của Giám khảo mang thêm persona vì #76 cho Giám khảo hỏi với tư cách tài khoản khác (điểm mới, issue chưa tính tới), làm sau khi #94, #93 và #92 được merge, ADR 0017 cho SD10 và quy tắc mọi link bị từ chối ra cùng một trang 'không tìm thấy'. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: đọc page.py, card_text.py, scope.py, chunking.py, run.py, các template thẻ và test_scope.py trên main 40a6836, cùng diff của PR #94, #93, #92; xác nhận run.py chỉ ghi kind và text của dòng thẻ nên thêm trường vào CardLine không đổi lượt chạy đã commit; dữ liệu có 10 văn bản, 25 chunk; python -m pytest 264 passed, 2 xfailed; không có dấu gạch dài; chưa gọi Gemini.
+- 21/10 (tiếp), Claude Opus 5.5 (Pi, claude-bridge), không subagent: phân tích mục 5 của gaps.md (cho người dùng kiểm chứng tài liệu); thêm khoảng trống G5.4 (câu của mô hình không được kiểm, thẻ không nói phần nào đã đối chiếu) và mục 5 của 'How Mission 3 fixes the gaps'; sửa câu sai 'Hiệp đã đọc 7/7 câu trả lời' (đúng cho run 20261014-2239, còn run 20261021-1032 chưa đọc); soạn kế hoạch #77 (chưa đăng). Quyết định của Hiệp: #77 chọn 1b, 2a, làm sau #76, #83, #87; G5.3 gộp vào #77; G5.4 thêm một dòng chú thích cố định trên thẻ trả lời, không thêm luật kiểm số. Kiểm: đọc code card_text.py, chunking.py, page.py sau #76, các nhánh #83 và #87; chạy thử thấy /nope trả 404 JSON còn /data trả 404 HTML; pytest 326 passed, 2 xfailed; grep không có dấu gạch dài.
+- 21/10 (tiếp), Claude Opus 5.5 (Pi, claude-bridge): Hiệp duyệt; đăng kế hoạch #77 (quyết định 7-9: không ADR, một trang 404 cho mọi đường dẫn lạ, ngày/chunk/tài khoản sai đều 404) và mở PR #95 (gaps.md mục 5). Kiểm: đọc lại comment, grep không có dấu gạch dài.
+- 21/10 18:42-18:50, Claude Opus 5.5 (Pi, claude-bridge), không subagent: giải thích G3.6 và cách PR #92 xử lý (Scope.hidden_partners, thẻ từ chối hidden_conflict); đăng comment đề xuất gỡ phần sửa G3.6 khỏi PR #92 (https://github.com/Park-Hip/next-gen-2026/pull/92#issuecomment-6315182862), không sửa code. Quyết định của Hiệp: 'đây là lỗi của metadata nên hệ thống không cần sửa cho trường hợp này'; các quyết định A-C trong comment [chờ Hiệp]. Kiểm: đọc diff PR #92 (scope.py, citations.py, page.py, card_text.py), xác nhận reason chỉ vào log máy chủ và chữ từ chối giống 'không tìm thấy'; phát hiện phần sửa từ chối sai khi văn bản chỉ dành cho role HR hợp lệ trùng topic; grep không có dấu gạch dài.
+- 21/10 18:51-nay, Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: làm theo bình luận mới nhất của PR #92 - gỡ phần sửa G3.6 (`Scope.hidden_partners`, thứ tự lọc quyền trong `services/scope.py`, nhánh `hidden_conflict`, các test P8 và test trang), giữ G3.3 và G3.7; viết lại ADR 0015 thành quy tắc của chủ sở hữu (không code), cập nhật gaps.md, scope.md, README, architecture.md, system_design.md. Quyết định của Hiệp: yêu cầu thực hiện đề xuất A, B, C (khuyến nghị) của bình luận, lý do là câu của Hiệp "đây là lỗi của metadata nên hệ thống không cần sửa cho trường hợp này". Kiểm: `PYTHONPATH=src python -m pytest` 352 passed, 2 xfailed; ruff sạch; grep không còn `hidden_partners` hay `hidden_conflict` ngoài ADR 0015; không gọi Gemini.
+- 21/10 18:58-19:10, Claude Opus 5.5 (Pi, claude-bridge), không subagent: thảo luận mục 4 của gaps.md (từ chối khi chưa đủ căn cứ), giải thích nội dung từ chối 'không kiểm chứng được' của G4.3; viết mục 4 của 'How Mission 3 fixes the gaps', thêm G4.5 vào ô #77. Quyết định của Hiệp: G4.3 tách 3 nội dung từ chối theo lý do; G4.2 chạy row 16 một lần rồi tính tiếp; G4.4 giữ nguyên (a); G4.5 thêm quy tắc prompt vào #83 và phần mở tài liệu vào #77; G4.1 và nguyên tắc chung của mục 4 [chờ Hiệp]. Kiểm: đọc citations.py, card_text.py, prompt.py, output.py (enum chunk id), run 20261021-1032 (cả 7 lần từ chối đều no_points); bỏ ý 'từ chối của G3.6' sau khi thấy PR #92 đã gỡ phần sửa G3.6; grep không có dấu gạch dài; chưa commit.
+- 21/10 (tiếp) 19:20, Claude Opus 5.5 (Pi, claude-bridge), không subagent: Hiệp đồng ý nguyên tắc chung của mục 4 và cho mở issue; mở issue #96 (G4.3, ba nội dung từ chối theo lý do) và PR #97 (gaps.md mục 4, 'No issue - minor fix'). Quyết định của Hiệp: nguyên tắc 'chỉ từ chối khi không có gì kiểm chứng được'; G4.1 và nơi đặt quy tắc prompt của G4.5 (#83 hay issue riêng) [chờ Hiệp]. Kiểm: pull main (đã có #92, phần G3.6 thành quy tắc của chủ sở hữu), uv run python -m pytest -q 352 passed, 2 xfailed; grep không có dấu gạch dài.
+- 21/10 (tiếp) 19:25, Claude Opus 5.5 (Pi, claude-bridge), không subagent: giải thích G4.1; đổi #96 thành issue cho yêu cầu 4 (G4.3 và quy tắc prompt của G4.5), sửa gaps.md và mô tả PR #97. Quyết định của Hiệp: G4.1 'phần thời gian do #83, còn lại là limitation'; quy tắc prompt của G4.5 vào #96, không mở rộng PR #93. Kiểm: uv run python -m pytest -q 352 passed, 2 xfailed; grep không có dấu gạch dài; đọc lại thân #96.
+- 21/10 19:13-nay, Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: làm issue #77 theo bình luận kế hoạch đã chốt ngày 21/10 (sau khi #92 và #93 đã gộp): thẻ trả lời và thẻ mâu thuẫn có liên kết tới `/source` mở nguyên phiên bản được trích (đoạn được trích tô sáng), cùng một trang 404 cho mọi đường dẫn lạ và nguồn ngoài phạm vi, dòng ghi chú cố định dưới dòng người hỏi của thẻ trả lời, thẻ mâu thuẫn ghi tên văn bản (`services/source_view.py`, `api/page.py`, `card_text.py`, mẫu HTML, test mới và cập nhật test cũ, system_design 2.2/6.4/6.5/SD10, architecture, gaps). Quyết định của Hiệp: đã chốt 9 quyết định trong bình luận kế hoạch; việc thêm trường `ref` vào `CardLine` (ngoài kế hoạch) và đổi tên `_window` thành `validity_window`: [chờ Hiệp]. Kiểm: uv run python -m pytest (408 đạt, 2 bỏ qua, 2 xfail), quét mọi tài khoản x mọi ngày biên x mọi đoạn, xem ảnh chụp thẻ và trang nguồn ở Chrome không giao diện (rộng 1000 và 520); chưa chạy Gemini thật.
+- 21/10 19:37-19:50, Claude Opus 5.5 (Pi, claude-bridge), không subagent: viết kế hoạch triển khai cho issue #96 (ba nội dung từ chối theo lý do, quy tắc prompt của G4.5) và đăng thành bình luận trên #96. Phát hiện ngoài issue: bộ nhớ đệm lưu cả câu trả lời bị bước 7 từ chối (hỏi lại vẫn ra lỗi cũ), và cổng R10 `refusals_identical` sẽ trượt khi có hơn một nội dung từ chối; hàng 11 có nguy cơ thành câu trả lời nếu quy tắc prompt viết lỏng. Quyết định của Hiệp: 7 quyết định trong bình luận [chờ Hiệp]. Kiểm: tái hiện P6 trên trang bằng mô hình giả (4 câu trả lời ra cùng một thẻ, mỗi câu hỏi 2 lần chỉ gọi mô hình 1 lần), đọc run 20261021-1032 (8 lần từ chối đều no_points; hàng 16 không có lời lưu ý về ngày), uv run python -m pytest 382 passed, 2 skipped, 2 xfailed tại 892a5d7; grep không có dấu gạch dài; không gọi Gemini, chưa sửa mã.
+- 21/10 19:49 (phiên Pi 19:32-20:01), Claude Opus 5.5 (Pi, claude-bridge), không subagent (công cụ và giờ sửa ngày 23/10 theo `scripts/ai_sessions.py`): đọc gaps.md, tóm tắt việc còn lại; ghi quyết định của Hiệp vào gaps.md (nhánh no-issue-mission3-open-decisions, commit fc0fa7e). Quyết định của Hiệp: G4.1 duyệt đề xuất AI, G1.5 duyệt (không thêm trường phiên bản), G3.4 bỏ qua, G1.4 duyệt (giữ ngày áp dụng làm nút demo có nhãn). Kiểm: git diff 7 dòng, grep không có dấu gạch dài; chưa đăng lên #76.
+- 21/10 20:01 (tiếp phiên Pi 19:32), Claude Opus 5.5 (Pi, claude-bridge), không subagent (công cụ và giờ sửa ngày 23/10 theo `scripts/ai_sessions.py`): rà lại các việc code trong gaps.md với main 8393c12; mở PR #100 (ghi quyết định G1.4, G1.5, G3.4, G4.1) và issue #101 (hàng đánh giá cho tài khoản Hoa, G2.4, bị sót sau #76). Quyết định của Hiệp: duyệt mở PR #100 và issue #101. Kiểm: uv run python -m pytest -q 408 passed, 2 skipped, 2 xfailed; grep data/test_cases.yaml không có persona hoa.
+- 21/10 19:52-20:04, Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: triển khai issue #96 trên nhánh `96-refusal-reasons-and-caveats` (ba nội dung từ chối theo lý do, không lưu đệm câu trả lời bị từ chối vì lỗi mô hình, cổng R10 so sánh theo lý do, quy tắc prompt của G4.5, ADR 0017 trạng thái Proposed, tài liệu). Quyết định của Hiệp: duyệt đề xuất (a) cho quyết định 1-6, ghi vào bình luận kế hoạch trên #96; quyết định 7 (lý do của ADR 0017, bằng lời của Hiệp): [chờ Hiệp], mục Reasons của ADR giữ "[chờ Hiệp]". Kiểm: `PYTHONPATH=src python -m pytest -q` 434 passed, 2 skipped, 2 xfailed (pytest của worktree phải đặt PYTHONPATH=src vì gói cài editable trỏ về bản chính); ruff sạch; kiểm tay bằng script tạm ngoài kho trên model giả: Minh 07/10/2026 hỏi hai lần cho mỗi lỗi, mô hình được gọi 2 lần, thẻ "không đối chiếu được" và "gặp lỗi khi tạo câu trả lời" đều nêu HR GameCo, ảnh chụp Chrome headless ở rộng 1000 và 520 không vỡ bố cục. Chưa chạy đánh giá đầy đủ (không có GEMINI_API_KEY trong workspace này); câu trả lời thật của dòng 3, 11, 16 với quy tắc mới do Hiệp đọc ở lần chạy chung tiếp theo.
+- 21/10 20:22-22:35, Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: triển khai issue #101 trên nhánh `101-hoa-salary-evaluation-row` (thêm hàng 22 vào `data/test_cases.yaml`: Hoa hỏi câu của hàng 10, kỳ vọng thẻ trả lời trích `SAL-BAND-GAMECO`; cập nhật README dữ liệu, gaps.md G2.4 và bốn kiểm thử đếm hàng/nhóm cùng câu hỏi). Quyết định của Hiệp: làm ngay, không cần kế hoạch; việc giữ hàng 10 và 22 thành nhóm "cùng một câu hỏi" trên trang /cases là [chờ Hiệp]. Kiểm tra: `PYTHONPATH=src python -m pytest` 435 đạt; chưa chạy mô hình thật (không có khóa API) nên `key_facts` "bậc 3" và "18 đến 25 triệu" chưa kiểm trên câu trả lời thật.
+- 21/10 20:29-22:45 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bàn danh sách "chủ động chưa làm" cho Câu 1 của Mission 3; đọc đề Mission 3, checklist, gaps.md, scope.md, mvp_spec.md, system_design.md, ADR 0004, 0006, 0016 và #102; phát hiện phần lớn nhất chưa làm là toàn bộ phía chủ sở hữu trong spec (H1-H5, S3, S4), không nằm trong gaps.md; viết nháp docs/mission3/choices.md (3 nhóm: phía chủ sở hữu, thay đổi bỏ vì kém an toàn, đơn giản hoá giữ từ Mission 2, và liên hệ với Câu 3) trên nhánh no-issue-mission3-not-done, chưa commit. Quyết định của Hiệp: "đồng ý" lấy phía chủ sở hữu làm mục cắt chính và nối Câu 1 với Câu 3; lý do cho phía chủ sở hữu ở Mission 3, G3.4, bản ghi vết S3 và ADR 0016 [chờ Hiệp]; số lần chạy hàng 16, 18, 19 [chờ Hiệp]. Kiểm: mọi đường dẫn tương đối trong tệp đều tồn tại, sửa anchor sang mục quyết định (-1) của gaps.md, mỗi lý do trong ngoặc kép đối chiếu với ADR 0004, gaps.md hoặc nhật ký; bỏ một câu chưa kiểm (Render không giữ log); uv run python -m pytest -q 434 passed, 2 skipped, 2 xfailed; không có dấu gạch dài.
+- 21/10 (tiếp phiên Pi trên), Claude Opus 5.5 (Pi, claude-bridge), không subagent: commit docs/mission3/choices.md và mở PR #104 (No issue - minor fix). Quyết định của Hiệp: "PR". Kiểm: uv run python -m pytest -q 434 passed, 2 skipped, 2 xfailed; diff chỉ một tệp.
+- 21/10 22:51-23:06 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: soạn nháp 3 câu hỏi bắt buộc của Mission 3 (mục 5.2 của checklist) trong docs/mission3/answers.md, tiếng Việt: Câu 1 ưu tiên theo 5 yêu cầu chung (#83, #76, #87, #96, #77, cùng #75) và danh sách chủ động chưa làm lấy từ choices.md (PR #104); Câu 2 chọn #83 là thay đổi lớn nhất, so ca 18 giữa lần chạy M2 20261014-2239 và thẻ M3 do luật tạo; Câu 3 lấy thông tin chủ sở hữu khai làm rủi ro lớn nhất (giả định A1), xử lý trước bằng đăng nhập thật, duyệt lại metadata, rồi trang ban hành có kiểm tra quyền xem và quét mâu thuẫn; sửa dòng docs/mission3/ trong docs/development.md; nhánh no-issue-mission3-answers (worktree workspaces/next-gen/no-issue-mission3-answers), chưa commit. Quyết định của Hiệp: [chờ Hiệp] (chọn thay đổi lớn nhất, rủi ro lớn nhất, các lý do ghi '(AI đề xuất)' và '[chờ Hiệp]'); số liệu của lần chạy cuối để '[chờ lần chạy cuối]'. Kiểm: đối chiếu thẻ ca 18 và ca 19 trong results/20261014-2239.jsonl và 20261021-1032.jsonl; ca 18 là câu trả lời nguy hiểm duy nhất của lần chạy M2 (ca 15, 17 trượt vì loại thẻ và từ chối nhầm); chuỗi dòng nguồn và 'Sắp thay đổi' lấy từ tests/api/test_page.py; pytest 232 passed 2 xfailed ở tag mission2 và 434 passed 2 skipped 2 xfailed ở main 0f5ca43, xfail là ca 15 và 17, skip là ca 21 chưa có lần chạy; mọi link tương đối tồn tại; không có dấu gạch dài.
+- 21/10 (tiếp phiên Pi 22:51), Claude Opus 5.5 (Pi, claude-bridge), không subagent: đổi docs/mission3/answers.md sang dạng văn bản thuần để dán vào ô văn bản trên portal (mỗi câu một khối text mở đầu bằng câu hỏi nguyên văn của đề, không bảng, không Markdown, đường dẫn đầy đủ); ghi cách nộp vào mục 5.2 của docs/mission3/checklist.md, không sửa docs/competition/ vì AGENTS.md cấm và tệp đề là bản sao nguyên văn. Quyết định của Hiệp: câu trả lời nộp trong một ô văn bản, không giới hạn số từ; nội dung câu trả lời [chờ Hiệp]. Kiểm: script so dòng đầu mỗi khối với 3 câu hỏi trong mission3_brief.md (khớp), không có dấu gạch dài, '**', '](' hay '|' trong khối; mọi link tương đối và link GitHub tới main tồn tại; chưa commit.
+- 21/10 22:57-23:14 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: soạn bản nháp tạm kịch bản video Mission 3 bằng tiếng Việt theo thứ tự đề (Yêu cầu mới → Quyết định → Before/After → Kết quả → Giới hạn), 7 cảnh, mỗi cảnh có mục tiêu, màn hình, lời đọc, ghi chú nguồn và chỗ cần Hiệp chọn; chỗ trống ghi [chờ CR], [chờ lần chạy cuối], [chờ Hiệp]; lưu ở build/video_script_mission3.md (thư mục bị git bỏ qua, không commit). Phát hiện: link demo cũ đã chạy code Mission 3 (trang chủ chuyển tới /signin), nên bản Mission 2 để so sánh phải chạy từ tag mission2 hoặc ghim dịch vụ; gaps.md gọi 20261021-1032 là lần chạy Mission 2 tại c3120ff, trong khi đó là lần chạy đầu trên code Mission 3 (d31d304); gaps.md G1.1 (ca 18 chạy một lần) và checklist 4.3 (ca từ trượt thành đạt chạy hơn một lần) nói khác nhau. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: dựng thẻ Mission 3 cho ca 1, 18, 7, 19 (có và không có lời báo), 10, Hoa và quote_mismatch bằng code thật với mô hình giả (script tạm ngoài kho, không gọi Gemini) tại 0f5ca43; đối chiếu thẻ Mission 2 trong results/20261014-2239.jsonl và kỳ vọng ca 18 ở tag mission2 (thẻ từ chối); đếm 25 lỗ hổng trong gaps.md; uv run python -m pytest ở main 434 passed, 2 skipped, 2 xfailed; ở bản xuất tag mission2 231 passed, 2 xfailed, 1 hỏng chỉ vì bản xuất không phải thư mục git; đếm âm tiết lời đọc (khoảng 785, khoảng 3:55 ở 200 âm tiết mỗi phút, khoảng 4:56 khi tính phần dành cho CR); không có dấu gạch dài.
+- 21/10 (tiếp phiên Pi 22:51), Claude Opus 5.5 (Pi, claude-bridge), không subagent: viết lại Câu 1 và Câu 2 trong docs/mission3/answers.md theo nhận xét của Hiệp: thay đổi lớn nhất là AI viết câu trả lời trên nguyên văn đã kiểm (#75, ADR 0011) và AI báo mâu thuẫn mà luật kiểm rồi mới thêm thẻ (#87, ADR 0014), thay cho #83; Câu 1 đưa #75 lên đầu danh sách ưu tiên; Câu 2 so ca 18 (M2 20261014-2239) và ca 19 (lần chạy 21/10, trước #87: một thẻ trả lời có cả 12 và 13 ngày), nêu giới hạn: câu sai số trên đoạn trích đúng vẫn ra thẻ trả lời (test_ask_does_not_check_the_claim). Quyết định của Hiệp: 'It is the biggest behavior change, and the fact that LLM also can flag conflicts is good also'; lý do của #75 và các lý do '(AI đề xuất)' [chờ Hiệp]. Kiểm: đọc ADR 0011, ADR 0014, tests/services/test_ask.py và test_citations.py (các kiểu cờ sai bị bỏ qua, cờ không bỏ được cặp hay đổi lần từ chối); dòng đầu mỗi khối khớp nguyên văn câu hỏi của đề; không có dấu gạch dài, '**', '](' hay '|' trong khối; chưa commit.
+- 21/10 20:32-22/10 06:40 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: bàn before/after của Mission 3 rồi làm theo yêu cầu của Hiệp "fix the problems ... run each test cases three times, record that": chạy thật (Gemini 3.5 Flash-Lite, medium) 3 lần ca 1-22 trên code Mission 3 tại 504d3e0 (main + ca 22 của PR #103; results/20261021-2253, -2258, -2301), 3 lần ca 1-18 trên tag mission2 (results/20261021-2311, -2315, -2319), và 3 lần ca 19-21 qua code Mission 2 bằng script ngoài kho áp data_edit.set trong bộ nhớ rồi gọi ask_row của harness M2 (results/20261022-0627/-0628/-0630-m2-rows19-21); chấm mọi lần chạy bằng check của Mission 3; viết docs/mission3/runs.md (bảng sinh bằng script ở phụ lục, nhóm theo 5 yêu cầu chung); sửa gaps.md: mốc là 20261014-2239 chứ không phải 20261021-1032 (code M3 d31d304), thẻ M2 không có câu của mô hình nên G5.4 do #75 mang vào, thêm số lần chạy cho G1.1, G3.3, G4.2; cập nhật checklist bước 0 (link demo M2 trả 303 về /signin nên đã chạy code M3), 4.1 và 4.3; tạo review.yaml cho 3 lần chạy M3; nhánh no-issue-mission3-runs, commit cf41b10, chưa push. Quyết định của Hiệp: chạy mỗi ca 3 lần và ghi lại, các thay đổi gắn với 5 yêu cầu chung; đọc độ trung thực 29 thẻ trả lời [chờ Hiệp]. Kiểm: mọi bản ghi status ok, commit sạch; ca 18 M2 trả lời 14 ngày 4/4, M3 có dòng Sắp thay đổi 2/3 và từ chối 1/3; ca 19 M2 thẻ trả lời chỉ 13 ngày 3/3, M3 thẻ mâu thuẫn 3/3; script kiểm dòng ghi chú trên mọi thẻ trả lời M3, tên văn bản trên thẻ mâu thuẫn, lý do từ chối đều no_points; pytest 434 passed, 2 skipped, 2 xfailed ở nhánh; không có dấu gạch dài. Lỗi đã sửa trong phiên: script ca 19-21 lần đầu hỏng khi ghi ngày ra JSON, đã xoá 3 tệp dở và chạy lại; lỡ git stash ở worktree docs, đã stash pop ngay.
+- 22/10 08:06-08:26 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), 2 subagent Claude Sonnet 5.5 (claude-bridge, high): rà việc còn lại trước hạn nộp Mission 3 (11:48 23/10) qua mọi nhánh và worktree; subagent 1 rebase và đẩy nhánh no-issue-mission3-runs (runs.md, 9 lần chạy) và sửa 3 dòng cũ về PR #103; subagent 2 soạn README dẫn đầu bằng Mission 3 (nhánh 16-readme-mission3), chuyển README Mission 2 đã nộp (tag mission2) sang docs/mission2/README.md; tôi commit bản nháp answers.md; mở PR #105 (runs), #106 (answers, draft) và #107 (README, draft). Quyết định của Hiệp: mở PR cho mọi bản nháp, Hiệp đọc sau. Kiểm tra: pytest 435 passed, 2 skipped, 2 xfailed trên cả ba nhánh; merge-tree giữa ba nhánh không xung đột; kiểm 82 link tương đối của hai README; 0 em dash; phát hiện mật khẩu demo chưa được công bố (README ghi [chờ Hiệp]) và ADR 0012, 0014, 0017 còn Proposed.
+- 22/10 08:26-08:50 (tiếp phiên Pi 08:06), Claude Opus 5.5 (Pi, claude-bridge), 6 subagent Claude Sonnet 5.5 (claude-bridge, high): theo yêu cầu của Hiệp "only use the jargon or internal terms when we really need it ... especially the ADRs", đo mật độ thuật ngữ nội bộ (số issue/PR, mã G/P, mã code, hash) trên các tài liệu giám khảo đọc, viết hướng dẫn văn phong chung kèm bảng thuật ngữ (ngoài repo), rồi giao subagent viết lại: README thêm Glossary và dòng Trail (#107), runs.md ghi kết quả bằng lời thường qua script sinh bảng (#105), answers.md bỏ mã trong khối dán portal (#106), ADR 0001-0010 (#108), ADR 0011-0017 cùng template và mục lục (#109), architecture.md (#110); mỗi ADR có mục In short và Technical detail. Quyết định của Hiệp: mở PR cho mọi bản nháp, Hiệp đọc sau. Kiểm tra: tôi đọc lại từng kết quả; so từng dòng bảng runs.md cũ và mới (22 dòng, 0 khác, 7 dòng Gates giữ nguyên); phát hiện và sửa nhãn "unsafe answer" bị mất ở ca 18 và 19; tự kiểm trong data/test_cases.yaml rằng ca 19 gán chủ đề nghi_phep_nam khác chủ đề nghi_phep của Tập đoàn (runs.md và README cũ ghi sai); tự kiểm src/appota_kb/api/page.py rằng tài khoản được nạp một lần lúc khởi động, nên câu "reloaded on every request" trong ADR 0016 và chú thích dòng 75 là sai; pytest 435 passed, 2 skipped, 2 xfailed trên cả 6 nhánh; merge-tree giữa các nhánh không xung đột.
+- 22/10 13:59-15:21 (phiên opencode trong worktree one-answer-per-question-a-single-claim-that-answ), DeepSeek V4.1 Flash Free (opencode), không subagent: làm issue #112 trên nhánh `112-one-answer-per-question` - đổi hợp đồng đầu ra thành `{answer, points: [{quote, chunks}], disagreement}`, thẻ trả lời hiện một câu trả lời in đậm cho cả câu hỏi rồi mới đến từng đoạn trích đã kiểm, giữ nguyên bước 7 và hai thẻ mâu thuẫn và từ chối; viết ADR 0018 (thay phần hợp đồng điểm và bố cục thẻ của ADR 0011), cập nhật README, architecture, system_design, development, mission1_promises, scope và test report; chạy lại lượt đánh giá 22 hàng thật; kiểm tra tay hàng 3. Quyết định của Hiệp: duyệt kế hoạch với 4 quyết định (một khối trả lời, 1 câu là chính và 2-3 câu ngắn chỉ khi câu hỏi nhiều phần; chỉ nêu tên văn bản khi hai văn bản khác giá trị chưa khai báo, nêu cả hai và tên từng văn bản; câu ghi chú mới; lý do ADR 0018 để `[chờ Hiệp]` như ADR 0011); Hiệp đồng ý chạy lượt đánh giá đầy đủ bằng khóa trong `.env` của checkout chính. Kiểm: `uv run --offline python -m pytest -q` 447 passed, 2 xfailed; `ruff check src tests scripts` sạch; lượt chạy `results/20261022-1432.jsonl` 22 hàng, 0 lỗi luật, 0 rò rỉ, 0 câu trả lời nguy hiểm, 0 từ chối nhầm trong 19 hàng tính điểm, các hàng 15 và 17 vẫn trượt theo hướng an toàn, hàng 16 trả lời đúng; đọc tay hàng 3 (Minh, 07/10/2026, "Tôi xin nghỉ phép ở đâu, ai duyệt?") ra một câu trả lời đủ cả nơi gửi và người duyệt, chỉ trích `LEAVE-PROC-GAMECO-v1#1` và `#2`, không có đoạn "3 ngày"; báo cáo và phiếu đọc sinh lại ở `docs/mission2/test_report.md`, `results/20261022-1432.review.md` và `.review.yaml`, phần Faithfulness còn `[chờ Hiệp]`. Sau khi Hiệp duyệt, commit `ba7c2d0` và mở PR #113 (Closes #112), chưa merge. Sau đó gộp `origin/main` mới (README Mission 3, ADR 0011-0017 viết lại theo ngôn ngữ thường, template ADR mới) vào nhánh và xử lý 3 xung đột: README lấy bản Mission 3 và cập nhật chỗ mô tả thẻ trả lời một câu trả lời, mục Test report trỏ báo cáo 22/10; architecture lấy bản viết lại rồi thay phần thẻ bằng dữ liệu lần chạy `20261022-1432`; chỉ mục ADR thêm dòng 0018 theo 5 cột. Viết lại ADR 0018 theo mẫu mới (In short, Technical detail), giữ Reasons `[chờ Hiệp]`; ADR 0011 ghi rõ hợp đồng điểm và bố cục thẻ bị 0018 thay một phần. Kiểm lại sau gộp: `uv run --offline python -m pytest -q` 447 passed, 2 xfailed; `ruff check src tests scripts` sạch; PR #113 hết xung đột, trạng thái mergeable.
+- 22/10 15:31-16:20 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: theo yêu cầu của Hiệp "Báo cáo kết quả chạy thử Evaluation mới nhất ...", chấm lại offline run 20261022-1432 và so với các run 21/10 (4 gate đạt, faithfulness chờ Hiệp, ca 15 và 17 fail đúng như limitation, run chạy trên working tree chưa sạch); rồi theo quyết định của Hiệp ("Ở case 15 thì đã được giải quyết bằng cách chủ sổ văn bản phải khai báo đúng metadata ... case 17 thì hành vi này được đề xuất và nên thực hiện như vậy"; chọn 1 đồng ý, 2 phương án A, 3 đồng ý) mở issue #114 và đăng kế hoạch, làm trên nhánh `114-rows-15-17-decided`: ca 15 thành ca khó kỳ vọng thẻ từ chối (ADR 0013), ca 17 thành ca khó kỳ vọng thẻ mâu thuẫn với ADR 0019 mới (lý do ghi nguyên lời Hiệp), bỏ 2 xfail, LIMITATION_ISSUES chỉ còn ca 16, sửa README, scope, architecture, system_design, gaps, choices, runs (bảng chạy lại bằng script phụ lục, không gọi model), mission1_promises; chạy thật lại 22 ca (Gemini 3.5 Flash-Lite, medium) trong worktree sạch tại bb329b5 -> results/20261022-1602 và test_report.md mới. Quyết định của Hiệp: như trên; mở PR [chờ Hiệp]. Kiểm tra: `python -m pytest` 449 passed, 0 xfail; run 1602 có 21 ca vào gate, 0 sai quy tắc, 0 rò rỉ, 0 trả lời không an toàn, 0 quá thận trọng, faithfulness 9 thẻ chờ Hiệp; chấm lại offline 8 run cũ: ca 15 đạt 8/8, ca 17 đạt 4/4 run Mission 3 và chỉ trượt "does not cite" ở Mission 2 như ca 7 và 12; xem tay trang "Tình huống kiểm thử" trên máy (Edge qua Playwright): ca 15, 17 nhãn "Khó" và "Đạt", ca 16 vẫn "Chưa xử lý tốt (#51)".
+- 22/10 16:16-16:45 (phiên opencode), DeepSeek V4.1 Flash Free (opencode), không subagent: điền `results/20261022-1602.review.yaml` theo yêu cầu của Hiệp (điền faithfulness để Hiệp duyệt): faithful yes cho 10 thẻ trả lời (hàng 1-5, 16, 18, 20-22; 9 thẻ vào gate vì hàng 16 là limitation), để trống cho 12 thẻ từ chối và mâu thuẫn, ghi chú ở hàng 3 (thiếu ý email), 16 (vế "hệ thống không tính toán ngày cụ thể" do prompt, không có trong đoạn trích) và 18 (vế bản 3 lấy từ metadata hiệu lực và dòng "Sắp thay đổi"); sau khi Hiệp duyệt, điền lesson "Đạt" cho 21 hàng không đặc biệt và hàng 16 ghi lý do cố tình không cho mô hình tự suy luận ra câu trả lời (hành vi chưa được kiểm chứng chặt chẽ, có thể dẫn tới câu trả lời sai; việc kiểm tra làm ở giai đoạn kế tiếp); tạo lại `results/20261022-1602.review.md` và `docs/mission2/test_report.md` bằng `python -m appota_kb.evaluation.report`, faithfulness 9/9 và cả 22 hàng Đạt. Quyết định của Hiệp: "duyệt" bản nháp faithfulness và chỉ định nội dung điều học được như trên. Kiểm: đọc từng câu trả lời với đoạn trích và chunk được dẫn trong phiếu đọc (không đổi số, không bỏ điều kiện, không sai người; hàng 3 thiếu một ý của văn bản, hàng 16 và 18 thêm vế lấy từ prompt/metadata); `python -m pytest` 449 passed; thời gian, công cụ và model lấy từ `scripts/ai_sessions.py`.
+- 22/10 16:51-17:00 (phiên Pi), DeepSeek V4 Pro 0813 (Pi, modelscope), không subagent: theo yêu cầu của Hiệp "PR it", commit phần đọc `results/20261022-1602.review.yaml` (faithfulness và lesson đã được Hiệp duyệt ở phiên 16:16-16:45) cùng hai tệp sinh lại `results/20261022-1602.review.md` và `docs/mission2/test_report.md` trên nhánh `no-issue-20261022-1602-reading` và mở PR #116 (No issue). Quyết định của Hiệp: "PR it", duyệt mở PR. Kiểm: `python -m appota_kb.evaluation.report results/20261022-1602.jsonl` in cả 22 hàng Đạt và faithfulness 9/9; `python -m pytest` 449 passed; `grep` ba tệp đã commit không có dấu gạch dài; thời gian, công cụ và model lấy từ `scripts/ai_sessions.py`. Ngoài PR: `docs/mission3/answers.md` đã sửa và hai tệp chưa theo dõi `results/20261014-1048.jsonl`, `results/20261014-1049.jsonl` được để ngoài PR [chờ Hiệp].
+- 22/10 16:54-20:12 (phiên Pi; dòng bù ngày 23/10 từ `scripts/ai_sessions.py`), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: theo yêu cầu của Hiệp, dựng lại phần tổng quan của kịch bản video Mission 3 (`build/video_script_mission3.md`, thư mục bị git bỏ qua): mỗi cảnh ứng với một yêu cầu cải tiến chung của đề, cảnh 1 giới thiệu thay đổi lớn nhất (mô hình trả lời thẳng câu hỏi và báo mâu thuẫn), mỗi cảnh có tình huống kiểm thử để demo, lời đọc cảnh 1-6 là một câu ngắn, cảnh 5 ghi các loại từ chối mới. Quyết định của Hiệp: duyệt danh sách cảnh ('đồng ý thay đổi'), tên cảnh lấy từ yêu cầu của đề. Kiểm: [chờ Hiệp].
+- 22/10 17:24-17:37 (phiên Pi; dòng bù ngày 23/10 từ `scripts/ai_sessions.py`), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent: soạn lại Câu 2 của 3 câu hỏi bắt buộc Mission 3 theo lần chạy đánh giá mới nhất, viết ngắn lại, thay phần 'đã khắc phục được' bằng phần 'bằng chứng' mô tả hành vi đã thấy trong các tình huống kiểm thử; phiên không ghi lệnh sửa tệp nào. Quyết định của Hiệp: các yêu cầu trên ('viết ngắn gọn lại', 'hãy mô tả tổng quan vì sao hệ thống tốt hơn bằng hành vi đã thấy trong test cases'). Kiểm: [chờ Hiệp].
+- 22/10 17:28-nay (phiên Pi), DeepSeek V4 Pro 0813 (Pi, modelscope), không subagent: theo yêu cầu của Hiệp, tìm nơi công bố mật khẩu demo; Hiệp duyệt giá trị "toiyeuappota". Thay chỗ giữ chỗ "[chờ Hiệp: mật khẩu demo]" trong README bằng "toiyeuappota" (kèm dòng export DEMO_PASSWORD), đưa mật khẩu vào ngữ cảnh trang đăng nhập (api/page.py) rồi hiện làm placeholder trong ô mật khẩu (signin.html) lấy từ biến môi trường demo_password, không ghi cứng giá trị trong mã; thêm kiểm thử test_sign_in_page_shows_the_demo_password. Quyết định của Hiệp: mật khẩu demo là "toiyeuappota", công bố trong README và hiển thị ngay ô mật khẩu trên trang đăng nhập. Kiểm: uv run python -m pytest -q 450 passed; placeholder hiện giá trị môi trường và không có value= nên test_sign_in_form_never_prefills_the_password vẫn đạt. Việc còn lại Hiệp tự làm tay: đặt DEMO_PASSWORD=toiyeuappota trong Render Dashboard cho khớp README (render.yaml để sync: false); đã mở PR #117 (No issue - minor fix).
+- 22/10 20:39-20:50 (phiên Pi), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent (công cụ và giờ sửa ngày 23/10 theo `scripts/ai_sessions.py`): theo yêu cầu của Hiệp, cập nhật `docs/mission3/runs.md` theo `results/20261022-1602.jsonl` (thêm lần chạy 4 của Mission 3, sinh lại bảng bằng script phụ lục, thêm phần Hiệp đã đọc 10 thẻ); quyết định: [chờ Hiệp]; kiểm tra: chạy lại script phụ lục không gọi model, không chạy pytest.
+- 22/10 20:50-21:00 (phiên Pi), Claude Sonnet 5.5 (Pi, claude-bridge), không subagent (công cụ và giờ sửa ngày 23/10 theo `scripts/ai_sessions.py`): theo yêu cầu của Hiệp, tạo `docs/mission3/runs.html` (bản tiếng Việt) và đổi `runs.md` chỉ lấy một lần chạy mới nhất mỗi bản (PR #118); quyết định: [chờ Hiệp]; kiểm tra: chạy lại script phụ lục không gọi model, không chạy pytest.
+- 23/10 10:15 (phiên Pi), DeepSeek V4 Pro 0813 (Pi, modelscope), không subagent: cập nhật mục Reasons của ba ADR còn trạng thái Proposed (0012, 0014, 0017) bằng lý do do AI soạn. Quyết định của Hiệp: "confirm", duyệt cả ba bản nháp lý do. Kiểm: lý do chỉ soạn từ nguyên tắc Hiệp đã nêu và duyệt (chỉ từ chối khi không có gì kiểm chứng được; nghi ngờ quy định nào áp dụng thì chuyển HR, không chọn một bên; hiệu lực do luật quyết), không đặt lời cho Hiệp; mỗi mục Reasons ghi "Drafted by AI; approved by Hiep on 23/10/2026"; đọc lại ba mục đã sửa và grep không thấy dấu gạch dài.
+- 23/10 10:35 (phiên Pi), DeepSeek V4 Pro 0813 (Pi, modelscope), không subagent: triển khai issue #120 (README báo lần chạy cũ: số lần chạy, trạng thái đọc và chỗ giữ chỗ đã lỗi thời). Sửa README.md cho khớp docs/mission3/runs.md và docs/mission2/test_report.md: mỗi bản một lần chạy mới nhất (Mission 2 1 lần ca 1-21, Mission 3 1 lần ca 1-22); Mission 2 có 2 câu trả lời nguy hiểm (ca 18, 19), Mission 3 không có câu trả lời nguy hiểm, rò rỉ hay từ chối nhầm; faithfulness 9/9 Đạt và cả 10 thẻ trả lời đã được Hiệp đọc, đánh dấu trung thực; thay hai chỗ "[chờ đề: Change Request...]" bằng lời nêu rõ không có Change Request được giao. Sửa docs/mission3/runs.md mục 5 trích đúng dòng ghi chú ANSWER_NOTE; điền link video Mission 3 vào mục Video. Quyết định của Hiệp: cung cấp link video (https://www.youtube.com/watch?v=Vdr1W1zR4Mo) và "PR it"; mở PR #123. Kiểm: uv run python -m pytest -q 450 passed; grep hai tệp không có dấu gạch dài; đối chiếu từng số với runs.md, test_report.md (faithfulness 9/9) và results/20261022-1602.review.yaml (10 thẻ faithful).
+- 23/10 10:57 (phiên Pi), DeepSeek V4 Pro 0813 (Pi, modelscope), không subagent: triển khai issue #121 (README mục Known limitations liệt kê nhầm hàng 15 và 17 là lỗi mở). Sửa README.md: mục này chỉ nêu đúng các lỗi mở còn lại sau Mission 3 là #50, #51, #53, #74 và việc câu trả lời của AI không được kiểm lúc chạy; gỡ ví dụ hàng 15 khỏi bullet #50, gỡ dòng hàng 17 khỏi "Giới hạn còn lại" của mục 3 nên hàng 15 và 17 chỉ còn ở phần "limits are decisions" (kèm ADR 0013 và 0019); thêm bullet thứ năm cho việc câu trả lời không được kiểm lúc chạy; đổi "v1" thành "the Mission 3 version" trong cả mục. Quyết định của Hiệp: [chờ Hiệp]. Kiểm: grep README.md thấy hàng 15 và 17 không còn trong bullet lỗi hay "Giới hạn còn lại" mục 3, chỉ còn ở dòng Summary (nêu là kết quả mong muốn), dòng Trail và hai đoạn quyết định; không còn "v1" trong mục Known limitations; không có dấu gạch dài.
+- 23/10 10:15-13:56 (phiên Pi), claude-bridge/claude-opus-5-5 (Pi), không subagent: rà README.md trước khi nộp Mission 3, không sửa README; mở ba issue #120 (số lần chạy, trạng thái đọc và chỗ giữ chỗ lỗi thời), #121 (Known limitations liệt kê nhầm hàng 15 và 17) và #122 (bố cục README cho giám khảo); rà docs/mission3/runs.md (chưa mở issue); soạn ghi chú Obsidian "Write Docs Readers Can Scan" về cách viết tài liệu dễ đọc và khi nào dùng sơ đồ, biểu đồ, rồi thêm một dòng vào AGENTS.md (mục Writing) trỏ tới ghi chú đó, mở PR #125. Quyết định của Hiệp: duyệt mở ba issue; bỏ 3 câu hỏi bắt buộc khỏi phạm vi vì đã nộp; #24 và #52 là lựa chọn kỹ thuật đã chấp nhận, Hiệp tự đóng; duyệt bản nháp ghi chú với giới hạn 25 từ nới thành gợi ý, và "agree" cho dòng AGENTS.md. Kiểm: đối chiếu từng số trong README với runs.md, test_report.md và results/20261022-1602.jsonl; đọc nguồn Diátaxis, Google style guide (highlights, translation, images) và plainlanguage.gov trước khi trích; uv run python -m pytest -q 450 passed trên nhánh PR.
+- 23/10 13:50-14:37 (phiên Pi), claude-bridge/claude-opus-5-5 (Pi), 3 subagent claude-bridge/claude-sonnet-5-5 (high): 1 worker chụp ảnh màn hình bản Mission 2 (tag mission2, worktree tạm) và Mission 3 chạy local, 2 reviewer (độ dễ đọc, kiểm chứng sự kiện): theo đề Mission 3 mới (chọn một hướng cải tiến và giải thích) và yêu cầu của Hiệp "our focus should be about writing documentation", trên nhánh `122-judge-docs`: viết lại README.md quanh một hướng (thẻ trả lời trả lời thẳng câu hỏi mà vẫn kiểm được), thêm `docs/mission3/README.md`, viết lại `docs/mission3/runs.md` (bảng sinh lại bằng script phụ lục), xoá `docs/mission3/{answers,checklist,choices,gaps}.md` và `runs.html` (Hiệp: "just delete them"; liên kết trong ADR trỏ về bản lưu trong lịch sử git), chuyển `docs/mission2/test_report.md` thành `docs/test_report.md` (sửa report.py, committed.py, sinh lại), thay ảnh README, sửa mục Known limitations của scope.md và dòng "[chờ Hiệp]" đã lỗi thời trong ADR 0011, 0018. Quyết định của Hiệp: đồng ý hướng đề xuất, xoá tài liệu nội bộ, viết tiếng Anh; hai câu trích lời Hiệp lấy từ bản Câu 1 Hiệp tự sửa trong answers.md (chưa commit) [chờ Hiệp xác nhận]. Kiểm: reviewer kiểm số liệu với results/*.jsonl và review.yaml, tìm ra ca 16 Mission 2 trả lời 2/4 lần (đã sửa cách viết), AI còn được báo mâu thuẫn (đã sửa); kiểm liên kết nội bộ bằng script; python -m pytest 450 passed; chưa xem trang render trên GitHub.
+- 23/10 14:40-15:06 (phiên Pi), claude-bridge/claude-opus-5-5 (Pi): kiểm lại 4 issue limitation đang mở (#50, #51, #53, #74) trên code Mission 3 (main 384f68a) bằng script thăm dò gọi gemini-3.5-flash-lite thật như trang hỏi, có bản dữ liệu sửa theo từng issue; kết quả: #51 có vẻ đã hết (4 câu thực tế, mỗi câu 3/3 trả lời), #53 nửa năm sau đã sửa nhưng câu hỏi năm 2025 của Minh bị từ chối 8/9 và 1/9 trả lời sai "14 ngày" (năm 2025 là 13), #74 và #50 ví dụ 1 ra thẻ mâu thuẫn 3/3 nhờ AI báo, #50 ví dụ 2 (văn bản sửa đổi 16 ngày) ra thẻ mâu thuẫn 3/3 thay vì 16 ngày. Quyết định của Hiệp: "approve" - đăng bằng chứng lên 4 issue, đổi tên #74, sửa mục hạn chế đã biết trong README, docs/mission3/README.md, docs/scope.md (PR #126); chưa đóng #51 vì phải đổi data/test_cases.yaml, chạy lại đánh giá và Hiệp đọc lại thẻ trả lời [chờ Hiệp]. Kiểm: số lần chạy là thăm dò, không phải tỉ lệ; python -m pytest 450 passed.
+- 23/10 19:47-20:30 (phiên Pi), Claude Opus 5.5 (Pi, claude-bridge), không subagent: theo yêu cầu của Hiệp "Báo cáo kết quả về Evidence_log.MD liệu có thể sẵn sàng cho Mission 3 chưa?", đối chiếu bản công bố `docs/evidence_log.md` (dừng ở 15/10) với bản làm việc cục bộ và với `scripts/ai_sessions.py --since 16/10` (77 phiên); rồi theo quyết định của Hiệp, viết lại nhật ký theo mẫu một dòng của quy định dùng AI: phần tóm tắt ở đầu trang (công cụ, việc AI làm và cách kiểm theo 7 phần của sản phẩm, những lần bác bỏ AI, lỗi của AI, phiên không định hình nội dung), nhật ký Mission 1 thành Phụ lục A, nhật ký chi tiết Mission 2 và Mission 3 thành Phụ lục B; gộp bản công bố (giữ các chỉnh sửa 15/10) với 74 dòng Mission 3 và 4 dòng Mission 2 chỉ có ở bản cục bộ; sửa công cụ và giờ của 5 dòng ghi nhầm "Claude Code"; thêm dòng bù cho 2 phiên ngày 22/10 (kịch bản video, Câu 2); đổi tiêu đề "Ghi chú nhanh Mission 2" thành "Ghi chú nhanh" trong AGENTS.md; sửa dòng nhật ký trong `docs/how_this_was_built.md`. Quyết định của Hiệp: "Đồng ý" làm theo mẫu một dòng, giữ nhật ký chi tiết làm phụ lục, ba mục bác bỏ AI, lỗi của AI và phiên không định hình nội dung thành mục riêng; tuyên bố trách nhiệm dịch từ mục Responsibility của `how_this_was_built.md` [chờ Hiệp xác nhận]. Kiểm: đếm lại từ tệp kết quả tình huống 18 (Mission 2 trả "14 ngày" không cảnh báo 4/4 lần; Mission 3 có "Sắp thay đổi" 4/5 lần, từ chối 1 lần) và tình huống 19 (Mission 2 thẻ trả lời "13 ngày" 3/3; Mission 3 thẻ mâu thuẫn 5/5); mỗi dòng tóm tắt đối chiếu với dòng nhật ký nguồn, đổi [Tôi] thành [Duyệt] ở phiếu đọc độ trung thực vì nhật ký ghi Hiệp duyệt bản nháp; script ghép kiểm không mất dòng ghi chú nào; uv run --offline python -m pytest -q 450 passed; không có dấu gạch dài, không có mẫu khóa API.
