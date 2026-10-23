@@ -167,7 +167,7 @@ What changed: each source opens the cited version, with its validity window, who
 
 No row is specific to this requirement; the runs show it on every card:
 
-- Every answer card of the Mission 3 run has the line "Câu in đậm là diễn giải của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu." under the asker line, and no conflict or refusal card has it.
+- Every answer card of the Mission 3 run has the line "Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu." under the asker line, and no conflict or refusal card has it.
 - Every conflict card names each side's document: "Quy chế nghỉ phép Tập đoàn, Điều 1 (từ 01/01/2024, áp dụng cho Tập đoàn)" where Mission 2 said "Tập đoàn, Điều 1 (từ 01/01/2024)".
 - The link and the page it opens are not in the run records, which keep the card's text only; they are tested by the automated tests. [Tests: see Technical detail.]
 - Faithfulness is the gate of this requirement: Hiep read the 10 answer cards of the Mission 3 run, 9 in gated rows and 1 of row 16, against their quotes in the [review sheet](../../results/20261022-1602.review.yaml) and marked all 10 faithful.

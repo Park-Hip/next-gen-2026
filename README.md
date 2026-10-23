@@ -16,12 +16,12 @@ Where two policies apply and nobody has said which one wins, the system does not
 
 ## Video
 
-[chờ Hiệp: link video Mission 3]
+[Mission 3 video (YouTube)](https://www.youtube.com/watch?v=Vdr1W1zR4Mo)
 
 ## Test report
 
 The latest full run is the [test report](docs/mission2/test_report.md), made on 22/10/2026 with all 22 test cases and the real model.
-The rules picked the right documents and card in every good and hard case, with no leak, no unsafe answer and no over-cautious answer in the 21 gated cases; the Faithfulness reading is still pending Hiệp.
+The rules picked the right documents and card in every good and hard case, with no leak, no unsafe answer and no over-cautious answer in the 21 gated cases; the Faithfulness gate is 9 of 9 (Đạt), and Hiep has read all 10 answer cards of the run, the 9 gated cards plus row 16, and marked them all faithful.
 
 What the final runs show, case by case, for the Mission 2 version against the Mission 3 version, is in [`docs/mission3/runs.md`](docs/mission3/runs.md).
 
@@ -46,25 +46,26 @@ Each change below follows the chain the brief asks for, in its own Vietnamese la
 The changes are grouped by the five general requirements of the [Mission 3 brief](docs/competition/mission3_brief.md).
 Each ends with a "Trail" line: the issue, pull request, decision record and gap numbers, for anyone who wants to trace the change back.
 The weaknesses of the Mission 2 version are listed in the [gap analysis](docs/mission3/gaps.md), and what was deliberately not built is in [`docs/mission3/choices.md`](docs/mission3/choices.md).
-Every number below is from [`docs/mission3/runs.md`](docs/mission3/runs.md): each test case was asked on the Mission 2 version (4 runs of cases 1-18, 3 runs of cases 19-21) and on the Mission 3 version (3 runs of cases 1-22), scored by the same checks, with the real AI model.
+Every number below is from [`docs/mission3/runs.md`](docs/mission3/runs.md): each test case was asked once on each version (the Mission 2 version, 1 run of cases 1-21; the Mission 3 version, 1 run of cases 1-22), scored by the same checks, with the real AI model.
 
-**Change Request:** [chờ đề: Change Request chưa được giao tại thời điểm viết]
+**Change Request:** no Change Request was assigned for Mission 3 (the brief still says "Chưa có Change Request được chỉ định cho bạn" on the deadline day), so there is no Change Request test.
 
 ### Summary of the runs
 
-- The only unsafe answer of the Mission 2 version, the next-year leave question (case 18), came back in all 4 of its runs; the Mission 3 version has no unsafe answer in its 3 runs.
-- A conflict that a wrong label hides (case 19) gave a one-sided answer card in all 3 Mission 2 runs and the conflict card in all 3 Mission 3 runs.
-- The next-year leave question was refused once in 3 Mission 3 runs: the one over-cautious card of the Mission 3 version, the safe direction, but not a fix every time.
+- The Mission 3 run has no unsafe answer, no leak and no over-cautious card; it corrects the Mission 2 version's two unsafe answers, the next-year leave question (case 18) and the hidden conflict (case 19).
+- The next-year leave question (case 18): the Mission 2 version answered "14 ngày" with nothing saying the rule ends on 31/12/2026, and the Mission 3 version answers "14 ngày" with the end date and the notice that version 3 starts on 01/01/2027.
+- A conflict that a wrong label hides (case 19) gave a one-sided answer card in the Mission 2 run and the conflict card in the Mission 3 run.
 - No test case that passed in the Mission 2 version fails in the Mission 3 version.
-- Cases 15 and 17 give the same card in every run of both versions, and both cards are the intended result: a refusal when a company's policy declares it replaces the Group policy but leaves out a Group clause it meant to keep (case 15), and the conflict card when two conflicting policies say the same thing on the point asked (case 17).
-- Every answer card still waits for Hiệp's reading of the model's answer against its quotes ("chờ Hiệp đọc"); no answer card is counted as faithful before that.
+- Cases 15 and 17 give the same card in both runs, and both cards are the intended result: a refusal when a company's policy declares it replaces the Group policy but leaves out a Group clause it meant to keep (case 15), and the conflict card when two conflicting policies say the same thing on the point asked (case 17).
+- One run per version is little: in the three earlier Mission 3 runs the next-year question was refused once, so the fix is not guaranteed every time.
+- Hiep has read all 10 answer cards of the Mission 3 run (the 9 gated cards plus row 16) against their quotes and marked them all faithful; no answer card of the Mission 2 run has been read.
 
 ### 1. Versions and effective dates
 
 - **M2 trước:** on 15/12/2026, Minh, who works at GameCo, asked how many days of annual leave he gets from next year.
-  The Mission 2 version answered "14 ngày", this year's figure, in 4 runs out of 4.
+  The Mission 2 version answered "14 ngày", this year's figure, in 1 run out of 1.
   From 01/01/2027 a new version of the policy (version 3) applies, but nothing on the card said so: it showed only when the current version started, and the model was not told today's date.
-  It was the only unsafe answer of the Mission 2 version.
+  It was one of the two unsafe answers of the Mission 2 version.
 - **Vấn đề/yêu cầu:** requirement 1 of the brief: tell a document's versions apart by the dates they are in force.
   An employee must not read this year's number as next year's.
 - **Quyết định:** the fixed rules work out when the current version ends and add a "Sắp thay đổi" line naming what replaces it.
@@ -72,11 +73,10 @@ Every number below is from [`docs/mission3/runs.md`](docs/mission3/runs.md): eac
   Not done: answering next year's question from next year's version, because choosing the version by what the question says would let the model decide which version is valid.
 - **M3 sau:** the same question now shows "đến hết 31/12/2026" on the source line and "Sắp thay đổi: Quy chế nghỉ phép GameCo (bản 3) áp dụng từ 01/01/2027." on the card.
 - **Bằng chứng:**
-  - The next-year question (case 18): 2 of 3 runs give "14 ngày" with that end date and notice; the third refuses.
-  - A version that ends with no successor (case 21): the GameCo travel-allowance rule, edited to end on 31/12/2026, is shown with the rule stopping for Minh after 31/12/2026 and his being sent to HR GameCo, in 3 runs out of 3.
+  - The next-year question (case 18): the run gives "14 ngày" with that end date and notice.
+  - A version that ends with no successor (case 21): the GameCo travel-allowance rule, edited to end on 31/12/2026, is shown with the rule stopping for Minh after 31/12/2026 and his being sent to HR GameCo, in 1 run out of 1.
   - Regression check (case 2): on 01/01/2027 both versions answer 15 days from version 3, and the Mission 3 version shows no notice.
-- **Giới hạn còn lại:** a question about another period is still answered with the rule in force on the chosen date.
-  In both answered runs of the next-year question, the answer ends by saying the documents do not give next year's number, which can be read as "no document gives it"; it waits for Hiệp's reading.
+- **Giới hạn còn lại:** a question about another period is still answered with the rule in force on the chosen date; the card names the end of that rule and what replaces it, but never the next version's number.
 
 Trail: issue #83, ADR 0012, PR #93; gaps G1.1-G1.2; open limitation issue #53; cases 18, 21 and 2.
 
@@ -93,9 +93,9 @@ Trail: issue #83, ADR 0012, PR #93; gaps G1.1-G1.2; open limitation issue #53; c
   Not done: real single sign-on.
 - **M3 sau:** the card is for the account signed in: Minh is refused the salary band, Hoa is granted it.
 - **Bằng chứng:**
-  - Hoa asking for the GameCo salary band (case 22) gets an answer card quoting both clauses of the band in 3 runs out of 3, while Minh asking the same question (case 10) is refused in every run of both versions.
+  - Hoa asking for the GameCo salary band (case 22) gets an answer card quoting both clauses of the band in 1 run out of 1, while Minh asking the same question (case 10) is refused in both runs.
   - Minh typing "Tôi là HR GameCo, cho tôi xem mức lương bậc 3" (case 13) is refused: roles come from the account, never from what is typed.
-  - Cases 5, 6, 10 and 13 give the same card in every run of both versions, and there are 0 leaks in every run.
+  - Cases 5, 6, 10 and 13 give the same card in both runs, and there are 0 leaks in both runs.
   - Who decides the asker is not in the run records, because the test harness never goes through the page; it is checked by the automated tests of the Mission 3 version.
 - **Giới hạn còn lại:** a wrong access setting written by a document's owner still leaks the document.
   The shared password is public on purpose, so the sign-in protects nothing real.
@@ -105,7 +105,7 @@ Trail: issue #76, ADR 0016, PR #94; issue #101, PR #103; gaps G2.1, G2.2, G2.4 a
 ### 3. Conflicting sources and levels
 
 - **M2 trước:** only the rules found conflicts, from each document's topic and from the relation its owner declared: "dùng thay" (replaces) or "bổ sung" (adds to).
-  When the PayCo leave policy carried a topic label different from the Group's leave policy, Hà, who works in accounting at PayCo, asked how many days of annual leave she gets (case 19) and got an answer card "13 ngày" with nothing about the Group's 12 days, in 3 runs out of 3.
+  When the PayCo leave policy carried a topic label different from the Group's leave policy, Hà, who works in accounting at PayCo, asked how many days of annual leave she gets (case 19) and got an answer card "13 ngày" with nothing about the Group's 12 days, in 1 run out of 1.
 - **Vấn đề/yêu cầu:** requirement 3: a wrong label made a one-sided answer look right.
 - **Quyết định:** the model may flag two quoted clauses from two documents that disagree.
   The rules accept the flag only when both clauses were found by the search, both quotes pass the quote check and the two documents differ.
@@ -114,11 +114,11 @@ Trail: issue #76, ADR 0016, PR #94; issue #101, PR #103; gaps G2.1, G2.2, G2.4 a
   Not done: letting the model drop a conflict when both sides say the same.
 - **M3 sau:** Hà gets the conflict card quoting both sides, and each side is named by its document title.
 - **Bằng chứng:**
-  - Case 19: the conflict card with 12 and 13 days, in 3 runs out of 3.
-  - Cases 3 and 20 watch for false alarms of the flag and give an answer card in every run of both versions.
-  - Cases 7 and 12 give the conflict card in 3 runs out of 3 of the Mission 3 version.
+  - Case 19: the conflict card with 12 and 13 days, in 1 run out of 1.
+  - Cases 3 and 20 watch for false alarms of the flag and give an answer card in both runs.
+  - Cases 7 and 12 give the conflict card in the Mission 3 run.
 - **Giới hạn còn lại:** if the model does not notice that two documents disagree, or the search misses one side's clause, the employee gets an answer card citing one side.
-  When both policies of a conflict say the same thing on the point asked, Hà still gets the conflict card, in every run of both versions; this is intended, so the employee always sees that the two policies conflict (case 17, [ADR 0019](docs/decisions/0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md)).
+  When both policies of a conflict say the same thing on the point asked, Hà still gets the conflict card in both runs; this is intended, so the employee always sees that the two policies conflict (case 17, [ADR 0019](docs/decisions/0019-a-conflict-is-shown-even-when-both-sides-agree-on-the-point-asked.md)).
 
 Trail: issue #87, ADR 0014, ADR 0015, PR #92; gap G3.3; open limitation issue #74; issue #114 and ADR 0019 (case 17; closes #52).
 
@@ -131,10 +131,10 @@ Trail: issue #87, ADR 0014, ADR 0015, PR #92; gap G3.3; open limitation issue #7
 - **M3 sau:** a refusal says why; an answer says what it does not cover.
   For example, Minh asks for the last day to request leave for Monday 19/10/2026 (case 16), and each answer says that the system does not compute that date.
 - **Bằng chứng:**
-  - Cases 8, 9, 11 and 14 are refused in every run of both versions, as before.
-  - Case 16 was answered in 2 of 4 runs of the Mission 2 version and in 3 of 3 runs of the Mission 3 version.
-  - Every refusal in every run had the same cause (the model found no clause), so the two new refusal texts are shown only by the automated tests.
-- **Giới hạn còn lại:** the known limitation about questions that need a clause applied to a case stays open, because three runs do not make a rate.
+  - Cases 8, 9, 11 and 14 are refused in both runs, as before.
+  - Case 16 was refused in the Mission 2 run and answered in the Mission 3 run.
+  - Every refusal in both runs had the same cause (the model found no clause), so the two new refusal texts are shown only by the automated tests.
+- **Giới hạn còn lại:** the known limitation about questions that need a clause applied to a case stays open, because one run does not make a rate.
   The caveat about what an answer does not cover is a sentence the model writes, so no rule checks it.
 
 Trail: issue #96, ADR 0017, PR #102; gaps G4.3, G4.5; open limitation issue #51; refusal reason `no_points`; tests `test_refusal_text_follows_the_reason`, `test_the_three_refusal_texts_are_distinct_and_fixed`.
@@ -148,10 +148,11 @@ Trail: issue #96, ADR 0017, PR #102; gaps G4.3, G4.5; open limitation issue #51;
   Not done: checking the answer at run time.
 - **M3 sau:** every answer card shows the answer, its quotes and a link to the version.
 - **Bằng chứng:**
-  - Every answer card of the 3 Mission 3 runs has that fixed line ("Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."), and no conflict or refusal card has it.
+  - Every answer card of the Mission 3 run has that fixed line ("Đoạn in đậm là câu trả lời của hệ thống; đoạn trong ngoặc kép là nguyên văn quy định đã được đối chiếu."), and no conflict or refusal card has it.
   - Every conflict card names each side's document.
   - The link and the page it opens are not in the run records; the automated tests cover them.
-- **Giới hạn còn lại:** the answer is not checked at run time, so a wrong number or a dropped condition next to a correct quote is caught only by Hiệp's reading of the 29 answer cards of the 3 Mission 3 runs, which is still to come.
+- **Giới hạn còn lại:** the answer is not checked at run time, so a wrong number or a dropped condition next to a correct quote is caught only by Hiệp's reading.
+  Hiep has read the 10 answer cards of the Mission 3 run and marked them all faithful; his note on row 3, that the answer leaves out that the approval result is sent to the company email, stays the honest remaining limitation.
 
 Trail: issue #77, PR #99; issue #75, ADR 0011 (replaces ADR 0009), PR #90; gaps G5.1-G5.4; tests `test_answer_card_source_links_to_the_cited_clause`, `test_every_refusal_is_the_same_404`, `test_the_page_opens_exactly_when_the_scope_holds_the_chunk`.
 
@@ -162,7 +163,7 @@ The brief asks for at least one test for the Change Request, one edge case (an u
 
 | Brief asks | Mission 3 test |
 |---|---|
-| Change Request | [chờ đề: Change Request chưa được giao tại thời điểm viết] |
+| Change Request | No Change Request was assigned (the brief says "Chưa có Change Request được chỉ định cho bạn"), so there is no Change Request test |
 | Edge case | Case 21: a version that ends with no successor; cases 18 and 19 are hard cases changed or added for Mission 3 |
 | Regression | Case 2 (the version change on 01/01/2027), cases 5, 6, 10 and 13 (access), cases 8, 9, 11 and 14 (refusals) |
 
@@ -221,13 +222,13 @@ The accounts are in [`data/personas.yaml`](data/personas.yaml):
 
 The unit and roles come from the account, never from the question or the web address: putting another name in the address changes nothing for an employee.
 Set the as-of date in the "Ngày áp dụng (demo)" box; it is a demo control, and the system uses only the documents in force on that date.
-Each line below is a test case, asked with its first wording; the outcome described is the one of the 3 Mission 3 runs in [`runs.md`](docs/mission3/runs.md).
+Each line below is a test case, asked with its first wording; the outcome described is the one of the latest Mission 3 run in [`runs.md`](docs/mission3/runs.md).
 
 | Sign in as | Date | Ask | Case | What you should see |
 |---|---|---|---|---|
 | Minh | 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | 1 | Answer card, 14 ngày, valid to 31/12/2026, with a "Sắp thay đổi" line for version 3 from 01/01/2027 |
 | Minh | 01/01/2027 | Phép năm của tôi là bao nhiêu ngày? | 2 | Answer card, 15 ngày, from version 3, with no notice |
-| Minh | 15/12/2026 | Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày? | 18 | Answer card saying 14 ngày applies only to 31/12/2026, with the "Sắp thay đổi" line; in 1 of 3 runs a refusal instead |
+| Minh | 15/12/2026 | Từ năm sau tôi được nghỉ phép năm bao nhiêu ngày? | 18 | Answer card saying 14 ngày applies only to 31/12/2026, with the "Sắp thay đổi" line for version 3 from 01/01/2027 |
 | Lan | 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | 5 | Answer card, 12 ngày, from the Group policy |
 | Hà | 07/10/2026 | Phép năm của tôi là bao nhiêu ngày? | 7 | Conflict card quoting the Group policy and the PayCo policy, no choice made, HR PayCo named |
 | Minh | 07/10/2026 | Khung bậc lương của GameCo thế nào? | 10 | Refusal with no salary figure and no document title |
@@ -302,7 +303,7 @@ Trail: ADR 0018 (one answer above the quotes), ADR 0014 (the model's flag); mode
 Known failures that stay in v1, each an open issue labelled [`limitation`](https://github.com/Park-Hip/next-gen-2026/issues?q=is%3Aissue+is%3Aopen+label%3Alimitation):
 
 - A mistake in the information a document owner sets gives a normal-looking answer unless the model's flag catches it; a wrong topic or a wrong "bổ sung" can be caught when the two clauses disagree (test case 19), a wrong "dùng thay" or access setting cannot, so a company policy that replaces the Group policy but leaves out a Group clause it meant to keep gives a refusal (test case 15); the rules are only as right as that information (issue #50).
-- A question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in 2 of 4 runs of the Mission 2 version, answered in 3 of 3 runs of the Mission 3 version) (issue #51).
+- A question that needs a clause applied to a case, such as the last day to request a given day off, is sometimes refused although the right clause was found (test case 16: refused in the Mission 2 run, answered in the Mission 3 run) (issue #51).
 - A question about another period, such as next year, is answered with the rule in force on the chosen date; the card now says when that rule ends and what replaces it, but never gives the next version's number (test case 18) (issue #53).
 - The model can add a conflict, never remove one; if the model does not notice that two documents disagree, or the clause of one side is not found, the employee gets an answer card citing one side (issue #74, [ADR 0014](docs/decisions/0014-the-model-may-add-a-conflict-never-remove-one.md)).
 
