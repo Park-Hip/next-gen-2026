@@ -154,7 +154,9 @@ Each of these was a real option that we weighed and left out.
 3. **A conflict the AI does not notice still gives a one-sided answer.**
    The AI can add a conflict only when it reads both sides and sees that they differ.
 4. **A question about another period gets the rule in force on the chosen date.**
-   The card says when that rule ends and what replaces it, but never gives the next version's numbers.
+   About next year, the card says when that rule ends and what replaces it, but never gives the next version's numbers.
+   About a past year, it is usually refused: Minh's question about his leave in 2025 was refused 8 times in 9.
+   The ninth time, it answered with this year's "14 ngày", when the rule in 2025 gave 13. [An experiment on 23/10/2026, not a test case]
 5. **A question that needs a clause applied to a case is sometimes refused,** although the right clause was found.
    Mission 2 refused it in 2 of 4 runs and Mission 3 answered it in 5 of 5, but its rate is not measured.
 

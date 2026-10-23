@@ -113,7 +113,8 @@ The last four stay open as issues labelled [`limitation`](https://github.com/Par
   A wrong access label leaks a document, and nothing checks the labels when a document is published.
 - **A conflict the AI does not notice gives a one-sided answer,** when no label reveals it.
 - **A question about another period gets the rule in force on the chosen date.**
-  The card says when that rule ends and what replaces it, but not the next version's numbers.
+  About next year, the card says when that rule ends and what replaces it, but not the next version's numbers.
+  About a past year, it is usually refused, and once in 9 tries it gave this year's "14 ngày" for 2025, when the rule then gave 13.
 - **A question that needs a clause applied to a case is sometimes refused,** although the right clause was found.
 
 Two behaviours are decisions, not defects.
