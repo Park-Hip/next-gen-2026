@@ -61,6 +61,7 @@ Mission 1 (design) was submitted on 08/10/2026; Mission 2 (build v1 in 3 days) i
 
 ## Writing
 
+- Before writing or reviewing a document, read `D:/DevBrain/remote-blog/30_Resources/Write Docs Readers Can Scan.md` and follow it; the rules in this section win where they differ.
 - Never use the em dash; use a plain "-".
 - One sentence per line in Markdown.
 - Code comments in English.
