@@ -1,6 +1,6 @@
 # 0017. A refusal says why, and an answer says what it does not cover
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-21
 - Origin: Hiep + AI
 - Supersedes: The refusal wording of Phần 2 of the Mission 1 document (promise C4) for three of the four refusal reasons (a quote that does not match, a citation outside what was retrieved, unreadable AI output); promise R10 is kept; it adds a rule to the prompt of ADR 0011, which keeps its status
@@ -86,7 +86,10 @@ The strict-grounding clause of ADR 0003, the own-record rule and "Never compute"
 
 ## Reasons
 
-[chờ Hiệp]
+A refusal must not say "không tìm thấy quy định" when a rule was found but could not be verified, or when the system itself failed; that makes the asker read it as "there is no rule".
+Each reason gets its own text, picked by a fixed rule and never by the model, and "not allowed" and "not found" keep the same wording so a restricted document is still never revealed.
+
+Drafted by AI; approved by Hiep on 23/10/2026.
 
 ## Consequences
 
