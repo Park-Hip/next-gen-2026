@@ -77,7 +77,7 @@ Evidence log line of 21/10/2026.
 
 ## Technical detail
 
-- Issue #87; gaps G3.6 (access hides a conflict) and G2.3 (a wrong `access` value is applied as written); limitation [#50](https://github.com/Park-Hip/next-gen-2026/issues/50); probe P8 in `docs/mission3/gaps.md`.
+- Issue #87; gaps G3.6 (access hides a conflict) and G2.3 (a wrong `access` value is applied as written); limitation [#50](https://github.com/Park-Hip/next-gen-2026/issues/50); probe P8 of the archived [gap analysis](https://github.com/Park-Hip/next-gen-2026/blob/384f68a/docs/mission3/gaps.md).
 - P8: `LEAVE-PAYCO-v1` with `access: roles:hr_payco`; Hà's scope keeps only `LEAVE-GROUP-v1`; a reply citing its Điều 1 gives an answer card "12 ngày".
   The example of a role-only document is `access: roles:hr_payco`.
 - Not built from the first draft: `Scope.hidden_partners`, the reordering in `services/scope.py`, and the `hidden_conflict` refusal.

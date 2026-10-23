@@ -115,7 +115,7 @@ Drafted by AI; approved by Hiep on 23/10/2026.
 
 ## Technical detail
 
-- Issue #96; Mission 3 requirement 4; gaps G4.3 (one text for every reason) and G4.5 (no word on what an answer leaves out); probe P6 in `docs/mission3/gaps.md`, reproduced on the page at commit `892a5d7`; promises C4 and R10; case 16 (the date that would have to be computed), case 11 (the own-record question).
+- Issue #96; Mission 3 requirement 4; gaps G4.3 (one text for every reason) and G4.5 (no word on what an answer leaves out); probe P6 of the archived [gap analysis](https://github.com/Park-Hip/next-gen-2026/blob/384f68a/docs/mission3/gaps.md), reproduced on the page at commit `892a5d7`; promises C4 and R10; case 16 (the date that would have to be computed), case 11 (the own-record question).
 - The step 7 refusal reasons (kept on the card as `reason`): `no_points`, `malformed`, `quote_mismatch`, `outside_retrieved`.
 - `card_text.refusal_card` picks the text from `card.reason`: `quote_mismatch` and `outside_retrieved` give text 2, `malformed` gives text 3, anything else (including `no_points` and `None`) gives the Mission 2 text.
   `REFUSAL_TEXT_BY_REASON` in `services/card_text.py` holds the mapping.

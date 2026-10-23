@@ -6,7 +6,7 @@ Judges can compare what ships with these lines, so each one is either built and 
 
 Quotes are from the submitted text.
 "Shown by" is the planned evidence: a row of the test matrix in `docs/mission1/redraft/artifacts.md`, a demo step, or a code property.
-Rows 1-10 keep their numbers in `data/test_cases.yaml`, and their results are in the [test report](test_report.md).
+Rows 1-10 keep their numbers in `data/test_cases.yaml`, and their results are in the [test report](https://github.com/Park-Hip/next-gen-2026/blob/mission2/docs/mission2/test_report.md).
 
 "Status", added on 14/10/2026 as the ledger of Mission 2, says what shipped: "Built", "Changed" with the ADR that changed it, or "Not done" with the reason.
 A status that depends on the final evaluation run says so until that run is made.

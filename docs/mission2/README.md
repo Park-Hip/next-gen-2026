@@ -8,7 +8,7 @@ An AI assistant that gives each Appota employee the rule that applies to them: f
 NextGen AI Talent 2026, Bài test B, Mission 2.
 All company data in this repository is simulated ("giả lập"); no real Appota data is used.
 
-**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](https://www.youtube.com/watch?v=p8_6wCrepgg)** · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](test_report.md)**
+**[Live demo](https://nextgen2026-appota-tri-thuc-noi-bo.onrender.com/)** · **[Video](https://www.youtube.com/watch?v=p8_6wCrepgg)** · **[The 3 mandatory questions](#the-3-mandatory-questions)** · **[Test report](https://github.com/Park-Hip/next-gen-2026/blob/mission2/docs/mission2/test_report.md)**
 
 ![The same question asked by Minh, Lan and Hà on 07/10/2026: Minh and Lan each get an answer card quoting their own leave policy, 14 and 12 days; Hà gets a conflict card quoting both the Group and the PayCo policy](../images/same-question-three-askers.png)
 
@@ -52,7 +52,7 @@ Two things changed from the Mission 1 plan.
 Each case was asked once, not several times with one bad run failing the case, because of the rate limit of the free tier of the Gemini API.
 Context recall is not measured: it is too soon on 10 simulated documents, and it comes back with real documents.
 
-Every case in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được" is in the [test report](test_report.md), generated from the committed run and never edited by hand.
+Every case in the brief's format "Kỳ vọng → Kết quả thực tế → Đạt/Chưa đạt → Điều học được" is in the [test report](https://github.com/Park-Hip/next-gen-2026/blob/mission2/docs/mission2/test_report.md), generated from the committed run and never edited by hand.
 The cases themselves, each with why it is tested, are in [`data/test_cases.yaml`](../../data/test_cases.yaml).
 
 ## The 3 mandatory questions
@@ -282,7 +282,7 @@ What v1 simplifies, leaves for later and gets wrong, with the reasons: [`docs/sc
 |---|---|
 | How v1 covers each point the brief asks the MVP to show | [`docs/architecture.md`](../architecture.md#what-the-brief-asks-the-mvp-to-show) |
 | How one question is answered, step by step, and which part decides what | [`docs/architecture.md`](../architecture.md) |
-| Every test case: expectation, actual result, pass or fail, lesson | [`docs/mission2/test_report.md`](test_report.md) |
+| Every test case: expectation, actual result, pass or fail, lesson | [`docs/mission2/test_report.md` at the Mission 2 tag](https://github.com/Park-Hip/next-gen-2026/blob/mission2/docs/mission2/test_report.md) |
 | What v1 simplifies, leaves for later and gets wrong | [`docs/scope.md`](../scope.md) |
 | What the Mission 1 design promised, and what was built | [`docs/mission2/mission1_promises.md`](mission1_promises.md) |
 | Why each design choice was made, and the options it was chosen over | [`docs/decisions/`](../decisions/README.md) |

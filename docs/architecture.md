@@ -190,7 +190,7 @@ Each is an open issue labelled `limitation`, except the last two, which are deci
 | Biết từ chối khi thiếu dữ liệu | The AI may return nothing; step 7 then shows the refusal card with the asker's HR contact | 8, 9, 11, 14 |
 | Có khả năng xử lý phiên bản hoặc thông tin mâu thuẫn | Step 1 keeps the version in force; step 4 marks undeclared conflicts and step 7 shows the conflict card | 2, 3, 7, 12 |
 
-The questions, expectations and results of every row are in the [test report](mission2/test_report.md).
+The questions, expectations and results of every row are in the [test report](test_report.md).
 
 ## The simulated organisation
 

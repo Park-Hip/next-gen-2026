@@ -1,6 +1,6 @@
 """The committed run the demo's "Test cases" page shows: the run the committed report names.
 
-Reads only committed files (docs/mission2/test_report.md, results/<run_id>.jsonl and its
+Reads only committed files (docs/test_report.md, results/<run_id>.jsonl and its
 review YAML), scores them offline and calls no model. The page and the report therefore
 cannot disagree: both are built from the same records, checks and review file.
 """
