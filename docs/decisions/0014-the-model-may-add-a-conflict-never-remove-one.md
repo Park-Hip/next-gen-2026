@@ -1,6 +1,6 @@
 # 0014. The model may add a conflict it reads in the text, never remove one
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-21
 - Origin: Hiep + AI
 - Supersedes: The "Deferred" row of `docs/scope.md` "An AI check that may add, never remove, a conflict warning when topics look mis-tagged", brought forward; "no conflict detection at question time" in SD14 of `docs/system_design.md` (Hiep, 20/10/2026)
@@ -69,7 +69,10 @@ This changes the fixed wording of Phần 2 of the Mission 1 document, which said
 
 ## Reasons
 
-[chờ Hiệp]
+A wrong label must not hide a real disagreement and hand the asker a confident wrong answer.
+The model may add a conflict because only reading the text can see a disagreement the metadata hides, and it may never remove one, because any doubt about which rule applies sends the asker to HR, never to one side.
+
+Drafted by AI; approved by Hiep on 23/10/2026.
 
 ## Consequences
 

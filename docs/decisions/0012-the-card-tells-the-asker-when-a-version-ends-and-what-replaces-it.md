@@ -1,6 +1,6 @@
 # 0012. The card tells the asker when a version ends and what replaces it
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-21
 - Origin: Hiep + AI
 - Supersedes: The Mission 1 rule that a future version is not shown before it takes effect (M8), for published versions
@@ -74,7 +74,11 @@ The Mission 2 test case on this question becomes a hard case that expects an ans
 
 ## Reasons
 
-[chờ Hiệp]
+The date the asker names must not decide which rule applies; that stays with the rules.
+The card, not the model, tells the asker that a version ends and what replaces it, so the asker is warned without the model ever seeing the future version's content.
+Letting the model answer from next year's version would make validity depend on how the question is read.
+
+Drafted by AI; approved by Hiep on 23/10/2026.
 
 ## Consequences
 
